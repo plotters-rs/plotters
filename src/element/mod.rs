@@ -1,12 +1,23 @@
+mod grid;
+
 use crate::color::Color;
 use crate::drawing::DrawingBackend;
 use crate::font::FontDesc;
 use std::iter::{once, Once};
 
+pub use grid::{Grid, GridDirection, GridLineIter};
+
 /// The trait that represents an element drawed on the canvas
 pub trait Element<'a, Coord:'a> {
+    /// The iterator for the key points of this element
     type Points: IntoIterator<Item = &'a Coord>;
+
+    /// The function that returns the list of key point. This is used by the
+    /// framework to do the coordinate mapping
     fn points(&'a self) -> Self::Points;
+
+    /// Actually draws the element. The key points is already translated into the 
+    /// image cooridnate and can be used by DC directly
     fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, pos:I, dc: &mut DC) -> Result<(), DC::ErrorType>;
 }
 
@@ -108,4 +119,5 @@ impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Circle<Coord, C> where Self:
         dc.draw_circle((pos.0 as i32, pos.1 as i32), self.radius, &self.color, self.filled)
     }
 }
+
 

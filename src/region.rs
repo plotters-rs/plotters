@@ -1,9 +1,12 @@
 use std::rc::Rc;
-use crate::drawing::DrawingBackend;
 use std::marker::PhantomData;
 use std::cell::RefCell;
-use crate::element::Element;
+use crate::element::{Element, Text};
+use crate::drawing::DrawingBackend;
+use crate::color::Color;
+use crate::font::FontDesc;
 
+#[derive(Clone)]
 pub struct Region{
     x0:u32,
     y0:u32,
@@ -58,6 +61,16 @@ impl <DC:DrawingBackend> From<DC> for DrawingRegion<DC, Shift> {
 }
 
 impl <DC:DrawingBackend, CT:CoordTrans> DrawingRegion<DC, CT> {
+    pub fn new(raw:&DrawingRegion<DC,Shift>, translate:CT) -> Self {
+        return Self {
+            region: raw.region.clone(),
+            translate,
+            ctx: raw.get_dc()
+        };
+    }
+    pub fn size_in_pixels(&self) -> (u32, u32) {
+        return (self.region.x1 - self.region.x0, self.region.y1 - self.region.y0);
+    }
     pub fn draw<'a, E:Element<'a, CT::CoordType>>(&self, element:&'a E) -> Result<(), DC::ErrorType> 
         where CT::CoordType : 'a
     {
@@ -74,6 +87,15 @@ impl <DC:DrawingBackend, CT:CoordTrans> DrawingRegion<DC, CT> {
     pub fn close(&self) -> Result<(), DC::ErrorType> {
         if let Ok(mut dc) = self.ctx.try_borrow_mut() {
             return dc.close();
+        }
+        //TODO: Handle error
+        Ok(())
+    }
+
+    pub fn fill<ColorType:Color>(&self, color:ColorType) -> Result<(), DC::ErrorType> {
+        if let Ok(mut dc) = self.ctx.try_borrow_mut() {
+            let dim = &self.region;
+            return dc.draw_rect((dim.x0 as i32, dim.y0 as i32), (dim.x1 as i32, dim.y1 as i32), &color, true);
         }
         //TODO: Handle error
         Ok(())
@@ -102,7 +124,8 @@ fn compute_splits(x0:u32, x1:u32, n:u32) -> Vec<u32> {
 pub trait Splitable<DC:DrawingBackend> {
     fn get_region(&self) -> &Region;
     fn get_dc(&self) -> Rc<RefCell<DC>>;
-    fn split(&self, (row, col):(u32,u32)) -> Vec<DrawingRegion<DC,Shift>> {
+    fn as_region(&self) -> &DrawingRegion<DC,Shift>;
+    fn split_m_n(&self, (row, col):(u32,u32)) -> Vec<DrawingRegion<DC,Shift>> {
         let mut ret = vec![];
 
         let dim = self.get_region();
@@ -121,6 +144,67 @@ pub trait Splitable<DC:DrawingBackend> {
 
         return ret;
     }
+    
+    fn titled<ColorType:Color>(&self, text:&str, font: &FontDesc, color:ColorType) -> Option<DrawingRegion<DC,Shift>> {
+        let (text_w, text_h) = font.box_size(text);
+        let dim = self.get_region();
+        let padding = if dim.x1 - dim.x0 > text_w { (dim.x1 - dim.x0 - text_w) / 2 } else { 0 };
+        let title_element = Text::new(text, font, (padding, 0), color);
+
+        // TODO: Handle the error
+        self.as_region().draw(&title_element).ok();
+
+        let new_y0 = (dim.y0 + text_h).min(dim.y1);
+        let new_y1 = dim.y1;
+
+        return Some(DrawingRegion {
+            region: Region {x0: dim.x0, y0: new_y0, x1: dim.x1, y1: new_y1},
+            translate: Shift(dim.x0, new_y0),
+            ctx: self.get_dc()
+        });
+    }
+
+    fn split_vertically(&self, height:u32) -> Option<(DrawingRegion<DC, Shift>, DrawingRegion<DC,Shift>)> {
+        let dim = self.get_region();
+        if height + dim.y0 >= dim.y1 {
+            return None;
+        }
+
+        let upper = DrawingRegion {
+            region: Region {x0: dim.x0, y0: dim.y0, x1: dim.x1, y1: dim.y0 + height},
+            translate: Shift(dim.x0, dim.y0),
+            ctx: self.get_dc()
+        };
+
+        let lower = DrawingRegion {
+            region: Region{ x0: dim.x0, y0: dim.y0 + height, x1: dim.x1, y1: dim.y1 },
+            translate: Shift(dim.x0, dim.y0 + height),
+            ctx: self.get_dc()
+        };
+
+        return Some((upper, lower));
+    }
+
+    fn split_horizentally(&self, width:u32) -> Option<(DrawingRegion<DC, Shift>, DrawingRegion<DC, Shift>)> {
+        let dim = self.get_region();
+        if width + dim.x0 >= dim.x1 {
+            return None;
+        }
+
+        let left = DrawingRegion {
+            region: Region { x0: dim.x0, y0: dim.y0, x1: dim.x0 + width, y1: dim.y1 },
+            translate: Shift(dim.x0, dim.y0),
+            ctx: self.get_dc()
+        };
+
+        let right = DrawingRegion {
+            region: Region { x0: dim.x0 + width, y0: dim.y0, x1: dim.x1, y1: dim.y1 },
+            translate: Shift(dim.x0 + width, dim.y0),
+            ctx: self.get_dc()
+        };
+
+        return Some((left, right));
+    }
 }
 
 impl <DC:DrawingBackend> Splitable<DC> for DrawingRegion<DC, Shift> {
@@ -131,5 +215,9 @@ impl <DC:DrawingBackend> Splitable<DC> for DrawingRegion<DC, Shift> {
 
     fn get_dc(&self) -> Rc<RefCell<DC>> {
         return self.ctx.clone();
+    }
+
+    fn as_region(&self) -> &DrawingRegion<DC, Shift> {
+        return self;
     }
 }
