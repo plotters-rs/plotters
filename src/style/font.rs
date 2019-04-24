@@ -1,13 +1,16 @@
-use font_loader::system_fonts;
-use lazy_static::lazy_static;
 /// The font management utilities
 /// This file retains a font cache and makes font object.
 ///
-use rusttype::{point, Error, Font, Scale};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::i32;
 use std::sync::Mutex;
+use std::convert::From;
+
+use rusttype::{point, Error, Font, Scale};
+use font_loader::system_fonts;
+use lazy_static::lazy_static;
+
 
 #[derive(Debug)]
 pub enum FontError {
@@ -58,6 +61,12 @@ pub struct FontDesc<'a> {
     font: RefCell<Option<Font<'a>>>,
 }
 
+impl <'a> From<&'a str> for FontDesc<'a> {
+    fn from(from:&'a str) -> FontDesc<'a> {
+        return FontDesc::new(from, 1.0);
+    }
+}
+
 impl<'a> FontDesc<'a> {
     /// Create a new font
     pub fn new(typeface: &'a str, size: f64) -> Self {
@@ -65,6 +74,15 @@ impl<'a> FontDesc<'a> {
             size,
             name: typeface,
             font: RefCell::new(None),
+        };
+    }
+
+    /// Create a new font desc with the same font but different size
+    pub fn resize(&self, size: f64) -> FontDesc<'a> {
+        return Self {
+            size,
+            name: self.name,
+            font: self.font.clone()
         };
     }
 

@@ -1,3 +1,5 @@
+/// The plotting context and more stuff
+
 use std::borrow::Borrow;
 use std::fmt::Debug;
 /// The abstraction of a chart
@@ -51,14 +53,14 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     }
 
     /// Set the caption of the chart
-    pub fn caption<S: AsRef<str>>(&mut self, caption: S, style: TextStyle) -> &mut Self {
+    pub fn caption<'b, S: AsRef<str>, Style:Into<TextStyle<'b>>>(&mut self, caption: S, style: Style) -> &mut Self {
         if self.titled_area.is_some() {
             return self;
         }
 
         self.titled_area = Some(
             self.root_area
-                .titled(caption.as_ref(), style)
+                .titled(caption.as_ref(), style.into())
                 .expect("Unable to create caption for chart"),
         );
         return self;
@@ -165,13 +167,13 @@ where
         return self;
     }
 
-    pub fn x_label_formatter(&mut self, fmt: Box<Fn(&X::ValueType) -> String>) -> &mut Self {
-        self.format_x = fmt;
+    pub fn x_label_formatter(&mut self, fmt: &'static dyn Fn(&X::ValueType) -> String) -> &mut Self {
+        self.format_x = Box::new(fmt);
         return self;
     }
 
-    pub fn y_label_formatter(&mut self, fmt: Box<dyn Fn(&Y::ValueType) -> String>) -> &mut Self {
-        self.format_y = fmt;
+    pub fn y_label_formatter(&mut self, fmt: &'static dyn Fn(&Y::ValueType) -> String) -> &mut Self {
+        self.format_y = Box::new(fmt);
         return self;
     }
 
@@ -192,6 +194,7 @@ where
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.4);
         let default_mesh_style_1 = ShapeStyle {
             color: &default_mesh_color_1,
+            filled: false,
         };
         let mesh_style_1 =
             unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_1) }
@@ -200,6 +203,7 @@ where
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.2);
         let default_mesh_style_2 = ShapeStyle {
             color: &default_mesh_color_2,
+            filled: false,
         };
         let mesh_style_2 =
             unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_2) }

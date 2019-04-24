@@ -2,7 +2,7 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
 
-/// The trait that represents an element drawed on the canvas
+/// The trait indicates it's a collection of points
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
     type Borrow: Borrow<Coord>;
@@ -14,6 +14,7 @@ pub trait PointCollection<'a, Coord> {
     fn point_iter(self) -> Self::IntoIter;
 }
 
+/// The trait indicates we are able to draw it on a drawing area
 pub trait Drawable {
     /// Actually draws the element. The key points is already translated into the
     /// image cooridnate and can be used by DC directly
@@ -22,6 +23,20 @@ pub trait Drawable {
         pos: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
+}
+
+pub trait Element<Coord>
+where
+    for<'a> &'a Self: PointCollection<'a, Coord>,
+    Self: Drawable,
+{
+}
+
+impl<T, C> Element<C> for T
+where
+    for<'a> &'a T: PointCollection<'a, C>,
+    T: Drawable,
+{
 }
 
 mod basic_shapes;

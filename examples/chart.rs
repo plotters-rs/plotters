@@ -1,10 +1,5 @@
-use plotters::drawing::backend::DrawingBackend;
-use plotters::drawing::coord::RangedCoordf32;
-use plotters::drawing::{BitMapBackend, DrawingArea};
-use plotters::element::Cross;
-use plotters::series::{LineSeries, PointSeries};
-use plotters::style::{FontDesc, RGBColor, ShapeStyle, TextStyle};
-use plotters::ChartBuilder;
+use plotters::prelude::*;
+
 fn main() {
     let mut img = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
 
@@ -14,15 +9,11 @@ fn main() {
 
     root_area.fill(&RGBColor(255, 255, 255)).unwrap();
 
-    let caption_font = FontDesc::new("ArialMT", 60.0);
-    let chart_font = FontDesc::new("ArialMT", 20.0);
-    let black = RGBColor(0, 0, 0);
-    let caption_style = TextStyle {
-        font: &caption_font,
-        color: &black,
-    };
+    let font:FontDesc = "ArialMT".into();
+    let font_large = &font.resize(60.0);
+    let font_small = &font.resize(40.0);
     let root_area = root_area
-        .titled("Hello World!", caption_style)
+        .titled("Hello World!", &font_large)
         .unwrap()
         .margin(0, 0, 0, 20);
 
@@ -33,32 +24,21 @@ fn main() {
         .set_y_label_size(60)
         .caption(
             "Sine and Cosine",
-            TextStyle {
-                font: &chart_font,
-                color: &black,
-            },
+            &font_small
         )
         .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-3.4f32..3.4f32, -1.2f32..1.2f32);
 
     cc.configure_mesh()
         .x_labels(20)
         .y_labels(10)
-        .x_label_formatter(Box::new(|v| format!("{:.1}", v)))
-        .y_label_formatter(Box::new(|v| format!("{:.1}", v)))
+        .x_label_formatter(&|v| format!("{:.1}", v))
+        .y_label_formatter(&|v| format!("{:.1}", v))
         .draw()
         .unwrap();
 
-    let red = RGBColor(255, 0, 0);
-    let blue = RGBColor(0, 0, 255);
-
     cc.draw_series(LineSeries::new(
-        (0..12).map(|x| {
-            (
-                (x - 6) as f32 / 2.0,
-                ((x - 6) as f32 / 2.0).sin(),
-            )
-        }),
-        &ShapeStyle { color: &red },
+        (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
+        &RGBColor(255,0,0),
     ))
     .unwrap();
     cc.draw_series(LineSeries::new(
@@ -68,14 +48,14 @@ fn main() {
                 ((x - 3400) as f32 / 1000.0).cos(),
             )
         }),
-        &ShapeStyle { color: &blue },
+        &RGBColor(0,0,255),
     ))
     .unwrap();
 
     cc.draw_series(PointSeries::<_, _, Cross<_>>::new(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
-        &ShapeStyle { color: &black },
+        &RGBColor(0,0,0),
     ))
     .unwrap();
 
@@ -87,10 +67,7 @@ fn main() {
             .set_y_label_size(60)
             .caption(
                 format!("Chart {}", idx),
-                TextStyle {
-                    font: &chart_font,
-                    color: &black,
-                },
+                &font_large
             )
             .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..11f32, 0f32..11f32);
         cc.configure_mesh().x_labels(5).y_labels(5).draw().unwrap();

@@ -66,6 +66,12 @@ impl Rect {
                 };
             });
     }
+
+    /// Make the coordinate in the range of the rectangle 
+    fn truncate(&self, p:(i32,i32)) -> (i32,i32) {
+        return (p.0.min(self.x1).max(self.y0),
+                p.1.min(self.y1).max(self.y0));
+    }
 }
 
 /// The abstraction of a region
@@ -139,9 +145,21 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
+
+    /// Get the left upper conner of this area in the drawing backend
     pub fn get_base_pixel(&self) -> BackendCoord {
         return (self.rect.x0, self.rect.y0);
     }
+
+    /// Strip the applied coordinate specification and returns a shift-based drawing area
+    pub fn strip_coord_spec(&self) -> DrawingArea<DB, Shift> {
+        return DrawingArea{
+            rect: self.rect.clone(),
+            backend: self.copy_backend_ref(),
+            coord: Shift((self.rect.x0, self.rect.y0))
+        };
+    }
+
     /// Get the area dimension in pixel
     pub fn dim_in_pixel(&self) -> (u32, u32) {
         return (
@@ -199,14 +217,28 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     {
         let backend_coords = element.point_iter().into_iter().map(|p| {
             let b = p.borrow();
-            return self.coord.translate(b);
+            return self.rect.truncate(self.coord.translate(b));
         });
         return self.backend_ops(move |b| element.draw(backend_coords, b));
     }
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
-    /// Apply the coord transformation object and returns a new drawing area
+   
+    /// Shrink the region, note all the locaitions are in guest coordinate 
+    pub fn shrink(mut self, left_upper:(u32,u32), dimension:(u32,u32)) -> DrawingArea<DB, Shift> {
+        self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0 as i32);
+        self.rect.y0 = self.rect.x1.min(self.rect.y1 + left_upper.1 as i32);
+        
+        self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0 as i32);
+        self.rect.y1 = self.rect.x0.max(self.rect.y1 + dimension.1 as i32);
+
+        self.coord = Shift((self.rect.x0, self.rect.y0));
+
+        return self;
+    }
+    
+    /// Apply a new coord transformation object and returns a new drawing area
     pub fn apply_coord_spec<CT: CoordTranslate>(&self, coord_spec: CT) -> DrawingArea<DB, CT> {
         return DrawingArea {
             rect: self.rect.clone(),
@@ -215,6 +247,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         };
     }
 
+    /// Create a margin for the given drawing area and returns the new drawing area
     pub fn margin(&self, top: i32, bottom: i32, left: i32, right: i32) -> DrawingArea<DB, Shift> {
         return DrawingArea {
             rect: Rect {
@@ -271,7 +304,9 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             .collect();
     }
 
-    pub fn titled(&self, text: &str, style: TextStyle) -> Result<Self, DrawingAreaError<DB>> {
+    pub fn titled<'a, S:Into<TextStyle<'a>>>(&self, text: &str, style: S) -> Result<Self, DrawingAreaError<DB>> {
+        let style = style.into();
+
         let (text_w, text_h) = match style.font.box_size(text) {
             Ok(what) => what,
             Err(what) => {

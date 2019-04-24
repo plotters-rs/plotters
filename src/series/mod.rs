@@ -4,7 +4,7 @@ use crate::style::ShapeStyle;
 use std::marker::PhantomData;
 
 pub struct LineSeries<'a, Coord, I: IntoIterator<Item = Coord>> {
-    style: &'a ShapeStyle<'a>,
+    style: ShapeStyle<'a>,
     data_iter: Option<I::IntoIter>,
 }
 
@@ -25,16 +25,16 @@ impl<'b, Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<'b, Coord
 }
 
 impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
-    pub fn new(iter: I, style: &'a ShapeStyle<'a>) -> Self {
+    pub fn new<S:Into<ShapeStyle<'a>>>(iter: I, style: S) -> Self {
         return Self {
-            style,
+            style: style.into(),
             data_iter: Some(iter.into_iter()),
         };
     }
 }
 
 pub struct PointSeries<'a, Coord, I: IntoIterator<Item = Coord>, P: PointElement<'a, Coord>> {
-    style: &'a ShapeStyle<'a>,
+    style: ShapeStyle<'a>,
     size: u32,
     data_iter: I::IntoIter,
     pahtomdata: PhantomData<&'a P>,
@@ -55,11 +55,11 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>, P: PointElement<'a, Coord>> Itera
 impl<'a, Coord, I: IntoIterator<Item = Coord>, P: PointElement<'a, Coord>>
     PointSeries<'a, Coord, I, P>
 {
-    pub fn new(iter: I, size: u32, style: &'a ShapeStyle<'a>) -> Self {
+    pub fn new<S:Into<ShapeStyle<'a>>>(iter: I, size: u32, style: S) -> Self {
         return Self {
             data_iter: iter.into_iter(),
             size,
-            style,
+            style: style.into(),
             pahtomdata: PhantomData,
         };
     }

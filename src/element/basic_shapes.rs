@@ -9,10 +9,10 @@ pub struct Path<'a, Coord> {
     style: ShapeStyle<'a>,
 }
 impl<'a, Coord> Path<'a, Coord> {
-    pub fn new<P: Into<Vec<Coord>>>(points: P, style: ShapeStyle<'a>) -> Self {
+    pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle<'a>>>(points: P, style: S) -> Self {
         return Self {
             points: points.into(),
-            style,
+            style: style.into(),
         };
     }
 }
@@ -34,30 +34,20 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
         return backend.draw_path(points, &Box::new(self.style.color));
     }
 }
-
 /*
-impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Path<Coord, C> where Self:'a {
-    type Points = &'a [Coord];
-
-    fn points(&'a self) -> &'a [Coord] {
-        return &self.points;
-    }
-
-    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
-        dc.draw_path(points.map(|(a,b)| (a as i32, b as i32)), &self.color)
-    }
-}
-
-pub struct Rectangle<Coord, C:Color> {
+pub struct Rectangle<'a, Coord, C:Color> {
     points:[Coord;2],
-    color: C,
-    filled: bool
+    style: ShapeStyle<'a>
 }
+
 impl <Coord, C:Color> Rectangle<Coord, C> {
     pub fn new(points:[Coord;2], color:C, filled:bool) -> Self {
         return Self { points, color, filled };
     }
 }
+
+impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<
+
 impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Rectangle<Coord, C> where Self:'a {
     type Points = &'a [Coord];
 
