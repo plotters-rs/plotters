@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
-descrption = "The Plotting Library in Rust"
+description = "Anoter Plotting Library in Rust"
 
 [dependencies]
 svg = "0.5.12"
