@@ -1,23 +1,23 @@
+use super::{Drawable, PointCollection};
+use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 /// Define the basic shapes
 use crate::style::ShapeStyle;
-use crate::drawing::backend::{DrawingBackend, DrawingErrorKind, BackendCoord};
-use super::{Drawable, PointCollection};
 
 /// Describe a path
 pub struct Path<'a, Coord> {
-    points: Vec<Coord>, 
+    points: Vec<Coord>,
     style: ShapeStyle<'a>,
 }
-impl <'a, Coord> Path<'a, Coord> {
-    pub fn new<P:Into<Vec<Coord>>>(points:P, style: ShapeStyle<'a>) -> Self {
-        return Self{
+impl<'a, Coord> Path<'a, Coord> {
+    pub fn new<P: Into<Vec<Coord>>>(points: P, style: ShapeStyle<'a>) -> Self {
+        return Self {
             points: points.into(),
-            style
+            style,
         };
     }
 }
 
-impl <'b, 'a, Coord:'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -25,12 +25,15 @@ impl <'b, 'a, Coord:'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
     }
 }
 
-impl <'a, Coord:'a> Drawable for Path<'a, Coord> {
-    fn draw<DB:DrawingBackend, I:Iterator<Item=BackendCoord>>(&self, points:I, backend: &mut DB) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         return backend.draw_path(points, &Box::new(self.style.color));
     }
 }
-
 
 /*
 impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Path<Coord, C> where Self:'a {
@@ -46,8 +49,8 @@ impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Path<Coord, C> where Self:'a
 }
 
 pub struct Rectangle<Coord, C:Color> {
-    points:[Coord;2], 
-    color: C, 
+    points:[Coord;2],
+    color: C,
     filled: bool
 }
 impl <Coord, C:Color> Rectangle<Coord, C> {
@@ -70,7 +73,7 @@ impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Rectangle<Coord, C> where Se
 }
 
 pub struct Text<'b, 'a:'b , Coord, C:Color> {
-    text: &'b str, 
+    text: &'b str,
     font: &'b FontDesc<'a>,
     coord: Coord,
     color: C,
@@ -86,7 +89,7 @@ impl <'b, 'a:'b, Coord:'b, C:Color> Element<'b, Coord> for Text<'b, 'a, Coord, C
 
     fn points(&'b self) -> Self::Points {
         return once(&self.coord);
-    } 
+    }
 
     fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
         let pos = points.into_iter().next().unwrap();

@@ -1,8 +1,8 @@
-pub mod style;
+mod chart;
+pub mod data;
 pub mod drawing;
 pub mod element;
 pub mod series;
-pub mod data;
-mod chart;
+pub mod style;
 
 pub use chart::{ChartBuilder, ChartContext};
