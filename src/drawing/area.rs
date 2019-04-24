@@ -6,10 +6,10 @@ use crate::style::{Color, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
-use std::fmt::Debug;
 use std::iter::{once, repeat};
 use std::ops::Range;
 use std::rc::Rc;
+use std::error::Error;
 
 /// The representation of the rectangle in backend canvas
 #[derive(Clone, Debug)]
@@ -92,11 +92,23 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
 }
 
 #[derive(Debug)]
-pub enum DrawingAreaErrorKind<E: Debug> {
+pub enum DrawingAreaErrorKind<E: Error> {
     BackendError(DrawingErrorKind<E>),
     SharingError,
     LayoutError,
 }
+
+impl <E:Error> std::fmt::Display for DrawingAreaErrorKind<E> {
+    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+        return match self {
+            DrawingAreaErrorKind::BackendError(e) => write!(fmt, "backend error: {}", e),
+            DrawingAreaErrorKind::SharingError    => write!(fmt, "Mulitple backend operation in progress"),
+            DrawingAreaErrorKind::LayoutError     => write!(fmt, "Bad layout")
+        };
+    }
+}
+
+impl <E:Error> Error for DrawingAreaErrorKind<E> {}
 
 #[allow(type_alias_bounds)]
 type DrawingAreaError<T: DrawingBackend> = DrawingAreaErrorKind<T::ErrorType>;

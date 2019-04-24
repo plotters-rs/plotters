@@ -1,20 +1,19 @@
 use plotters::prelude::*;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut img = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
 
-    img.open().unwrap();
+    img.open()?;
 
     let root_area: DrawingArea<_, _> = img.into();
 
-    root_area.fill(&RGBColor(255, 255, 255)).unwrap();
+    root_area.fill(&RGBColor(255, 255, 255))?;
 
-    let font:FontDesc = "ArialMT".into();
+    let font:FontDesc = "Iosevka".into();
     let font_large = &font.resize(60.0);
     let font_small = &font.resize(40.0);
     let root_area = root_area
-        .titled("Hello World!", &font_large)
-        .unwrap()
+        .titled("Hello World!", &font_large)?
         .margin(0, 0, 0, 20);
 
     let (upper, lower) = root_area.split_vertically(512);
@@ -33,14 +32,12 @@ fn main() {
         .y_labels(10)
         .x_label_formatter(&|v| format!("{:.1}", v))
         .y_label_formatter(&|v| format!("{:.1}", v))
-        .draw()
-        .unwrap();
+        .draw()?;
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
         &RGBColor(255,0,0),
-    ))
-    .unwrap();
+    ))?;
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
             (
@@ -49,15 +46,13 @@ fn main() {
             )
         }),
         &RGBColor(0,0,255),
-    ))
-    .unwrap();
+    ))?;
 
     cc.draw_series(PointSeries::<_, _, Cross<_>>::new(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
         &RGBColor(0,0,0),
-    ))
-    .unwrap();
+    ))?;
 
     let drawing_areas = lower.split_evenly((1, 2));
 
@@ -70,8 +65,10 @@ fn main() {
                 &font_large
             )
             .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..11f32, 0f32..11f32);
-        cc.configure_mesh().x_labels(5).y_labels(5).draw().unwrap();
+        cc.configure_mesh().x_labels(5).y_labels(5).draw()?
     }
 
-    root_area.close().unwrap();
+    root_area.close()?;
+
+    return Ok(());
 }

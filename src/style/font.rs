@@ -19,6 +19,18 @@ pub enum FontError {
     FontLoadError(Error),
 }
 
+impl std::fmt::Display for FontError {
+    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+        return match self {
+            FontError::LockError => write!(fmt, "Could not lock mutex"),
+            FontError::NoSuchFont => write!(fmt, "No such font"),
+            FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e)
+        };
+    }
+}
+
+impl std::error::Error for FontError{}
+
 /// The type we used to represent a result of any font operations
 pub type FontResult<T> = Result<T, FontError>;
 

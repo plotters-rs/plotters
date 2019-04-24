@@ -1,23 +1,33 @@
 use crate::style::{Color, FontDesc, FontError, Mixable};
-/// The abstraction of a drawing backend
-use std::fmt::Debug;
+use std::error::Error;
 
 /// A coordiante in the image
 pub type BackendCoord = (i32, i32);
 
 /// The Error Type of a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Debug> {
+pub enum DrawingErrorKind<E: Error> {
     /// A drawing backend error
     DrawingError(E),
     /// A font rendering error
     FontError(FontError),
 }
 
+impl <E:Error> std::fmt::Display for DrawingErrorKind<E> {
+    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+        return match self {
+            DrawingErrorKind::DrawingError(e) => write!(fmt, "Drawing backend error: {}", e),
+            DrawingErrorKind::FontError(e)    => write!(fmt, "Font loading error: {}", e)
+        };
+    }
+}
+
+impl <E:Error> Error for DrawingErrorKind<E>{}
+
 /// The drawing context
 pub trait DrawingBackend {
     /// The error reported by the backend
-    type ErrorType: Debug;
+    type ErrorType: Error;
 
     /// Dimension
     fn get_size(&self) -> (u32, u32);
