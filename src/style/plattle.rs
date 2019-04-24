@@ -1,5 +1,10 @@
+use super::color::PlattleColor; 
+
 pub trait Plattle {
     const COLORS : &'static [(u8,u8,u8)];
+    fn pick(idx:usize) -> PlattleColor<Self> where Self: Sized{
+        PlattleColor::<Self>::pick(idx)
+    }
 }
 
 pub struct Plattle99;
@@ -17,4 +22,3 @@ impl Plattle for Plattle9999 {
 impl Plattle for Plattle100 {
     const COLORS : &'static [(u8,u8,u8)] = &[(255, 225, 25), (0, 130, 200), (128, 128, 128), (0, 0, 0)];
 }
-

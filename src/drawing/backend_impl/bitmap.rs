@@ -1,13 +1,17 @@
 use image::{RgbImage, Rgb, ImageError};
-use crate::drawing::{DrawingBackend, Coord};
-use crate::color::Color;
+use crate::drawing::backend::{DrawingBackend, BackendCoord, DrawingErrorKind};
+use crate::style::Color;
 
+/// The backend that drawing a bitmap
 pub struct BitMapBackend<'a> {
+    /// The path to the image
     path: &'a str,
+    /// The image object
     img : RgbImage,
 }
 
 impl <'a> BitMapBackend<'a> {
+    /// Create a new bitmap backend
     pub fn new(path: &'a str, dimension: (u32,u32)) -> Self {
         return Self {
             path,
@@ -17,21 +21,22 @@ impl <'a> BitMapBackend<'a> {
 }
 
 impl <'a> DrawingBackend for BitMapBackend<'a> {
+
     type ErrorType = ImageError;
 
     fn get_size(&self) -> (u32, u32) {
         return (self.img.width(), self.img.height());
     }
 
-    fn open(&mut self) -> Result<(), ImageError> {
+    fn open(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
         Ok(())
     }
 
-    fn close(&mut self) -> Result<(), ImageError> {
-        self.img.save(&self.path).map_err(|x| ImageError::IoError(x))
+    fn close(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+        self.img.save(&self.path).map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))
     }
 
-    fn draw_pixel<C:Color>(&mut self, point:Coord, color: &C) -> Result<(), ImageError> {
+    fn draw_pixel<C:Color>(&mut self, point:BackendCoord, color: &C) -> Result<(), DrawingErrorKind<ImageError>> {
         if point.0 as u32 >= self.img.width()  || point.0 < 0 ||
            point.1 as u32 >= self.img.height() || point.1 < 0 {
             return Ok(());

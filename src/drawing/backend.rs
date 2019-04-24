@@ -1,28 +1,39 @@
-use crate::color::Color;
-use crate::font::FontDesc;
+/// The abstraction of a drawing backend
+
+use std::fmt::Debug;
+use crate::style::{Color, FontDesc, FontError, Mixable};
 
 /// A coordiante in the image
-pub type Coord = (i32, i32);
+pub type BackendCoord = (i32, i32);
+
+/// The Error Type of a drawing backend
+#[derive(Debug)]
+pub enum DrawingErrorKind<E:Debug> {
+    /// A drawing backend error
+    DrawingError(E),
+    /// A font rendering error
+    FontError(FontError),
+}
 
 /// The drawing context
 pub trait DrawingBackend {
     /// The error reported by the backend
-    type ErrorType;
+    type ErrorType:Debug;
 
     /// Dimension
     fn get_size(&self) -> (u32, u32);
 
     /// Start drawing
-    fn open(&mut self) -> Result<(), Self::ErrorType>;
+    fn open(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Stop drawing
-    fn close(&mut self) -> Result<(), Self::ErrorType>;
+    fn close(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a pixel
-    fn draw_pixel<C:Color>(&mut self, point: Coord, color : &C) -> Result<(), Self::ErrorType>;
+    fn draw_pixel<C:Color>(&mut self, point: BackendCoord, color : &C) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a line
-    fn draw_line<C:Color>(&mut self, mut from: Coord, mut to:Coord, color: &C) -> Result<(), Self::ErrorType> {
+    fn draw_line<C:Color>(&mut self, mut from: BackendCoord, mut to:BackendCoord, color: &C) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let steep = (from.0 - to.0).abs() < (from.1 - to.1).abs();
 
         if steep {
@@ -34,7 +45,7 @@ pub trait DrawingBackend {
 
         let grad = (to.1 - from.1) as f64 / (to.0 - from.0) as f64;
 
-        let mut put_pixel = |(x,y):Coord, b:f64| {
+        let mut put_pixel = |(x,y):BackendCoord, b:f64| {
             if steep {
                 return self.draw_pixel((y,x),&color.mix(b));
             } else {
@@ -55,7 +66,7 @@ pub trait DrawingBackend {
     }
 
     /// Draw a rectangle
-    fn draw_rect<C:Color>(&mut self, upper_left:Coord, bottom_right:Coord, color: &C, fill:bool) -> Result<(), Self::ErrorType> {
+    fn draw_rect<C:Color>(&mut self, upper_left:BackendCoord, bottom_right:BackendCoord, color: &C, fill:bool) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         if fill {
             if bottom_right.0 - upper_left.0 < bottom_right.1 - upper_left.1 {
                 for x in upper_left.0..=bottom_right.0 {
@@ -76,8 +87,8 @@ pub trait DrawingBackend {
     }
 
     /// Draw a path
-    fn draw_path<C:Color, I:IntoIterator<Item=Coord> >(&mut self, path:I, color: &C) -> Result<(), Self::ErrorType> {
-        let mut begin:Option<Coord> = None;
+    fn draw_path<C:Color, I:IntoIterator<Item=BackendCoord> >(&mut self, path:I, color: &C) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let mut begin:Option<BackendCoord> = None;
         for end in path.into_iter() {
             if let Some(begin) = begin {
                 self.draw_line(begin, end, color)?;
@@ -88,7 +99,7 @@ pub trait DrawingBackend {
     }
 
     /// Draw a circle
-    fn draw_circle<C:Color>(&mut self, center:Coord, radius:u32, color: &C, fill:bool) -> Result<(), Self::ErrorType> {
+    fn draw_circle<C:Color>(&mut self, center:BackendCoord, radius:u32, color: &C, fill:bool) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let range = if fill {
             0..=2*radius as i32
         } else {
@@ -122,10 +133,12 @@ pub trait DrawingBackend {
     }
 
     /// Draw a text
-    fn draw_text<'a, C:Color>(&mut self, text:&str, font: &FontDesc<'a>, pos: Coord, color: &C) -> Result<(), Self::ErrorType> {
-        font.draw(text, (pos.0 as u32, pos.1 as u32), |x,y,v| {
-            self.draw_pixel((x as i32,y as i32), &color.mix(v as f64)).ok();
-        });
-        Ok(())
+    fn draw_text<'a, C:Color>(&mut self, text:&str, font: &FontDesc<'a>, pos: BackendCoord, color: &C) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        match font.draw(text, (pos.0 as u32, pos.1 as u32), |x,y,v| {
+            self.draw_pixel((x as i32,y as i32), &color.mix(v as f64))
+        }) {
+            Ok(drawing_result) => drawing_result,
+            Err(font_error)    => Err(DrawingErrorKind::FontError(font_error)), 
+        }
     }
 }

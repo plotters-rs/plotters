@@ -1,37 +1,29 @@
-mod grid;
-
-use crate::color::Color;
-use crate::drawing::DrawingBackend;
-use crate::font::FontDesc;
-use std::iter::{once, Once};
-
-pub use grid::{Grid, GridDirection, GridLineIter};
+/// Defines the drawing elements, which is the high-level drawing interface
+use crate::drawing::backend::{DrawingBackend, DrawingErrorKind, BackendCoord};
+use std::borrow::Borrow;
 
 /// The trait that represents an element drawed on the canvas
-pub trait Element<'a, Coord:'a> {
-    /// The iterator for the key points of this element
-    type Points: IntoIterator<Item = &'a Coord>;
+pub trait PointCollection<'a, Coord> {
+    /// The item in point iterator 
+    type Borrow : Borrow<Coord>;
+    
+    /// The point iterator
+    type IntoIter : IntoIterator<Item = Self::Borrow>;
 
-    /// The function that returns the list of key point. This is used by the
     /// framework to do the coordinate mapping
-    fn points(&'a self) -> Self::Points;
+    fn point_iter(self) -> Self::IntoIter;
+}
 
+pub trait Drawable {
     /// Actually draws the element. The key points is already translated into the 
     /// image cooridnate and can be used by DC directly
-    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, pos:I, dc: &mut DC) -> Result<(), DC::ErrorType>;
+    fn draw<DB:DrawingBackend, I:Iterator<Item=BackendCoord>>(&self, pos:I, backend: &mut DB) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
-pub struct Path<Coord, C:Color> {
-    points: Vec<Coord>, 
-    color: C,
-}
+mod basic_shapes;
+pub use basic_shapes::*;
 
-impl <Coord, C:Color> Path<Coord, C> {
-    pub fn new(points:Vec<Coord>, color:C) -> Self {
-        return Self {points, color };
-    }
-}
-
+/*
 impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Path<Coord, C> where Self:'a {
     type Points = &'a [Coord];
 
@@ -119,5 +111,4 @@ impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Circle<Coord, C> where Self:
         dc.draw_circle((pos.0 as i32, pos.1 as i32), self.radius, &self.color, self.filled)
     }
 }
-
-
+*/

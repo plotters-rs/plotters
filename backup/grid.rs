@@ -1,6 +1,6 @@
 use super::Element;
-use crate::color::Color;
-use crate::drawing::DrawingBackend;
+use crate::style::Color;
+use crate::drawing::backend::DrawingBackend;
 
 pub enum GridDirection {
     Horizontal,

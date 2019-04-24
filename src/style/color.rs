@@ -1,17 +1,34 @@
+/// The abstraction of a color
+
 use std::marker::PhantomData;
-use crate::plattle::Plattle;
+use super::plattle::Plattle;
 
 /// Any color representation
-pub trait Color : Sized {
+pub trait Color {
     /// Convert the RGB representation to the standard RGB tuple
     fn rgb(&self) -> (u8,u8,u8);
     
     /// Get the alpha channel of the color
     fn alpha(&self) -> f64;
+}
 
+/// The trait for any color that can composite with other color
+pub trait Mixable : Color {
     /// Introduce alpha channel to the color
     fn mix(&self, alpha:f64) -> CompsitableColor<Self> {
         CompsitableColor(self, alpha)
+    }
+}
+
+impl <T:Color + Sized> Mixable for T {}
+
+impl Color for Box<&dyn Color> {
+    fn rgb(&self) -> (u8,u8,u8) {
+        self.as_ref().rgb()
+    }
+
+    fn alpha(&self) -> f64 {
+        self.as_ref().alpha()
     }
 }
 
@@ -48,7 +65,7 @@ impl <P:Plattle> SimpleColor for PlattleColor<P> {
 
 
 /// Simple color with additional alpha channel
-pub struct CompsitableColor<'a, T:Color>(&'a T, f64);
+pub struct CompsitableColor<'a, T:Color + ?Sized>(&'a T, f64);
 
 impl <'a, T:Color> Color for CompsitableColor<'a, T> {
     fn rgb(&self) -> (u8,u8,u8) {
