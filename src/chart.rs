@@ -2,6 +2,7 @@
 use std::marker::PhantomData;
 use std::fmt::Debug;
 use std::borrow::Borrow;
+use std::ops::Range;
 
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::drawing::backend::DrawingBackend;
@@ -197,6 +198,16 @@ impl <DB:DrawingBackend, XT:Debug, YT:Debug, X:Ranged<ValueType=XT>, Y:Ranged<Va
 }
 
 impl <DB:DrawingBackend, X:Ranged, Y:Ranged> ChartContext<DB, RangedCoord<X,Y>> {
+    /// Get the range of X axis
+    pub fn x_range(&self) -> Range<X::ValueType> {
+        return self.drawing_area.get_x_range();
+    }
+    
+    /// Get range of the Y axis
+    pub fn y_range(&self) -> Range<Y::ValueType> {
+        return self.drawing_area.get_y_range();
+    }
+
     /// Draw a series
     pub fn draw_series<E,R,S>(&self, series:S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> 
         where for <'a> &'a E:PointCollection<'a, (X::ValueType, Y::ValueType)>,

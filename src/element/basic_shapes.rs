@@ -31,40 +31,93 @@ impl <'a, Coord:'a> Drawable for Path<'a, Coord> {
     }
 }
 
-/// Describe a cross
-pub struct Cross<'a, Coord> {
-    center: Coord,
-    size: u32,
-    style: ShapeStyle<'a>,
-}
 
-impl <'a, Coord> Cross<'a, Coord> {
-    pub fn new(coord:Coord, size:u32, style: ShapeStyle<'a>) -> Self {
-        return Self {
-            center: coord,
-            size,
-            style
-        };
+/*
+impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Path<Coord, C> where Self:'a {
+    type Points = &'a [Coord];
+
+    fn points(&'a self) -> &'a [Coord] {
+        return &self.points;
+    }
+
+    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
+        dc.draw_path(points.map(|(a,b)| (a as i32, b as i32)), &self.color)
     }
 }
 
-impl <'b, 'a, Coord:'a> PointCollection<'a, Coord> for &'a Cross<'b, Coord> {
-    type Borrow  = &'a Coord;
-    type IntoIter = std::iter::Once<&'a Coord>;
-    fn point_iter(self) -> std::iter::Once<&'a Coord> {
-        return std::iter::once(&self.center);
+pub struct Rectangle<Coord, C:Color> {
+    points:[Coord;2], 
+    color: C, 
+    filled: bool
+}
+impl <Coord, C:Color> Rectangle<Coord, C> {
+    pub fn new(points:[Coord;2], color:C, filled:bool) -> Self {
+        return Self { points, color, filled };
+    }
+}
+impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Rectangle<Coord, C> where Self:'a {
+    type Points = &'a [Coord];
+
+    fn points(&'a self) -> &'a [Coord] {
+        return &self.points;
+    }
+
+    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
+        let points:Vec<_> = points.into_iter().map(|(a,b)|(a as i32, b as i32)).take(2).collect();
+
+        dc.draw_rect(points[0], points[1], &self.color, self.filled)
     }
 }
 
-impl <'a, Coord:'a> Drawable for Cross<'a, Coord> {
-    fn draw<DB:DrawingBackend, I:Iterator<Item=BackendCoord>>(&self, mut points:I, backend: &mut DB) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        if let Some((x,y)) = points.next() {
-            let size = self.size as i32;
-            let (x0,y0) = (x - size, y - size);
-            let (x1,y1) = (x + size, y + size);
-            backend.draw_line((x0,y0), (x1,y1), &Box::new(self.style.color))?;
-            backend.draw_line((x0,y1), (x1,y0), &Box::new(self.style.color))?;
-        }
-        return Ok(());
+pub struct Text<'b, 'a:'b , Coord, C:Color> {
+    text: &'b str, 
+    font: &'b FontDesc<'a>,
+    coord: Coord,
+    color: C,
+}
+impl <'b, 'a:'b, Coord, C:Color> Text<'b, 'a, Coord, C> {
+    pub fn new(text: &'b str, font: &'b FontDesc<'a>, coord: Coord, color:C) -> Self {
+        return Self {text, font, coord, color};
+    }
+
+}
+impl <'b, 'a:'b, Coord:'b, C:Color> Element<'b, Coord> for Text<'b, 'a, Coord, C> {
+    type Points = Once<&'b Coord>;
+
+    fn points(&'b self) -> Self::Points {
+        return once(&self.coord);
+    } 
+
+    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
+        let pos = points.into_iter().next().unwrap();
+
+        dc.draw_text(self.text, self.font, (pos.0 as i32, pos.1 as i32), &self.color)
     }
 }
+
+pub struct Circle<Coord, C:Color> {
+    coord: Coord,
+    radius: u32,
+    color: C,
+    filled: bool,
+}
+
+impl <Coord, C:Color> Circle<Coord, C> {
+    pub fn new(coord:Coord, radius:u32, color:C, filled: bool) -> Self {
+        return Self {coord, radius, color, filled};
+    }
+}
+
+impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Circle<Coord, C> where Self:'a {
+    type Points = Once<&'a Coord>;
+
+    fn points(&'a self) -> Self::Points {
+        return once(&self.coord);
+    }
+
+    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
+        let pos = points.into_iter().next().unwrap();
+        dc.draw_circle((pos.0 as i32, pos.1 as i32), self.radius, &self.color, self.filled)
+    }
+}
+*/

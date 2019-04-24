@@ -4,7 +4,7 @@ use plotters::drawing::backend::DrawingBackend;
 use plotters::style::{TextStyle, FontDesc, RGBColor, ShapeStyle};
 use plotters::drawing::coord::RangedCoordf32;
 fn main() {
-    let mut img = BitMapBackend::new("/tmp/plotter.png", (4096, 1440));
+    let mut img = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
     
     img.open().unwrap();
 
@@ -21,30 +21,27 @@ fn main() {
     };
     let root_area = root_area.titled("Demo Title", caption_style).unwrap();
 
-    let (upper, lower) = root_area.split_vertically(1000);
+    let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
         .set_x_label_size(50)
-        .set_y_label_size(100)
-        .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-11f32..11f32, -1.2f32..1.2f32);
+        .set_y_label_size(60)
+        .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-3.4f32..3.4f32, -1.2f32..1.2f32);
 
     cc.configure_mesh()
-        .x_labels(50)
-        .y_labels(20)
+        .x_labels(20)
+        .y_labels(10)
         .x_label_formatter(Box::new(|v| format!("{:.1}", v)))
         .y_label_formatter(Box::new(|v| format!("{:.1}", v)))
         .draw().unwrap();
 
-    let sc = RGBColor(255,0,0);
-    let sc2 = RGBColor(0,0,255);
-    let ss = ShapeStyle{ color: &sc};
-    let ss2 = ShapeStyle{ color: &sc2}; 
-    let ss3 = ShapeStyle{ color: &black}; 
-
-    cc.draw_series(plotters::data::LineSeries::new((0..2200).map(|x| ((x-1100) as f32/100.0, ((x-1100) as f32 / 20.0).sin())), &ss)).unwrap();
-    cc.draw_series(plotters::data::LineSeries::new((0..2200).map(|x| ((x-1100) as f32/100.0, ((x-1100) as f32 / 20.0).cos())), &ss2)).unwrap();
+    let red = RGBColor(255,0,0);
+    let blue = RGBColor(0,0,255);
     
-    cc.draw_series(plotters::data::ScatterSeries::new((0..22).map(|x| ((x-11) as f32/1.0, ((x-11) as f32 * 5.0).sin())), 5, &ss3)).unwrap();
+    cc.draw_series(plotters::series::LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).sin())), &ShapeStyle{color:&red})).unwrap();
+    cc.draw_series(plotters::series::LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).cos())), &ShapeStyle{color:&blue})).unwrap();
+    
+    cc.draw_series(plotters::series::PointSeries::<_,_,plotters::element::Cross<_>>::new((0..6).map(|x| ((x-3) as f32/1.0, ((x-3) as f32 / 1.0).sin())), 5, &ShapeStyle{color:&black})).unwrap();
     
     let drawing_areas = lower.split_evenly((1,2));
 

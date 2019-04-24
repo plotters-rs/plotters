@@ -44,6 +44,9 @@ pub trait Ranged {
 
     /// This function gives the key points that we can draw a grid based on this
     fn key_points(&self, max_points:usize) -> Vec<Self::ValueType>;
+
+    /// Get the range of this value
+    fn range(&self) -> Range<Self::ValueType>;
 }
 
 /// The coordinate description 
@@ -95,6 +98,14 @@ impl <X:Ranged, Y:Ranged> RangedCoord<X,Y> {
 
         return Ok(());
     }
+
+    pub fn get_x_range(&self) -> Range<X::ValueType> {
+        return self.logic_x.range();
+    }
+
+    pub fn get_y_range(&self) -> Range<Y::ValueType> {
+        return self.logic_y.range();
+    }
 }
 
 impl <X:Ranged, Y:Ranged> CoordTranslate for RangedCoord<X,Y> {
@@ -126,6 +137,9 @@ macro_rules! make_numeric_coord {
             }
             fn key_points(&self, max_points: usize) -> Vec<$type> {
                 $key_points((self.0, self.1), max_points)
+            }
+            fn range(&self) -> Range<$type> {
+                return self.0..self.1;
             }
         }
     }

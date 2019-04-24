@@ -106,6 +106,14 @@ impl <DB:DrawingBackend, X:Ranged, Y:Ranged> DrawingArea<DB, RangedCoord<X,Y>> {
             });
         });
     }
+
+    pub fn get_x_range(&self) -> Range<X::ValueType> {
+        return self.coord.get_x_range();
+    }
+
+    pub fn get_y_range(&self) -> Range<Y::ValueType> {
+        return self.coord.get_y_range();
+    }
 }
 
 impl <DB:DrawingBackend, CT:CoordTranslate> DrawingArea<DB, CT> {
