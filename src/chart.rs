@@ -29,6 +29,15 @@ impl <'a, DB:DrawingBackend> ChartBuilder<'a, DB> {
         };
     }
 
+    pub fn set_margin(&mut self, size:u32) -> &mut Self {
+        if self.titled_area.is_some() {
+            return self;
+        }
+        let size = size as i32;
+        self.titled_area = Some(self.root_area.margin(size, size, size, size));
+        return self; 
+    }
+
     /// Set the size of X label
     pub fn set_x_label_size(&mut self, size: u32) -> &mut Self {
         self.x_label_size = size;

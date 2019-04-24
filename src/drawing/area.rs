@@ -184,6 +184,14 @@ impl <DB:DrawingBackend> DrawingArea<DB, Shift> {
         };
     }
 
+    pub fn margin(&self, top:i32, bottom:i32, left:i32, right:i32) -> DrawingArea<DB,Shift> {
+        return DrawingArea {
+            rect: Rect{ x0: self.rect.x0 + left, y0: self.rect.y0 + top, x1: self.rect.x1 - right, y1: self.rect.y1 - bottom },
+            backend: self.copy_backend_ref(),
+            coord: Shift((self.rect.x0 + left, self.rect.y0 + top))
+        };
+    }
+
     /// Split the drawing area vertically
     pub fn split_vertically(&self, y:i32) -> (Self, Self) {
         let split_point = [y + self.rect.y0];

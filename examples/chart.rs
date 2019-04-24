@@ -3,6 +3,8 @@ use plotters::drawing::{BitMapBackend, DrawingArea};
 use plotters::drawing::backend::DrawingBackend;
 use plotters::style::{TextStyle, FontDesc, RGBColor, ShapeStyle};
 use plotters::drawing::coord::RangedCoordf32;
+use plotters::series::{LineSeries, PointSeries};
+use plotters::element::Cross;
 fn main() {
     let mut img = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
     
@@ -19,13 +21,14 @@ fn main() {
         font: &caption_font,
         color: &black
     };
-    let root_area = root_area.titled("Demo Title", caption_style).unwrap();
+    let root_area = root_area.titled("Hello World!", caption_style).unwrap().margin(0, 0, 0, 20);
 
     let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
         .set_x_label_size(50)
         .set_y_label_size(60)
+        .caption("Sine and Cosine", TextStyle { font:&chart_font, color: &black})
         .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-3.4f32..3.4f32, -1.2f32..1.2f32);
 
     cc.configure_mesh()
@@ -38,10 +41,10 @@ fn main() {
     let red = RGBColor(255,0,0);
     let blue = RGBColor(0,0,255);
     
-    cc.draw_series(plotters::series::LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).sin())), &ShapeStyle{color:&red})).unwrap();
-    cc.draw_series(plotters::series::LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).cos())), &ShapeStyle{color:&blue})).unwrap();
+    cc.draw_series(LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).sin())), &ShapeStyle{color:&red})).unwrap();
+    cc.draw_series(LineSeries::new((0..6800).map(|x| ((x-3400) as f32/1000.0, ((x-3400) as f32 / 1000.0).cos())), &ShapeStyle{color:&blue})).unwrap();
     
-    cc.draw_series(plotters::series::PointSeries::<_,_,plotters::element::Cross<_>>::new((0..6).map(|x| ((x-3) as f32/1.0, ((x-3) as f32 / 1.0).sin())), 5, &ShapeStyle{color:&black})).unwrap();
+    cc.draw_series(PointSeries::<_,_,Cross<_>>::new((0..6).map(|x| ((x-3) as f32/1.0, ((x-3) as f32 / 1.0).sin())), 5, &ShapeStyle{color:&black})).unwrap();
     
     let drawing_areas = lower.split_evenly((1,2));
 
@@ -51,7 +54,7 @@ fn main() {
             .set_y_label_size(60)
             .caption(format!("Chart {}", idx), TextStyle { font:&chart_font, color:&black })
             .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..11f32, 0f32..11f32);
-        cc.configure_mesh().draw().unwrap();
+        cc.configure_mesh().x_labels(5).y_labels(5).draw().unwrap();
     }
 
     root_area.close().unwrap();
