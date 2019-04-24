@@ -1,3 +1,0 @@
-pub struct SVGBackend {
-    //TODO
-}
