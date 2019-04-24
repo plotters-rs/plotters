@@ -53,7 +53,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let alpha = color.alpha();
         let rgb = color.rgb();
 
-        if alpha == 1.0 {
+        if alpha >= 1.0 {
             self.img.put_pixel(
                 point.0 as u32,
                 point.1 as u32,
@@ -71,7 +71,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 .iter_mut()
                 .zip(&new_color)
                 .for_each(|(old, new)| {
-                    *old = (*old as f64 * (1.0 - alpha) + *new as f64 * alpha) as u8;
+                    *old = (*old as f64 * (1.0 - alpha) + *new as f64 * alpha).min(255.0) as u8;
                 });
         }
         return Ok(());

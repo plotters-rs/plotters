@@ -52,10 +52,10 @@ fn main() {
     let blue = RGBColor(0, 0, 255);
 
     cc.draw_series(LineSeries::new(
-        (0..6800).map(|x| {
+        (0..12).map(|x| {
             (
-                (x - 3400) as f32 / 1000.0,
-                ((x - 3400) as f32 / 1000.0).sin(),
+                (x - 6) as f32 / 2.0,
+                ((x - 6) as f32 / 2.0).sin(),
             )
         }),
         &ShapeStyle { color: &red },

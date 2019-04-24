@@ -69,7 +69,7 @@ pub trait DrawingBackend {
 
         for x in from.0..=to.0 {
             put_pixel((x, y as i32), 1.0 + y.floor() - y)?;
-            put_pixel((x, y as i32), y - y.floor())?;
+            put_pixel((x, y as i32 + 1), y - y.floor())?;
 
             y += grad;
         }
