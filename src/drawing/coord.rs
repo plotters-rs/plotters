@@ -230,7 +230,7 @@ macro_rules! gen_key_points_comp {
             }
 
             let (mut left, right) = (
-                range.0 + (scale - range.0) % scale,
+                range.0 + (scale - range.0 % scale) % scale,
                 range.1 - range.1 % scale,
             );
 
