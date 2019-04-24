@@ -1,4 +1,0 @@
-*.swo
-*.swp
-Cargo.lock
-backup/*

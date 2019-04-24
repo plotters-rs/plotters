@@ -21,7 +21,7 @@ fn main() {
     };
     let root_area = root_area.titled("Demo Title", caption_style).unwrap();
 
-    let (upper, lower) = root_area.split_vertically(500);
+    let (upper, lower) = root_area.split_vertically(1000);
 
     let mut cc = ChartBuilder::on(&upper)
         .set_x_label_size(50)
@@ -39,9 +39,12 @@ fn main() {
     let sc2 = RGBColor(0,0,255);
     let ss = ShapeStyle{ color: &sc};
     let ss2 = ShapeStyle{ color: &sc2}; 
+    let ss3 = ShapeStyle{ color: &black}; 
 
     cc.draw_series(plotters::data::LineSeries::new((0..2200).map(|x| ((x-1100) as f32/100.0, ((x-1100) as f32 / 20.0).sin())), &ss)).unwrap();
     cc.draw_series(plotters::data::LineSeries::new((0..2200).map(|x| ((x-1100) as f32/100.0, ((x-1100) as f32 / 20.0).cos())), &ss2)).unwrap();
+    
+    cc.draw_series(plotters::data::ScatterSeries::new((0..22).map(|x| ((x-11) as f32/1.0, ((x-11) as f32 * 5.0).sin())), 5, &ss3)).unwrap();
     
     let drawing_areas = lower.split_evenly((1,2));
 
