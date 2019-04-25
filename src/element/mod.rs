@@ -33,4 +33,3 @@ pub trait Drawable {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
-

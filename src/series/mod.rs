@@ -1,8 +1,6 @@
 use crate::element::{Path, PointElement};
 use crate::style::ShapeStyle;
 
-use std::marker::PhantomData;
-
 pub struct LineSeries<'a, Coord, I: IntoIterator<Item = Coord>> {
     style: ShapeStyle<'a>,
     data_iter: Option<I::IntoIter>,
@@ -25,7 +23,7 @@ impl<'b, Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<'b, Coord
 }
 
 impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
-    pub fn new<S:Into<ShapeStyle<'a>>>(iter: I, style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle<'a>>>(iter: I, style: S) -> Self {
         return Self {
             style: style.into(),
             data_iter: Some(iter.into_iter()),
@@ -33,16 +31,14 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
     }
 }
 
-pub struct PointSeries<'a, Coord, I: IntoIterator<Item = Coord>, E>  {
+pub struct PointSeries<'a, Coord, I: IntoIterator<Item = Coord>, E> {
     style: ShapeStyle<'a>,
     size: u32,
     data_iter: I::IntoIter,
     make_point: &'a dyn Fn(Coord, u32, ShapeStyle<'a>) -> E,
 }
 
-impl<'a, Coord, I: IntoIterator<Item = Coord>, E> Iterator
-    for PointSeries<'a, Coord, I, E>
-{
+impl<'a, Coord, I: IntoIterator<Item = Coord>, E> Iterator for PointSeries<'a, Coord, I, E> {
     type Item = E;
     fn next(&mut self) -> Option<Self::Item> {
         return self
@@ -52,30 +48,32 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>, E> Iterator
     }
 }
 
-impl<'a, Coord, I: IntoIterator<Item = Coord>, E>
-    PointSeries<'a, Coord, I, E>
+impl<'a, Coord, I: IntoIterator<Item = Coord>, E> PointSeries<'a, Coord, I, E>
 where
-    E:PointElement<'a, Coord>
+    E: PointElement<'a, Coord>,
 {
-    pub fn new<S:Into<ShapeStyle<'a>>>(iter: I, size: u32, style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle<'a>>>(iter: I, size: u32, style: S) -> Self {
         return Self {
             data_iter: iter.into_iter(),
             size,
             style: style.into(),
-            make_point: &|a,b,c|E::make_point(a,b,c),
+            make_point: &|a, b, c| E::make_point(a, b, c),
         };
     }
 }
 
-impl<'a, Coord, I: IntoIterator<Item = Coord>, E>
-    PointSeries<'a, Coord, I, E>
-{
-    pub fn of_element<S:Into<ShapeStyle<'a>>, F:Fn(Coord, u32, ShapeStyle<'a>) -> E>(iter: I, size: u32, style: S, cons: &'a F) -> Self {
+impl<'a, Coord, I: IntoIterator<Item = Coord>, E> PointSeries<'a, Coord, I, E> {
+    pub fn of_element<S: Into<ShapeStyle<'a>>, F: Fn(Coord, u32, ShapeStyle<'a>) -> E>(
+        iter: I,
+        size: u32,
+        style: S,
+        cons: &'a F,
+    ) -> Self {
         return Self {
             data_iter: iter.into_iter(),
             size,
             style: style.into(),
-            make_point: cons
+            make_point: cons,
         };
     }
 }

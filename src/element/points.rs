@@ -1,7 +1,7 @@
+use super::*;
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
-use super::*;
 
 /// The element that used to describe a point
 pub trait PointElement<'a, Coord> {
@@ -60,4 +60,3 @@ impl<'a, Coord> PointElement<'a, Coord> for Circle<'a, Coord> {
         return Self::new(pos, size, style);
     }
 }
-

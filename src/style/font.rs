@@ -3,14 +3,13 @@
 ///
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::convert::From;
 use std::i32;
 use std::sync::Mutex;
-use std::convert::From;
 
-use rusttype::{point, Error, Font, Scale};
 use font_loader::system_fonts;
 use lazy_static::lazy_static;
-
+use rusttype::{point, Error, Font, Scale};
 
 #[derive(Debug)]
 pub enum FontError {
@@ -20,16 +19,16 @@ pub enum FontError {
 }
 
 impl std::fmt::Display for FontError {
-    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         return match self {
             FontError::LockError => write!(fmt, "Could not lock mutex"),
             FontError::NoSuchFont => write!(fmt, "No such font"),
-            FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e)
+            FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e),
         };
     }
 }
 
-impl std::error::Error for FontError{}
+impl std::error::Error for FontError {}
 
 /// The type we used to represent a result of any font operations
 pub type FontResult<T> = Result<T, FontError>;
@@ -73,8 +72,8 @@ pub struct FontDesc<'a> {
     font: RefCell<Option<Font<'a>>>,
 }
 
-impl <'a> From<&'a str> for FontDesc<'a> {
-    fn from(from:&'a str) -> FontDesc<'a> {
+impl<'a> From<&'a str> for FontDesc<'a> {
+    fn from(from: &'a str) -> FontDesc<'a> {
         return FontDesc::new(from, 1.0);
     }
 }
@@ -94,7 +93,7 @@ impl<'a> FontDesc<'a> {
         return Self {
             size,
             name: self.name,
-            font: self.font.clone()
+            font: self.font.clone(),
         };
     }
 

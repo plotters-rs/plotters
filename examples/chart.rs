@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root_area.fill(&RGBColor(255, 255, 255))?;
 
-    let font:FontDesc = "Iosevka".into();
+    let font: FontDesc = "Iosevka".into();
     let font_large = &font.resize(60.0);
     let font_small = &font.resize(40.0);
     let root_area = root_area
@@ -21,10 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cc = ChartBuilder::on(&upper)
         .set_x_label_size(50)
         .set_y_label_size(60)
-        .caption(
-            "Sine and Cosine",
-            &font_small
-        )
+        .caption("Sine and Cosine", &font_small)
         .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-3.4f32..3.4f32, -1.2f32..1.2f32);
 
     cc.configure_mesh()
@@ -36,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
-        &RGBColor(255,0,0),
+        &RGBColor(255, 0, 0),
     ))?;
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
@@ -45,27 +42,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ((x - 3400) as f32 / 1000.0).cos(),
             )
         }),
-        &RGBColor(0,0,255),
+        &RGBColor(0, 0, 255),
     ))?;
 
-    /*cc.draw_series(PointSeries::<_, _, Circle<_>>::new(
+    // It's possible to use a existing pointing element
+    /*
+     cc.draw_series(PointSeries::<_, _, Circle<_>>::new(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
         Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled(),
     ))?;*/
     let point_font = font_small.resize(15.0);
+    // Otherwise you can use a function to construct your pointing element yourself
     cc.draw_series(PointSeries::of_element(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
-        Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled(),
+        Into::<ShapeStyle>::into(&RGBColor(255, 0, 0)).filled(),
         &|coord, size, style| {
-            return EmptyElement::at(coord) + Circle::new((0,0), size, style) +
-                   OwnedText::new(format!("{:?}", coord), (0,15), &point_font);
-        }
+            return EmptyElement::at(coord)
+                + Circle::new((0, 0), size, style)
+                + OwnedText::new(format!("{:?}", coord), (0, 15), &point_font);
+        },
     ))?;
 
-
-    cc.define_series_label_area((700, 150), (230, 100), Into::<ShapeStyle>::into(&RGBColor(255,0,0).mix(0.5)).filled())?;
+    cc.define_series_label_area(
+        (700, 150),
+        (230, 100),
+        Into::<ShapeStyle>::into(&RGBColor(255, 0, 0).mix(0.5)).filled(),
+    )?;
 
     let drawing_areas = lower.split_evenly((1, 2));
 
@@ -73,10 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut cc = ChartBuilder::on(&drawing_area)
             .set_x_label_size(50)
             .set_y_label_size(60)
-            .caption(
-                format!("Chart {}", idx),
-                &font_large
-            )
+            .caption(format!("Chart {}", idx), &font_large)
             .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..11f32, 0f32..11f32);
         cc.configure_mesh().x_labels(5).y_labels(5).draw()?
     }

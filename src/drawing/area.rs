@@ -6,10 +6,10 @@ use crate::style::{Color, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::error::Error;
 use std::iter::{once, repeat};
 use std::ops::Range;
 use std::rc::Rc;
-use std::error::Error;
 
 /// The representation of the rectangle in backend canvas
 #[derive(Clone, Debug)]
@@ -67,10 +67,9 @@ impl Rect {
             });
     }
 
-    /// Make the coordinate in the range of the rectangle 
-    fn truncate(&self, p:(i32,i32)) -> (i32,i32) {
-        return (p.0.min(self.x1).max(self.y0),
-                p.1.min(self.y1).max(self.y0));
+    /// Make the coordinate in the range of the rectangle
+    fn truncate(&self, p: (i32, i32)) -> (i32, i32) {
+        return (p.0.min(self.x1).max(self.y0), p.1.min(self.y1).max(self.y0));
     }
 }
 
@@ -98,17 +97,19 @@ pub enum DrawingAreaErrorKind<E: Error> {
     LayoutError,
 }
 
-impl <E:Error> std::fmt::Display for DrawingAreaErrorKind<E> {
-    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+impl<E: Error> std::fmt::Display for DrawingAreaErrorKind<E> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         return match self {
             DrawingAreaErrorKind::BackendError(e) => write!(fmt, "backend error: {}", e),
-            DrawingAreaErrorKind::SharingError    => write!(fmt, "Mulitple backend operation in progress"),
-            DrawingAreaErrorKind::LayoutError     => write!(fmt, "Bad layout")
+            DrawingAreaErrorKind::SharingError => {
+                write!(fmt, "Mulitple backend operation in progress")
+            }
+            DrawingAreaErrorKind::LayoutError => write!(fmt, "Bad layout"),
         };
     }
 }
 
-impl <E:Error> Error for DrawingAreaErrorKind<E> {}
+impl<E: Error> Error for DrawingAreaErrorKind<E> {}
 
 #[allow(type_alias_bounds)]
 type DrawingAreaError<T: DrawingBackend> = DrawingAreaErrorKind<T::ErrorType>;
@@ -157,7 +158,6 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
-
     /// Get the left upper conner of this area in the drawing backend
     pub fn get_base_pixel(&self) -> BackendCoord {
         return (self.rect.x0, self.rect.y0);
@@ -165,10 +165,10 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
     /// Strip the applied coordinate specification and returns a shift-based drawing area
     pub fn strip_coord_spec(&self) -> DrawingArea<DB, Shift> {
-        return DrawingArea{
+        return DrawingArea {
             rect: self.rect.clone(),
             backend: self.copy_backend_ref(),
-            coord: Shift((self.rect.x0, self.rect.y0))
+            coord: Shift((self.rect.x0, self.rect.y0)),
         };
     }
 
@@ -236,12 +236,15 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
-   
-    /// Shrink the region, note all the locaitions are in guest coordinate 
-    pub fn shrink(mut self, left_upper:(u32,u32), dimension:(u32,u32)) -> DrawingArea<DB, Shift> {
+    /// Shrink the region, note all the locaitions are in guest coordinate
+    pub fn shrink(
+        mut self,
+        left_upper: (u32, u32),
+        dimension: (u32, u32),
+    ) -> DrawingArea<DB, Shift> {
         self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0 as i32);
         self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1 as i32);
-        
+
         self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0 as i32);
         self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1 as i32);
 
@@ -249,7 +252,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
 
         return self;
     }
-    
+
     /// Apply a new coord transformation object and returns a new drawing area
     pub fn apply_coord_spec<CT: CoordTranslate>(&self, coord_spec: CT) -> DrawingArea<DB, CT> {
         return DrawingArea {
@@ -316,7 +319,11 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             .collect();
     }
 
-    pub fn titled<'a, S:Into<TextStyle<'a>>>(&self, text: &str, style: S) -> Result<Self, DrawingAreaError<DB>> {
+    pub fn titled<'a, S: Into<TextStyle<'a>>>(
+        &self,
+        text: &str,
+        style: S,
+    ) -> Result<Self, DrawingAreaError<DB>> {
         let style = style.into();
 
         let (text_w, text_h) = match style.font.box_size(text) {

@@ -14,21 +14,21 @@ pub struct TextStyle<'a> {
     pub color: &'a dyn Color,
 }
 
-impl <'a> TextStyle<'a> {
+impl<'a> TextStyle<'a> {
     /// Make a filled shape style
-    pub fn color<C:Color>(&self, color:&'a C) -> Self {
+    pub fn color<C: Color>(&self, color: &'a C) -> Self {
         return Self {
             font: self.font,
-            color
+            color,
         };
     }
 }
 
-impl <'a,T:Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
-    fn from(font:&'a T) -> Self {
+impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
+    fn from(font: &'a T) -> Self {
         return Self {
             font: font.borrow(),
-            color: &RGBColor(0,0,0),
+            color: &RGBColor(0, 0, 0),
         };
     }
 }
@@ -37,24 +37,24 @@ impl <'a,T:Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
 #[derive(Clone)]
 pub struct ShapeStyle<'a> {
     pub color: &'a dyn Color,
-    pub filled: bool
+    pub filled: bool,
 }
 
-impl <'a> ShapeStyle<'a> {
+impl<'a> ShapeStyle<'a> {
     /// Make a filled shape style
     pub fn filled(&self) -> Self {
         return Self {
             color: self.color,
-            filled: true
+            filled: true,
         };
     }
 }
 
-impl <'a, T:Color> From<&'a T> for ShapeStyle<'a> {
-    fn from(f:&'a T) -> Self {
+impl<'a, T: Color> From<&'a T> for ShapeStyle<'a> {
+    fn from(f: &'a T) -> Self {
         return ShapeStyle {
             color: f,
-            filled: false
+            filled: false,
         };
     }
 }

@@ -1,5 +1,4 @@
 /// The plotting context and more stuff
-
 use std::borrow::Borrow;
 use std::fmt::Debug;
 /// The abstraction of a chart
@@ -9,7 +8,7 @@ use std::ops::Range;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, PointCollection,Rectangle};
+use crate::element::{Drawable, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart
@@ -53,7 +52,11 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     }
 
     /// Set the caption of the chart
-    pub fn caption<'b, S: AsRef<str>, Style:Into<TextStyle<'b>>>(&mut self, caption: S, style: Style) -> &mut Self {
+    pub fn caption<'b, S: AsRef<str>, Style: Into<TextStyle<'b>>>(
+        &mut self,
+        caption: S,
+        style: Style,
+    ) -> &mut Self {
         if self.titled_area.is_some() {
             return self;
         }
@@ -119,7 +122,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
 pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
     x_label_area: Option<DrawingArea<DB, Shift>>,
     y_label_area: Option<DrawingArea<DB, Shift>>,
-    series_area:  Option<DrawingArea<DB, Shift>>,
+    series_area: Option<DrawingArea<DB, Shift>>,
     drawing_area: DrawingArea<DB, CT>,
 }
 
@@ -169,12 +172,18 @@ where
         return self;
     }
 
-    pub fn x_label_formatter(&mut self, fmt: &'static dyn Fn(&X::ValueType) -> String) -> &mut Self {
+    pub fn x_label_formatter(
+        &mut self,
+        fmt: &'static dyn Fn(&X::ValueType) -> String,
+    ) -> &mut Self {
         self.format_x = Box::new(fmt);
         return self;
     }
 
-    pub fn y_label_formatter(&mut self, fmt: &'static dyn Fn(&Y::ValueType) -> String) -> &mut Self {
+    pub fn y_label_formatter(
+        &mut self,
+        fmt: &'static dyn Fn(&Y::ValueType) -> String,
+    ) -> &mut Self {
         self.format_y = Box::new(fmt);
         return self;
     }
@@ -265,9 +274,14 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     }
 
     /// Defines a series label area
-    pub fn define_series_label_area<'a, S:Into<ShapeStyle<'a>>>(&mut self, pos:(u32,u32), size:(u32,u32), bg_style:S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+    pub fn define_series_label_area<'a, S: Into<ShapeStyle<'a>>>(
+        &mut self,
+        pos: (u32, u32),
+        size: (u32, u32),
+        bg_style: S,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
-        let element = Rectangle::new([(0,0), (size.0 as i32, size.1 as i32)], bg_style.into());
+        let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
         return self.series_area.as_ref().unwrap().draw(&element);
     }
 

@@ -13,16 +13,16 @@ pub enum DrawingErrorKind<E: Error> {
     FontError(FontError),
 }
 
-impl <E:Error> std::fmt::Display for DrawingErrorKind<E> {
-    fn fmt(&self, fmt:&mut std::fmt::Formatter) -> Result<(), std::fmt::Error>{
+impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         return match self {
             DrawingErrorKind::DrawingError(e) => write!(fmt, "Drawing backend error: {}", e),
-            DrawingErrorKind::FontError(e)    => write!(fmt, "Font loading error: {}", e)
+            DrawingErrorKind::FontError(e) => write!(fmt, "Font loading error: {}", e),
         };
     }
 }
 
-impl <E:Error> Error for DrawingErrorKind<E>{}
+impl<E: Error> Error for DrawingErrorKind<E> {}
 
 /// The drawing context
 pub trait DrawingBackend {

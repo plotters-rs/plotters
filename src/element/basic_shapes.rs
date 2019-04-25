@@ -35,17 +35,20 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
 }
 
 pub struct Rectangle<'a, Coord> {
-    points:[Coord;2],
-    style: ShapeStyle<'a>
+    points: [Coord; 2],
+    style: ShapeStyle<'a>,
 }
 
-impl <'a, Coord> Rectangle<'a, Coord> {
-    pub fn new<S: Into<ShapeStyle<'a>>>(points:[Coord;2], style: S) -> Self {
-        return Self { points, style: style.into() };
+impl<'a, Coord> Rectangle<'a, Coord> {
+    pub fn new<S: Into<ShapeStyle<'a>>>(points: [Coord; 2], style: S) -> Self {
+        return Self {
+            points,
+            style: style.into(),
+        };
     }
 }
 
-impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> {
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -53,7 +56,7 @@ impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord>
     }
 }
 
-impl <'a, Coord:'a> Drawable for Rectangle<'a, Coord> {
+impl<'a, Coord: 'a> Drawable for Rectangle<'a, Coord> {
     fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
@@ -62,7 +65,7 @@ impl <'a, Coord:'a> Drawable for Rectangle<'a, Coord> {
         match (points.next(), points.next()) {
             (Some(a), Some(b)) => {
                 return backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled);
-            },
+            }
             _ => {
                 return Ok(());
             }
@@ -76,13 +79,21 @@ pub struct Text<'a, Coord> {
     style: TextStyle<'a>,
 }
 
-impl <'a, Coord> Text<'a, Coord> {
-    pub fn new<T:AsRef<str>, S: Into<TextStyle<'a>>>(text: &'a T, points:Coord, style: S) -> Self {
-        return Self { text: text.as_ref(), coord: points, style: style.into() };
+impl<'a, Coord> Text<'a, Coord> {
+    pub fn new<T: AsRef<str>, S: Into<TextStyle<'a>>>(
+        text: &'a T,
+        points: Coord,
+        style: S,
+    ) -> Self {
+        return Self {
+            text: text.as_ref(),
+            coord: points,
+            style: style.into(),
+        };
     }
 }
 
-impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
@@ -134,7 +145,12 @@ impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_circle((x,y), self.size, &Box::new(self.style.color), self.style.filled);
+            return backend.draw_circle(
+                (x, y),
+                self.size,
+                &Box::new(self.style.color),
+                self.style.filled,
+            );
         }
         return Ok(());
     }
@@ -146,13 +162,17 @@ pub struct OwnedText<'a, Coord> {
     style: TextStyle<'a>,
 }
 
-impl <'a, Coord> OwnedText<'a, Coord> {
-    pub fn new<S: Into<TextStyle<'a>>>(text: String, points:Coord, style: S) -> Self {
-        return Self { text, coord: points, style: style.into() };
+impl<'a, Coord> OwnedText<'a, Coord> {
+    pub fn new<S: Into<TextStyle<'a>>>(text: String, points: Coord, style: S) -> Self {
+        return Self {
+            text,
+            coord: points,
+            style: style.into(),
+        };
     }
 }
 
-impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> {
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {

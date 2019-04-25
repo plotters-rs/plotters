@@ -30,7 +30,9 @@ fn main() {
     }
 
     // The elements are composable
-    let composed = EmptyElement::at((500,500)) + Rectangle::new([(0,0), (100,100)], &RGBColor(0,0,0)) +  Rectangle::new([(30,30), (80,80)], &RGBColor(0,0,0));
+    let composed = EmptyElement::at((500, 500))
+        + Rectangle::new([(0, 0), (100, 100)], &RGBColor(0, 0, 0))
+        + Rectangle::new([(30, 30), (80, 80)], &RGBColor(0, 0, 0));
 
     area.draw(&composed).unwrap();
 
