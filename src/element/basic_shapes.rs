@@ -139,3 +139,36 @@ impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
         return Ok(());
     }
 }
+
+pub struct OwnedText<'a, Coord> {
+    text: String,
+    coord: Coord,
+    style: TextStyle<'a>,
+}
+
+impl <'a, Coord> OwnedText<'a, Coord> {
+    pub fn new<S: Into<TextStyle<'a>>>(text: String, points:Coord, style: S) -> Self {
+        return Self { text, coord: points, style: style.into() };
+    }
+}
+
+impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = std::iter::Once<&'a Coord>;
+    fn point_iter(self) -> Self::IntoIter {
+        return std::iter::once(&self.coord);
+    }
+}
+
+impl<'a, Coord: 'a> Drawable for OwnedText<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        if let Some(a) = points.next() {
+            return backend.draw_text(&self.text, self.style.font, a, &Box::new(self.style.color));
+        }
+        return Ok(());
+    }
+}

@@ -1,7 +1,7 @@
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut img = BitMapBackend::new("/tmp/plotter.bmp", (1024, 768));
+    let mut img = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
 
     img.open()?;
 
@@ -48,11 +48,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &RGBColor(0,0,255),
     ))?;
 
-    cc.draw_series(PointSeries::<_, _, Circle<_>>::new(
+    /*cc.draw_series(PointSeries::<_, _, Circle<_>>::new(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
         Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled(),
+    ))?;*/
+    let point_font = font_small.resize(15.0);
+    cc.draw_series(PointSeries::of_element(
+        (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
+        5,
+        Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled(),
+        &|coord, size, style| {
+            return EmptyElement::at(coord) + Circle::new((0,0), size, style) +
+                   OwnedText::new(format!("{:?}", coord), (0,15), &point_font);
+        }
     ))?;
+
 
     cc.define_series_label_area((700, 150), (230, 100), Into::<ShapeStyle>::into(&RGBColor(255,0,0).mix(0.5)).filled())?;
 
