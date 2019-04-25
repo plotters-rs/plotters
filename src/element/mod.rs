@@ -2,6 +2,12 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
 
+mod basic_shapes;
+pub use basic_shapes::*;
+
+mod points;
+pub use points::*;
+
 /// The trait indicates it's a collection of points
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
@@ -24,23 +30,3 @@ pub trait Drawable {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
-
-pub trait Element<Coord>
-where
-    for<'a> &'a Self: PointCollection<'a, Coord>,
-    Self: Drawable,
-{
-}
-
-impl<T, C> Element<C> for T
-where
-    for<'a> &'a T: PointCollection<'a, C>,
-    T: Drawable,
-{
-}
-
-mod basic_shapes;
-pub use basic_shapes::*;
-
-mod points;
-pub use points::*;

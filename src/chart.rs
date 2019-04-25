@@ -9,7 +9,7 @@ use std::ops::Range;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, PointCollection};
+use crate::element::{Drawable, PointCollection,Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart
@@ -105,6 +105,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         return ChartContext {
             x_label_area,
             y_label_area,
+            series_area: None,
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
                 x_spec.into(),
                 y_spec.into(),
@@ -116,9 +117,10 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
 
 /// The context of the chart
 pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
-    pub x_label_area: Option<DrawingArea<DB, Shift>>,
-    pub y_label_area: Option<DrawingArea<DB, Shift>>,
-    pub drawing_area: DrawingArea<DB, CT>,
+    x_label_area: Option<DrawingArea<DB, Shift>>,
+    y_label_area: Option<DrawingArea<DB, Shift>>,
+    series_area:  Option<DrawingArea<DB, Shift>>,
+    drawing_area: DrawingArea<DB, CT>,
 }
 
 pub struct MeshStyle<'a, X: Ranged, Y: Ranged, DB>
@@ -260,6 +262,13 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     /// Get range of the Y axis
     pub fn y_range(&self) -> Range<Y::ValueType> {
         return self.drawing_area.get_y_range();
+    }
+
+    /// Defines a series label area
+    pub fn define_series_label_area<'a, S:Into<ShapeStyle<'a>>>(&mut self, pos:(u32,u32), size:(u32,u32), bg_style:S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+        self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
+        let element = Rectangle::new([(0,0), (size.0 as i32, size.1 as i32)], bg_style.into());
+        return self.series_area.as_ref().unwrap().draw(&element);
     }
 
     /// Draw a series

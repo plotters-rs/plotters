@@ -1,7 +1,6 @@
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-/// Define the basic shapes
-use crate::style::ShapeStyle;
+use crate::style::{ShapeStyle, TextStyle};
 
 /// Describe a path
 pub struct Path<'a, Coord> {
@@ -34,83 +33,109 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
         return backend.draw_path(points, &Box::new(self.style.color));
     }
 }
-/*
-pub struct Rectangle<'a, Coord, C:Color> {
+
+pub struct Rectangle<'a, Coord> {
     points:[Coord;2],
     style: ShapeStyle<'a>
 }
 
-impl <Coord, C:Color> Rectangle<Coord, C> {
-    pub fn new(points:[Coord;2], color:C, filled:bool) -> Self {
-        return Self { points, color, filled };
+impl <'a, Coord> Rectangle<'a, Coord> {
+    pub fn new<S: Into<ShapeStyle<'a>>>(points:[Coord;2], style: S) -> Self {
+        return Self { points, style: style.into() };
     }
 }
 
-impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<
-
-impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Rectangle<Coord, C> where Self:'a {
-    type Points = &'a [Coord];
-
-    fn points(&'a self) -> &'a [Coord] {
+impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = &'a [Coord];
+    fn point_iter(self) -> &'a [Coord] {
         return &self.points;
     }
+}
 
-    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
-        let points:Vec<_> = points.into_iter().map(|(a,b)|(a as i32, b as i32)).take(2).collect();
-
-        dc.draw_rect(points[0], points[1], &self.color, self.filled)
+impl <'a, Coord:'a> Drawable for Rectangle<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        match (points.next(), points.next()) {
+            (Some(a), Some(b)) => {
+                return backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled);
+            },
+            _ => {
+                return Ok(());
+            }
+        }
     }
 }
 
-pub struct Text<'b, 'a:'b , Coord, C:Color> {
-    text: &'b str,
-    font: &'b FontDesc<'a>,
+pub struct Text<'a, Coord> {
+    text: &'a str,
     coord: Coord,
-    color: C,
+    style: TextStyle<'a>,
 }
-impl <'b, 'a:'b, Coord, C:Color> Text<'b, 'a, Coord, C> {
-    pub fn new(text: &'b str, font: &'b FontDesc<'a>, coord: Coord, color:C) -> Self {
-        return Self {text, font, coord, color};
-    }
 
-}
-impl <'b, 'a:'b, Coord:'b, C:Color> Element<'b, Coord> for Text<'b, 'a, Coord, C> {
-    type Points = Once<&'b Coord>;
-
-    fn points(&'b self) -> Self::Points {
-        return once(&self.coord);
-    }
-
-    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
-        let pos = points.into_iter().next().unwrap();
-
-        dc.draw_text(self.text, self.font, (pos.0 as i32, pos.1 as i32), &self.color)
+impl <'a, Coord> Text<'a, Coord> {
+    pub fn new<T:AsRef<str>, S: Into<TextStyle<'a>>>(text: &'a T, points:Coord, style: S) -> Self {
+        return Self { text: text.as_ref(), coord: points, style: style.into() };
     }
 }
 
-pub struct Circle<Coord, C:Color> {
-    coord: Coord,
-    radius: u32,
-    color: C,
-    filled: bool,
-}
-
-impl <Coord, C:Color> Circle<Coord, C> {
-    pub fn new(coord:Coord, radius:u32, color:C, filled: bool) -> Self {
-        return Self {coord, radius, color, filled};
+impl <'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = std::iter::Once<&'a Coord>;
+    fn point_iter(self) -> Self::IntoIter {
+        return std::iter::once(&self.coord);
     }
 }
 
-impl <'a, Coord:'a, C:Color> Element<'a, Coord> for Circle<Coord, C> where Self:'a {
-    type Points = Once<&'a Coord>;
-
-    fn points(&'a self) -> Self::Points {
-        return once(&self.coord);
-    }
-
-    fn draw<DC:DrawingBackend, I:Iterator<Item=(u32,u32)>>(&self, points:I, dc: &mut DC) -> Result<(), DC::ErrorType> {
-        let pos = points.into_iter().next().unwrap();
-        dc.draw_circle((pos.0 as i32, pos.1 as i32), self.radius, &self.color, self.filled)
+impl<'a, Coord: 'a> Drawable for Text<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        if let Some(a) = points.next() {
+            return backend.draw_text(self.text, self.style.font, a, &Box::new(self.style.color));
+        }
+        return Ok(());
     }
 }
-*/
+
+pub struct Circle<'a, Coord> {
+    center: Coord,
+    size: u32,
+    style: ShapeStyle<'a>,
+}
+
+impl<'a, Coord> Circle<'a, Coord> {
+    pub fn new(coord: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
+        return Self {
+            center: coord,
+            size,
+            style,
+        };
+    }
+}
+
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<'b, Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = std::iter::Once<&'a Coord>;
+    fn point_iter(self) -> std::iter::Once<&'a Coord> {
+        return std::iter::once(&self.center);
+    }
+}
+
+impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        if let Some((x, y)) = points.next() {
+            return backend.draw_circle((x,y), self.size, &Box::new(self.style.color), self.style.filled);
+        }
+        return Ok(());
+    }
+}

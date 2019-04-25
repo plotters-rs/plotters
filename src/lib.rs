@@ -14,6 +14,6 @@ pub mod prelude {
 
     pub use crate::drawing::BitMapBackend;
 
-    pub use crate::element::{Path, Cross};
+    pub use crate::element::{Path, Cross, Circle, Text, Rectangle};
 }
 

@@ -240,10 +240,10 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     /// Shrink the region, note all the locaitions are in guest coordinate 
     pub fn shrink(mut self, left_upper:(u32,u32), dimension:(u32,u32)) -> DrawingArea<DB, Shift> {
         self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0 as i32);
-        self.rect.y0 = self.rect.x1.min(self.rect.y1 + left_upper.1 as i32);
+        self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1 as i32);
         
         self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0 as i32);
-        self.rect.y1 = self.rect.x0.max(self.rect.y1 + dimension.1 as i32);
+        self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1 as i32);
 
         self.coord = Shift((self.rect.x0, self.rect.y0));
 
