@@ -8,6 +8,9 @@ pub use basic_shapes::*;
 mod points;
 pub use points::*;
 
+mod composable;
+pub use composable::{ComposedElement, EmptyElement};
+
 /// The trait indicates it's a collection of points
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
@@ -30,3 +33,4 @@ pub trait Drawable {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
+
