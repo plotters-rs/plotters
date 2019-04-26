@@ -1,7 +1,6 @@
 /target
 **/*.rs.bk
 Cargo.lock
-.*.swo
-.*.swp
+.*.sw*
 Cargo.lock
 backup/*

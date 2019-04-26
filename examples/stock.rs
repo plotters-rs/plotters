@@ -32,19 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.draw_series(data.iter().map(|x|{
         let date = Local.datetime_from_str(&format!("{} 0:0", x.0), "%Y-%m-%d %H:%M").unwrap().date();
-        let (open,low,high,close) = (x.1,x.2,x.3,x.4);
-        let l = chart.backend_coord(&(date, low));
-        let h = chart.backend_coord(&(date, high));
-        let o = chart.backend_coord(&(date, open));
-        let c = chart.backend_coord(&(date, close));
-        return EmptyElement::<_>::at((date, high))
-            + Path::new(vec![(0,0), (0, (l.1 - h.1))], &RGBColor(0,0,0))
-            + if open > close {
-                Rectangle::new([(-5, o.1 - h.1), (5, c.1 - h.1)], Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled())
-            } else {
-                Rectangle::new([(-5, c.1 - h.1), (5, o.1 - h.1)], Into::<ShapeStyle>::into(&RGBColor(0,255,0)).filled())
-            }
-        ;
+        return CandleStick::<_,_>::new::<&RGBColor, &RGBColor>(date, x.1, x.2, x.3, x.4, &RGBColor(0,255,0), &RGBColor(255,0,0), 10);
     }))?;
 
     root.close()?;

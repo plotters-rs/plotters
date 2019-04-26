@@ -11,6 +11,9 @@ pub use points::*;
 mod composable;
 pub use composable::{ComposedElement, EmptyElement};
 
+mod candlestick;
+pub use candlestick::CandleStick;
+
 /// The trait indicates it's a collection of points
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator

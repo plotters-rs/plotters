@@ -172,5 +172,5 @@ pub mod prelude {
 
     pub use crate::drawing::{BitMapBackend, SVGBackend};
 
-    pub use crate::element::{Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text};
+    pub use crate::element::{Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text, CandleStick};
 }
