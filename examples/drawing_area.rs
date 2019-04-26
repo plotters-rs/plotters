@@ -1,40 +1,14 @@
 use plotters::prelude::*;
-fn main() {
-    let mut backend = BitMapBackend::new("/tmp/plotter.png", (1024, 768));
-    backend.open().unwrap();
-
-    let area: DrawingArea<BitMapBackend, _> = backend.into();
-
-    area.fill(&RGBColor(255, 255, 255)).unwrap();
-
-    let area = area
-        .titled(
-            "Hello World",
-            &Into::<FontDesc>::into("ArialMT").resize(80.0),
-        )
-        .unwrap();
-
-    let (upper, lower) = area.split_vertically(256);
-    upper.fill(&RGBColor(255, 0, 0)).unwrap();
-
-    let path_color = Plattle9999::pick(15);
-
-    let path = Path::new(
-        vec![(0, 0), (50, 50), (70, 70), (30, 100), (0, 0)],
-        &path_color,
-    );
-
-    for (a, idx) in lower.split_evenly((3, 3)).into_iter().zip(0..) {
-        a.fill(&Plattle9999::pick(idx)).unwrap();
-        a.draw(&path).unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let backend = BitMapBackend::new("examples/outputs/2.png", (300, 200));
+    // A backend object can be converted into a drawing area
+    let root_drawing_area:DrawingArea<_,_> = backend.into();
+    // And we can split the drawing area into 3x3 grid
+    let child_drawing_areas = root_drawing_area.split_evenly((3,3));
+    // Then we fill the drawing area with different color
+    for (area,color) in child_drawing_areas.into_iter().zip(0..) {
+        area.fill(&Plattle99::pick(color))?;
     }
-
-    // The elements are composable
-    let composed = EmptyElement::at((500, 500))
-        + Rectangle::new([(0, 0), (100, 100)], &RGBColor(0, 0, 0))
-        + Rectangle::new([(30, 30), (80, 80)], &RGBColor(0, 0, 0));
-
-    area.draw(&composed).unwrap();
-
-    area.close().unwrap();
+    root_drawing_area.close()?;
+    return Ok(());
 }

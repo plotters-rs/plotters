@@ -69,7 +69,7 @@ impl Rect {
 
     /// Make the coordinate in the range of the rectangle
     fn truncate(&self, p: (i32, i32)) -> (i32, i32) {
-        return (p.0.min(self.x1).max(self.y0), p.1.min(self.y1).max(self.y0));
+        return (p.0.min(self.x1).max(self.x0), p.1.min(self.y1).max(self.y0));
     }
 }
 
