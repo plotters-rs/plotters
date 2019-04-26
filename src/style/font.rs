@@ -140,10 +140,10 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Actually draws a font with a drawing function
-    pub fn draw<E, DrawFunc: FnMut(u32, u32, f32) -> Result<(), E>>(
+    pub fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
         text: &str,
-        (x, y): (u32, u32),
+        (x, y): (i32, i32),
         mut draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
         let (_, h) = self.box_size(text)?;
@@ -162,7 +162,7 @@ impl<'a> FontDesc<'a> {
                     let y0 = rect.min.y;
                     g.draw(|x, y, v| {
                         if x as i32 + x0 >= 0 && y as i32 + y0 >= 0 && result.is_ok() {
-                            result = draw((x as i32 + x0) as u32, (y as i32 + y0) as u32, v);
+                            result = draw(x as i32 + x0, y as i32 + y0, v);
                         }
                     });
                 }

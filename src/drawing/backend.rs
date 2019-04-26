@@ -205,7 +205,7 @@ pub trait DrawingBackend {
         pos: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        match font.draw(text, (pos.0 as u32, pos.1 as u32), |x, y, v| {
+        match font.draw(text, (pos.0, pos.1), |x, y, v| {
             self.draw_pixel((x as i32, y as i32), &color.mix(v as f64))
         }) {
             Ok(drawing_result) => drawing_result,
