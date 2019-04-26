@@ -101,7 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root:DrawingArea<_,_> = backend.into();
     root.fill(&RGBColor(255,255,255));
     // Draw an circle on the drawing area
-    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&RGBColor(255, 255, 255))))?;
+    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&RGBColor(0, 255, 0))))?;
     root.close()?;
     return Ok(());
 }
