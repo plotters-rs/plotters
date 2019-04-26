@@ -12,6 +12,8 @@
 
 mod line_series;
 mod point_series;
+mod histogram;
 
 pub use line_series::LineSeries;
 pub use point_series::PointSeries;
+pub use histogram::Histogram;

@@ -118,3 +118,12 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
         return backend.draw_line(left, right, &Box::new(style.color));
     }
 }
+
+pub trait DescreteRanged 
+where 
+    Self:Ranged, 
+    Self::ValueType:Eq 
+{
+    fn next_value(this:&Self::ValueType) -> Self::ValueType;
+}
+

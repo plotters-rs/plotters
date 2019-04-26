@@ -126,7 +126,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/4.png", (640, 480));
     // A backend object can be converted into a drawing area
     let root:DrawingArea<_,_> = backend.into();
-    root.fill(&RGBColor(255,255,255))?;
+    root.fill(&RGBColor(240,200,200))?;
 
     let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
     let font = Into::<FontDesc>::into("DejaVu Serif").resize(15.0);
@@ -163,7 +163,7 @@ pub mod prelude {
         RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate, RangedDateTime,
     };
     pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
-    pub use crate::series::{LineSeries, PointSeries};
+    pub use crate::series::{LineSeries, PointSeries, Histogram};
     pub use crate::style::{
         Color, FontDesc, Mixable, Plattle, Plattle100, Plattle99, Plattle9999, RGBColor,
         ShapeStyle, TextStyle,

@@ -14,4 +14,5 @@ For detailed documentation, visit the documentation on [docs.rs](https://docs.rs
 - CandleStick Chart [source code](https://github.com/38/plotters/blob/master/examples/stock.rs)
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png)
 
-
+- Histogram [source code](https://github.com/38/plotters/blob/master/examples/histogram.rs)
+![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png");

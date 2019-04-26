@@ -37,6 +37,7 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
 pub struct Rectangle<'a, Coord> {
     points: [Coord; 2],
     style: ShapeStyle<'a>,
+    margin: (u32,u32,u32,u32),
 }
 
 impl<'a, Coord> Rectangle<'a, Coord> {
@@ -44,8 +45,15 @@ impl<'a, Coord> Rectangle<'a, Coord> {
         return Self {
             points,
             style: style.into(),
+            margin: (0,0,0,0),
         };
     }
+
+    pub fn set_margin(&mut self, t:u32, b:u32, l:u32, r:u32) -> &mut Self{
+        self.margin = (t,b,l,r);
+        return self;
+    }
+
 }
 
 impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> {
@@ -63,7 +71,11 @@ impl<'a, Coord: 'a> Drawable for Rectangle<'a, Coord> {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         match (points.next(), points.next()) {
-            (Some(a), Some(b)) => {
+            (Some(mut a), Some(mut b)) => {
+                a.1 += self.margin.0 as i32;
+                b.1 -= self.margin.1 as i32;
+                a.0 += self.margin.2 as i32;
+                b.0 -= self.margin.3 as i32;
                 return backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled);
             }
             _ => {
