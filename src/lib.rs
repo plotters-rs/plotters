@@ -147,6 +147,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
 
+### Chart Context
+
+In order to draw a chart, Plotters need an data object build on top of drawing area called `ChartContext`. 
+The chart context defines even higher level constructs compare to the drawing area. 
+For example, you can define the label areas, meshs, and put a data series onto the drawing area with the help
+of the chart context object.
+
+```rust
+use plotters::prelude::*;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let backend = BitMapBackend::new("examples/outputs/5.png", (640, 480));
+    let root:DrawingArea<_,_> = backend.into();
+    root.fill(&RGBColor(255,255,255));
+    let root = root.margin(10,10,10,10);
+    // After this point, we should be able to draw construct a chart context
+    let font:FontDesc = Into::<FontDesc>::into("DejaVu Serif").resize(40.0);
+    // Create the chart object
+    let mut chart = ChartBuilder::on(&root)
+        // Set the caption of the chart
+        .caption("This is our first plot", &font)
+        // Set the size of the label region
+        .set_x_label_size(40)
+        .set_y_label_size(40)
+        // Finally attach a coordinate on the drawing area and make a chart context
+        .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..10f32, 0f32..10f32);
+
+    // Then we can draw a mesh
+    chart.configure_mesh()
+        // We can customize the maxium number of labels allowed for each axis
+        .x_labels(30)
+        .y_labels(10)
+        // We can also change the format of the label text
+        .y_label_formatter(&|x| format!("{:.3}", x))
+        .draw()?;
+
+    // And we can draw something in the drawing area
+    let smaller_font = font.resize(10.0);
+    chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &RGBColor(255,0,0)))?;
+    // Similarly, we can draw point series 
+    chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &RGBColor(255,0,0), &|c,s,st| {
+        return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
+            + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
+            + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
+    }))?;
+    root.close()?;
+    return Ok(());
+}
+```
+
+![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
+
 */
 pub mod chart;
 pub mod coord;
