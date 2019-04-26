@@ -14,6 +14,7 @@ use std::ops::Range;
 use crate::drawing::backend::DrawingBackend;
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
+use crate::drawing::backend::BackendCoord;
 use crate::element::{Drawable, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
@@ -237,6 +238,13 @@ where
                 .unwrap_or(&default_mesh_style_2);
 
         target.draw_mesh(
+            (self.n_y_labels * 10, self.n_x_labels * 10),
+            mesh_style_2,
+            label_style,
+            |_| None,
+        )?;
+
+        return target.draw_mesh(
             (self.n_y_labels, self.n_x_labels),
             mesh_style_1,
             label_style,
@@ -244,13 +252,6 @@ where
                 MeshLine::XMesh(_, _, v) => Some((self.format_x)(v)),
                 MeshLine::YMesh(_, _, v) => Some((self.format_y)(v)),
             },
-        )?;
-
-        return target.draw_mesh(
-            (self.n_y_labels * 10, self.n_x_labels * 10),
-            mesh_style_2,
-            label_style,
-            |_| None,
         );
     }
 }
@@ -301,6 +302,10 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
         let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
         return self.series_area.as_ref().unwrap().draw(&element);
+    }
+
+    pub fn backend_coord(&self, coord:&(X::ValueType,Y::ValueType)) -> BackendCoord {
+        return self.drawing_area.map_coordinate(coord);
     }
 
     /// Draw a series

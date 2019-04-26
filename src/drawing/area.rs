@@ -241,6 +241,11 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         });
         return self.backend_ops(move |b| element.draw(backend_coords, b));
     }
+
+    /// Map coordinate to the backend coordinate
+    pub fn map_coordinate(&self, coord: &CT::From) -> BackendCoord {
+        return self.coord.translate(coord);
+    }
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {

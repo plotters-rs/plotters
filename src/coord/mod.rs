@@ -1,12 +1,13 @@
 /// The abstraction of the coordinate system
 use crate::drawing::backend::BackendCoord;
-use std::ops::Range;
 
 mod numeric;
 mod ranged;
+mod datetime;
 
-pub use ranged::{MeshLine, RangedCoord};
+pub use ranged::{MeshLine, RangedCoord, Ranged};
 pub use numeric::{RangedCoordf32, RangedCoordf64, RangedCoordu32, RangedCoordi32, RangedCoordi64, RangedCoordu64};
+pub use datetime::{RangedDate, RangedDateTime};
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
@@ -36,18 +37,3 @@ impl<T: CoordTranslate> CoordTranslate for ShiftAndTrans<T> {
     }
 }
 
-/// The trait that indicates we have a ordered and ranged value
-/// Which is used to describe the axis
-pub trait Ranged {
-    /// The type of this value
-    type ValueType;
-
-    /// This function maps the value to i32, which is the drawing coordinate
-    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32;
-
-    /// This function gives the key points that we can draw a grid based on this
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType>;
-
-    /// Get the range of this value
-    fn range(&self) -> Range<Self::ValueType>;
-}

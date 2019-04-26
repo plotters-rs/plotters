@@ -119,6 +119,11 @@ make_numeric_coord!(i32, RangedCoordi32, compute_i32_key_points);
 make_numeric_coord!(u64, RangedCoordu64, compute_u64_key_points);
 make_numeric_coord!(i64, RangedCoordi64, compute_i64_key_points);
 
+/*
+pub fn keypoints_i64(range:(i64,i64), n:usize) -> Vec<i64> {
+    compute_i64_key_points(range,n)
+}*/
+
 
 #[cfg(test)]
 mod test {
