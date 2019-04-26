@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root_area.fill(&RGBColor(255, 255, 255))?;
 
-    let font: FontDesc = "Iosevka".into();
+    let font: FontDesc = "DejaVu Serif".into();
     let font_large = &font.resize(60.0);
     let font_small = &font.resize(40.0);
     let root_area = root_area
@@ -30,11 +30,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_formatter(&|v| format!("{:.1}", v))
         .y_label_formatter(&|v| format!("{:.1}", v))
         .draw()?;
+    
+    cc.define_series_label_area(
+        (720, 130),
+        (240, 100),
+        Into::<ShapeStyle>::into(&RGBColor(255, 255, 255).mix(0.7)).filled(),
+    )?;
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
         &RGBColor(255, 0, 0),
     ))?;
+
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
             (
@@ -64,12 +71,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 + OwnedText::new(format!("{:?}", coord), (0, 15), &point_font);
         },
     ))?;
-
-    cc.define_series_label_area(
-        (700, 150),
-        (230, 100),
-        Into::<ShapeStyle>::into(&RGBColor(255, 0, 0).mix(0.5)).filled(),
-    )?;
 
     let drawing_areas = lower.split_evenly((1, 2));
 

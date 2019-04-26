@@ -5,4 +5,4 @@ pub mod backend;
 pub mod coord;
 
 pub use area::{DrawingArea, DrawingAreaErrorKind};
-pub use backend_impl::BitMapBackend;
+pub use backend_impl::{BitMapBackend, SVGBackend};
