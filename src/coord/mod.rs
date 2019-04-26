@@ -1,13 +1,15 @@
 /// The abstraction of the coordinate system
 use crate::drawing::backend::BackendCoord;
 
+mod datetime;
 mod numeric;
 mod ranged;
-mod datetime;
 
-pub use ranged::{MeshLine, RangedCoord, Ranged};
-pub use numeric::{RangedCoordf32, RangedCoordf64, RangedCoordu32, RangedCoordi32, RangedCoordi64, RangedCoordu64};
 pub use datetime::{RangedDate, RangedDateTime};
+pub use numeric::{
+    RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
+};
+pub use ranged::{MeshLine, Ranged, RangedCoord};
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
@@ -36,4 +38,3 @@ impl<T: CoordTranslate> CoordTranslate for ShiftAndTrans<T> {
         return self.0.translate(&temp);
     }
 }
-

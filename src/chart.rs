@@ -11,10 +11,10 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 
-use crate::drawing::backend::DrawingBackend;
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
-use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::drawing::backend::BackendCoord;
+use crate::drawing::backend::DrawingBackend;
+use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
@@ -304,7 +304,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         return self.series_area.as_ref().unwrap().draw(&element);
     }
 
-    pub fn backend_coord(&self, coord:&(X::ValueType,Y::ValueType)) -> BackendCoord {
+    pub fn backend_coord(&self, coord: &(X::ValueType, Y::ValueType)) -> BackendCoord {
         return self.drawing_area.map_coordinate(coord);
     }
 

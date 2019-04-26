@@ -38,7 +38,7 @@ where
 }
 
 impl<'a, Coord, I: IntoIterator<Item = Coord>, E> PointSeries<'a, Coord, I, E> {
-    /// Create a new point series. Similar to `PointSeries::new` but it doesn't 
+    /// Create a new point series. Similar to `PointSeries::new` but it doesn't
     /// requires the element implements point trait. So instead of using the point
     /// constructor, it uses the cusmotized function for element creation
     pub fn of_element<S: Into<ShapeStyle<'a>>, F: Fn(Coord, u32, ShapeStyle<'a>) -> E>(

@@ -1,8 +1,8 @@
 /*!
 # Plotters - Another Plotting Library in Rust
 
-Plotters is a flexible drawing library for data visualization written in pure Rust. 
-The library isn't aimed supporting different types of plotting, but a generic platform 
+Plotters is a flexible drawing library for data visualization written in pure Rust.
+The library isn't aimed supporting different types of plotting, but a generic platform
 that can be extended to support different types of visualization methods.
 
 ## Quick Start
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.configure_mesh()
         .draw()?;
-    
+
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x*x)),
         &RGBColor(255, 0, 0),
@@ -54,13 +54,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-And this will produce 
+And this will produce
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/1.png)
 
 ### Drawing Area
 Plotters use a concept called drawing area for layout purpose.
-Plotters support multiple plot integrate in a single image. 
+Plotters support multiple plot integrate in a single image.
 This is done by craeting sub drawing areas.
 
 Besides that, drawing area also allows customized cooridnate system, by doing so, the coordinate mapping is done by the drawing area automatically.
@@ -82,14 +82,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-And this will produce 
+And this will produce
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/2.png)
 
 ### Elements
 
 In Plotters, elements are build blocks of a image. All elements are able to draw on a drawing area.
-There are different types of elements, such as, lines, texts, circles, etc. 
+There are different types of elements, such as, lines, texts, circles, etc.
 
 You may also combining existing elements to build a complex element.
 
@@ -149,19 +149,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 */
 pub mod chart;
+pub mod coord;
 pub mod data;
 pub mod drawing;
 pub mod element;
 pub mod series;
 pub mod style;
-pub mod coord;
 
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext};
     pub use crate::coord::{
         CoordTranslate, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
-        RangedCoordi64, RangedCoordu32, RangedCoordu64,
-        RangedDate, RangedDateTime
+        RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate, RangedDateTime,
     };
     pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
     pub use crate::series::{LineSeries, PointSeries};
@@ -172,5 +171,7 @@ pub mod prelude {
 
     pub use crate::drawing::{BitMapBackend, SVGBackend};
 
-    pub use crate::element::{Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text, CandleStick};
+    pub use crate::element::{
+        CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text,
+    };
 }

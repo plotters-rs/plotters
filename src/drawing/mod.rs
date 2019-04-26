@@ -9,7 +9,7 @@ On the top of drawing backend, one or more drawing area can be defined and diffe
 system can be applied to the drawing areas. And the drawing area implement the high-level drawing
 interface, which draws an element.
 
-Currently we have two backend implemented: 
+Currently we have two backend implemented:
 
 - `BitMapBackend`: The backend that creates bitmap, this is based on `image` crate
 - `SVGBackend`: The backend that creates SVG image, based on `svg` crate.

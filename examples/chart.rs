@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_formatter(&|v| format!("{:.1}", v))
         .y_label_formatter(&|v| format!("{:.1}", v))
         .draw()?;
-    
+
     cc.define_series_label_area(
         (720, 130),
         (240, 100),

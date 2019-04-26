@@ -1,6 +1,6 @@
-use crate::drawing::backend::{DrawingBackend, DrawingErrorKind, BackendCoord};
-use crate::style::ShapeStyle;
 use super::CoordTranslate;
+use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::style::ShapeStyle;
 
 use std::ops::Range;
 

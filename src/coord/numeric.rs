@@ -124,7 +124,6 @@ pub fn keypoints_i64(range:(i64,i64), n:usize) -> Vec<i64> {
     compute_i64_key_points(range,n)
 }*/
 
-
 #[cfg(test)]
 mod test {
     use super::*;

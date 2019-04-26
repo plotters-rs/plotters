@@ -32,4 +32,3 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
         };
     }
 }
-
