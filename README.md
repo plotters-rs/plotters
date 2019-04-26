@@ -8,10 +8,10 @@ For detailed documentation, visit the documentation on [docs.rs](https://docs.rs
 
 # Sample Plots
 
-Check [source code](https://github.com/38/plotters/blob/master/examples/chart.rs)
+- Sample Plot [source code](https://github.com/38/plotters/blob/master/examples/chart.rs)
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png)
 
-Check [source code](https://github.com/38/plotters/blob/master/examples/stock.rs)
+- CandleStick Chart [source code](https://github.com/38/plotters/blob/master/examples/stock.rs)
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png)
 
 
