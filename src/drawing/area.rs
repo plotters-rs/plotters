@@ -90,10 +90,16 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
     }
 }
 
+/// The error description of any drawing area API
 #[derive(Debug)]
 pub enum DrawingAreaErrorKind<E: Error> {
+    /// The error is due to drawing backend failure
     BackendError(DrawingErrorKind<E>),
+    /// We are not able to get the mutable reference of the backend,
+    /// which indicates the drawing backend is current used by other
+    /// drawing operation
     SharingError,
+    /// The error caused by invalid layout
     LayoutError,
 }
 
@@ -148,10 +154,12 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
         });
     }
 
+    /// Get the range of X of the guest coordinate for current drawing area
     pub fn get_x_range(&self) -> Range<X::ValueType> {
         return self.coord.get_x_range();
     }
 
+    /// Get the range of Y of the guest coordinate for current drawing area
     pub fn get_y_range(&self) -> Range<Y::ValueType> {
         return self.coord.get_y_range();
     }
@@ -319,6 +327,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             .collect();
     }
 
+    /// Draw a title of the drawing area and return the remaining drawing area
     pub fn titled<'a, S: Into<TextStyle<'a>>>(
         &self,
         text: &str,

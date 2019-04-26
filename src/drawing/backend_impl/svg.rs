@@ -1,3 +1,7 @@
+/*!
+The SVG image drawing backend
+*/
+
 use svg::node::element::{Circle, Rectangle, Polyline, Text, Line};
 use svg::Document;
 
@@ -12,6 +16,7 @@ fn make_svg_color<C:Color>(color:&C) -> String {
     return format!("rgba({},{},{},{})", r,g,b,a);
 }
 
+/// The SVG image drawing backend
 pub struct SVGBackend<'a> {
     path: &'a str,
     size: (u32,u32),
@@ -24,7 +29,7 @@ impl <'a> SVGBackend<'a> {
         std::mem::swap(&mut temp, &mut self.document);
         self.document = Some(op(temp.unwrap()));
     }
-
+    /// Create a new SVG drawing backend
     pub fn new(path: &'a str, size:(u32,u32)) -> Self {
         return Self {
             path,

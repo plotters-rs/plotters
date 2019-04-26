@@ -146,10 +146,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
 
-### Plotting
-
-## Extending Plotters
-
 */
 pub mod chart;
 pub mod data;
