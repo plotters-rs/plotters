@@ -12,7 +12,7 @@ use std::marker::PhantomData;
 use std::ops::Range;
 
 use crate::drawing::backend::DrawingBackend;
-use crate::drawing::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};

@@ -1,6 +1,6 @@
 /// The abstraction of a drawing area
 use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use super::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
 use crate::style::{Color, TextStyle};
 

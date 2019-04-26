@@ -153,10 +153,11 @@ pub mod drawing;
 pub mod element;
 pub mod series;
 pub mod style;
+pub mod coord;
 
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext};
-    pub use crate::drawing::coord::{
+    pub use crate::coord::{
         CoordTranslate, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
         RangedCoordi64, RangedCoordu32, RangedCoordu64,
     };
