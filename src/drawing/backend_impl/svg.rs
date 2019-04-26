@@ -2,46 +2,46 @@
 The SVG image drawing backend
 */
 
-use svg::node::element::{Circle, Rectangle, Polyline, Text, Line};
+use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
 use svg::Document;
 
+use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, FontDesc};
-use crate::drawing::backend::{DrawingErrorKind, DrawingBackend, BackendCoord};
 
 use std::io::Error;
 
-fn make_svg_color<C:Color>(color:&C) -> String {
-    let (r,g,b) = color.rgb();
-    let a   = color.alpha();
-    return format!("rgba({},{},{},{})", r,g,b,a);
+fn make_svg_color<C: Color>(color: &C) -> String {
+    let (r, g, b) = color.rgb();
+    let a = color.alpha();
+    return format!("rgba({},{},{},{})", r, g, b, a);
 }
 
 /// The SVG image drawing backend
 pub struct SVGBackend<'a> {
     path: &'a str,
-    size: (u32,u32),
+    size: (u32, u32),
     document: Option<Document>,
 }
 
-impl <'a> SVGBackend<'a> {
-    fn update_document<F:FnOnce(Document) -> Document>(&mut self, op:F) {
+impl<'a> SVGBackend<'a> {
+    fn update_document<F: FnOnce(Document) -> Document>(&mut self, op: F) {
         let mut temp = None;
         std::mem::swap(&mut temp, &mut self.document);
         self.document = Some(op(temp.unwrap()));
     }
     /// Create a new SVG drawing backend
-    pub fn new(path: &'a str, size:(u32,u32)) -> Self {
+    pub fn new(path: &'a str, size: (u32, u32)) -> Self {
         return Self {
             path,
             size,
-            document: Some(Document::new().set("view_box", (0,0,size.0,size.1)))
+            document: Some(Document::new().set("view_box", (0, 0, size.0, size.1))),
         };
     }
 }
 
 impl<'a> DrawingBackend for SVGBackend<'a> {
     type ErrorType = Error;
-    
+
     fn get_size(&self) -> (u32, u32) {
         return self.size;
     }
@@ -51,7 +51,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     }
 
     fn close(&mut self) -> Result<(), DrawingErrorKind<Error>> {
-        return svg::save(self.path, self.document.as_ref().unwrap()).map_err(|x| DrawingErrorKind::DrawingError(x));
+        return svg::save(self.path, self.document.as_ref().unwrap())
+            .map_err(|x| DrawingErrorKind::DrawingError(x));
     }
 
     fn draw_pixel<C: Color>(
@@ -69,21 +70,21 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         self.update_document(|d| d.add(node));
         return Ok(());
     }
-    
+
     fn draw_line<C: Color>(
         &mut self,
         from: BackendCoord,
         to: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-         let node = Line::new()
+        let node = Line::new()
             .set("x1", from.0)
             .set("y1", from.1)
             .set("x2", to.0)
             .set("y2", to.1)
             .set("stroke", make_svg_color(color));
-         self.update_document(|d| d.add(node));
-         return Ok(());
+        self.update_document(|d| d.add(node));
+        return Ok(());
     }
 
     fn draw_rect<C: Color>(
@@ -93,17 +94,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         color: &C,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-         let mut node = Rectangle::new()
+        let mut node = Rectangle::new()
             .set("x", upper_left.0)
             .set("y", upper_left.1)
             .set("width", bottom_right.0 - upper_left.0)
             .set("height", bottom_right.1 - upper_left.1);
 
         if !fill {
-            node = node.set("stroke", make_svg_color(color))
+            node = node
+                .set("stroke", make_svg_color(color))
                 .set("fill", "none");
         } else {
-            node = node.set("fill", make_svg_color(color))
+            node = node
+                .set("fill", make_svg_color(color))
                 .set("stroke", "none");
         }
 
@@ -119,10 +122,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         let node = Polyline::new()
             .set("fill", "none")
             .set("stroke", make_svg_color(color))
-            .set("points", path.into_iter().fold(String::new(), |mut s, (x,y)| {
-                s.push_str(&format!("{},{} ", x,y));
-                return s;
-            }));
+            .set(
+                "points",
+                path.into_iter().fold(String::new(), |mut s, (x, y)| {
+                    s.push_str(&format!("{},{} ", x, y));
+                    return s;
+                }),
+            );
         self.update_document(|d| d.add(node));
         return Ok(());
     }
@@ -138,18 +144,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("cx", center.0)
             .set("cy", center.1)
             .set("r", radius);
-        
+
         if !fill {
-            node = node.set("stroke", make_svg_color(color))
+            node = node
+                .set("stroke", make_svg_color(color))
                 .set("fill", "none");
         } else {
-            node = node.set("fill", make_svg_color(color))
+            node = node
+                .set("fill", make_svg_color(color))
                 .set("stroke", "none");
         }
 
         self.update_document(|d| d.add(node));
         return Ok(());
-
     }
     fn draw_text<'b, C: Color>(
         &mut self,
@@ -168,7 +175,5 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .add(context);
         self.update_document(|d| d.add(node));
         return Ok(());
-
     }
 }
-
