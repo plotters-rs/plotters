@@ -149,8 +149,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Chart Context
 
-In order to draw a chart, Plotters need an data object build on top of drawing area called `ChartContext`. 
-The chart context defines even higher level constructs compare to the drawing area. 
+In order to draw a chart, Plotters need an data object build on top of drawing area called `ChartContext`.
+The chart context defines even higher level constructs compare to the drawing area.
 For example, you can define the label areas, meshs, and put a data series onto the drawing area with the help
 of the chart context object.
 
@@ -185,7 +185,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And we can draw something in the drawing area
     let smaller_font = font.resize(10.0);
     chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &RGBColor(255,0,0)))?;
-    // Similarly, we can draw point series 
+    // Similarly, we can draw point series
     chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &RGBColor(255,0,0), &|c,s,st| {
         return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
@@ -196,7 +196,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
+![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
 
 */
 pub mod chart;
@@ -214,7 +214,7 @@ pub mod prelude {
         RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate, RangedDateTime,
     };
     pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
-    pub use crate::series::{LineSeries, PointSeries, Histogram};
+    pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
         Color, FontDesc, Mixable, Plattle, Plattle100, Plattle99, Plattle9999, RGBColor,
         ShapeStyle, TextStyle,

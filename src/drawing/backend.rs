@@ -96,8 +96,14 @@ pub trait DrawingBackend {
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (upper_left, bottom_right) = (
-            (upper_left.0.min(bottom_right.0), upper_left.1.min(bottom_right.1)),
-            (upper_left.0.max(bottom_right.0), upper_left.1.max(bottom_right.1))
+            (
+                upper_left.0.min(bottom_right.0),
+                upper_left.1.min(bottom_right.1),
+            ),
+            (
+                upper_left.0.max(bottom_right.0),
+                upper_left.1.max(bottom_right.1),
+            ),
         );
 
         if fill {

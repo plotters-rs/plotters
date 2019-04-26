@@ -119,11 +119,12 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
     }
 }
 
-pub trait DescreteRanged 
-where 
-    Self:Ranged, 
-    Self::ValueType:Eq 
+/// The trait indicates the coordinate is descrete, so that we can draw histogram on it
+pub trait DescreteRanged
+where
+    Self: Ranged,
+    Self::ValueType: Eq,
 {
-    fn next_value(this:&Self::ValueType) -> Self::ValueType;
+    /// Get the smallest value that is larger than the `this` value
+    fn next_value(this: &Self::ValueType) -> Self::ValueType;
 }
-

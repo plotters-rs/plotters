@@ -5,8 +5,10 @@ use std::ops::Range;
 use super::Ranged;
 //use super::numeric::keypoints_i64;
 
+/// The ranged coordinate for date
 pub struct RangedDate<Z: TimeZone>(Date<Z>, Date<Z>);
 
+/// The ranged coordinate for the date and time
 pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
 
 impl<Z: TimeZone> From<Range<Date<Z>>> for RangedDate<Z> {

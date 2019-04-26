@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::{Ranged, DescreteRanged};
+use super::{DescreteRanged, Ranged};
 
 macro_rules! impl_descrete_trait {
     ($name:ident) => {
