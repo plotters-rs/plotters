@@ -222,6 +222,11 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         });
     }
 
+    /// Open the backend
+    pub fn open(&self) -> Result<(), DrawingAreaError<DB>> {
+        return self.backend_ops(|b| b.open());
+    }
+
     /// Close the backend
     pub fn close(&self) -> Result<(), DrawingAreaError<DB>> {
         return self.backend_ops(|b| {
