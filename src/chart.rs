@@ -144,8 +144,8 @@ where
     line_style_1: Option<&'a ShapeStyle<'a>>,
     line_style_2: Option<&'a ShapeStyle<'a>>,
     label_style: Option<&'a TextStyle<'a>>,
-    format_x: Box<dyn Fn(&X::ValueType) -> String>,
-    format_y: Box<dyn Fn(&Y::ValueType) -> String>,
+    format_x: &'a dyn Fn(&X::ValueType) -> String,
+    format_y: &'a dyn Fn(&Y::ValueType) -> String,
     target: Option<&'a mut ChartContext<DB, RangedCoord<X, Y>>>,
     _pahtom_data: PhantomData<(X, Y)>,
 }
@@ -189,18 +189,18 @@ where
     /// Set the formatter function for the X label text
     pub fn x_label_formatter(
         &mut self,
-        fmt: &'static dyn Fn(&X::ValueType) -> String,
+        fmt: &'a dyn Fn(&X::ValueType) -> String,
     ) -> &mut Self {
-        self.format_x = Box::new(fmt);
+        self.format_x = fmt;
         return self;
     }
 
     /// Set the formatter function for the Y label text
     pub fn y_label_formatter(
         &mut self,
-        fmt: &'static dyn Fn(&Y::ValueType) -> String,
+        fmt: &'a dyn Fn(&Y::ValueType) -> String,
     ) -> &mut Self {
-        self.format_y = Box::new(fmt);
+        self.format_y = fmt;
         return self;
     }
 
@@ -273,8 +273,8 @@ impl<
             line_style_1: None,
             line_style_2: None,
             label_style: None,
-            format_x: Box::new(|x| format!("{:?}", x)),
-            format_y: Box::new(|y| format!("{:?}", y)),
+            format_x: &|x| format!("{:?}", x),
+            format_y: &|y| format!("{:?}", y),
             target: Some(self),
             _pahtom_data: PhantomData,
         };
