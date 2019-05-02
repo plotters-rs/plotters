@@ -1,4 +1,4 @@
-use super::plattle::Plattle;
+use super::palette::Palette;
 /// The abstraction of a color
 use std::marker::PhantomData;
 
@@ -46,17 +46,17 @@ impl<T: SimpleColor> Color for T {
     }
 }
 
-/// A color in the given plattle
-pub struct PlattleColor<P: Plattle>(usize, PhantomData<P>);
+/// A color in the given palette
+pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
 
-impl<P: Plattle> PlattleColor<P> {
-    /// Pick a color from the plattle
-    pub fn pick(idx: usize) -> PlattleColor<P> {
-        return PlattleColor(idx % P::COLORS.len(), PhantomData);
+impl<P: Palette> PaletteColor<P> {
+    /// Pick a color from the palette
+    pub fn pick(idx: usize) -> PaletteColor<P> {
+        return PaletteColor(idx % P::COLORS.len(), PhantomData);
     }
 }
 
-impl<P: Plattle> SimpleColor for PlattleColor<P> {
+impl<P: Palette> SimpleColor for PaletteColor<P> {
     fn rgb(&self) -> (u8, u8, u8) {
         P::COLORS[self.0]
     }

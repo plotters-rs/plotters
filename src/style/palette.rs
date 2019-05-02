@@ -1,20 +1,20 @@
-use super::color::PlattleColor;
+use super::color::PaletteColor;
 
-pub trait Plattle {
+pub trait Palette {
     const COLORS: &'static [(u8, u8, u8)];
-    fn pick(idx: usize) -> PlattleColor<Self>
+    fn pick(idx: usize) -> PaletteColor<Self>
     where
         Self: Sized,
     {
-        PlattleColor::<Self>::pick(idx)
+        PaletteColor::<Self>::pick(idx)
     }
 }
 
-pub struct Plattle99;
-pub struct Plattle9999;
-pub struct Plattle100;
+pub struct Palette99;
+pub struct Palette9999;
+pub struct Palette100;
 
-impl Plattle for Plattle99 {
+impl Palette for Palette99 {
     const COLORS: &'static [(u8, u8, u8)] = &[
         (230, 25, 75),
         (60, 180, 75),
@@ -40,7 +40,7 @@ impl Plattle for Plattle99 {
     ];
 }
 
-impl Plattle for Plattle9999 {
+impl Palette for Palette9999 {
     const COLORS: &'static [(u8, u8, u8)] = &[
         (255, 225, 25),
         (0, 130, 200),
@@ -54,7 +54,7 @@ impl Plattle for Plattle9999 {
     ];
 }
 
-impl Plattle for Plattle100 {
+impl Palette for Palette100 {
     const COLORS: &'static [(u8, u8, u8)] =
         &[(255, 225, 25), (0, 130, 200), (128, 128, 128), (0, 0, 0)];
 }

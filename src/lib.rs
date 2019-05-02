@@ -75,7 +75,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let child_drawing_areas = root_drawing_area.split_evenly((3,3));
     // Then we fill the drawing area with different color
     for (area,color) in child_drawing_areas.into_iter().zip(0..) {
-        area.fill(&Plattle99::pick(color))?;
+        area.fill(&Palette99::pick(color))?;
     }
     root_drawing_area.close()?;
     return Ok(());
@@ -216,7 +216,7 @@ pub mod prelude {
     pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
-        Color, FontDesc, Mixable, Plattle, Plattle100, Plattle99, Plattle9999, RGBColor,
+        Color, FontDesc, Mixable, Palette, Palette100, Palette99, Palette9999, RGBColor,
         ShapeStyle, TextStyle,
     };
 

@@ -1,11 +1,11 @@
 mod color;
 mod font;
-mod plattle;
+mod palette;
 use std::borrow::Borrow;
 
-pub use color::{Color, Mixable, PlattleColor, RGBColor, SimpleColor};
+pub use color::{Color, Mixable, PaletteColor, RGBColor, SimpleColor};
 pub use font::{FontDesc, FontError, FontResult};
-pub use plattle::*;
+pub use palette::*;
 
 /// The object that describe the style of a text
 #[derive(Clone)]
