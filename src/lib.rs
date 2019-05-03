@@ -225,4 +225,10 @@ pub mod prelude {
     pub use crate::element::{
         CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text,
     };
+
+    #[allow(type_alias_bounds)]
+    /// The type used to returns a drawing operation that can be failed
+    /// - `T`: The return type
+    /// - `D`: The drawing backend type
+    pub type DrawResult<T, D:DrawingBackend>=Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
 }

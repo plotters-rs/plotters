@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (to_date, from_date) = (
         parse_time(&data[0].0) + Duration::days(1),
-        parse_time(&data[29].0) + Duration::days(1),
+        parse_time(&data[29].0) - Duration::days(1),
     );
 
     let mut chart = ChartBuilder::on(&root)
@@ -30,10 +30,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.configure_mesh().line_style_2(&style).draw()?;
 
-    chart.draw_series(LineSeries::new(
-        data.iter().map(|x| (parse_time(x.0), (x.1 + x.4) / 2.0)),
-        &RGBColor(128, 128, 128),
-    ))?;
     chart.draw_series(data.iter().map(|x| {
         CandleStick::<_, _>::new::<&RGBColor, &RGBColor>(
             parse_time(x.0),

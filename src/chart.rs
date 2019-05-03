@@ -171,13 +171,13 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
-    /// Set how many labels for the X axis
+    /// Set how many labels for the X axis at most
     pub fn x_labels(&mut self, value: usize) -> &mut Self {
         self.n_x_labels = value;
         return self;
     }
 
-    /// Set how many label for the Y axis
+    /// Set how many label for the Y axis at most
     pub fn y_labels(&mut self, value: usize) -> &mut Self {
         self.n_y_labels = value;
         return self;
