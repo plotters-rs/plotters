@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/0.png", (640,480));
     backend.open()?;
     let root:DrawingArea<_,_> = backend.into();
-    let font = Into::<FontDesc>::into("DejaVu Serif").resize(20.0);
+    let font = Into::<FontDesc>::into("Arial").resize(20.0);
     root.fill(&RGBColor(255,255,255))?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
@@ -129,7 +129,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(240,200,200))?;
 
     let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
-    let font = Into::<FontDesc>::into("DejaVu Serif").resize(15.0);
+    let font = Into::<FontDesc>::into("Arial").resize(15.0);
 
     let dot_and_label = |x:f32,y:f32| {
         return EmptyElement::at((x,y))
@@ -162,7 +162,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255,255,255));
     let root = root.margin(10,10,10,10);
     // After this point, we should be able to draw construct a chart context
-    let font:FontDesc = Into::<FontDesc>::into("DejaVu Serif").resize(40.0);
+    let font:FontDesc = Into::<FontDesc>::into("Arial").resize(40.0);
     // Create the chart object
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart

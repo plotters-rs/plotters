@@ -180,8 +180,8 @@ mod test {
 
     #[test]
     fn test_load_system_font() -> FontResult<()> {
-        let font_desc = FontDesc::new("ArialMT", 30.0);
-        assert_eq!(font_desc.get_name(), "ArialMT");
+        let font_desc = FontDesc::new("Arial", 30.0);
+        assert_eq!(font_desc.get_name(), "Arial");
 
         let (box_w, box_h) = font_desc.box_size("hello!")?;
         assert!(box_w > 0);

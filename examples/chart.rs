@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root_area.fill(&RGBColor(255, 255, 255))?;
 
-    let font: FontDesc = "DejaVu Serif".into();
+    let font: FontDesc = "Arial".into();
     let font_large = &font.resize(60.0);
     let font_small = &font.resize(40.0);
     let root_area = root_area

@@ -3,7 +3,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/histogram.png", (640, 480));
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
-    let font = Into::<FontDesc>::into("DejaVu Serif").resize(20.0);
+    let font = Into::<FontDesc>::into("Arial").resize(20.0);
     root.fill(&RGBColor(255, 255, 255))?;
 
     let mut chart = ChartBuilder::on(&root)
