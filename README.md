@@ -31,35 +31,21 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
 
 ### Gallery
 
-<div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem"></img>
-    </a>
-    <div class="galleryText">
-        Multiple Plot
-        <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">[code]</a>
-    </div>
-</div>
+<a href="https://github.com/38/plotters/blob/master/examples/chart.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem" width=200px></img>
+</a>
 
-<div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem"></img>
-    </a>
-    <div class="galleryText">
-        Candlestick Plot
-        <a href="https://github.com/38/plotters/blob/master/examples/stock.rs">[code]</a>
-    </div>
-</div>
+<a href="https://github.com/38/plotters/blob/master/examples/stock.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem" width=200px></img>
+</a>
 
-<div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
-    </a>
-    <div class="galleryText">
-        Candlestick Plot
-        <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">[code]</a>
-    </div>
-</div>
+<a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem" width=200px></img>
+</a>
+
+<a href="https://github.com/38/plotters/blob/master/examples/quick_start.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem" width=200px></img>
+</a>
 
 ### Quick Start
 
@@ -253,24 +239,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
-
-<style>
-    img {
-            display: block;
-            margin: 0 auto;
-            max-width: 500px;
-    }
-    .galleryItem {
-            width: 250px;
-            display: inline-block;
-    }
-    .galleryImg {
-            max-width: 100%;
-    }
-    .galleryText {
-            text-align: center;
-    }
-</style>
-
-
-License: MIT
