@@ -7,6 +7,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255, 255, 255))?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
+        .set_x_label_size(30)
+        .set_y_label_size(30)
         .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-1f32..1f32, 0f32..1f32);
 
     chart.configure_mesh().draw()?;

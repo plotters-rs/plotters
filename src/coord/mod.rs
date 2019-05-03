@@ -1,4 +1,4 @@
-/*! 
+/*!
   The abstraction of the coordinate system
 */
 use crate::drawing::backend::BackendCoord;

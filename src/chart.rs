@@ -174,7 +174,7 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
-    pub fn x_label_offset(&mut self, value:i32) -> &mut Self {
+    pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
         self.x_label_offset = value;
         return self;
     }
@@ -217,19 +217,13 @@ where
     }
 
     /// Set the formatter function for the X label text
-    pub fn x_label_formatter(
-        &mut self,
-        fmt: &'a dyn Fn(&X::ValueType) -> String,
-    ) -> &mut Self {
+    pub fn x_label_formatter(&mut self, fmt: &'a dyn Fn(&X::ValueType) -> String) -> &mut Self {
         self.format_x = fmt;
         return self;
     }
 
     /// Set the formatter function for the Y label text
-    pub fn y_label_formatter(
-        &mut self,
-        fmt: &'a dyn Fn(&Y::ValueType) -> String,
-    ) -> &mut Self {
+    pub fn y_label_formatter(&mut self, fmt: &'a dyn Fn(&Y::ValueType) -> String) -> &mut Self {
         self.format_y = fmt;
         return self;
     }
@@ -393,7 +387,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         draw = y_mesh;
                     }
                 };
-                return if draw { l.draw(b, mesh_line_style) } else { Ok(()) };
+                return if draw {
+                    l.draw(b, mesh_line_style)
+                } else {
+                    Ok(())
+                };
             },
             r,
             c,
@@ -404,7 +402,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         if let Some(ref xl) = self.x_label_area {
             for (p, t) in x_labels {
                 let (w, _) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                xl.draw_text(&t, label_style, (p - x0 - w as i32 / 2 + x_label_offset, 15))?;
+                xl.draw_text(
+                    &t,
+                    label_style,
+                    (p - x0 - w as i32 / 2 + x_label_offset, 15),
+                )?;
             }
         }
 

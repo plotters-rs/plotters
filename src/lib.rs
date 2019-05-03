@@ -15,16 +15,16 @@
 Plotters is a flexible drawing library for data visualization written in pure Rust.
 
 - Why plotting in Rust?
-Although rendering a figure doesn't requires too many computation power in most of the case, 
+Although rendering a figure doesn't requires too many computation power in most of the case,
 and programming language such as Python and Javascript is used for visualization purpose.
 Sometimes we need to make a figure based on huge amount of data, for example, rendering some
 human gene data may requires to downsampling trillions data points, which isn't even doable
-with many high-level programming language. In this case, Rust is a perfect candidate for rendering 
-figures, since it runs very fast while having high-level abstraction abilities. 
+with many high-level programming language. In this case, Rust is a perfect candidate for rendering
+figures, since it runs very fast while having high-level abstraction abilities.
 
 - What type of figure is supported?
-Currently, we support line series, point series and candlestick series. 
-And the library is designed to be able to render multiple figure into a single image. 
+Currently, we support line series, point series and candlestick series.
+And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
 
 
@@ -303,5 +303,6 @@ pub mod prelude {
     /// The type used to returns a drawing operation that can be failed
     /// - `T`: The return type
     /// - `D`: The drawing backend type
-    pub type DrawResult<T, D:DrawingBackend>=Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
+    pub type DrawResult<T, D: DrawingBackend> =
+        Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
 }
