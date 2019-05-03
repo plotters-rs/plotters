@@ -12,7 +12,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Histogram Test", &font)
         .build_ranged::<RangedCoordu32, RangedCoordu32, _, _>(0..10, 0..10);
 
-    chart.configure_mesh().draw()?;
+    chart.configure_mesh()
+        .disable_x_mesh()
+        .line_style_1(&Into::into(&RGBColor(255,255,255).mix(0.3)))
+        .x_label_offset(30)
+        .draw()?;
 
     let data = [
         0, 1, 1, 1, 4, 2, 5, 7, 8, 6, 4, 2, 1, 8, 3, 3, 3, 4, 4, 3, 3, 3,

@@ -154,6 +154,9 @@ pub struct MeshStyle<'a, X: Ranged, Y: Ranged, DB>
 where
     DB: DrawingBackend,
 {
+    draw_x_mesh: bool,
+    draw_y_mesh: bool,
+    x_label_offset: i32,
     n_x_labels: usize,
     n_y_labels: usize,
     line_style_1: Option<&'a ShapeStyle<'a>>,
@@ -171,6 +174,18 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
+    pub fn x_label_offset(&mut self, value:i32) -> &mut Self {
+        self.x_label_offset = value;
+        return self;
+    }
+    pub fn disable_x_mesh(&mut self) -> &mut Self {
+        self.draw_x_mesh = false;
+        return self;
+    }
+    pub fn disable_y_mesh(&mut self) -> &mut Self {
+        self.draw_y_mesh = false;
+        return self;
+    }
     /// Set how many labels for the X axis at most
     pub fn x_labels(&mut self, value: usize) -> &mut Self {
         self.n_x_labels = value;
@@ -257,6 +272,9 @@ where
             mesh_style_2,
             label_style,
             |_| None,
+            self.draw_x_mesh,
+            self.draw_y_mesh,
+            self.x_label_offset,
         )?;
 
         return target.draw_mesh(
@@ -267,6 +285,9 @@ where
                 MeshLine::XMesh(_, _, v) => Some((self.format_x)(v)),
                 MeshLine::YMesh(_, _, v) => Some((self.format_y)(v)),
             },
+            self.draw_x_mesh,
+            self.draw_y_mesh,
+            self.x_label_offset,
         );
     }
 }
@@ -283,6 +304,9 @@ impl<
     /// the function `MeshStyle::draw`
     pub fn configure_mesh(&mut self) -> MeshStyle<X, Y, DB> {
         return MeshStyle {
+            x_label_offset: 0,
+            draw_x_mesh: true,
+            draw_y_mesh: true,
             n_x_labels: 10,
             n_y_labels: 10,
             line_style_1: None,
@@ -343,6 +367,9 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         mesh_line_style: &ShapeStyle,
         label_style: &TextStyle,
         mut fmt_label: FmtLabel,
+        x_mesh: bool,
+        y_mesh: bool,
+        x_label_offset: i32,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
@@ -351,19 +378,22 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         let mut y_labels = vec![];
         self.drawing_area.draw_mesh(
             |b, l| {
+                let draw;
                 match l {
                     MeshLine::XMesh((x, _), _, _) => {
                         if let Some(label_text) = fmt_label(&l) {
                             x_labels.push((x, label_text));
                         }
+                        draw = x_mesh;
                     }
                     MeshLine::YMesh((_, y), _, _) => {
                         if let Some(label_text) = fmt_label(&l) {
                             y_labels.push((y, label_text));
                         }
+                        draw = y_mesh;
                     }
                 };
-                return l.draw(b, mesh_line_style);
+                return if draw { l.draw(b, mesh_line_style) } else { Ok(()) };
             },
             r,
             c,
@@ -374,7 +404,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         if let Some(ref xl) = self.x_label_area {
             for (p, t) in x_labels {
                 let (w, _) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                xl.draw_text(&t, label_style, (p - x0 - w as i32 / 2, 15))?;
+                xl.draw_text(&t, label_style, (p - x0 - w as i32 / 2 + x_label_offset, 15))?;
             }
         }
 
