@@ -1,6 +1,17 @@
 # plotters
 
+
 ## Plotters - Another Plotting Library in Rust
+
+<a href="https://crates.io/crates/plotters">
+    <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
+</a>
+
+<a href="https://docs.rs/plotters">
+    <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
+</a>
+
+
 
 Plotters is a flexible drawing library for data visualization written in pure Rust.
 The library isn't aimed supporting different types of plotting, but a generic platform
@@ -230,6 +241,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+
+<style>
+    img {
+            display: block;
+            margin: 0 auto;
+            max-width: 500px;
+    }
+    .galleryItem {
+            width: 250px;
+            display: inline-block;
+    }
+    .galleryImg {
+            max-width: 100%;
+    }
+    .galleryText {
+            text-align: center;
+    }
+</style>
 
 
 License: MIT
