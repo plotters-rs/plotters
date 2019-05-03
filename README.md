@@ -239,24 +239,3 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
-
-<style>
-    img {
-            display: block;
-            margin: 0 auto;
-            max-width: 500px;
-    }
-    .galleryItem {
-            width: 250px;
-            display: inline-block;
-    }
-    .galleryImg {
-            max-width: 100%;
-    }
-    .galleryText {
-            text-align: center;
-    }
-</style>
-
-
-License: MIT
