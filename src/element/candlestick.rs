@@ -1,3 +1,7 @@
+/*!
+  The candelstick element, which showing the high/low/open/close price
+*/
+
 use std::cmp::Ordering;
 
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};

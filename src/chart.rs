@@ -28,6 +28,8 @@ pub struct ChartBuilder<'a, DB: DrawingBackend> {
 
 impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// Create a chart builder on the given drawing area
+    /// - `root`: The root drawing area
+    /// - Returns: The chart builder object
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
         return Self {
             x_label_size: 0,
@@ -38,6 +40,8 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     }
 
     /// Set the margin size of the chart
+    /// - `size`: The size of the chart margin. If the chart builder is titled, we don't apply any
+    /// margin
     pub fn set_margin(&mut self, size: u32) -> &mut Self {
         if self.titled_area.is_some() {
             return self;
@@ -48,18 +52,23 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     }
 
     /// Set the size of X label area
+    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn set_x_label_size(&mut self, size: u32) -> &mut Self {
         self.x_label_size = size;
         return self;
     }
 
     /// Set the size of the Y label area
+    /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn set_y_label_size(&mut self, size: u32) -> &mut Self {
         self.y_label_size = size;
         return self;
     }
 
     /// Set the caption of the chart
+    /// - `caption`: The caption of the chart
+    /// - `style`: The text style
+    /// - Note: If the caption is set, the margin option will be ignored
     pub fn caption<'b, S: AsRef<str>, Style: Into<TextStyle<'b>>>(
         &mut self,
         caption: S,
@@ -77,7 +86,11 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         return self;
     }
 
-    /// Builder the chart with a ranged coordinate system
+    /// Builder the chart with a ranged coordinate system. The function will returns a chart
+    /// context, where data series can be rendered on.
+    /// - `x_spec`: The specification of X axis
+    /// - `y_spec`: The specification of Y axis
+    /// - Returns: A chart context
     pub fn build_ranged<XR: Ranged, YR: Ranged, X: Into<XR>, Y: Into<YR>>(
         &mut self,
         x_spec: X,
@@ -126,7 +139,9 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     }
 }
 
-/// The context of the chart
+/// The context of the chart. This is the core object of Plotters.
+/// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
+/// context.
 pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
     x_label_area: Option<DrawingArea<DB, Shift>>,
     y_label_area: Option<DrawingArea<DB, Shift>>,

@@ -1,4 +1,6 @@
-/// The abstraction of the coordinate system
+/*! 
+  The abstraction of the coordinate system
+*/
 use crate::drawing::backend::BackendCoord;
 
 mod datetime;
@@ -14,6 +16,8 @@ pub use ranged::{DescreteRanged, MeshLine, Ranged, RangedCoord};
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
     type From;
+
+    /// Translate the guest coordinate to the guest coordinate
     fn translate(&self, from: &Self::From) -> BackendCoord;
 }
 
