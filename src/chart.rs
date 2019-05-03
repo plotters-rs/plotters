@@ -466,7 +466,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
             }
             for (p, t) in y_labels {
                 let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                if p - y0 >= 0 && p - y0 - h as i32 / 2 < th as i32 {
+                if p - y0 >= 0 && p - y0 + h as i32 / 2 < th as i32 {
                     yl.draw_text(
                         &t,
                         label_style,
