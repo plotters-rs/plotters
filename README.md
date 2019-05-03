@@ -2,24 +2,6 @@
 
 ## Plotters - Another Plotting Library in Rust
 
-<style>
-    img {
-        display: block;
-        margin: 0 auto;
-        max-width: 500px;
-    }
-    .galleryItem {
-        width: 250px;
-        display: inline-block;
-    }
-    .galleryImg {
-        max-width: 100%;
-    }
-    .galleryText {
-        text-align: center;
-    }
-</style>
-
 Plotters is a flexible drawing library for data visualization written in pure Rust.
 The library isn't aimed supporting different types of plotting, but a generic platform
 that can be extended to support different types of visualization methods.
