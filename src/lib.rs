@@ -1,9 +1,59 @@
 /*!
 # Plotters - Another Plotting Library in Rust
 
+<style>
+    img {
+        display: block;
+        margin: 0 auto;
+        max-width: 500px;
+    }
+    .galleryItem {
+        width: 250px;
+        display: inline-block;
+    }
+    .galleryImg {
+        max-width: 100%;
+    }
+    .galleryText {
+        text-align: center;
+    }
+</style>
+
 Plotters is a flexible drawing library for data visualization written in pure Rust.
 The library isn't aimed supporting different types of plotting, but a generic platform
 that can be extended to support different types of visualization methods.
+
+## Gallery
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Multiple Plot
+        <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Candlestick Plot
+        <a href="https://github.com/38/plotters/blob/master/examples/stock.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Candlestick Plot
+        <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">[code]</a>
+    </div>
+</div>
 
 ## Quick Start
 
