@@ -72,15 +72,17 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
             points[3].0 += r;
 
             backend.draw_line(points[1], points[2], &Box::new(self.style.color))?;
-            backend.draw_line(
-                (points[1].0 - l, points[1].1),
-                (points[1].0 + r, points[1].1),
+            backend.draw_rect(
+                (points[1].0 - l / 2, points[1].1),
+                (points[1].0 + r / 2, points[1].1 + 1),
                 &Box::new(self.style.color),
+                true,
             )?;
-            backend.draw_line(
-                (points[2].0 - l, points[2].1),
-                (points[2].0 + r, points[2].1),
+            backend.draw_rect(
+                (points[2].0 - l / 2, points[2].1),
+                (points[2].0 + r / 2, points[2].1 - 1),
                 &Box::new(self.style.color),
+                true,
             )?;
             backend.draw_rect(points[0], points[3], &Box::new(self.style.color), true)?;
         }

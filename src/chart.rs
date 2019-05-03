@@ -15,7 +15,7 @@ use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, PointCollection, Rectangle};
+use crate::element::{Drawable, PointCollection, Rectangle, Path};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart context, which is used for the high-level plotting
@@ -156,11 +156,14 @@ where
 {
     draw_x_mesh: bool,
     draw_y_mesh: bool,
+    draw_x_axis: bool,
+    draw_y_axis: bool,
     x_label_offset: i32,
     n_x_labels: usize,
     n_y_labels: usize,
     line_style_1: Option<&'a ShapeStyle<'a>>,
     line_style_2: Option<&'a ShapeStyle<'a>>,
+    axis_style: Option<&'a ShapeStyle<'a>>,
     label_style: Option<&'a TextStyle<'a>>,
     format_x: &'a dyn Fn(&X::ValueType) -> String,
     format_y: &'a dyn Fn(&Y::ValueType) -> String,
@@ -184,6 +187,18 @@ where
     }
     pub fn disable_y_mesh(&mut self) -> &mut Self {
         self.draw_y_mesh = false;
+        return self;
+    }
+    pub fn disable_x_axis(&mut self) -> &mut Self {
+        self.draw_x_axis = false;
+        return self;
+    }
+    pub fn disable_y_axis(&mut self) -> &mut Self {
+        self.draw_y_axis = false;
+        return self;
+    }
+    pub fn axis_style(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
+        self.axis_style = Some(style);
         return self;
     }
     /// Set how many labels for the X axis at most
@@ -243,7 +258,7 @@ where
         let label_style = unsafe { std::mem::transmute::<_, Option<&TextStyle>>(self.label_style) }
             .unwrap_or(&default_label_style);
 
-        let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.4);
+        let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
         let default_mesh_style_1 = ShapeStyle {
             color: &default_mesh_color_1,
             filled: false,
@@ -252,7 +267,7 @@ where
             unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_1) }
                 .unwrap_or(&default_mesh_style_1);
 
-        let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.2);
+        let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
         let default_mesh_style_2 = ShapeStyle {
             color: &default_mesh_color_2,
             filled: false,
@@ -260,6 +275,16 @@ where
         let mesh_style_2 =
             unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_2) }
                 .unwrap_or(&default_mesh_style_2);
+
+
+        let default_axis_color = RGBColor(0,0,0);
+        let default_axis_style = ShapeStyle {
+            color: &default_axis_color,
+            filled: false,
+        };
+        let axis_style =
+            unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.axis_style) }
+                .unwrap_or(&default_axis_style);
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
@@ -269,6 +294,9 @@ where
             self.draw_x_mesh,
             self.draw_y_mesh,
             self.x_label_offset,
+            false,
+            false,
+            &axis_style,
         )?;
 
         return target.draw_mesh(
@@ -282,6 +310,9 @@ where
             self.draw_x_mesh,
             self.draw_y_mesh,
             self.x_label_offset,
+            self.draw_x_axis,
+            self.draw_y_axis,
+            &axis_style,
         );
     }
 }
@@ -298,9 +329,12 @@ impl<
     /// the function `MeshStyle::draw`
     pub fn configure_mesh(&mut self) -> MeshStyle<X, Y, DB> {
         return MeshStyle {
+            axis_style: None,
             x_label_offset: 0,
             draw_x_mesh: true,
             draw_y_mesh: true,
+            draw_x_axis: true,
+            draw_y_axis: true,
             n_x_labels: 10,
             n_y_labels: 10,
             line_style_1: None,
@@ -354,6 +388,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         }
         return Ok(());
     }
+    
     /// Draw the mesh
     fn draw_mesh<FmtLabel>(
         &mut self,
@@ -364,6 +399,9 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         x_mesh: bool,
         y_mesh: bool,
         x_label_offset: i32,
+        x_axis: bool,
+        y_axis: bool,
+        axis_style: &ShapeStyle,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
@@ -400,27 +438,47 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         let (x0, y0) = self.drawing_area.get_base_pixel();
 
         if let Some(ref xl) = self.x_label_area {
+            let (tw, _) = xl.dim_in_pixel();
+            if x_axis {
+                xl.draw(&Path::new(vec![(0,0),(tw as i32, 0)], axis_style.clone()))?;
+            }
             for (p, t) in x_labels {
                 let (w, _) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                xl.draw_text(
-                    &t,
-                    label_style,
-                    (p - x0 - w as i32 / 2 + x_label_offset, 15),
-                )?;
+
+                if p - x0 + x_label_offset > 0 && p - x0 + x_label_offset + w as i32 / 2 < tw as i32{
+                    if x_axis {
+                        xl.draw(&Path::new(vec![(p - x0, 0), (p - x0, 5)], axis_style.clone()))?;
+                    }
+                    xl.draw_text(
+                        &t,
+                        label_style,
+                        (p - x0 - w as i32 / 2 + x_label_offset, 10),
+                    )?;
+                }
+
             }
         }
 
         if let Some(ref yl) = self.y_label_area {
-            let (tw, _) = yl.dim_in_pixel();
+            let (tw, th) = yl.dim_in_pixel();
+            if y_axis {
+                yl.draw(&Path::new(vec![(tw as i32,0),(tw as i32,th as i32)], axis_style.clone()))?;
+            }
             for (p, t) in y_labels {
                 let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                yl.draw_text(
-                    &t,
-                    label_style,
-                    (tw as i32 - w as i32 - 15, p - y0 - h as i32),
-                )?;
+                if p - y0 >= 0 && p - y0 - h as i32 / 2 < th as i32 {
+                    yl.draw_text(
+                        &t,
+                        label_style,
+                        (tw as i32 - w as i32 - 10, p - y0 - h as i32 / 2),
+                    )?;
+                    if y_axis {
+                        yl.draw(&Path::new(vec![(tw as i32 - 5, p - y0), (tw as i32, p - y0)], axis_style.clone()))?;
+                    }
+                }
             }
         }
+
         return Ok(());
     }
 }

@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
-    let font = Into::<FontDesc>::into("Arial").resize(20.0);
+    let font = Into::<FontDesc>::into("Arial").resize(30.0);
     root.fill(&RGBColor(255, 255, 255))?;
 
     let (to_date, from_date) = (
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_x_label_size(40)
         .set_y_label_size(40)
         .caption("MSFT Stock Price", &font)
-        .build_ranged::<RangedDate<_>, RangedCoordf32, _, _>(from_date..to_date, 100f32..140f32);
+        .build_ranged::<RangedDate<_>, RangedCoordf32, _, _>(from_date..to_date, 110f32..135f32);
 
     let style: ShapeStyle = (&RGBColor(255, 255, 255)).into();
 
@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             x.4,
             &RGBColor(0, 255, 0),
             &RGBColor(255, 0, 0),
-            10,
+            15,
         )
     }))?;
 
