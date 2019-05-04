@@ -84,9 +84,6 @@ macro_rules! gen_key_points_comp {
                 ret.push(left as $type);
                 left += scale;
             }
-
-            println!("{:?}", ret);
-
             return ret;
         }
     };

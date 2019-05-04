@@ -60,6 +60,15 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Simple Chart
+    </div>
+</div>
+
 ## Quick Start
 
 ```rust
