@@ -15,7 +15,7 @@ use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, PointCollection, Rectangle, Path};
+use crate::element::{Drawable, Path, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart context, which is used for the high-level plotting
@@ -276,15 +276,13 @@ where
             unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_2) }
                 .unwrap_or(&default_mesh_style_2);
 
-
-        let default_axis_color = RGBColor(0,0,0);
+        let default_axis_color = RGBColor(0, 0, 0);
         let default_axis_style = ShapeStyle {
             color: &default_axis_color,
             filled: false,
         };
-        let axis_style =
-            unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.axis_style) }
-                .unwrap_or(&default_axis_style);
+        let axis_style = unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.axis_style) }
+            .unwrap_or(&default_axis_style);
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
@@ -388,7 +386,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         }
         return Ok(());
     }
-    
+
     /// Draw the mesh
     fn draw_mesh<FmtLabel>(
         &mut self,
@@ -440,14 +438,18 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         if let Some(ref xl) = self.x_label_area {
             let (tw, _) = xl.dim_in_pixel();
             if x_axis {
-                xl.draw(&Path::new(vec![(0,0),(tw as i32, 0)], axis_style.clone()))?;
+                xl.draw(&Path::new(vec![(0, 0), (tw as i32, 0)], axis_style.clone()))?;
             }
             for (p, t) in x_labels {
                 let (w, _) = label_style.font.box_size(&t).unwrap_or((0, 0));
 
-                if p - x0 + x_label_offset > 0 && p - x0 + x_label_offset + w as i32 / 2 < tw as i32{
+                if p - x0 + x_label_offset > 0 && p - x0 + x_label_offset + w as i32 / 2 < tw as i32
+                {
                     if x_axis {
-                        xl.draw(&Path::new(vec![(p - x0, 0), (p - x0, 5)], axis_style.clone()))?;
+                        xl.draw(&Path::new(
+                            vec![(p - x0, 0), (p - x0, 5)],
+                            axis_style.clone(),
+                        ))?;
                     }
                     xl.draw_text(
                         &t,
@@ -455,14 +457,16 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         (p - x0 - w as i32 / 2 + x_label_offset, 10),
                     )?;
                 }
-
             }
         }
 
         if let Some(ref yl) = self.y_label_area {
             let (tw, th) = yl.dim_in_pixel();
             if y_axis {
-                yl.draw(&Path::new(vec![(tw as i32,0),(tw as i32,th as i32)], axis_style.clone()))?;
+                yl.draw(&Path::new(
+                    vec![(tw as i32, 0), (tw as i32, th as i32)],
+                    axis_style.clone(),
+                ))?;
             }
             for (p, t) in y_labels {
                 let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
@@ -473,7 +477,10 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         (tw as i32 - w as i32 - 10, p - y0 - h as i32 / 2),
                     )?;
                     if y_axis {
-                        yl.draw(&Path::new(vec![(tw as i32 - 5, p - y0), (tw as i32, p - y0)], axis_style.clone()))?;
+                        yl.draw(&Path::new(
+                            vec![(tw as i32 - 5, p - y0), (tw as i32, p - y0)],
+                            axis_style.clone(),
+                        ))?;
                     }
                 }
             }

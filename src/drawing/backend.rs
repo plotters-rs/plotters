@@ -165,14 +165,16 @@ pub trait DrawingBackend {
         color: &C,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-
         //let range = ((radius + 3) / 4) as i32..=(2 * radius - radius / 4) as i32;
         let min = (radius as f64 * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
         let max = (radius as f64 * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
 
         let range = min..=max;
 
-        let (up,down) = (range.start() + center.1 - radius as i32, range.end() + center.1 - radius as i32);
+        let (up, down) = (
+            range.start() + center.1 - radius as i32,
+            range.end() + center.1 - radius as i32,
+        );
 
         for dy in range {
             let dy = dy - radius as i32;
@@ -184,25 +186,23 @@ pub trait DrawingBackend {
             let right = center.0 + lx.floor() as i32;
 
             let v = lx - lx.floor();
-            
+
             let x = center.0 + dy;
             let top = center.1 - lx.floor() as i32;
             let bottom = center.1 + lx.floor() as i32;
-
 
             if fill {
                 self.draw_line((left, y), (right, y), color)?;
                 self.draw_line((x, top), (x, up), color)?;
                 self.draw_line((x, down), (x, bottom), color)?;
             } else {
-                self.draw_pixel((left, y), &color.mix(1.0-v))?;
-                self.draw_pixel((right, y), &color.mix(1.0-v))?;
-                
-                self.draw_pixel((x, top), &color.mix(1.0-v))?;
-                self.draw_pixel((x, bottom), &color.mix(1.0-v))?;
-                
+                self.draw_pixel((left, y), &color.mix(1.0 - v))?;
+                self.draw_pixel((right, y), &color.mix(1.0 - v))?;
+
+                self.draw_pixel((x, top), &color.mix(1.0 - v))?;
+                self.draw_pixel((x, bottom), &color.mix(1.0 - v))?;
             }
-            
+
             self.draw_pixel((left - 1, y), &color.mix(v))?;
             self.draw_pixel((right + 1, y), &color.mix(v))?;
             self.draw_pixel((x, top - 1), &color.mix(v))?;
@@ -228,3 +228,4 @@ pub trait DrawingBackend {
         }
     }
 }
+
