@@ -34,7 +34,7 @@ impl<'a> SVGBackend<'a> {
         return Self {
             path,
             size,
-            document: Some(Document::new().set("view_box", (0, 0, size.0, size.1))),
+            document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
         };
     }
 }
