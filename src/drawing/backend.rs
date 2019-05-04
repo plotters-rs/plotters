@@ -228,4 +228,3 @@ pub trait DrawingBackend {
         }
     }
 }
-

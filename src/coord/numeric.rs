@@ -45,20 +45,20 @@ macro_rules! make_numeric_coord {
 macro_rules! gen_key_points_comp {
     (float, $name:ident, $type:ty) => {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
-            let mut scale = (10 as $type).powf((range.1 - range.0).log(10.0).floor());
-            fn rem_euclid(a: $type, b: $type) -> $type {
+            let range = (range.0 as f64, range.1 as f64);
+            let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
+            let mut digits = (range.1 - range.0).log(10.0).floor().max(0.0) as u32 + 1;
+            fn rem_euclid(a: f64, b: f64) -> f64 {
                 if b > 0.0 {
                     a - (a / b).floor() * b
                 } else {
                     a - (a / b).ceil() * b
                 }
             }
-            let mut left = range.0 + rem_euclid(range.0, -scale);
-            let mut right = range.1 - rem_euclid(range.1, scale);
             'outer: loop {
                 let old_scale = scale;
                 for nxt in [2.0, 5.0, 10.0].iter() {
-                    let new_left = range.0 + rem_euclid(range.0, -scale / nxt);
+                    let new_left = range.0 + scale / nxt - rem_euclid(range.0, scale / nxt);
                     let new_right = range.1 - rem_euclid(range.1, scale / nxt);
 
                     let npoints = 1 + ((new_right - new_left) / old_scale * nxt) as usize;
@@ -68,16 +68,24 @@ macro_rules! gen_key_points_comp {
                     }
 
                     scale = old_scale / nxt;
-                    left = new_left;
-                    right = new_right;
+                }
+                scale = old_scale / 10.0;
+                if scale < 1.0 {
+                    digits += 1;
                 }
             }
 
             let mut ret = vec![];
+            let mut left = range.0 + scale - rem_euclid(range.0, scale);
+            let right = range.1 - rem_euclid(range.1, scale);
             while left <= right {
+                let size = (10f64).powf(digits as f64);
+                left = (left * size).round() / size;
                 ret.push(left as $type);
                 left += scale;
             }
+
+            println!("{:?}", ret);
 
             return ret;
         }
