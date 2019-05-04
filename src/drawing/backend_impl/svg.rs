@@ -166,11 +166,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let context = svg::node::Text::new(text);
+        let ((_,b),(_,_)) = font.layout_box(text).map_err(|x| DrawingErrorKind::FontError(x))?;
         let node = Text::new()
             .set("x", pos.0)
-            .set("y", pos.1 as f64 + font.get_size())
+            .set("y", pos.1 - b)
             .set("font-famliy", font.get_name())
-            .set("font-size", font.get_size() * 0.8)
+            .set("font-size", font.get_size())
             .set("fill", make_svg_color(color))
             .add(context);
         self.update_document(|d| d.add(node));

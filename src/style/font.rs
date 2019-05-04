@@ -108,7 +108,7 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Get the size of the text if rendered in this font
-    fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {
+    pub fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {
         let scale = Scale::uniform(self.size as f32);
 
         if self.font.borrow().is_none() {
