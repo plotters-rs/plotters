@@ -55,7 +55,7 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        Candlestick Plot
+       Histogram 
         <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">[code]</a>
     </div>
 </div>
