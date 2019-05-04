@@ -249,7 +249,7 @@ where
         std::mem::swap(&mut target, &mut self.target);
         let target = target.unwrap();
 
-        let default_font = FontDesc::new("Arial", 10.0);
+        let default_font = FontDesc::new("Arial", 12.0);
         let default_color = RGBColor(0, 0, 0);
         let default_label_style = TextStyle {
             font: &default_font,

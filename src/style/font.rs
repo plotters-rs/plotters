@@ -108,7 +108,7 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Get the size of the text if rendered in this font
-    pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
+    fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {
         let scale = Scale::uniform(self.size as f32);
 
         if self.font.borrow().is_none() {
@@ -131,12 +131,18 @@ impl<'a> FontDesc<'a> {
                 });
 
             if min_x == i32::MAX || min_y == i32::MAX {
-                return Ok((0, 0));
+                return Ok(((0, 0), (0, 0)));
             }
 
-            return Ok(((max_x - min_x) as u32, (0 - min_y) as u32));
+            return Ok(((min_x, min_y), (max_x, max_y)));
         }
         unreachable!();
+    }
+    
+    /// Get the size of the text if rendered in this font
+    pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
+        let ((min_x, min_y), (max_x, max_y)) = self.layout_box(text)?;
+        return Ok(((max_x - min_x) as u32, (max_y - min_y) as u32));
     }
 
     /// Actually draws a font with a drawing function
@@ -146,7 +152,7 @@ impl<'a> FontDesc<'a> {
         (x, y): (i32, i32),
         mut draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
-        let (_, h) = self.box_size(text)?;
+        let ((_,b),(_,_)) = self.layout_box(text)?;
 
         let scale = Scale::uniform(self.size as f32);
         if self.font.borrow().is_none() {
@@ -156,7 +162,7 @@ impl<'a> FontDesc<'a> {
 
         if let Some(ref font) = *self.font.borrow() {
             let mut result = Ok(());
-            for g in font.layout(text, scale, point(x as f32, y as f32 + h as f32)) {
+            for g in font.layout(text, scale, point(x as f32, y as f32 - b as f32)) {
                 if let Some(rect) = g.pixel_bounding_box() {
                     let x0 = rect.min.x;
                     let y0 = rect.min.y;

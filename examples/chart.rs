@@ -83,7 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .set_y_label_size(60)
             .caption(format!("y = x^{}", 1 + 2 * idx), &font_small)
             .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(-1f32..1f32, -1f32..1f32);
-        cc.configure_mesh().x_labels(5).y_labels(5).draw()?;
+        cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 
         cc.draw_series(LineSeries::new(
             (-100..100).map(|x| {

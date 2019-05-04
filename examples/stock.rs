@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
-    let font = Into::<FontDesc>::into("Arial").resize(30.0);
+    let font = Into::<FontDesc>::into("Arial").resize(50.0);
     root.fill(&RGBColor(255, 255, 255))?;
 
     let (to_date, from_date) = (

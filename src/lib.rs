@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
-    let font = Into::<FontDesc>::into("Arial").resize(20.0);
+    let font = Into::<FontDesc>::into("Arial").resize(50.0);
     root.fill(&RGBColor(255, 255, 255))?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
@@ -233,7 +233,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Set the caption of the chart
         .caption("This is our first plot", &font)
         // Set the size of the label region
-        .set_x_label_size(40)
+        .set_x_label_size(20)
         .set_y_label_size(40)
         // Finally attach a coordinate on the drawing area and make a chart context
         .build_ranged::<RangedCoordf32, RangedCoordf32, _, _>(0f32..10f32, 0f32..10f32);

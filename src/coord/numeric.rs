@@ -30,7 +30,7 @@ macro_rules! make_numeric_coord {
                     return limit.1;
                 }
 
-                return limit.0 + (actual_length as f64 * logic_length) as i32;
+                return limit.0 + (actual_length as f64 * logic_length + 1e-3).floor() as i32;
             }
             fn key_points(&self, max_points: usize) -> Vec<$type> {
                 $key_points((self.0, self.1), max_points)
