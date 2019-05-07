@@ -166,7 +166,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let context = svg::node::Text::new(text);
-        let ((_,b),(_,_)) = font.layout_box(text).map_err(|x| DrawingErrorKind::FontError(x))?;
+        let ((_, b), (_, _)) = font
+            .layout_box(text)
+            .map_err(|x| DrawingErrorKind::FontError(x))?;
         let node = Text::new()
             .set("x", pos.0)
             .set("y", pos.1 - b)

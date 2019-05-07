@@ -55,7 +55,7 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-       Histogram 
+       Histogram
         <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">[code]</a>
     </div>
 </div>
@@ -78,7 +78,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(50.0);
-    root.fill(&RGBColor(255, 255, 255))?;
+    root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
         .set_x_label_size(30)
@@ -113,7 +113,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.open()?;
-    backend.draw_rect((50,50), (200, 150), &RGBColor(255,0,0), true)?;
+    backend.draw_rect((50,50), (200, 150), &Red, true)?;
     backend.close()?;
     return Ok(());
 }
@@ -164,9 +164,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/3.png", (300, 200));
     // A backend object can be converted into a drawing area
     let root:DrawingArea<_,_> = backend.into();
-    root.fill(&RGBColor(255,255,255));
+    root.fill(&White);
     // Draw an circle on the drawing area
-    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&RGBColor(0, 255, 0)).filled()))?;
+    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
     root.close()?;
     return Ok(());
 }
@@ -198,7 +198,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let dot_and_label = |x:f32,y:f32| {
         return EmptyElement::at((x,y))
-               + Circle::new((0,0), 3, Into::<ShapeStyle>::into(&RGBColor(0,0,0)).filled())
+               + Circle::new((0,0), 3, ShapeStyle::from(&Black).filled())
                + OwnedText::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
     };
 
@@ -224,7 +224,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/5.png", (640, 480));
     let root:DrawingArea<_,_> = backend.into();
-    root.fill(&RGBColor(255,255,255));
+    root.fill(&White);
     let root = root.margin(10,10,10,10);
     // After this point, we should be able to draw construct a chart context
     let font:FontDesc = Into::<FontDesc>::into("Arial").resize(40.0);
@@ -249,9 +249,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // And we can draw something in the drawing area
     let smaller_font = font.resize(10.0);
-    chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &RGBColor(255,0,0)))?;
+    chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &Red))?;
     // Similarly, we can draw point series
-    chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &RGBColor(255,0,0), &|c,s,st| {
+    chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &Red, &|c,s,st| {
         return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
@@ -299,8 +299,9 @@ pub mod prelude {
     pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
-        Color, FontDesc, Mixable, Palette, Palette100, Palette99, Palette9999, RGBColor,
-        ShapeStyle, TextStyle,
+        Black, Blue, Color, Cyan, FontDesc, Green, Magenta, Mixable, Palette, Palette100,
+        Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle, SimpleColor, TextStyle,
+        Transparent, White, Yellow,
     };
 
     pub use crate::drawing::{BitMapBackend, SVGBackend};

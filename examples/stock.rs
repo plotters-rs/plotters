@@ -26,9 +26,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("MSFT Stock Price", &font)
         .build_ranged::<RangedDate<_>, RangedCoordf32, _, _>(from_date..to_date, 110f32..135f32);
 
-    let style: ShapeStyle = (&RGBColor(255, 255, 255)).into();
-
-    chart.configure_mesh().line_style_2(&style).draw()?;
+    chart
+        .configure_mesh()
+        .line_style_2(&RGBColor(255, 255, 255))
+        .draw()?;
 
     chart.draw_series(data.iter().map(|x| {
         CandleStick::<_, _>::new::<&RGBColor, &RGBColor>(

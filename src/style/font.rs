@@ -138,7 +138,7 @@ impl<'a> FontDesc<'a> {
         }
         unreachable!();
     }
-    
+
     /// Get the size of the text if rendered in this font
     pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
         let ((min_x, min_y), (max_x, max_y)) = self.layout_box(text)?;
@@ -152,7 +152,7 @@ impl<'a> FontDesc<'a> {
         (x, y): (i32, i32),
         mut draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
-        let ((_,b),(_,_)) = self.layout_box(text)?;
+        let ((_, b), (_, _)) = self.layout_box(text)?;
 
         let scale = Scale::uniform(self.size as f32);
         if self.font.borrow().is_none() {

@@ -161,10 +161,10 @@ where
     x_label_offset: i32,
     n_x_labels: usize,
     n_y_labels: usize,
-    line_style_1: Option<&'a ShapeStyle<'a>>,
-    line_style_2: Option<&'a ShapeStyle<'a>>,
-    axis_style: Option<&'a ShapeStyle<'a>>,
-    label_style: Option<&'a TextStyle<'a>>,
+    line_style_1: Option<ShapeStyle<'a>>,
+    line_style_2: Option<ShapeStyle<'a>>,
+    axis_style: Option<ShapeStyle<'a>>,
+    label_style: Option<TextStyle<'a>>,
     format_x: &'a dyn Fn(&X::ValueType) -> String,
     format_y: &'a dyn Fn(&Y::ValueType) -> String,
     target: Option<&'a mut ChartContext<DB, RangedCoord<X, Y>>>,
@@ -177,7 +177,7 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
-    /// The offset of x labels. This is used when we want to place the label in the middle of 
+    /// The offset of x labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel
     pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
@@ -185,7 +185,7 @@ where
         return self;
     }
 
-    /// Disable the mesh for the x axis. 
+    /// Disable the mesh for the x axis.
     pub fn disable_x_mesh(&mut self) -> &mut Self {
         self.draw_x_mesh = false;
         return self;
@@ -211,8 +211,8 @@ where
 
     /// Set the style definition for the axis
     /// - `style`
-    pub fn axis_style(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
-        self.axis_style = Some(style);
+    pub fn axis_style<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+        self.axis_style = Some(style.into());
         return self;
     }
     /// Set how many labels for the X axis at most
@@ -231,22 +231,22 @@ where
 
     /// Set the style for the coarse grind grid
     /// - `style`: This is the fcoarse grind grid style
-    pub fn line_style_1(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
-        self.line_style_1 = Some(style);
+    pub fn line_style_1<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+        self.line_style_1 = Some(style.into());
         return self;
     }
 
     /// Set the style for the fine grind grid
     /// - `style`: The fine grind grid style
-    pub fn line_style_2(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
-        self.line_style_2 = Some(style);
+    pub fn line_style_2<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+        self.line_style_2 = Some(style.into());
         return self;
     }
 
     /// Set the style of the label text
     /// - `style`: The text style that would be applied to the labels
-    pub fn label_style(&mut self, style: &'a TextStyle<'a>) -> &mut Self {
-        self.label_style = Some(style);
+    pub fn label_style<T: Into<TextStyle<'a>>>(&mut self, style: T) -> &mut Self {
+        self.label_style = Some(style.into());
         return self;
     }
 
@@ -270,45 +270,32 @@ where
         std::mem::swap(&mut target, &mut self.target);
         let target = target.unwrap();
 
-        let default_font = FontDesc::new("Arial", 12.0);
-        let default_color = RGBColor(0, 0, 0);
-        let default_label_style = TextStyle {
-            font: &default_font,
-            color: &default_color,
-        };
-        let label_style = unsafe { std::mem::transmute::<_, Option<&TextStyle>>(self.label_style) }
-            .unwrap_or(&default_label_style);
-
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
-        let default_mesh_style_1 = ShapeStyle {
-            color: &default_mesh_color_1,
-            filled: false,
-        };
-        let mesh_style_1 =
-            unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_1) }
-                .unwrap_or(&default_mesh_style_1);
-
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
-        let default_mesh_style_2 = ShapeStyle {
-            color: &default_mesh_color_2,
-            filled: false,
-        };
-        let mesh_style_2 =
-            unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.line_style_2) }
-                .unwrap_or(&default_mesh_style_2);
-
         let default_axis_color = RGBColor(0, 0, 0);
-        let default_axis_style = ShapeStyle {
-            color: &default_axis_color,
-            filled: false,
-        };
-        let axis_style = unsafe { std::mem::transmute::<_, Option<&ShapeStyle>>(self.axis_style) }
-            .unwrap_or(&default_axis_style);
+        let default_label_font = FontDesc::new("Arial", 12.0);
+
+        let mesh_style_1 = self
+            .line_style_1
+            .clone()
+            .unwrap_or_else(|| (&default_mesh_color_1).into());
+        let mesh_style_2 = self
+            .line_style_2
+            .clone()
+            .unwrap_or_else(|| (&default_mesh_color_2).into());
+        let axis_style = self
+            .axis_style
+            .clone()
+            .unwrap_or_else(|| (&default_axis_color).into());
+
+        let label_style =
+            unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.label_style.clone()) }
+                .unwrap_or_else(|| (&default_label_font).into());
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
-            mesh_style_2,
-            label_style,
+            &mesh_style_2,
+            &label_style,
             |_| None,
             self.draw_x_mesh,
             self.draw_y_mesh,
@@ -320,8 +307,8 @@ where
 
         return target.draw_mesh(
             (self.n_y_labels, self.n_x_labels),
-            mesh_style_1,
-            label_style,
+            &mesh_style_1,
+            &label_style,
             |m| match m {
                 MeshLine::XMesh(_, _, v) => Some((self.format_x)(v)),
                 MeshLine::YMesh(_, _, v) => Some((self.format_y)(v)),

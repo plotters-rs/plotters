@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .disable_x_mesh()
-        .line_style_1(&Into::into(&RGBColor(255, 255, 255).mix(0.3)))
+        .line_style_1(&RGBColor(255, 255, 255).mix(0.3))
         .x_label_offset(30)
         .draw()?;
 

@@ -83,3 +83,70 @@ impl SimpleColor for RGBColor {
         (self.0, self.1, self.2)
     }
 }
+
+pub struct Transparent;
+pub struct White;
+pub struct Black;
+pub struct Red;
+pub struct Green;
+pub struct Blue;
+pub struct Yellow;
+pub struct Cyan;
+pub struct Magenta;
+
+impl SimpleColor for White {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (255, 255, 255);
+    }
+}
+
+impl SimpleColor for Black {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (0, 0, 0);
+    }
+}
+
+impl SimpleColor for Green {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (0, 255, 0);
+    }
+}
+
+impl SimpleColor for Red {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (255, 0, 0);
+    }
+}
+
+impl SimpleColor for Blue {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (0, 0, 255);
+    }
+}
+
+impl SimpleColor for Cyan {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (0, 255, 255);
+    }
+}
+
+impl SimpleColor for Yellow {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (255, 255, 0);
+    }
+}
+
+impl SimpleColor for Magenta {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (255, 255, 0);
+    }
+}
+
+impl Color for Transparent {
+    fn rgb(&self) -> (u8, u8, u8) {
+        return (0, 0, 0);
+    }
+    fn alpha(&self) -> f64 {
+        return 0.0;
+    }
+}

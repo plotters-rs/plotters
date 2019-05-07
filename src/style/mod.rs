@@ -3,7 +3,10 @@ mod font;
 mod palette;
 use std::borrow::Borrow;
 
-pub use color::{Color, Mixable, PaletteColor, RGBColor, SimpleColor};
+pub use color::{
+    Black, Blue, Color, Cyan, Green, Magenta, Mixable, PaletteColor, RGBColor, Red, SimpleColor,
+    Transparent, White, Yellow,
+};
 pub use font::{FontDesc, FontError, FontResult};
 pub use palette::*;
 
