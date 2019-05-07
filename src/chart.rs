@@ -177,67 +177,88 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
+    /// The offset of x labels. This is used when we want to place the label in the middle of 
+    /// the grid. This is useful if we are drawing a histogram
+    /// - `value`: The offset in pixel
     pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
         self.x_label_offset = value;
         return self;
     }
+
+    /// Disable the mesh for the x axis. 
     pub fn disable_x_mesh(&mut self) -> &mut Self {
         self.draw_x_mesh = false;
         return self;
     }
+
+    /// Disable the mesh for the y axis
     pub fn disable_y_mesh(&mut self) -> &mut Self {
         self.draw_y_mesh = false;
         return self;
     }
+
+    /// Disable drawing the X axis
     pub fn disable_x_axis(&mut self) -> &mut Self {
         self.draw_x_axis = false;
         return self;
     }
+
+    /// Disable drawing the Y axis
     pub fn disable_y_axis(&mut self) -> &mut Self {
         self.draw_y_axis = false;
         return self;
     }
+
+    /// Set the style definition for the axis
+    /// - `style`
     pub fn axis_style(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
         self.axis_style = Some(style);
         return self;
     }
     /// Set how many labels for the X axis at most
+    /// - `value`: The maximum desired number of labels in the X axis
     pub fn x_labels(&mut self, value: usize) -> &mut Self {
         self.n_x_labels = value;
         return self;
     }
 
     /// Set how many label for the Y axis at most
+    /// - `value`: The maximum desired number of labels in the Y axis
     pub fn y_labels(&mut self, value: usize) -> &mut Self {
         self.n_y_labels = value;
         return self;
     }
 
-    /// Set the style for the coarse grid
+    /// Set the style for the coarse grind grid
+    /// - `style`: This is the fcoarse grind grid style
     pub fn line_style_1(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
         self.line_style_1 = Some(style);
         return self;
     }
 
-    /// Set the style for the fine grid
+    /// Set the style for the fine grind grid
+    /// - `style`: The fine grind grid style
     pub fn line_style_2(&mut self, style: &'a ShapeStyle<'a>) -> &mut Self {
         self.line_style_2 = Some(style);
         return self;
     }
 
     /// Set the style of the label text
+    /// - `style`: The text style that would be applied to the labels
     pub fn label_style(&mut self, style: &'a TextStyle<'a>) -> &mut Self {
         self.label_style = Some(style);
         return self;
     }
 
     /// Set the formatter function for the X label text
+    /// - `fmt`: The formatter function
     pub fn x_label_formatter(&mut self, fmt: &'a dyn Fn(&X::ValueType) -> String) -> &mut Self {
         self.format_x = fmt;
         return self;
     }
 
     /// Set the formatter function for the Y label text
+    /// - `fmt`: The formatter function
     pub fn y_label_formatter(&mut self, fmt: &'a dyn Fn(&Y::ValueType) -> String) -> &mut Self {
         self.format_y = fmt;
         return self;

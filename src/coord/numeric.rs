@@ -80,7 +80,7 @@ macro_rules! gen_key_points_comp {
             let right = range.1 - rem_euclid(range.1, scale);
             while left <= right {
                 let size = (10f64).powf(digits as f64);
-                left = (left * size).round() / size;
+                left = (left * size + 1e-3).round() / size;
                 ret.push(left as $type);
                 left += scale;
             }
