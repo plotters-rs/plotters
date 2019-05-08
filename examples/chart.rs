@@ -19,8 +19,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
-        .set_x_label_size(50)
-        .set_y_label_size(60)
+        .x_label_area_size(50)
+        .y_label_area_size(60)
         .caption("Sine and Cosine", &font_small)
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32);
 
@@ -79,8 +79,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for (drawing_area, idx) in drawing_areas.iter().zip(1..) {
         let mut cc = ChartBuilder::on(&drawing_area)
-            .set_x_label_size(50)
-            .set_y_label_size(60)
+            .x_label_area_size(50)
+            .y_label_area_size(60)
             .caption(format!("y = x^{}", 1 + 2 * idx), &font_small)
             .build_ranged(-1f32..1f32, -1f32..1f32);
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;

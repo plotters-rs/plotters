@@ -7,8 +7,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255, 255, 255))?;
 
     let mut chart = ChartBuilder::on(&root)
-        .set_x_label_size(25)
-        .set_y_label_size(40)
+        .x_label_area_size(25)
+        .y_label_area_size(40)
         .caption("Histogram Test", &font)
         .build_ranged(0u32..10u32, 0u32..10u32);
 

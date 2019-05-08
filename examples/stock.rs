@@ -21,8 +21,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let mut chart = ChartBuilder::on(&root)
-        .set_x_label_size(40)
-        .set_y_label_size(40)
+        .x_label_area_size(40)
+        .y_label_area_size(40)
         .caption("MSFT Stock Price", &font)
         .build_ranged(from_date..to_date, 110f32..135f32);
 

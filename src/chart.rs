@@ -42,7 +42,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// Set the margin size of the chart
     /// - `size`: The size of the chart margin. If the chart builder is titled, we don't apply any
     /// margin
-    pub fn set_margin(&mut self, size: u32) -> &mut Self {
+    pub fn margin(&mut self, size: u32) -> &mut Self {
         if self.titled_area.is_some() {
             return self;
         }
@@ -53,14 +53,14 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
 
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
-    pub fn set_x_label_size(&mut self, size: u32) -> &mut Self {
+    pub fn x_label_area_size(&mut self, size: u32) -> &mut Self {
         self.x_label_size = size;
         return self;
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
-    pub fn set_y_label_size(&mut self, size: u32) -> &mut Self {
+    pub fn y_label_area_size(&mut self, size: u32) -> &mut Self {
         self.y_label_size = size;
         return self;
     }

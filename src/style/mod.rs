@@ -10,7 +10,7 @@ pub use color::{
 pub use font::{FontDesc, FontError, FontResult};
 pub use palette::*;
 
-/// The object that describe the style of a text
+/// Denotes an style of a text
 #[derive(Clone)]
 pub struct TextStyle<'a> {
     pub font: &'a FontDesc<'a>,
@@ -18,7 +18,7 @@ pub struct TextStyle<'a> {
 }
 
 impl<'a> TextStyle<'a> {
-    /// Make a filled shape style
+    /// Determine the color of the style
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         return Self {
             font: self.font,
@@ -36,7 +36,7 @@ impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     }
 }
 
-/// The object that describes the style of a shape
+/// Denotes an style for any of shape
 #[derive(Clone)]
 pub struct ShapeStyle<'a> {
     pub color: &'a dyn Color,
