@@ -11,7 +11,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 
-use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift, AsRangedCoord};
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
@@ -91,11 +91,11 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `x_spec`: The specification of X axis
     /// - `y_spec`: The specification of Y axis
     /// - Returns: A chart context
-    pub fn build_ranged<XR: Ranged, YR: Ranged, X: Into<XR>, Y: Into<YR>>(
+    pub fn build_ranged<X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
-    ) -> ChartContext<DB, RangedCoord<XR, YR>> {
+    ) -> ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>> {
         let mut x_label_area = None;
         let mut y_label_area = None;
 
@@ -131,8 +131,8 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
             y_label_area,
             series_area: None,
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
-                x_spec.into(),
-                y_spec.into(),
+                x_spec,
+                y_spec,
                 pixel_range,
             )),
         };

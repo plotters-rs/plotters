@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::{DescreteRanged, Ranged};
+use super::{DescreteRanged, Ranged, AsRangedCoord};
 
 macro_rules! impl_descrete_trait {
     ($name:ident) => {
@@ -10,6 +10,15 @@ macro_rules! impl_descrete_trait {
             }
         }
     };
+}
+
+macro_rules! impl_ranged_type_trait {
+    ($value:ty, $coord:ident) => {
+        impl AsRangedCoord for Range<$value> {
+            type CoordDescType = $coord;
+            type Value = $value;
+        }
+    }
 }
 
 macro_rules! make_numeric_coord {
@@ -138,6 +147,13 @@ impl_descrete_trait!(RangedCoordu32);
 impl_descrete_trait!(RangedCoordi32);
 impl_descrete_trait!(RangedCoordu64);
 impl_descrete_trait!(RangedCoordi64);
+
+impl_ranged_type_trait!(f32, RangedCoordf32);
+impl_ranged_type_trait!(f64, RangedCoordf64);
+impl_ranged_type_trait!(i32, RangedCoordi32);
+impl_ranged_type_trait!(i64, RangedCoordi64);
+impl_ranged_type_trait!(u32, RangedCoordu32);
+impl_ranged_type_trait!(u64, RangedCoordu64);
 
 /*
 pub fn keypoints_i64(range:(i64,i64), n:usize) -> Vec<i64> {

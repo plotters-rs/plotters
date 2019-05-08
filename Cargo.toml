@@ -4,7 +4,7 @@ version = "0.1.9"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
-description = "Anoter Plotting Library in Rust"
+description = "Plot Drawing Library in Pure Rust"
 repository = "https://github.com/38/plotters"
 
 [dependencies]

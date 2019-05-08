@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_x_label_size(25)
         .set_y_label_size(40)
         .caption("Histogram Test", &font)
-        .build_ranged::<RangedCoordu32, RangedCoordu32, _, _>(0..10, 0..10);
+        .build_ranged(0u32..10u32, 0u32..10u32);
 
     chart
         .configure_mesh()

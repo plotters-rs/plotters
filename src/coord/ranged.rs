@@ -128,3 +128,17 @@ where
     /// Get the smallest value that is larger than the `this` value
     fn next_value(this: &Self::ValueType) -> Self::ValueType;
 }
+
+pub trait AsRangedCoord : Sized{
+    type CoordDescType : Ranged + From<Self>;
+    type Value;
+}
+
+impl <T> AsRangedCoord for T 
+    where 
+    T: Ranged,
+    Range<T::ValueType> : Into<T>,
+{
+    type CoordDescType = T;
+    type Value = T::ValueType;
+}

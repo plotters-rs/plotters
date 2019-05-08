@@ -3,7 +3,6 @@ use chrono::{Date, DateTime, Duration, TimeZone};
 use std::ops::Range;
 
 use super::Ranged;
-//use super::numeric::keypoints_i64;
 
 /// The ranged coordinate for date
 pub struct RangedDate<Z: TimeZone>(Date<Z>, Date<Z>);
@@ -53,4 +52,9 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
 
         return ret;
     }
+}
+
+impl <Z:TimeZone> super::AsRangedCoord for Range<Date<Z>> {
+    type CoordDescType = RangedDate<Z>;
+    type Value = Date<Z>;
 }
