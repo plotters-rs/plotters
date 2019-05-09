@@ -8,9 +8,14 @@ description = "Plot Drawing Library in Pure Rust"
 repository = "https://github.com/38/plotters"
 
 [dependencies]
+chrono = "0.4.6"
 svg = "0.5.12"
-image = "0.21.1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = "0.7.6"
+image = "0.21.1"
 font-loader = "0.8.0"
 lazy_static = "^1.2"
-chrono = "0.4.6"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { version = "0.3.4", features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window'] }
