@@ -28,6 +28,11 @@ Currently, we support line series, point series and candlestick series.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
 
+- Plotting on HTML5 canvas
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
+`CanvasBackend` instead of other backend and all other API remains the same!
+Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/)
+
 
 ### Gallery
 
@@ -59,8 +64,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255, 255, 255))?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
-        .set_x_label_size(30)
-        .set_y_label_size(30)
+        .x_label_arae_size(30)
+        .y_label_area_size(30)
         .build_ranged(-1f32..1f32, 0f32..1f32);
 
     chart.configure_mesh().draw()?;

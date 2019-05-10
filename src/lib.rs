@@ -12,7 +12,7 @@
 
 
 
-Plotters is a flexible drawing library for data visualization written in pure Rust.
+Plotters is a flexible drawing library for data visualization written in pure Rust for both native and WebAssembly.
 
 - Why plotting in Rust?
 Although rendering a figure doesn't requires too many computation power in most of the case,
@@ -26,6 +26,11 @@ figures, since it runs very fast while having high-level abstraction abilities.
 Currently, we support line series, point series and candlestick series.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
+
+- Plotting on HTML5 canvas
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
+`CanvasBackend` instead of other backend and all other API remains the same!
+Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/)
 
 
 ## Gallery
