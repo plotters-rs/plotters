@@ -21,4 +21,7 @@ mod backend_impl;
 pub mod backend;
 
 pub use area::{DrawingArea, DrawingAreaErrorKind};
-pub use backend_impl::{BitMapBackend, SVGBackend};
+
+pub use backend_impl::*;
+
+pub use backend::DrawingBackend;

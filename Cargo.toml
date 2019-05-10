@@ -18,4 +18,6 @@ font-loader = "0.8.0"
 lazy_static = "^1.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-web-sys = { version = "0.3.4", features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window'] }
+web-sys = { version = "0.3.4", features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d'] }
+js-sys= "0.3.4"
+wasm-bindgen = "0.2.43"

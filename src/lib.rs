@@ -296,15 +296,13 @@ pub mod prelude {
         CoordTranslate, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
         RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate, RangedDateTime,
     };
-    pub use crate::drawing::{backend::DrawingBackend, DrawingArea};
+    pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
         Black, Blue, Color, Cyan, FontDesc, Green, Magenta, Mixable, Palette, Palette100,
         Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle, SimpleColor, TextStyle,
         Transparent, White, Yellow,
     };
-
-    pub use crate::drawing::{BitMapBackend, SVGBackend};
 
     pub use crate::element::{
         CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text,
