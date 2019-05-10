@@ -1,8 +1,8 @@
+use super::{FontData, FontDataInternal};
 /// The font management utilities
 /// This file retains a font cache and makes font object.
 ///
 use std::convert::From;
-use super::{FontDataInternal, FontData};
 
 /// The error type for the font implementation
 pub type FontError = <FontDataInternal as FontData>::ErrorType;
@@ -29,7 +29,7 @@ impl<'a> FontDesc<'a> {
         return Self {
             size,
             name: typeface,
-            data: FontDataInternal::new(typeface)
+            data: FontDataInternal::new(typeface),
         };
     }
 
@@ -38,7 +38,7 @@ impl<'a> FontDesc<'a> {
         return Self {
             size,
             name: self.name,
-            data: self.data.clone()
+            data: self.data.clone(),
         };
     }
 
@@ -56,7 +56,7 @@ impl<'a> FontDesc<'a> {
     pub fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {
         return match &self.data {
             Ok(ref font) => font.estimate_layout(self.size, text),
-            Err(e) => Err(e.clone())
+            Err(e) => Err(e.clone()),
         };
     }
 
@@ -74,8 +74,8 @@ impl<'a> FontDesc<'a> {
         draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
         return match &self.data {
-            Ok(ref font) => font.draw((x,y), self.size, text, draw), 
-            Err(e) => Err(e.clone())
+            Ok(ref font) => font.draw((x, y), self.size, text, draw),
+            Err(e) => Err(e.clone()),
         };
     }
 }

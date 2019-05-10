@@ -11,7 +11,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 
-use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift, AsRangedCoord};
+use crate::coord::{AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};

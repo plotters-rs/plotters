@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::{DescreteRanged, Ranged, AsRangedCoord};
+use super::{AsRangedCoord, DescreteRanged, Ranged};
 
 macro_rules! impl_descrete_trait {
     ($name:ident) => {
@@ -18,7 +18,7 @@ macro_rules! impl_ranged_type_trait {
             type CoordDescType = $coord;
             type Value = $value;
         }
-    }
+    };
 }
 
 macro_rules! make_numeric_coord {

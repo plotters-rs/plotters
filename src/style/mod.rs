@@ -1,6 +1,6 @@
 mod color;
-mod palette;
 mod font;
+mod palette;
 use std::borrow::Borrow;
 
 pub use color::{

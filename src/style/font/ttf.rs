@@ -1,12 +1,12 @@
-use std::pin::Pin;
-use std::marker::PhantomPinned;
-use std::slice::from_raw_parts;
 use std::collections::HashMap;
-use std::sync::Mutex;
 use std::i32;
+use std::marker::PhantomPinned;
+use std::pin::Pin;
 use std::rc::Rc;
+use std::slice::from_raw_parts;
+use std::sync::Mutex;
 
-use rusttype::{Error, Scale, Font, point};
+use rusttype::{point, Error, Font, Scale};
 
 use lazy_static::lazy_static;
 
@@ -15,7 +15,6 @@ use font_loader::system_fonts;
 use super::FontData;
 
 type FontResult<T> = Result<T, FontError>;
-
 
 #[derive(Debug, Clone)]
 pub enum FontError {
@@ -43,7 +42,7 @@ struct OwnedFont {
 }
 
 impl OwnedFont {
-    fn new(data:Vec<u8>) -> Result<Pin<Box<Self>>, Error> {
+    fn new(data: Vec<u8>) -> Result<Pin<Box<Self>>, Error> {
         let font_obj = OwnedFont {
             data,
             font: None,
@@ -56,7 +55,8 @@ impl OwnedFont {
             let addr = &boxed_font_obj.data[0] as *const u8;
             let font = Font::from_bytes(from_raw_parts(addr, boxed_font_obj.data.len()))?;
             let mut_ref: Pin<&mut Self> = Pin::as_mut(&mut boxed_font_obj);
-            Pin::get_unchecked_mut(mut_ref).font = std::mem::transmute::<_, Option<Font<'static>>>(Some(font));
+            Pin::get_unchecked_mut(mut_ref).font =
+                std::mem::transmute::<_, Option<Font<'static>>>(Some(font));
         }
 
         return Ok(boxed_font_obj);
@@ -69,14 +69,15 @@ impl Drop for OwnedFont {
     }
 }
 
-impl <'a> Into<&'a Font<'a>> for &'a OwnedFont {
+impl<'a> Into<&'a Font<'a>> for &'a OwnedFont {
     fn into(self) -> &'a Font<'a> {
         return self.font.as_ref().unwrap();
     }
 }
 
 lazy_static! {
-    static ref FONT_DATA_CACHE: Mutex<HashMap<String, Pin<Box<OwnedFont>>>> = { Mutex::new(HashMap::new()) };
+    static ref FONT_DATA_CACHE: Mutex<HashMap<String, Pin<Box<OwnedFont>>>> =
+        { Mutex::new(HashMap::new()) };
 }
 
 #[allow(dead_code)]
@@ -87,15 +88,17 @@ fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
                 .family(face)
                 .build();
             if let Some((data, _)) = system_fonts::get(&query) {
-                let font = OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Rc::new(e)))?;
+                let font =
+                    OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Rc::new(e)))?;
                 cache.insert(face.to_string(), font);
             } else {
                 return Err(FontError::NoSuchFont);
             }
         }
-        let font_ref:&'static OwnedFont = unsafe{ std::mem::transmute(cache.get(face).unwrap().as_ref().get_ref()) };
+        let font_ref: &'static OwnedFont =
+            unsafe { std::mem::transmute(cache.get(face).unwrap().as_ref().get_ref()) };
         let addr = Into::<&'static Font<'static>>::into(font_ref) as *const Font<'static>;
-        return Ok(unsafe {addr.as_ref().unwrap()});
+        return Ok(unsafe { addr.as_ref().unwrap() });
     }) {
         Ok(what) => what,
         Err(_) => Err(FontError::LockError),
@@ -117,10 +120,14 @@ pub struct FontDataInternal(&'static Font<'static>);
 
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
-    fn new(face:&str) -> Result<Self, FontError> {
+    fn new(face: &str) -> Result<Self, FontError> {
         return Ok(FontDataInternal(load_font_data(face)?));
     }
-    fn estimate_layout(&self, size:f64, text:&str) -> Result<((i32, i32), (i32, i32)), Self::ErrorType> {
+    fn estimate_layout(
+        &self,
+        size: f64,
+        text: &str,
+    ) -> Result<((i32, i32), (i32, i32)), Self::ErrorType> {
         let scale = Scale::uniform(size as f32);
 
         let (mut min_x, mut min_y) = (i32::MAX, i32::MAX);
@@ -144,7 +151,13 @@ impl FontData for FontDataInternal {
 
         return Ok(((min_x, min_y), (max_x, max_y)));
     }
-    fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(&self, (x,y): (i32, i32), size:f64, text:&str, mut draw: DrawFunc) -> Result<Result<(), E>, Self::ErrorType> {
+    fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
+        &self,
+        (x, y): (i32, i32),
+        size: f64,
+        text: &str,
+        mut draw: DrawFunc,
+    ) -> Result<Result<(), E>, Self::ErrorType> {
         let ((_, b), (_, _)) = self.estimate_layout(size, text)?;
 
         let scale = Scale::uniform(size as f32);
@@ -164,8 +177,6 @@ impl FontData for FontDataInternal {
         return Ok(result);
     }
 }
-
-
 
 #[cfg(test)]
 mod test {

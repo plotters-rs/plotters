@@ -129,15 +129,15 @@ where
     fn next_value(this: &Self::ValueType) -> Self::ValueType;
 }
 
-pub trait AsRangedCoord : Sized{
-    type CoordDescType : Ranged + From<Self>;
+pub trait AsRangedCoord: Sized {
+    type CoordDescType: Ranged + From<Self>;
     type Value;
 }
 
-impl <T> AsRangedCoord for T 
-    where 
+impl<T> AsRangedCoord for T
+where
     T: Ranged,
-    Range<T::ValueType> : Into<T>,
+    Range<T::ValueType>: Into<T>,
 {
     type CoordDescType = T;
     type Value = T::ValueType;

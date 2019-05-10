@@ -11,7 +11,7 @@ pub use datetime::{RangedDate, RangedDateTime};
 pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
 };
-pub use ranged::{DescreteRanged, MeshLine, Ranged, RangedCoord, AsRangedCoord};
+pub use ranged::{AsRangedCoord, DescreteRanged, MeshLine, Ranged, RangedCoord};
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
