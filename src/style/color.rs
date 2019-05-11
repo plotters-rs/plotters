@@ -84,69 +84,37 @@ impl SimpleColor for RGBColor {
     }
 }
 
-pub struct Transparent;
-pub struct White;
-pub struct Black;
-pub struct Red;
-pub struct Green;
-pub struct Blue;
-pub struct Yellow;
-pub struct Cyan;
-pub struct Magenta;
+macro_rules! predefined_color {
+    ($name:ident, $r:expr, $g:expr, $b:expr, $doc: expr) => {
+        #[doc = $doc]
+        pub struct $name;
+        impl SimpleColor for $name {
+            fn rgb(&self) -> (u8,u8,u8) {
+                return ($r, $g, $b);
+            }
+        }
+    };
 
-impl SimpleColor for White {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (255, 255, 255);
+    ($name:ident, $r:expr, $g:expr, $b:expr, $a: expr, $doc: expr) => {
+        #[doc = $doc]
+        pub struct $name;
+        impl Color for $name {
+            fn rgb(&self) -> (u8,u8,u8) {
+                return ($r, $g, $b);
+            }
+            fn alpha(&self) -> f64 { 
+                return $a;
+            }
+        }
     }
 }
 
-impl SimpleColor for Black {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (0, 0, 0);
-    }
-}
-
-impl SimpleColor for Green {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (0, 255, 0);
-    }
-}
-
-impl SimpleColor for Red {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (255, 0, 0);
-    }
-}
-
-impl SimpleColor for Blue {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (0, 0, 255);
-    }
-}
-
-impl SimpleColor for Cyan {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (0, 255, 255);
-    }
-}
-
-impl SimpleColor for Yellow {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (255, 255, 0);
-    }
-}
-
-impl SimpleColor for Magenta {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (255, 255, 0);
-    }
-}
-
-impl Color for Transparent {
-    fn rgb(&self) -> (u8, u8, u8) {
-        return (0, 0, 0);
-    }
-    fn alpha(&self) -> f64 {
-        return 0.0;
-    }
-}
+predefined_color!(White, 255, 255, 255, "The predefined white color");
+predefined_color!(Black, 0, 0, 0, "The predefined black color");
+predefined_color!(Red, 255, 0, 0, "The predefined red color");
+predefined_color!(Green, 0, 255, 0, "The predefined green color");
+predefined_color!(Blue, 0, 0, 255, "The predefined blue color");
+predefined_color!(Yellow, 255, 255, 0, "The predefined yellow color");
+predefined_color!(Cyan, 0, 255, 255, "The predefined cyan color");
+predefined_color!(Magenta, 255, 0, 255, "The predefined magenta color");
+predefined_color!(Transparent, 0, 0, 0, 0.0, "The predefined transparent");

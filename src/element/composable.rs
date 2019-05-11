@@ -3,6 +3,7 @@ use std::borrow::Borrow;
 use std::iter::{once, Once};
 use std::ops::Add;
 
+/// An empty composibable element, which is the start point of an ad-hoc composible element
 pub struct EmptyElement<Coord> {
     coord: Coord,
 }

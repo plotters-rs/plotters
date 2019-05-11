@@ -2,12 +2,16 @@ use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, TextStyle};
 
-/// Describe a path
+/// An element of a series of connected lines
 pub struct Path<'a, Coord> {
     points: Vec<Coord>,
     style: ShapeStyle<'a>,
 }
 impl<'a, Coord> Path<'a, Coord> {
+    /// Create a new path
+    /// - `points`: The iterator of the points
+    /// - `style`: The shape style
+    /// - returns the created element
     pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle<'a>>>(points: P, style: S) -> Self {
         return Self {
             points: points.into(),
@@ -34,6 +38,7 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
     }
 }
 
+/// A rectangle element
 pub struct Rectangle<'a, Coord> {
     points: [Coord; 2],
     style: ShapeStyle<'a>,
@@ -41,6 +46,10 @@ pub struct Rectangle<'a, Coord> {
 }
 
 impl<'a, Coord> Rectangle<'a, Coord> {
+    /// Create a new path
+    /// - `points`: The left upper and right lower coner of the rectangle
+    /// - `style`: The shape style
+    /// - returns the created element
     pub fn new<S: Into<ShapeStyle<'a>>>(points: [Coord; 2], style: S) -> Self {
         return Self {
             points,
@@ -49,6 +58,11 @@ impl<'a, Coord> Rectangle<'a, Coord> {
         };
     }
 
+    /// Set the margin of the rectangle
+    /// - `t`: The top margin
+    /// - `b`: The bottom margin
+    /// - `l`: The left margin
+    /// - `r`: The right margin
     pub fn set_margin(&mut self, t: u32, b: u32, l: u32, r: u32) -> &mut Self {
         self.margin = (t, b, l, r);
         return self;
@@ -84,6 +98,7 @@ impl<'a, Coord: 'a> Drawable for Rectangle<'a, Coord> {
     }
 }
 
+/// A text element
 pub struct Text<'a, Coord> {
     text: &'a str,
     coord: Coord,
@@ -91,6 +106,11 @@ pub struct Text<'a, Coord> {
 }
 
 impl<'a, Coord> Text<'a, Coord> {
+    /// Create a new text element
+    /// - `text`: The text for the element
+    /// - `points`: The upper left conner for the text element
+    /// - `style`: The text style
+    /// - Return the newly created text element
     pub fn new<T: AsRef<str>, S: Into<TextStyle<'a>>>(
         text: &'a T,
         points: Coord,
@@ -125,6 +145,7 @@ impl<'a, Coord: 'a> Drawable for Text<'a, Coord> {
     }
 }
 
+/// A circle element
 pub struct Circle<'a, Coord> {
     center: Coord,
     size: u32,
@@ -132,6 +153,11 @@ pub struct Circle<'a, Coord> {
 }
 
 impl<'a, Coord> Circle<'a, Coord> {
+    /// Create a new circle element
+    /// - `coord` The center of the circle
+    /// - `size` The radius of the circle
+    /// - `style` The style of the circle
+    /// - Return: The newly created circle element
     pub fn new(coord: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
         return Self {
             center: coord,
@@ -167,6 +193,8 @@ impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
     }
 }
 
+/// A text element. This is similar to the text element, but it owns the 
+/// string. 
 pub struct OwnedText<'a, Coord> {
     text: String,
     coord: Coord,
@@ -174,6 +202,11 @@ pub struct OwnedText<'a, Coord> {
 }
 
 impl<'a, Coord> OwnedText<'a, Coord> {
+    /// Create a new owned text element
+    /// - `text`: The text to create
+    /// - `points`: The left upper conner
+    /// - `style`: The font style
+    /// - Return the newly created owned text object
     pub fn new<S: Into<TextStyle<'a>>>(text: String, points: Coord, style: S) -> Self {
         return Self {
             text,

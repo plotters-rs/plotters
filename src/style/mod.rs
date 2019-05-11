@@ -1,3 +1,6 @@
+/*!
+  The style for shapes and text, font, color, etc.
+*/
 mod color;
 mod font;
 mod palette;

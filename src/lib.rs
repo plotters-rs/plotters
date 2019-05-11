@@ -298,6 +298,7 @@ pub mod element;
 pub mod series;
 pub mod style;
 
+/// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext};
     pub use crate::coord::{

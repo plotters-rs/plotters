@@ -1,4 +1,6 @@
-/// Defines the drawing elements, which is the high-level drawing interface
+/*!
+  Defines the drawing elements, the high-level drawing unit in Plotters drawing system
+*/
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
 

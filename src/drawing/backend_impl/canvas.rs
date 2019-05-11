@@ -1,7 +1,3 @@
-/*!
-  The backend that is drawing on the HTML canvas
-*/
-
 use js_sys::JSON;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
@@ -9,6 +5,7 @@ use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, FontDesc};
 
+/// The backend that is drawing on the HTML canvas
 pub struct CanvasBackend {
     canvas: HtmlCanvasElement,
     context: CanvasRenderingContext2d,
@@ -43,6 +40,9 @@ impl std::fmt::Debug for CanvasError {
 impl std::error::Error for CanvasError {}
 
 impl CanvasBackend {
+    /// Create a new drawing backend backed with an HTML5 canvas object
+    /// - `elem_id` The element id for the canvas
+    /// - Return either some drawing backend has been created, or none in error case
     pub fn new(elem_id: &str) -> Option<Self> {
         let document = window()?.document()?;
         let canvas = document.get_element_by_id(elem_id)?;
