@@ -33,6 +33,7 @@ Plotters currently supports backend that uses the HTML5 canvas. To use the WASM 
 Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/).
 An sample WASM application is avaiable at examples/wasm-demo. To try it just simply run the shell script `start-server.sh` under 
 that directory.
+And the demo is avaiable at [this link](https://plumberserver.com/plotters-wasm-demo/index.html) as well.
 
 
 ## Gallery
