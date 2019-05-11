@@ -2,5 +2,7 @@
 **/*.rs.bk
 Cargo.lock
 .*.sw*
-Cargo.lock
 backup/*
+**/Cargo.lock
+**/target
+examples/wasm-demo/www/pkg

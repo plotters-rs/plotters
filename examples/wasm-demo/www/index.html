@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>title</title>
+	</head>
+	<body>
+		<canvas id="canvas" height=400 width=600></canvas>
+		<br/>
+		<script type="module">
+			import * as wasm from "./pkg/wasm_demo.js";
+			wasm.default("./pkg/wasm_demo_bg.wasm").then(function() {
+				wasm.draw("canvas");
+			});
+		</script>
+	</body>
+</html>

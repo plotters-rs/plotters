@@ -30,7 +30,9 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
 - Plotting on HTML5 canvas
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
-Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/)
+Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/).
+An sample WASM application is avaiable at examples/wasm-demo. To try it just simply run the shell script `start-server.sh` under 
+that directory.
 
 
 ## Gallery
