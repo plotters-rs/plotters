@@ -1,12 +1,14 @@
 [package]
 name = "plotters"
-version = "0.1.10"
+version = "0.1.11"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
 description = "Plot Drawing Library in Pure Rust for both native and WASM applications"
 repository = "https://github.com/38/plotters"
 keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
+categories = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
+readme = "README.md"
 
 [dependencies]
 chrono = "0.4.6"
