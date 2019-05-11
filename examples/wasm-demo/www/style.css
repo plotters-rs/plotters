@@ -1,0 +1,12 @@
+.centered {
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+#pow {
+	width: 600px;
+}
+

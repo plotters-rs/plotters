@@ -3,14 +3,36 @@
 	<head>
 		<meta charset="utf-8">
 		<title>title</title>
+		<link rel="stylesheet" href="./style.css">
 	</head>
 	<body>
-		<canvas id="canvas" height=400 width=600></canvas>
+		<div>
+			<canvas id="canvas" class="centered" height=400 width=600></canvas>
+			<br/>
+			<select id="pow" class="centered">
+				<option value="0">y = 1</option>
+				<option value="1">y = x</option>
+				<option value="2">y = x^2</option>
+				<option value="3">y = x^3</option>
+				<option value="4">y = x^4</option>
+				<option value="5">y = x^5</option>
+			</select>
+		</div>
 		<br/>
 		<script type="module">
 			import * as wasm from "./pkg/wasm_demo.js";
 			wasm.default("./pkg/wasm_demo_bg.wasm").then(function() {
-				wasm.draw("canvas");
+				var sel = document.getElementById("pow");
+				function update_plot() {
+					var pow = Number(sel.selectedOptions[0].value);
+					wasm.draw("canvas", pow);
+				}
+
+				update_plot();
+
+				sel.addEventListener("change", function (e) {
+					update_plot();
+				});
 			});
 		</script>
 	</body>

@@ -10,3 +10,8 @@ crate-type=['cdylib']
 [dependencies]
 plotters = {path = "../.."}
 wasm-bindgen = "0.2.43"
+wee_alloc = "*"
+
+[profile.release]
+opt-level = 'z'
+lto = true

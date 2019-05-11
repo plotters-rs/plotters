@@ -1,22 +1,25 @@
 use plotters::prelude::*;
 use wasm_bindgen::prelude::*;
 
-fn start_plotting(element:&str) -> Result<(), Box<dyn std::error::Error>> {
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+fn start_plotting(element:&str, pow: i32) -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = CanvasBackend::new(element).unwrap();
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(20.0);
     root.fill(&RGBColor(255, 255, 255))?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &font)
+        .caption(format!("y=x^{}", pow), &font)
         .x_label_area_size(30)
         .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, 0f32..1f32);
+        .build_ranged(-1f32..1f32, -1f32..1f32);
 
     chart.configure_mesh().draw()?;
 
     chart.draw_series(LineSeries::new(
-        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
+        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x.powf(pow as f32))),
         &RGBColor(255, 0, 0),
     ))?;
 
@@ -25,6 +28,6 @@ fn start_plotting(element:&str) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[wasm_bindgen]
-pub fn draw(element:&str) -> bool {
-    return start_plotting(element).is_ok();
+pub fn draw(element:&str, p:i32) -> bool {
+    return start_plotting(element, p).is_ok();
 }
