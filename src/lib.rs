@@ -15,6 +15,7 @@
 Plotters is a flexible drawing library for data visualization written in pure Rust for both native and WebAssembly.
 
 - Why plotting in Rust?
+
 Although rendering a figure doesn't requires too many computation power in most of the case,
 and programming language such as Python and Javascript is used for visualization purpose.
 Sometimes we need to make a figure based on huge amount of data, for example, rendering some
@@ -23,18 +24,18 @@ with many high-level programming language. In this case, Rust is a perfect candi
 figures, since it runs very fast while having high-level abstraction abilities.
 
 - What type of figure is supported?
+
 Currently, we support line series, point series and candlestick series.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
 
 - Plotting on HTML5 canvas
+
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
-Check the demo that uses Plotters with WASM at [here](http://home.chpc.utah.edu/~u0875014/wasm-test/).
-An sample WASM application is avaiable at examples/wasm-demo. To try it just simply run the shell script `start-server.sh` under 
-that directory.
-And the demo is avaiable at [this link](https://plumberserver.com/plotters-wasm-demo/index.html) as well.
 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Gallery
 
@@ -249,8 +250,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Then we can draw a mesh
     chart.configure_mesh()
         // We can customize the maxium number of labels allowed for each axis
-        .x_labels(30)
-        .y_labels(10)
+        .x_labels(5)
+        .y_labels(5)
         // We can also change the format of the label text
         .y_label_formatter(&|x| format!("{:.3}", x))
         .draw()?;
