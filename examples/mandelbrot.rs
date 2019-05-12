@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let range = plotting_area.get_pixel_range();
     let (pw, ph) = (range.0.end - range.0.start, range.1.end - range.1.start);
 
-    for (x, y, c) in mandelbrot_set(-2.1..0.6, -1.2..1.2, (pw as usize, ph as usize), 200) {
+    for (x, y, c) in mandelbrot_set(chart.x_range(), chart.y_range(), (pw as usize, ph as usize), 200) {
         if c != 200 {
             plotting_area
                 .draw_pixel((x, y), &Palette99::pick(c / 10).mix((c % 10) as f64 / 10.0))?;
