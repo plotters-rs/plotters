@@ -1,4 +1,5 @@
 use plotters::prelude::*;
+use std::ops::Range;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600));
@@ -24,11 +25,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let range = plotting_area.get_pixel_range();
     let (pw, ph) = (range.0.end - range.0.start, range.1.end - range.1.start);
 
-    for (x,y,c) in MandelbrotSet::new(-2.1..0.6, -1.2..1.2, (pw as usize, ph as usize), 200) {
+    for (x, y, c) in mandelbrot_set(-2.1..0.6, -1.2..1.2, (pw as usize, ph as usize), 200) {
         if c != 200 {
-            plotting_area.draw_pixel((x,y), &Palette99::pick(c/10).mix((c%10) as f64 / 10.0))?;
+            plotting_area
+                .draw_pixel((x, y), &Palette99::pick(c / 10).mix((c % 10) as f64 / 10.0))?;
         } else {
-            plotting_area.draw_pixel((x,y), &Black)?;
+            plotting_area.draw_pixel((x, y), &Black)?;
         }
     }
 
@@ -36,61 +38,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     return Ok(());
 }
 
-use std::ops::Range;
-struct MandelbrotSet {
-    start: (f64, f64),
-    step: (f64, f64),
-    size: (usize, usize),
-    this: (usize, usize),
-    iter: usize,
-}
-
-impl MandelbrotSet {
-    fn new(x: Range<f64>, y: Range<f64>, (nx, ny): (usize, usize), niter: usize) -> Self {
-        return MandelbrotSet {
-            start: (x.start, y.start),
-            step: ((x.end - x.start) / nx as f64, (y.end - y.start) / ny as f64),
-            size: (nx, ny),
-            this: (0, 0),
-            iter: niter,
-        };
-    }
-}
-
-impl Iterator for MandelbrotSet {
-    type Item = (f64, f64, usize);
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.this.0 < self.size.0 && self.this.1 < self.size.1 {
-            let (c_r, c_c) = (
-                self.start.0 + self.this.0 as f64 * self.step.0,
-                self.start.1 + self.this.1 as f64 * self.step.1,
-            );
-            let (mut z_r, mut z_c) = (0.0, 0.0);
-            let mut n_iter = 0;
-            for _ in 0..self.iter {
-                n_iter += 1;
-
-                let nz_r = z_r * z_r - z_c * z_c + c_r;
-                let nz_c = 2.0 * z_c * z_r + c_c;
-
-                z_r = nz_r;
-                z_c = nz_c;
-
-                if z_r * z_r + z_c * z_c > 1e10 {
-                    break;
-                }
+fn mandelbrot_set(
+    real: Range<f64>,
+    complex: Range<f64>,
+    samples: (usize, usize),
+    max_iter: usize,
+) -> impl Iterator<Item = (f64, f64, usize)> {
+    let step = (
+        (real.end - real.start) / samples.0 as f64,
+        (complex.end - complex.start) / samples.1 as f64,
+    );
+    return (0..(samples.0 * samples.1))
+        .map(move |k| {
+            (
+                real.start + step.0 * (k % samples.0) as f64,
+                complex.start + step.1 * (k / samples.0) as f64,
+            )
+        })
+        .map(move |c| {
+            let mut z = (0.0, 0.0);
+            let mut cnt = 0;
+            while cnt < max_iter && z.0 * z.0 + z.1 * z.1 <= 1e10 {
+                z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
+                cnt += 1;
             }
-
-            self.this.0 += 1;
-
-            if self.this.0 == self.size.0 {
-                self.this.0 = 0;
-                self.this.1 += 1;
-            }
-
-            return Some((c_r, c_c, n_iter));
-        }
-        return None;
-    }
+            return (c.0, c.1, cnt);
+        });
 }
-

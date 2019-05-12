@@ -325,7 +325,7 @@ pub mod prelude {
     };
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text, Pixel
+        CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Pixel, Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]

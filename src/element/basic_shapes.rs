@@ -7,8 +7,8 @@ pub struct Pixel<'a, Coord> {
     style: ShapeStyle<'a>,
 }
 
-impl <'a, Coord> Pixel<'a, Coord> {
-    pub fn new<P:Into<Coord>, S:Into<ShapeStyle<'a>>>(pos: P, style: S) -> Self {
+impl<'a, Coord> Pixel<'a, Coord> {
+    pub fn new<P: Into<Coord>, S: Into<ShapeStyle<'a>>>(pos: P, style: S) -> Self {
         return Self {
             pos: pos.into(),
             style: style.into(),
@@ -31,7 +31,7 @@ impl<'a, Coord: 'a> Drawable for Pixel<'a, Coord> {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_pixel((x,y), &Box::new(self.style.color));
+            return backend.draw_pixel((x, y), &Box::new(self.style.color));
         }
         return Ok(());
     }
