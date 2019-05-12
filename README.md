@@ -13,7 +13,7 @@
 
 
 
-- Why plotting in Rust?
+### Why plotting in Rust?
 
 Although rendering a figure doesn't requires too many computation power in most of the case,
 and programming language such as Python and Javascript is used for visualization purpose.
@@ -22,13 +22,13 @@ human gene data may requires to downsampling trillions data points, which isn't 
 with many high-level programming language. In this case, Rust is a perfect candidate for rendering
 figures, since it runs very fast while having high-level abstraction abilities.
 
-- What type of figure is supported?
+### What type of figure is supported?
 
 Currently, we support line series, point series and candlestick series.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
 
-- Plotting on HTML5 canvas
+### Plotting on HTML5 canvas
 
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
