@@ -78,6 +78,15 @@ And you should be able to try the deployed version with the following [link](htt
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Mandelbrot set
+    </div>
+</div>
+
 ## Quick Start
 
 ```rust
