@@ -24,8 +24,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let range = plotting_area.get_pixel_range();
     let (pw, ph) = (range.0.end - range.0.start, range.1.end - range.1.start);
+    let (xr, yr) = (chart.x_range(), chart.y_range());
 
-    for (x, y, c) in mandelbrot_set(chart.x_range(), chart.y_range(), (pw as usize, ph as usize), 200) {
+    for (x, y, c) in mandelbrot_set(xr, yr, (pw as usize, ph as usize), 200) {
         if c != 200 {
             plotting_area
                 .draw_pixel((x, y), &Palette99::pick(c / 10).mix((c % 10) as f64 / 10.0))?;
@@ -48,20 +49,17 @@ fn mandelbrot_set(
         (real.end - real.start) / samples.0 as f64,
         (complex.end - complex.start) / samples.1 as f64,
     );
-    return (0..(samples.0 * samples.1))
-        .map(move |k| {
-            (
-                real.start + step.0 * (k % samples.0) as f64,
-                complex.start + step.1 * (k / samples.0) as f64,
-            )
-        })
-        .map(move |c| {
-            let mut z = (0.0, 0.0);
-            let mut cnt = 0;
-            while cnt < max_iter && z.0 * z.0 + z.1 * z.1 <= 1e10 {
-                z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
-                cnt += 1;
-            }
-            return (c.0, c.1, cnt);
-        });
+    return (0..(samples.0 * samples.1)).map(move |k| {
+        let c = (
+            real.start + step.0 * (k % samples.0) as f64,
+            complex.start + step.1 * (k / samples.0) as f64,
+        );
+        let mut z = (0.0, 0.0);
+        let mut cnt = 0;
+        while cnt < max_iter && z.0 * z.0 + z.1 * z.1 <= 1e10 {
+            z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
+            cnt += 1;
+        }
+        return (c.0, c.1, cnt);
+    });
 }
