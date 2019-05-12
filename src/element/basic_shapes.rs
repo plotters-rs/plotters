@@ -2,6 +2,41 @@ use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, TextStyle};
 
+pub struct Pixel<'a, Coord> {
+    pos: Coord,
+    style: ShapeStyle<'a>,
+}
+
+impl <'a, Coord> Pixel<'a, Coord> {
+    pub fn new<P:Into<Coord>, S:Into<ShapeStyle<'a>>>(pos: P, style: S) -> Self {
+        return Self {
+            pos: pos.into(),
+            style: style.into(),
+        };
+    }
+}
+
+impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<'b, Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = std::iter::Once<&'a Coord>;
+    fn point_iter(self) -> Self::IntoIter {
+        return std::iter::once(&self.pos);
+    }
+}
+
+impl<'a, Coord: 'a> Drawable for Pixel<'a, Coord> {
+    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        if let Some((x, y)) = points.next() {
+            return backend.draw_pixel((x,y), &Box::new(self.style.color));
+        }
+        return Ok(());
+    }
+}
+
 /// An element of a series of connected lines
 pub struct Path<'a, Coord> {
     points: Vec<Coord>,
@@ -193,8 +228,8 @@ impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
     }
 }
 
-/// A text element. This is similar to the text element, but it owns the 
-/// string. 
+/// A text element. This is similar to the text element, but it owns the
+/// string.
 pub struct OwnedText<'a, Coord> {
     text: String,
     coord: Coord,

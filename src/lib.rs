@@ -34,7 +34,7 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Gallery
@@ -315,7 +315,7 @@ pub mod prelude {
     };
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text,
+        CandleStick, Circle, Cross, EmptyElement, OwnedText, Path, Rectangle, Text, Pixel
     };
 
     #[allow(type_alias_bounds)]

@@ -222,6 +222,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         });
     }
 
+    /// Draw a single pixel
+    pub fn draw_pixel<ColorType: Color>(&self, pos: CT::From, color: &ColorType) -> Result<(), DrawingAreaError<DB>> {
+        let pos = self.coord.translate(&pos);
+        return self.backend_ops(|b| {
+            return b.draw_pixel(pos, color);
+        });
+    }
+
     /// Open the backend
     pub fn open(&self) -> Result<(), DrawingAreaError<DB>> {
         return self.backend_ops(|b| b.open());

@@ -9,7 +9,7 @@ fn start_plotting(element: &str, pow: i32) -> Result<(), Box<dyn std::error::Err
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(20.0);
-    root.fill(&RGBColor(255, 255, 255))?;
+    root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
         .caption(format!("y=x^{}", pow), &font)
         .x_label_area_size(30)
@@ -22,7 +22,7 @@ fn start_plotting(element: &str, pow: i32) -> Result<(), Box<dyn std::error::Err
         (-50..=50)
             .map(|x| x as f32 / 50.0)
             .map(|x| (x, x.powf(pow as f32))),
-        &RGBColor(255, 0, 0),
+        &Red,
     ))?;
 
     root.close()?;

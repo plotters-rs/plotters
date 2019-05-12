@@ -54,6 +54,10 @@ And you should be able to try the deployed version with the following [link](htt
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem" width=200px></img>
+</a>
+
 ### Quick Start
 
 ```rust

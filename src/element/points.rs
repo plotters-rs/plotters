@@ -60,3 +60,9 @@ impl<'a, Coord> PointElement<'a, Coord> for Circle<'a, Coord> {
         return Self::new(pos, size, style);
     }
 }
+
+impl<'a, Coord> PointElement<'a, Coord> for Pixel<'a, Coord> {
+    fn make_point(pos: Coord, _: u32, style: ShapeStyle<'a>) -> Self {
+        return Self::new(pos, style);
+    }
+}

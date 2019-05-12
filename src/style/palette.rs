@@ -10,11 +10,11 @@ pub trait Palette {
     }
 }
 
-/// The palette of 99% accessibility 
+/// The palette of 99% accessibility
 pub struct Palette99;
-/// The palette of 99.99% accessibility 
+/// The palette of 99.99% accessibility
 pub struct Palette9999;
-/// The palette of 100% accessibility 
+/// The palette of 100% accessibility
 pub struct Palette100;
 
 impl Palette for Palette99 {

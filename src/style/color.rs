@@ -102,7 +102,7 @@ macro_rules! predefined_color {
             fn rgb(&self) -> (u8,u8,u8) {
                 return ($r, $g, $b);
             }
-            fn alpha(&self) -> f64 { 
+            fn alpha(&self) -> f64 {
                 return $a;
             }
         }

@@ -137,12 +137,42 @@ gen_key_points_comp!(integer, compute_u32_key_points, u32);
 gen_key_points_comp!(integer, compute_i64_key_points, i64);
 gen_key_points_comp!(integer, compute_u64_key_points, u64);
 
-make_numeric_coord!(f32, RangedCoordf32, compute_f32_key_points, "The ranged coordinate for type f32");
-make_numeric_coord!(f64, RangedCoordf64, compute_f64_key_points, "The ranged coordinate for type f64");
-make_numeric_coord!(u32, RangedCoordu32, compute_u32_key_points, "The ranged coordinate for type u32");
-make_numeric_coord!(i32, RangedCoordi32, compute_i32_key_points, "The ranged coordinate for type i32");
-make_numeric_coord!(u64, RangedCoordu64, compute_u64_key_points, "The ranged coordinate for type u64");
-make_numeric_coord!(i64, RangedCoordi64, compute_i64_key_points, "The ranged coordinate for type i64");
+make_numeric_coord!(
+    f32,
+    RangedCoordf32,
+    compute_f32_key_points,
+    "The ranged coordinate for type f32"
+);
+make_numeric_coord!(
+    f64,
+    RangedCoordf64,
+    compute_f64_key_points,
+    "The ranged coordinate for type f64"
+);
+make_numeric_coord!(
+    u32,
+    RangedCoordu32,
+    compute_u32_key_points,
+    "The ranged coordinate for type u32"
+);
+make_numeric_coord!(
+    i32,
+    RangedCoordi32,
+    compute_i32_key_points,
+    "The ranged coordinate for type i32"
+);
+make_numeric_coord!(
+    u64,
+    RangedCoordu64,
+    compute_u64_key_points,
+    "The ranged coordinate for type u64"
+);
+make_numeric_coord!(
+    i64,
+    RangedCoordi64,
+    compute_i64_key_points,
+    "The ranged coordinate for type i64"
+);
 
 impl_descrete_trait!(RangedCoordu32);
 impl_descrete_trait!(RangedCoordi32);

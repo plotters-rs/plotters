@@ -365,6 +365,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         return self.drawing_area.get_y_range();
     }
 
+    /// Get the plotting area
+    pub fn plotting_area(&self) -> &DrawingArea<DB, RangedCoord<X, Y>> {
+        return &self.drawing_area;
+    }
+
     /// Defines a series label area
     pub fn define_series_label_area<'a, S: Into<ShapeStyle<'a>>>(
         &mut self,
