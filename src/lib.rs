@@ -84,6 +84,7 @@ And you should be able to try the deployed version with the following [link](htt
     </a>
     <div class="galleryText">
         Mandelbrot set
+        <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">[code]</a>
     </div>
 </div>
 
