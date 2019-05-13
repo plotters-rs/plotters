@@ -1,4 +1,4 @@
-use super::CoordTranslate;
+use super::{CoordTranslate, ReverseCoordTranslate};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
 
@@ -18,6 +18,13 @@ pub trait Ranged {
 
     /// Get the range of this value
     fn range(&self) -> Range<Self::ValueType>;
+}
+
+/// The trait indicates the ranged value can be map reversely, which means
+/// an pixel-based cooridinate is given, it's possible to figureout the underlying
+/// logic value.
+pub trait ReversableRanged : Ranged{
+    fn unmap(&self, input: i32, limit:(i32, i32)) -> Option<Self::ValueType>;
 }
 
 /// The coordinate described by two ranged value
@@ -95,6 +102,15 @@ impl<X: Ranged, Y: Ranged> CoordTranslate for RangedCoord<X, Y> {
             self.logic_x.map(&from.0, self.back_x),
             self.logic_y.map(&from.1, self.back_y),
         );
+    }
+}
+
+impl <X: ReversableRanged, Y: ReversableRanged> ReverseCoordTranslate for RangedCoord<X, Y> {
+    fn reverse_translate(&self, input: BackendCoord) -> Option<Self::From> {
+        return Some((
+            self.logic_x.unmap(input.0, self.back_x)?,
+            self.logic_y.unmap(input.1, self.back_y)?,
+        ));
     }
 }
 

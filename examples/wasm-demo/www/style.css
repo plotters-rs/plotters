@@ -15,4 +15,9 @@
 	width: 300px;
 	float: right;
 }
-
+.code-link {
+	margin-left: 0;
+	margin-right: 0;
+	display: block;
+	text-align: center;
+}

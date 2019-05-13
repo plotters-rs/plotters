@@ -11,7 +11,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 
-use crate::coord::{AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::{AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, Shift, ReverseCoordTranslate};
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
@@ -350,6 +350,16 @@ impl<
             format_y: &|y| format!("{:?}", y),
             target: Some(self),
             _pahtom_data: PhantomData,
+        };
+    }
+}
+
+impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
+    /// Convert the chart context into an closure that can be used for coordinate translation
+    pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
+        let coord_spec = self.drawing_area.into_coord_spec();
+        return move |coord| {
+            return coord_spec.reverse_translate(coord);
         };
     }
 }

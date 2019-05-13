@@ -9,23 +9,29 @@
 		<div>
 			<h1 class="centered">Plotters WebAssembly Demo</h1>
 			<canvas id="canvas" class="centered" height=400 width=600></canvas>
+			<div id="status" class='centered' style='color: grey; font-size: 10px'>Loading WebAssembly...</div>
+			<div style="margin-top:20px"></div>
 			<div class="control">
 				<b>Demo: </b>
 				<select id="pow">
-					<option value="0">y = 1</option>
-					<option value="1">y = x</option>
-					<option value="2">y = x^2</option>
-					<option value="3">y = x^3</option>
-					<option value="4">y = x^4</option>
-					<option value="5">y = x^5</option>
+					<option value="0">Graph of y=1</option>
+					<option value="1">Graph of y=x</option>
+					<option value="2">Graph of y=x^2</option>
+					<option value="3">Graph of y=x^3</option>
+					<option value="4">Graph of y=x^4</option>
+					<option value="5">Graph of y=x^5</option>
 					<option value="mandelbrot">Mandelbrot Set</option>
 				</select>
 			</div>
 		</div>
-		<br/>
-		<div id="status" class='centered' style='color: grey; font-size: 8px'>Rendering...</div>
-		<div class='centered' style='margin-top: 20px'>
-			<a href="https://github.com/38/plotters/blob/master/examples/wasm-demo" target='a' stlye='text-align: center'>View the Source Code</a>	
+		<div style="margin-top:50px"></div>
+		<div class='centered' style='font-size: 12px;'>
+			<div class='code-link'> 
+				<a href="https://github.com/38/plotters/blob/master/examples/wasm-demo" target='a'>Source</a> | 
+				<a href="https://github.com/38/plotters" target='a'>Repo</a> | 
+				<a href="https://crates.io/crates/plotters" target='a'>Crates</a> | 
+				<a href="https://docs.rs/plotters" target='a'>Docs</a> 
+			</div>
 		</div>
 			
 		<script type="module">
@@ -34,17 +40,21 @@
 				var sel = document.getElementById("pow");
 				var stat = document.getElementById("status");
 				function update_plot() {
-					var start = performance.now();
-					stat.innerText = "Rendering " + sel.selectedOptions[0].innerText;
-					if(sel.selectedOptions[0].value != "mandelbrot") {
-						var pow = Number(sel.selectedOptions[0].value);
-						wasm.draw_func("canvas", pow);
-					} else {
-						wasm.draw_mandelbrot("canvas");
-					}
-					var end = performance.now();
-					stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";
+					stat.innerText = "Rendering " + sel.selectedOptions[0].innerText + "...";
+					setTimeout(function() {
+						var start = performance.now();
+						if(sel.selectedOptions[0].value != "mandelbrot") {
+							var pow = Number(sel.selectedOptions[0].value);
+							wasm.draw_func("canvas", pow);
+						} else {
+							wasm.draw_mandelbrot("canvas");
+						}
+						var end = performance.now();
+						stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";
+					}, 5);
 				}
+
+				stat.innerText = "WebAssembly loaded!";
 
 				update_plot();
 

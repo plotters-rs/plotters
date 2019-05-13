@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::{AsRangedCoord, DescreteRanged, Ranged};
+use super::{AsRangedCoord, DescreteRanged, Ranged, ReversableRanged};
 
 macro_rules! impl_descrete_trait {
     ($name:ident) => {
@@ -47,6 +47,18 @@ macro_rules! make_numeric_coord {
             }
             fn range(&self) -> Range<$type> {
                 return self.0..self.1;
+            }
+        }
+
+        impl ReversableRanged for $name {
+            fn unmap(&self, p:i32, (min,max): (i32, i32)) -> Option<$type> {
+                if p < min || p > max {
+                    return None;
+                }
+                
+                let logical_offset = (p - min) as f64 / (max - min) as f64;
+
+                return Some(((self.1 - self.0) as f64 * logical_offset + self.0 as f64) as $type);
             }
         }
     };
