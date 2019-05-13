@@ -2,14 +2,15 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>title</title>
+		<title>Plotters WebAssembly Demo</title>
 		<link rel="stylesheet" href="./style.css">
 	</head>
 	<body>
 		<div>
+			<h1 class="centered">Plotters WebAssembly Demo</h1>
 			<canvas id="canvas" class="centered" height=400 width=600></canvas>
 			<div class="control">
-				<b>Function: </b>
+				<b>Demo: </b>
 				<select id="pow">
 					<option value="0">y = 1</option>
 					<option value="1">y = x</option>
@@ -17,10 +18,12 @@
 					<option value="3">y = x^3</option>
 					<option value="4">y = x^4</option>
 					<option value="5">y = x^5</option>
+					<option value="mandelbrot">Mandelbrot Set</option>
 				</select>
 			</div>
 		</div>
 		<br/>
+		<div id="status" class='centered' style='color: grey; font-size: 8px'>Rendering...</div>
 		<div class='centered' style='margin-top: 20px'>
 			<a href="https://github.com/38/plotters/blob/master/examples/wasm-demo" target='a' stlye='text-align: center'>View the Source Code</a>	
 		</div>
@@ -29,9 +32,18 @@
 			import * as wasm from "./pkg/wasm_demo.js";
 			wasm.default("./pkg/wasm_demo_bg.wasm").then(function() {
 				var sel = document.getElementById("pow");
+				var stat = document.getElementById("status");
 				function update_plot() {
-					var pow = Number(sel.selectedOptions[0].value);
-					wasm.draw("canvas", pow);
+					var start = performance.now();
+					stat.innerText = "Rendering " + sel.selectedOptions[0].innerText;
+					if(sel.selectedOptions[0].value != "mandelbrot") {
+						var pow = Number(sel.selectedOptions[0].value);
+						wasm.draw_func("canvas", pow);
+					} else {
+						wasm.draw_mandelbrot("canvas");
+					}
+					var end = performance.now();
+					stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";
 				}
 
 				update_plot();
