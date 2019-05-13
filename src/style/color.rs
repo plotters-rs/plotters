@@ -118,3 +118,44 @@ predefined_color!(Yellow, 255, 255, 0, "The predefined yellow color");
 predefined_color!(Cyan, 0, 255, 255, "The predefined cyan color");
 predefined_color!(Magenta, 255, 0, 255, "The predefined magenta color");
 predefined_color!(Transparent, 0, 0, 0, 0.0, "The predefined transparent");
+
+pub struct HSLColor(pub f64, pub f64, pub f64);
+
+impl SimpleColor for HSLColor {
+    fn rgb(&self) -> (u8, u8, u8) {
+        let (h,s,l) = (
+            self.0.min(1.0).max(0.0), 
+            self.1.min(1.0).max(0.0), 
+            self.2.min(1.0).max(0.0), 
+        );
+
+        if s == 0.0 {
+            let value = (l * 255.0).round() as u8;
+            return (value, value, value);
+        }
+
+        let q = if l < 0.5 { l * (1.0 + s) } else { l + s - l * s };
+        let p = 2.0 * l - q;
+
+        let cvt = |mut t| {
+            if t < 0.0 {
+                t += 1.0;
+            }
+            if t > 1.0 {
+                t -= 1.0;
+            }
+            let value = if t < 1.0/6.0 {
+                p + (q - p) * 6.0 * t
+            } else if t < 1.0/2.0 {
+                q
+            } else if t < 2.0 / 3.0 {
+                p + (q - p) * (2.0 / 3.0 -  t)  * 6.0
+            } else {
+                p
+            };
+            return (value * 255.0).round() as u8;
+        };
+
+        return (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0));
+    }
+}

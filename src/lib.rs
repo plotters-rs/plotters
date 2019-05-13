@@ -321,7 +321,7 @@ pub mod prelude {
     pub use crate::style::{
         Black, Blue, Color, Cyan, FontDesc, Green, Magenta, Mixable, Palette, Palette100,
         Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle, SimpleColor, TextStyle,
-        Transparent, White, Yellow,
+        Transparent, White, Yellow, HSLColor,
     };
 
     pub use crate::element::{

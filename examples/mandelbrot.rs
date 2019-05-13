@@ -26,10 +26,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (pw, ph) = (range.0.end - range.0.start, range.1.end - range.1.start);
     let (xr, yr) = (chart.x_range(), chart.y_range());
 
-    for (x, y, c) in mandelbrot_set(xr, yr, (pw as usize, ph as usize), 200) {
-        if c != 200 {
+    for (x, y, c) in mandelbrot_set(xr, yr, (pw as usize, ph as usize), 100) {
+        if c != 100 {
             plotting_area
-                .draw_pixel((x, y), &Palette99::pick(c / 10).mix((c % 10) as f64 / 10.0))?;
+                .draw_pixel((x, y), &HSLColor(c as f64/100.0, 1.0, 0.5))?;
         } else {
             plotting_area.draw_pixel((x, y), &Black)?;
         }

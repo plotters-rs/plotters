@@ -8,7 +8,7 @@ use std::borrow::Borrow;
 
 pub use color::{
     Black, Blue, Color, Cyan, Green, Magenta, Mixable, PaletteColor, RGBColor, Red, SimpleColor,
-    Transparent, White, Yellow,
+    Transparent, White, Yellow, HSLColor,
 };
 pub use font::{FontDesc, FontError, FontResult};
 pub use palette::*;

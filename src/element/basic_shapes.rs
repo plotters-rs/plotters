@@ -2,6 +2,7 @@ use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, TextStyle};
 
+/// An element of a single pixel
 pub struct Pixel<'a, Coord> {
     pos: Coord,
     style: ShapeStyle<'a>,
