@@ -23,8 +23,8 @@ pub trait Ranged {
 /// The trait indicates the ranged value can be map reversely, which means
 /// an pixel-based cooridinate is given, it's possible to figureout the underlying
 /// logic value.
-pub trait ReversableRanged : Ranged{
-    fn unmap(&self, input: i32, limit:(i32, i32)) -> Option<Self::ValueType>;
+pub trait ReversableRanged: Ranged {
+    fn unmap(&self, input: i32, limit: (i32, i32)) -> Option<Self::ValueType>;
 }
 
 /// The coordinate described by two ranged value
@@ -105,7 +105,7 @@ impl<X: Ranged, Y: Ranged> CoordTranslate for RangedCoord<X, Y> {
     }
 }
 
-impl <X: ReversableRanged, Y: ReversableRanged> ReverseCoordTranslate for RangedCoord<X, Y> {
+impl<X: ReversableRanged, Y: ReversableRanged> ReverseCoordTranslate for RangedCoord<X, Y> {
     fn reverse_translate(&self, input: BackendCoord) -> Option<Self::From> {
         return Some((
             self.logic_x.unmap(input.0, self.back_x)?,

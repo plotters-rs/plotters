@@ -52,10 +52,10 @@ macro_rules! make_numeric_coord {
 
         impl ReversableRanged for $name {
             fn unmap(&self, p:i32, (min,max): (i32, i32)) -> Option<$type> {
-                if p < min || p > max {
+                if p < min.min(max) || p > max.max(min) {
                     return None;
                 }
-                
+
                 let logical_offset = (p - min) as f64 / (max - min) as f64;
 
                 return Some(((self.1 - self.0) as f64 * logical_offset + self.0 as f64) as $type);
@@ -69,7 +69,7 @@ macro_rules! gen_key_points_comp {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
             let range = (range.0 as f64, range.1 as f64);
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
-            let mut digits = (range.1 - range.0).log(10.0).floor().max(0.0) as u32 + 1;
+            let mut digits = -(range.1 - range.0).log(10.0).floor() as i32 + 1;
             fn rem_euclid(a: f64, b: f64) -> f64 {
                 if b > 0.0 {
                     a - (a / b).floor() * b
@@ -101,8 +101,13 @@ macro_rules! gen_key_points_comp {
             let mut left = range.0 + scale - rem_euclid(range.0, scale);
             let right = range.1 - rem_euclid(range.1, scale);
             while left <= right {
-                let size = (10f64).powf(digits as f64);
-                left = (left * size + 1e-3).round() / size;
+                let size = (10f64).powf(digits as f64 + 1.0);
+                let new_left = (left * size).abs() + 1e-3;
+                if left < 0.0 {
+                    left = -new_left.round() / size;
+                } else {
+                    left = new_left.round() / size;
+                }
                 ret.push(left as $type);
                 left += scale;
             }

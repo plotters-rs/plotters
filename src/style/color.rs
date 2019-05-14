@@ -123,10 +123,10 @@ pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl SimpleColor for HSLColor {
     fn rgb(&self) -> (u8, u8, u8) {
-        let (h,s,l) = (
-            self.0.min(1.0).max(0.0), 
-            self.1.min(1.0).max(0.0), 
-            self.2.min(1.0).max(0.0), 
+        let (h, s, l) = (
+            self.0.min(1.0).max(0.0),
+            self.1.min(1.0).max(0.0),
+            self.2.min(1.0).max(0.0),
         );
 
         if s == 0.0 {
@@ -134,7 +134,11 @@ impl SimpleColor for HSLColor {
             return (value, value, value);
         }
 
-        let q = if l < 0.5 { l * (1.0 + s) } else { l + s - l * s };
+        let q = if l < 0.5 {
+            l * (1.0 + s)
+        } else {
+            l + s - l * s
+        };
         let p = 2.0 * l - q;
 
         let cvt = |mut t| {
@@ -144,12 +148,12 @@ impl SimpleColor for HSLColor {
             if t > 1.0 {
                 t -= 1.0;
             }
-            let value = if t < 1.0/6.0 {
+            let value = if t < 1.0 / 6.0 {
                 p + (q - p) * 6.0 * t
-            } else if t < 1.0/2.0 {
+            } else if t < 1.0 / 2.0 {
                 q
             } else if t < 2.0 / 3.0 {
-                p + (q - p) * (2.0 / 3.0 -  t)  * 6.0
+                p + (q - p) * (2.0 / 3.0 - t) * 6.0
             } else {
                 p
             };

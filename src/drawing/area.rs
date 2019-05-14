@@ -410,7 +410,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 }
 
-impl <DB:DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
+impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn into_coord_spec(self) -> CT {
         return self.coord;
     }

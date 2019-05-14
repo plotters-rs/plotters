@@ -8,6 +8,7 @@
 	<body>
 		<div>
 			<h1 class="centered">Plotters WebAssembly Demo</h1>
+			<div id="coord" class='centered' style='color: grey; font-size: 10px; height: 15px'></div>
 			<canvas id="canvas" class="centered" height=400 width=600></canvas>
 			<div id="status" class='centered' style='color: grey; font-size: 10px'>Loading WebAssembly...</div>
 			<div style="margin-top:20px"></div>
@@ -37,17 +38,29 @@
 		<script type="module">
 			import * as wasm from "./pkg/wasm_demo.js";
 			wasm.default("./pkg/wasm_demo_bg.wasm").then(function() {
+				var map_coord = undefined;
+				document.getElementById("canvas").addEventListener("mousemove", function(e) {
+					if(map_coord === undefined) return false;
+					var lx = map_coord(e.offsetX, e.offsetY, 0);
+					var ly = map_coord(e.offsetX, e.offsetY, 1);
+					if(Number.isNaN(lx) || Number.isNaN(ly)) {
+						document.getElementById("coord").innerText = "Mouse poiner is out of range";
+						return;
+					}
+					document.getElementById("coord").innerText = "(" + lx.toFixed(3) + "," + ly.toFixed(3) + ")";
+				});
 				var sel = document.getElementById("pow");
 				var stat = document.getElementById("status");
 				function update_plot() {
 					stat.innerText = "Rendering " + sel.selectedOptions[0].innerText + "...";
 					setTimeout(function() {
+						map_coord = undefined;
 						var start = performance.now();
 						if(sel.selectedOptions[0].value != "mandelbrot") {
 							var pow = Number(sel.selectedOptions[0].value);
-							wasm.draw_func("canvas", pow);
+							map_coord = wasm.draw_func("canvas", pow);
 						} else {
-							wasm.draw_mandelbrot("canvas");
+							map_coord = wasm.draw_mandelbrot("canvas");
 						}
 						var end = performance.now();
 						stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";

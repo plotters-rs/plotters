@@ -1,7 +1,10 @@
 use plotters::prelude::*;
 use wasm_bindgen::prelude::*;
 
-fn start_plotting(element: &str, pow: i32) -> Result<(), Box<dyn std::error::Error>> {
+fn start_plotting(
+    element: &str,
+    pow: i32,
+) -> Result<Box<Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
     let mut backend = CanvasBackend::new(element).unwrap();
     backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
@@ -23,10 +26,10 @@ fn start_plotting(element: &str, pow: i32) -> Result<(), Box<dyn std::error::Err
     ))?;
 
     root.close()?;
-    return Ok(());
+    return Ok(Box::new(chart.into_coord_trans()));
 }
 
 #[wasm_bindgen]
-pub fn draw_func(element: &str, p: i32) -> bool {
-    return start_plotting(element, p).is_ok();
+pub fn draw_func(element: &str, p: i32) -> JsValue {
+    crate::make_coord_mapping_closure(start_plotting(element, p).ok())
 }
