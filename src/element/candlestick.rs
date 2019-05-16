@@ -59,6 +59,7 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let mut points: Vec<_> = points.take(4).collect();
         if points.len() == 4 {
+            let fill = false;
             if points[0].1 > points[3].1 {
                 let tmp = points[0].clone();
                 points[0] = points[3];
@@ -68,23 +69,14 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
                 self.width as i32 / 2,
                 self.width as i32 - self.width as i32 / 2,
             );
+           
+            backend.draw_line(points[0], points[1], &Box::new(self.style.color))?;
+            backend.draw_line(points[2], points[3], &Box::new(self.style.color))?;
+            
             points[0].0 -= l;
             points[3].0 += r;
 
-            backend.draw_line(points[1], points[2], &Box::new(self.style.color))?;
-            backend.draw_rect(
-                (points[1].0 - l / 2, points[1].1),
-                (points[1].0 + r / 2, points[1].1 + 1),
-                &Box::new(self.style.color),
-                true,
-            )?;
-            backend.draw_rect(
-                (points[2].0 - l / 2, points[2].1),
-                (points[2].0 + r / 2, points[2].1 - 1),
-                &Box::new(self.style.color),
-                true,
-            )?;
-            backend.draw_rect(points[0], points[3], &Box::new(self.style.color), true)?;
+            backend.draw_rect(points[0], points[3], &Box::new(self.style.color), fill)?;
         }
         return Ok(());
     }
