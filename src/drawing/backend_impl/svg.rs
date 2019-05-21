@@ -12,7 +12,7 @@ use std::io::Error;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
     let (r, g, b) = color.rgb();
-    return format!("#{:.2X}{:.2X}{:.2X}", r, g, b);
+    return format!("#{:02X}{:02X}{:02X}", r, g, b);
 }
 
 fn make_svg_opacity<C:Color>(color: &C) -> String {
