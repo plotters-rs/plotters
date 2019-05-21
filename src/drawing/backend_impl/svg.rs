@@ -12,8 +12,11 @@ use std::io::Error;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
     let (r, g, b) = color.rgb();
-    let a = color.alpha();
-    return format!("rgba({},{},{},{})", r, g, b, a);
+    return format!("#{:.2X}{:.2X}{:.2X}", r, g, b);
+}
+
+fn make_svg_opacity<C:Color>(color: &C) -> String {
+    return format!("{}", color.alpha());
 }
 
 /// The SVG image drawing backend
@@ -66,6 +69,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("width", 1)
             .set("height", 1)
             .set("stroke", "none")
+            .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color));
         self.update_document(|d| d.add(node));
         return Ok(());
@@ -82,6 +86,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("y1", from.1)
             .set("x2", to.0)
             .set("y2", to.1)
+            .set("opacity", make_svg_opacity(color))
             .set("stroke", make_svg_color(color));
         self.update_document(|d| d.add(node));
         return Ok(());
@@ -102,10 +107,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
+                .set("opacity", make_svg_opacity(color))
                 .set("stroke", make_svg_color(color))
                 .set("fill", "none");
         } else {
             node = node
+                .set("opacity", make_svg_opacity(color))
                 .set("fill", make_svg_color(color))
                 .set("stroke", "none");
         }
@@ -121,6 +128,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let node = Polyline::new()
             .set("fill", "none")
+            .set("opacity", make_svg_opacity(color))
             .set("stroke", make_svg_color(color))
             .set(
                 "points",
@@ -147,10 +155,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
+                .set("opacity", make_svg_opacity(color))
                 .set("stroke", make_svg_color(color))
                 .set("fill", "none");
         } else {
             node = node
+                .set("opacity", make_svg_opacity(color))
                 .set("fill", make_svg_color(color))
                 .set("stroke", "none");
         }
@@ -174,6 +184,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("y", pos.1 - b)
             .set("font-famliy", font.get_name())
             .set("font-size", font.get_size())
+            .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color))
             .add(context);
         self.update_document(|d| d.add(node));
