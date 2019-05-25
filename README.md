@@ -91,8 +91,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Concepts by examples
 
 #### Drawing Backends
-Plotters can use different drawing backends, such as SVG, BitMap, etc. And even real-time rendering,
-such as library. For example a bitmap drawing backend.
+Plotters can use different drawing backends, such as SVG, BitMap, etc, even real-time rendering. For example a bitmap drawing backend.
 
 ```rust
 use plotters::prelude::*;
