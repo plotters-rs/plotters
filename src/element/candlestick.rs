@@ -69,10 +69,10 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
                 self.width as i32 / 2,
                 self.width as i32 - self.width as i32 / 2,
             );
-           
+
             backend.draw_line(points[0], points[1], &Box::new(self.style.color))?;
             backend.draw_line(points[2], points[3], &Box::new(self.style.color))?;
-            
+
             points[0].0 -= l;
             points[3].0 += r;
 

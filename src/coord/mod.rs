@@ -4,6 +4,7 @@
 use crate::drawing::backend::BackendCoord;
 
 mod datetime;
+mod logarithmic;
 mod numeric;
 mod ranged;
 
@@ -12,6 +13,8 @@ pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
 };
 pub use ranged::{AsRangedCoord, DescreteRanged, MeshLine, Ranged, RangedCoord, ReversableRanged};
+
+pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {

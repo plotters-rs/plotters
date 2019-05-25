@@ -15,7 +15,7 @@ fn make_svg_color<C: Color>(color: &C) -> String {
     return format!("#{:02X}{:02X}{:02X}", r, g, b);
 }
 
-fn make_svg_opacity<C:Color>(color: &C) -> String {
+fn make_svg_opacity<C: Color>(color: &C) -> String {
     return format!("{}", color.alpha());
 }
 

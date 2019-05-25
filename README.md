@@ -222,8 +222,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Set the caption of the chart
         .caption("This is our first plot", &font)
         // Set the size of the label region
-        .set_x_label_size(40)
-        .set_y_label_size(40)
+        .x_label_area_size(40)
+        .y_label_area_size(40)
         // Finally attach a coordinate on the drawing area and make a chart context
         .build_ranged(0f32..10f32, 0f32..10f32);
 

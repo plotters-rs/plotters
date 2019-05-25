@@ -313,8 +313,9 @@ pub mod style;
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext};
     pub use crate::coord::{
-        CoordTranslate, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
-        RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate, RangedDateTime,
+        CoordTranslate, LogCoord, LogRange, LogScalable, Ranged, RangedCoord, RangedCoordf32,
+        RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64, RangedDate,
+        RangedDateTime,
     };
     pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
