@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255, 255, 255))?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", &font)
-        .x_label_arae_size(30)
+        .x_label_area_size(30)
         .y_label_area_size(30)
         .build_ranged(-1f32..1f32, 0f32..1f32);
 
