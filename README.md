@@ -114,7 +114,7 @@ And this will produce
 #### Drawing Area
 Plotters use a concept called drawing area for layout purpose.
 Plotters support multiple plot integrate in a single image.
-This is done by craeting sub drawing areas.
+This is done by creating sub drawing areas.
 
 Besides that, drawing area also allows customized cooridnate system, by doing so, the coordinate mapping is done by the drawing area automatically.
 
