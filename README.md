@@ -13,7 +13,7 @@
 
 *Please note: This library is in a very early stage. I am trying my best to stablize the APIs, but APIs may change during the time.*
 
-Plotters is drawing libray that desgined for rendering figures, plots and charts, in pure rust. 
+Plotters is drawing library designed for rendering figures, plots and charts, in pure rust. 
 
 ### Reasons for Plotting in Rust
 
