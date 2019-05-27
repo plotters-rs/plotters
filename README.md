@@ -1,7 +1,7 @@
 # plotters
 
 
-## Plotters - Another Plotting Library in Rust
+## Plotters - A drawing library for Plotting
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -11,20 +11,29 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 
+*Please note: This library is in a very early stage. I am trying my best to stablize the APIs, but APIs may change during the time.*
 
+Plotters is drawing libray that desgined for rendering figures, plots and charts, in pure rust. 
 
-### Why plotting in Rust?
+### Reasons for Plotting in Rust
 
-Although rendering a figure doesn't requires too many computation power in most of the case,
-and programming language such as Python and Javascript is used for visualization purpose.
-Sometimes we need to make a figure based on huge amount of data, for example, rendering some
-human gene data may requires to downsampling trillions data points, which isn't even doable
-with many high-level programming language. In this case, Rust is a perfect candidate for rendering
-figures, since it runs very fast while having high-level abstraction abilities.
+* **Rust is fast.** If you need rendering a figure with trillions data points, 
+plotting in Rust is a good choice. Rust's performance allows you combine downsample 
+and rednering at the same time.  Unlike plotting in high-level programming langauges,
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
+program because of the performance considerations. You can also integrate the 
+figure rendering code into your application handling huge amount of data and visualize it in real-time.
+
+* **Iterators** Rust has a very good iterator system built into the standard library. With the help of iterators,
+Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
+can be very easy to use.
+
+* **WebAssembly Support** Rust is one of few the langauge with the best WASM support. Plotting in Rust could be 
+very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ### What type of figure is supported?
 
-Currently, we support line series, point series and candlestick series.
+Currently, we support line series, point series, candlestick series and histogram.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to supporting any other types of figure.
 
