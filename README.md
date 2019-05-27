@@ -17,11 +17,12 @@ Plotters is drawing library designed for rendering figures, plots and charts, in
 
 ### Reasons for Plotting in Rust
 
-* **Rust is fast.** If you need rendering a figure with trillions data points, 
-plotting in Rust is a good choice. Rust's performance allows you combine downsample 
-and rednering at the same time.  Unlike plotting in high-level programming langauges,
+* **Rust is fast.** If you need rendering a figure with trillions of data points, 
+Rust is a good choice. Rust's performance allows you combine data processing step 
+and rednering step into a single application. When plotting in high-level programming langauges,
 e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
-program because of the performance considerations. You can also integrate the 
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
+within a signle program. You can also integrate the 
 figure rendering code into your application handling huge amount of data and visualize it in real-time.
 
 * **Iterators** Rust has a very good iterator system built into the standard library. With the help of iterators,
