@@ -200,9 +200,10 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         ops: O,
     ) -> Result<R, DrawingAreaError<DB>> {
         if let Ok(mut db) = self.backend.try_borrow_mut() {
-            return ops(&mut db).map_err(DrawingAreaErrorKind::BackendError);
+            db.ensure_prepared().map_err(DrawingAreaErrorKind::BackendError)?;
+            ops(&mut db).map_err(DrawingAreaErrorKind::BackendError)
         } else {
-            return Err(DrawingAreaErrorKind::SharingError);
+            Err(DrawingAreaErrorKind::SharingError)
         }
     }
 
@@ -228,14 +229,9 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.backend_ops(|b| b.draw_pixel(pos, color))
     }
 
-    /// Open the backend
-    pub fn open(&self) -> Result<(), DrawingAreaError<DB>> {
-        self.backend_ops(|b| b.open())
-    }
-
-    /// Close the backend
-    pub fn close(&self) -> Result<(), DrawingAreaError<DB>> {
-        self.backend_ops(|b| b.close())
+    /// Present all the pending changes to the backend
+    pub fn present(&self) -> Result<(), DrawingAreaError<DB>> {
+        self.backend_ops(|b| b.present())
     }
 
     /// Draw an high-level element

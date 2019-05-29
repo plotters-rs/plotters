@@ -9,8 +9,7 @@ fn parse_time(t: &str) -> Date<Local> {
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = get_data();
-    let mut backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
-    backend.open()?;
+    let backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(50.0);
     root.fill(&RGBColor(255, 255, 255))?;
@@ -44,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     }))?;
 
-    root.close()?;
+    root.present()?;
     return Ok(());
 }
 

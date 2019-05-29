@@ -32,11 +32,15 @@ pub trait DrawingBackend {
     /// Dimension
     fn get_size(&self) -> (u32, u32);
 
-    /// Start drawing
-    fn open(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
+    /// Ensure the backend is ready to draw
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
-    /// Stop drawing
-    fn close(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
+    /// Finialize the drawing step and present all the changes.
+    /// This is used as the real-time rendering support. 
+    /// The backend may implement in the following way, when `ensure_prepared` is called
+    /// it checks if it needs a fresh buffer and `present` is called rendering all the 
+    /// pending changes on the screen.
+    fn present(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a pixel
     fn draw_pixel<C: Color>(
@@ -230,3 +234,4 @@ pub trait DrawingBackend {
         }
     }
 }
+

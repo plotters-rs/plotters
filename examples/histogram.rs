@@ -1,7 +1,6 @@
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut backend = BitMapBackend::new("examples/outputs/histogram.png", (640, 480));
-    backend.open()?;
+    let backend = BitMapBackend::new("examples/outputs/histogram.png", (640, 480));
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(50.0);
     root.fill(&RGBColor(255, 255, 255))?;
@@ -29,6 +28,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Into::<ShapeStyle>::into(&RGBColor(255, 0, 0).mix(0.5)).filled(),
     ))?;
 
-    root.close()?;
+    root.present()?;
     return Ok(());
 }

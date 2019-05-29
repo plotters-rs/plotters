@@ -1,9 +1,7 @@
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut img = BitMapBackend::new("examples/outputs/sample.png", (1024, 768));
-
-    img.open()?;
+    let img = BitMapBackend::new("examples/outputs/sample.png", (1024, 768));
 
     let root_area: DrawingArea<_, _> = img.into();
 
@@ -96,7 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ))?;
     }
 
-    root_area.close()?;
+    root_area.present()?;
 
     return Ok(());
 }

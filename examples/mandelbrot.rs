@@ -2,9 +2,8 @@ use plotters::prelude::*;
 use std::ops::Range;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut backend = BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600));
+    let backend = BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600));
 
-    backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
     root.fill(&White)?;
 
@@ -34,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    root.close()?;
+    root.present()?;
     return Ok(());
 }
 
