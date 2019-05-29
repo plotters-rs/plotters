@@ -34,11 +34,11 @@ impl<'a> SVGBackend<'a> {
     }
     /// Create a new SVG drawing backend
     pub fn new(path: &'a str, size: (u32, u32)) -> Self {
-        return Self {
+        Self {
             path,
             size,
             document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
-        };
+        }
     }
 }
 
@@ -46,7 +46,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     type ErrorType = Error;
 
     fn get_size(&self) -> (u32, u32) {
-        return self.size;
+        self.size
     }
 
     fn open(&mut self) -> Result<(), DrawingErrorKind<Error>> {
@@ -54,8 +54,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     }
 
     fn close(&mut self) -> Result<(), DrawingErrorKind<Error>> {
-        return svg::save(self.path, self.document.as_ref().unwrap())
-            .map_err(|x| DrawingErrorKind::DrawingError(x));
+        svg::save(self.path, self.document.as_ref().unwrap())
+            .map_err(DrawingErrorKind::DrawingError)
     }
 
     fn draw_pixel<C: Color>(
@@ -72,7 +72,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color));
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
 
     fn draw_line<C: Color>(
@@ -89,7 +89,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("opacity", make_svg_opacity(color))
             .set("stroke", make_svg_color(color));
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
 
     fn draw_rect<C: Color>(
@@ -118,7 +118,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         }
 
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
 
     fn draw_path<C: Color, I: IntoIterator<Item = BackendCoord>>(
@@ -134,11 +134,11 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 "points",
                 path.into_iter().fold(String::new(), |mut s, (x, y)| {
                     s.push_str(&format!("{},{} ", x, y));
-                    return s;
+                    s
                 }),
             );
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
 
     fn draw_circle<C: Color>(
@@ -166,7 +166,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         }
 
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
     fn draw_text<'b, C: Color>(
         &mut self,
@@ -176,9 +176,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let context = svg::node::Text::new(text);
-        let ((_, b), (_, _)) = font
-            .layout_box(text)
-            .map_err(|x| DrawingErrorKind::FontError(x))?;
+        let ((_, b), (_, _)) = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
         let node = Text::new()
             .set("x", pos.0)
             .set("y", pos.1 - b)
@@ -188,6 +186,6 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("fill", make_svg_color(color))
             .add(context);
         self.update_document(|d| d.add(node));
-        return Ok(());
+        Ok(())
     }
 }
