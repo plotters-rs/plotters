@@ -5,7 +5,7 @@ The SVG image drawing backend
 use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
 use svg::Document;
 
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind, BackendStyle};
+use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, FontDesc};
 
 use std::io::Error;
@@ -36,7 +36,7 @@ impl<'a> SVGBackend<'a> {
     }
 
     /// Create a new SVG drawing backend
-    pub fn new<T:AsRef<Path> + ?Sized>(path: &'a T, size: (u32, u32)) -> Self {
+    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, size: (u32, u32)) -> Self {
         Self {
             path: path.as_ref(),
             size,
