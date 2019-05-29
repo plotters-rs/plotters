@@ -28,7 +28,6 @@ pub struct ChartBuilder<'a, DB: DrawingBackend> {
     root_area: &'a DrawingArea<DB, Shift>,
     title: Option<(String, TextStyle<'a>)>,
     margin: u32,
-    //titled_area: Option<DrawingArea<DB, Shift>>,
 }
 
 impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
@@ -214,7 +213,7 @@ where
     }
 
     /// Set the style definition for the axis
-    /// - `style`
+    /// - `style`: The style for the axis
     pub fn axis_style<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
         self.axis_style = Some(style.into());
         self
@@ -377,7 +376,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         self.drawing_area.get_y_range()
     }
 
-    /// Get the plotting area
+    /// Get a reference of underlying plotting area
     pub fn plotting_area(&self) -> &DrawingArea<DB, RangedCoord<X, Y>> {
         &self.drawing_area
     }
@@ -389,16 +388,19 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         size: (u32, u32),
         bg_style: S,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+        // TODO: we should be able to draw the label
         self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
         let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
         self.series_area.as_ref().unwrap().draw(&element)
     }
 
+    /// Maps the coordinate to the backend coordinate. This is typically used
+    /// with an interactive chart.
     pub fn backend_coord(&self, coord: &(X::ValueType, Y::ValueType)) -> BackendCoord {
         self.drawing_area.map_coordinate(coord)
     }
 
-    /// Draw a series
+    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
     pub fn draw_series<E, R, S>(&self, series: S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         for<'a> &'a E: PointCollection<'a, (X::ValueType, Y::ValueType)>,
@@ -412,7 +414,6 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         Ok(())
     }
 
-    /// Draw the mesh
     #[allow(clippy::too_many_arguments)]
     fn draw_mesh<FmtLabel>(
         &mut self,
