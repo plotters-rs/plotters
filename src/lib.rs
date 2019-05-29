@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Another Plotting Library in Rust
+# Plotters - A drawing library for Plotting
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -286,6 +286,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+
 
 <style>
     img {
