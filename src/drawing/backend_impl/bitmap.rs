@@ -2,20 +2,25 @@ use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::Color;
 use image::{ImageError, Rgb, RgbImage};
 
+use std::path::Path;
+
 /// The backend that drawing a bitmap
 pub struct BitMapBackend<'a> {
     /// The path to the image
-    path: &'a str,
+    path: &'a Path,
     /// The image object
     img: RgbImage,
+    /// Flag indicates if the bitmap has been saved
+    saved: bool,
 }
 
 impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
-    pub fn new(path: &'a str, dimension: (u32, u32)) -> Self {
+    pub fn new<T:AsRef<Path> + ?Sized>(path: &'a T, dimension: (u32, u32)) -> Self {
         Self {
-            path,
+            path: path.as_ref(),
             img: RgbImage::new(dimension.0, dimension.1),
+            saved: false,
         }
     }
 }
@@ -34,7 +39,9 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     fn present(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
         self.img
             .save(&self.path)
-            .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))
+            .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))?;
+        self.saved = true;
+        Ok(())
     }
 
     fn draw_pixel<C: Color>(
@@ -76,5 +83,13 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 });
         }
         Ok(())
+    }
+}
+
+impl Drop for BitMapBackend<'_> {
+    fn drop(&mut self) {
+        if !self.saved {
+            self.present().expect("Unable to save the bitmap");
+        }
     }
 }

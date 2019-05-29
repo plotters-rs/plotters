@@ -24,6 +24,23 @@ impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
 
 impl<E: Error> Error for DrawingErrorKind<E> {}
 
+/// The trait that describing a backend drawing style. 
+pub trait BackendStyle {
+    /// The underlying type reprsents the color for this style
+    type ColorType : Color;
+
+    /// Convert the style into the underlying color
+    fn as_color(&self) -> &Self::ColorType;
+    // TODO: In the future we should support stroke width, line shape, etc....
+}
+
+impl <T:Color> BackendStyle for T {
+    type ColorType = T;
+    fn as_color(&self) -> &T {
+        self
+    }
+}
+
 /// The drawing context
 pub trait DrawingBackend {
     /// The error reported by the backend
@@ -43,18 +60,18 @@ pub trait DrawingBackend {
     fn present(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a pixel
-    fn draw_pixel<C: Color>(
+    fn draw_pixel<S: Color>(
         &mut self,
         point: BackendCoord,
-        color: &C,
+        color: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a line
-    fn draw_line<C: Color>(
+    fn draw_line<S: BackendStyle>(
         &mut self,
         mut from: BackendCoord,
         mut to: BackendCoord,
-        color: &C,
+        style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let steep = (from.0 - to.0).abs() < (from.1 - to.1).abs();
 
@@ -73,9 +90,9 @@ pub trait DrawingBackend {
 
         let mut put_pixel = |(x, y): BackendCoord, b: f64| {
             if steep {
-                self.draw_pixel((y, x), &color.mix(b))
+                self.draw_pixel((y, x), &style.as_color().mix(b))
             } else {
-                self.draw_pixel((x, y), &color.mix(b))
+                self.draw_pixel((x, y), &style.as_color().mix(b))
             }
         };
 
@@ -92,11 +109,11 @@ pub trait DrawingBackend {
     }
 
     /// Draw a rectangle
-    fn draw_rect<C: Color>(
+    fn draw_rect<S:BackendStyle>(
         &mut self,
         upper_left: BackendCoord,
         bottom_right: BackendCoord,
-        color: &C,
+        style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (upper_left, bottom_right) = (
@@ -113,48 +130,48 @@ pub trait DrawingBackend {
         if fill {
             if bottom_right.0 - upper_left.0 < bottom_right.1 - upper_left.1 {
                 for x in upper_left.0..=bottom_right.0 {
-                    self.draw_line((x, upper_left.1), (x, bottom_right.1), color)?;
+                    self.draw_line((x, upper_left.1), (x, bottom_right.1), style)?;
                 }
             } else {
                 for y in upper_left.1..=bottom_right.1 {
-                    self.draw_line((upper_left.0, y), (bottom_right.0, y), color)?;
+                    self.draw_line((upper_left.0, y), (bottom_right.0, y), style)?;
                 }
             }
         } else {
             self.draw_line(
                 (upper_left.0, upper_left.1),
                 (upper_left.0, bottom_right.1),
-                color,
+                style,
             )?;
             self.draw_line(
                 (upper_left.0, upper_left.1),
                 (bottom_right.0, upper_left.1),
-                color,
+                style,
             )?;
             self.draw_line(
                 (bottom_right.0, bottom_right.1),
                 (upper_left.0, bottom_right.1),
-                color,
+                style,
             )?;
             self.draw_line(
                 (bottom_right.0, bottom_right.1),
                 (bottom_right.0, upper_left.1),
-                color,
+                style,
             )?;
         }
         Ok(())
     }
 
     /// Draw a path
-    fn draw_path<C: Color, I: IntoIterator<Item = BackendCoord>>(
+    fn draw_path<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
         &mut self,
         path: I,
-        color: &C,
+        style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let mut begin: Option<BackendCoord> = None;
         for end in path.into_iter() {
             if let Some(begin) = begin {
-                self.draw_line(begin, end, color)?;
+                self.draw_line(begin, end, style)?;
             }
             begin = Some(end);
         }
@@ -162,11 +179,11 @@ pub trait DrawingBackend {
     }
 
     /// Draw a circle
-    fn draw_circle<C: Color>(
+    fn draw_circle<S: BackendStyle>(
         &mut self,
         center: BackendCoord,
         radius: u32,
-        color: &C,
+        style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         //let range = ((radius + 3) / 4) as i32..=(2 * radius - radius / 4) as i32;
@@ -198,21 +215,21 @@ pub trait DrawingBackend {
             let bottom = center.1 + lx.floor() as i32;
 
             if fill {
-                self.draw_line((left, y), (right, y), color)?;
-                self.draw_line((x, top), (x, up), color)?;
-                self.draw_line((x, down), (x, bottom), color)?;
+                self.draw_line((left, y), (right, y), style)?;
+                self.draw_line((x, top), (x, up), style)?;
+                self.draw_line((x, down), (x, bottom), style)?;
             } else {
-                self.draw_pixel((left, y), &color.mix(1.0 - v))?;
-                self.draw_pixel((right, y), &color.mix(1.0 - v))?;
+                self.draw_pixel((left, y), &style.as_color().mix(1.0 - v))?;
+                self.draw_pixel((right, y), &style.as_color().mix(1.0 - v))?;
 
-                self.draw_pixel((x, top), &color.mix(1.0 - v))?;
-                self.draw_pixel((x, bottom), &color.mix(1.0 - v))?;
+                self.draw_pixel((x, top), &style.as_color().mix(1.0 - v))?;
+                self.draw_pixel((x, bottom), &style.as_color().mix(1.0 - v))?;
             }
 
-            self.draw_pixel((left - 1, y), &color.mix(v))?;
-            self.draw_pixel((right + 1, y), &color.mix(v))?;
-            self.draw_pixel((x, top - 1), &color.mix(v))?;
-            self.draw_pixel((x, bottom + 1), &color.mix(v))?;
+            self.draw_pixel((left - 1, y), &style.as_color().mix(v))?;
+            self.draw_pixel((right + 1, y), &style.as_color().mix(v))?;
+            self.draw_pixel((x, top - 1), &style.as_color().mix(v))?;
+            self.draw_pixel((x, bottom + 1), &style.as_color().mix(v))?;
         }
 
         Ok(())

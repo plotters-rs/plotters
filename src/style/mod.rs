@@ -10,6 +10,7 @@ pub use color::{
     Black, Blue, Color, Cyan, Green, HSLColor, Magenta, Mixable, PaletteColor, RGBColor, Red,
     SimpleColor, Transparent, White, Yellow,
 };
+
 pub use font::{FontDesc, FontError, FontResult};
 pub use palette::*;
 
