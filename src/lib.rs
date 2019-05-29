@@ -10,29 +10,25 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 
-
-
-Plotters is a flexible drawing library for data visualization written in pure Rust for both native and WebAssembly.
-
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs, but APIs may change during the time.*
 
-Plotters is drawing library designed for rendering figures, plots and charts, in pure rust.
+Plotters is drawing library designed for rendering figures, plots and charts, in pure rust. 
 
 ### Reasons for Plotting in Rust
 
-* **Rust is fast.** If you need rendering a figure with trillions of data points,
-Rust is a good choice. Rust's performance allows you combine data processing step
+* **Rust is fast.** If you need rendering a figure with trillions of data points, 
+Rust is a good choice. Rust's performance allows you combine data processing step 
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization
-within a signle program. You can also integrate the
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
+within a signle program. You can also integrate the 
 figure rendering code into your application handling huge amount of data and visualize it in real-time.
 
 * **Iterators** Rust has a very good iterator system built into the standard library. With the help of iterators,
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ### What type of figure is supported?
@@ -46,7 +42,7 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Gallery
@@ -154,7 +150,7 @@ And this will produce
 ### Drawing Area
 Plotters use a concept called drawing area for layout purpose.
 Plotters support multiple plot integrate in a single image.
-This is done by craeting sub drawing areas.
+This is done by creating sub drawing areas.
 
 Besides that, drawing area also allows customized coordinate system, by doing so, the coordinate mapping is done by the drawing area automatically.
 

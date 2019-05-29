@@ -36,6 +36,7 @@ impl<'a, Coord> PointCollection<'a, Coord> for &'a EmptyElement<Coord> {
     }
 }
 
+/// An composed element has only one component
 pub struct BoxedElement<Coord, A: Drawable> {
     inner: A,
     offset: Coord,
@@ -89,6 +90,7 @@ where
     }
 }
 
+/// The composed element which has at least two components
 pub struct ComposedElement<Coord, A, B>
 where
     A: Drawable,

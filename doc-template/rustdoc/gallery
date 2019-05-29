@@ -1,0 +1,48 @@
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Multiple Plot
+        <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Candlestick Plot
+        <a href="https://github.com/38/plotters/blob/master/examples/stock.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+       Histogram
+        <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Simple Chart
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Mandelbrot set
+        <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">[code]</a>
+    </div>
+</div>
