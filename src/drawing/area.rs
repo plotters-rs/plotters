@@ -200,7 +200,8 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         ops: O,
     ) -> Result<R, DrawingAreaError<DB>> {
         if let Ok(mut db) = self.backend.try_borrow_mut() {
-            db.ensure_prepared().map_err(DrawingAreaErrorKind::BackendError)?;
+            db.ensure_prepared()
+                .map_err(DrawingAreaErrorKind::BackendError)?;
             ops(&mut db).map_err(DrawingAreaErrorKind::BackendError)
         } else {
             Err(DrawingAreaErrorKind::SharingError)

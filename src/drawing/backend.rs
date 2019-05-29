@@ -24,17 +24,17 @@ impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
 
 impl<E: Error> Error for DrawingErrorKind<E> {}
 
-/// The trait that describing a backend drawing style. 
+/// The trait that describing a backend drawing style.
 pub trait BackendStyle {
     /// The underlying type reprsents the color for this style
-    type ColorType : Color;
+    type ColorType: Color;
 
     /// Convert the style into the underlying color
     fn as_color(&self) -> &Self::ColorType;
     // TODO: In the future we should support stroke width, line shape, etc....
 }
 
-impl <T:Color> BackendStyle for T {
+impl<T: Color> BackendStyle for T {
     type ColorType = T;
     fn as_color(&self) -> &T {
         self
@@ -53,9 +53,9 @@ pub trait DrawingBackend {
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Finialize the drawing step and present all the changes.
-    /// This is used as the real-time rendering support. 
+    /// This is used as the real-time rendering support.
     /// The backend may implement in the following way, when `ensure_prepared` is called
-    /// it checks if it needs a fresh buffer and `present` is called rendering all the 
+    /// it checks if it needs a fresh buffer and `present` is called rendering all the
     /// pending changes on the screen.
     fn present(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
@@ -109,7 +109,7 @@ pub trait DrawingBackend {
     }
 
     /// Draw a rectangle
-    fn draw_rect<S:BackendStyle>(
+    fn draw_rect<S: BackendStyle>(
         &mut self,
         upper_left: BackendCoord,
         bottom_right: BackendCoord,
@@ -251,4 +251,3 @@ pub trait DrawingBackend {
         }
     }
 }
-

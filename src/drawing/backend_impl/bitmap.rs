@@ -16,7 +16,7 @@ pub struct BitMapBackend<'a> {
 
 impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
-    pub fn new<T:AsRef<Path> + ?Sized>(path: &'a T, dimension: (u32, u32)) -> Self {
+    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, dimension: (u32, u32)) -> Self {
         Self {
             path: path.as_ref(),
             img: RgbImage::new(dimension.0, dimension.1),
