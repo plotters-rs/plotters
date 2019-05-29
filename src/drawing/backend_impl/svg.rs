@@ -5,10 +5,11 @@ The SVG image drawing backend
 use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
 use svg::Document;
 
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind, BackendStyle};
 use crate::style::{Color, FontDesc};
 
 use std::io::Error;
+use std::path::Path;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
     let (r, g, b) = color.rgb();
@@ -21,9 +22,10 @@ fn make_svg_opacity<C: Color>(color: &C) -> String {
 
 /// The SVG image drawing backend
 pub struct SVGBackend<'a> {
-    path: &'a str,
+    path: &'a Path,
     size: (u32, u32),
     document: Option<Document>,
+    saved: bool,
 }
 
 impl<'a> SVGBackend<'a> {
@@ -32,12 +34,14 @@ impl<'a> SVGBackend<'a> {
         std::mem::swap(&mut temp, &mut self.document);
         self.document = Some(op(temp.unwrap()));
     }
+
     /// Create a new SVG drawing backend
-    pub fn new(path: &'a str, size: (u32, u32)) -> Self {
+    pub fn new<T:AsRef<Path> + ?Sized>(path: &'a T, size: (u32, u32)) -> Self {
         Self {
-            path,
+            path: path.as_ref(),
             size,
             document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
+            saved: false,
         }
     }
 }
@@ -55,7 +59,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
     fn present(&mut self) -> Result<(), DrawingErrorKind<Error>> {
         svg::save(self.path, self.document.as_ref().unwrap())
-            .map_err(DrawingErrorKind::DrawingError)
+            .map_err(DrawingErrorKind::DrawingError)?;
+        self.saved = true;
+        Ok(())
     }
 
     fn draw_pixel<C: Color>(
@@ -75,28 +81,28 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
-    fn draw_line<C: Color>(
+    fn draw_line<S: BackendStyle>(
         &mut self,
         from: BackendCoord,
         to: BackendCoord,
-        color: &C,
+        style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let node = Line::new()
             .set("x1", from.0)
             .set("y1", from.1)
             .set("x2", to.0)
             .set("y2", to.1)
-            .set("opacity", make_svg_opacity(color))
-            .set("stroke", make_svg_color(color));
+            .set("opacity", make_svg_opacity(style.as_color()))
+            .set("stroke", make_svg_color(style.as_color()));
         self.update_document(|d| d.add(node));
         Ok(())
     }
 
-    fn draw_rect<C: Color>(
+    fn draw_rect<S: BackendStyle>(
         &mut self,
         upper_left: BackendCoord,
         bottom_right: BackendCoord,
-        color: &C,
+        style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let mut node = Rectangle::new()
@@ -107,13 +113,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
-                .set("opacity", make_svg_opacity(color))
-                .set("stroke", make_svg_color(color))
+                .set("opacity", make_svg_opacity(style.as_color()))
+                .set("stroke", make_svg_color(style.as_color()))
                 .set("fill", "none");
         } else {
             node = node
-                .set("opacity", make_svg_opacity(color))
-                .set("fill", make_svg_color(color))
+                .set("opacity", make_svg_opacity(style.as_color()))
+                .set("fill", make_svg_color(style.as_color()))
                 .set("stroke", "none");
         }
 
@@ -121,15 +127,15 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
-    fn draw_path<C: Color, I: IntoIterator<Item = BackendCoord>>(
+    fn draw_path<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
         &mut self,
         path: I,
-        color: &C,
+        style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let node = Polyline::new()
             .set("fill", "none")
-            .set("opacity", make_svg_opacity(color))
-            .set("stroke", make_svg_color(color))
+            .set("opacity", make_svg_opacity(style.as_color()))
+            .set("stroke", make_svg_color(style.as_color()))
             .set(
                 "points",
                 path.into_iter().fold(String::new(), |mut s, (x, y)| {
@@ -141,11 +147,11 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
-    fn draw_circle<C: Color>(
+    fn draw_circle<S: BackendStyle>(
         &mut self,
         center: BackendCoord,
         radius: u32,
-        color: &C,
+        style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let mut node = Circle::new()
@@ -155,13 +161,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
-                .set("opacity", make_svg_opacity(color))
-                .set("stroke", make_svg_color(color))
+                .set("opacity", make_svg_opacity(style.as_color()))
+                .set("stroke", make_svg_color(style.as_color()))
                 .set("fill", "none");
         } else {
             node = node
-                .set("opacity", make_svg_opacity(color))
-                .set("fill", make_svg_color(color))
+                .set("opacity", make_svg_opacity(style.as_color()))
+                .set("fill", make_svg_color(style.as_color()))
                 .set("stroke", "none");
         }
 
@@ -187,5 +193,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .add(context);
         self.update_document(|d| d.add(node));
         Ok(())
+    }
+}
+
+impl Drop for SVGBackend<'_> {
+    fn drop(&mut self) {
+        if !self.saved {
+            self.present().expect("Unable to save the SVG image");
+        }
     }
 }
