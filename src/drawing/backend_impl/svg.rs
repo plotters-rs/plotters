@@ -49,11 +49,11 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         self.size
     }
 
-    fn open(&mut self) -> Result<(), DrawingErrorKind<Error>> {
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Error>> {
         Ok(())
     }
 
-    fn close(&mut self) -> Result<(), DrawingErrorKind<Error>> {
+    fn present(&mut self) -> Result<(), DrawingErrorKind<Error>> {
         svg::save(self.path, self.document.as_ref().unwrap())
             .map_err(DrawingErrorKind::DrawingError)
     }
