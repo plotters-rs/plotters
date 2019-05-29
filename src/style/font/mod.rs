@@ -18,17 +18,15 @@ mod web;
 #[cfg(target_arch = "wasm32")]
 use web::FontDataInternal;
 
-mod font;
-pub use font::*;
+mod font_desc;
+pub use font_desc::*;
+
+pub type LayoutBox = ((i32, i32), (i32, i32));
 
 pub trait FontData: Clone {
     type ErrorType: Sized + std::error::Error + Clone;
     fn new(face: &str) -> Result<Self, Self::ErrorType>;
-    fn estimate_layout(
-        &self,
-        size: f64,
-        text: &str,
-    ) -> Result<((i32, i32), (i32, i32)), Self::ErrorType>;
+    fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType>;
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
         _pos: (i32, i32),

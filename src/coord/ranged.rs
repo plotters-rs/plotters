@@ -42,12 +42,12 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
         logic_y: IntoY,
         actual: (Range<i32>, Range<i32>),
     ) -> Self {
-        return Self {
+        Self {
             logic_x: logic_x.into(),
             logic_y: logic_y.into(),
             back_x: (actual.0.start, actual.0.end),
             back_y: (actual.1.start, actual.1.end),
-        };
+        }
     }
 
     /// Draw the mesh for the coordinate system
@@ -80,17 +80,17 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
             ))?;
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// Get the range of X axis
     pub fn get_x_range(&self) -> Range<X::ValueType> {
-        return self.logic_x.range();
+        self.logic_x.range()
     }
 
     /// Get the range of Y axis
     pub fn get_y_range(&self) -> Range<Y::ValueType> {
-        return self.logic_y.range();
+        self.logic_y.range()
     }
 }
 
@@ -98,19 +98,19 @@ impl<X: Ranged, Y: Ranged> CoordTranslate for RangedCoord<X, Y> {
     type From = (X::ValueType, Y::ValueType);
 
     fn translate(&self, from: &Self::From) -> BackendCoord {
-        return (
+        (
             self.logic_x.map(&from.0, self.back_x),
             self.logic_y.map(&from.1, self.back_y),
-        );
+        )
     }
 }
 
 impl<X: ReversableRanged, Y: ReversableRanged> ReverseCoordTranslate for RangedCoord<X, Y> {
     fn reverse_translate(&self, input: BackendCoord) -> Option<Self::From> {
-        return Some((
+        Some((
             self.logic_x.unmap(input.0, self.back_x)?,
             self.logic_y.unmap(input.1, self.back_y)?,
-        ));
+        ))
     }
 }
 
@@ -131,7 +131,7 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
             MeshLine::XMesh(a, b, _) => (a, b),
             MeshLine::YMesh(a, b, _) => (a, b),
         };
-        return backend.draw_line(left, right, &Box::new(style.color));
+        backend.draw_line(left, right, &Box::new(style.color))
     }
 }
 

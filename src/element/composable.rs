@@ -10,7 +10,7 @@ pub struct EmptyElement<Coord> {
 
 impl<Coord> EmptyElement<Coord> {
     pub fn at(coord: Coord) -> Self {
-        return Self { coord };
+        Self { coord }
     }
 }
 
@@ -21,10 +21,10 @@ where
 {
     type Output = BoxedElement<Coord, Other>;
     fn add(self, other: Other) -> Self::Output {
-        return BoxedElement {
+        BoxedElement {
             offset: self.coord,
             inner: other,
-        };
+        }
     }
 }
 
@@ -32,7 +32,7 @@ impl<'a, Coord> PointCollection<'a, Coord> for &'a EmptyElement<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return once(&self.coord);
+        once(&self.coord)
     }
 }
 
@@ -45,7 +45,7 @@ impl<'b, Coord, A: Drawable> PointCollection<'b, Coord> for &'b BoxedElement<Coo
     type Borrow = &'b Coord;
     type IntoIter = Once<&'b Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return once(&self.offset);
+        once(&self.offset)
     }
 }
 
@@ -63,12 +63,12 @@ where
             self.inner.draw(
                 self.inner.point_iter().into_iter().map(|p| {
                     let p = p.borrow();
-                    return (p.0 + x0, p.1 + y0);
+                    (p.0 + x0, p.1 + y0)
                 }),
                 backend,
             )?;
         }
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -81,11 +81,11 @@ where
 {
     type Output = ComposedElement<Coord, My, Yours>;
     fn add(self, yours: Yours) -> Self::Output {
-        return ComposedElement {
+        ComposedElement {
             offset: self.offset,
             first: self.inner,
             second: yours,
-        };
+        }
     }
 }
 
@@ -107,7 +107,7 @@ where
     type Borrow = &'b Coord;
     type IntoIter = Once<&'b Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return once(&self.offset);
+        once(&self.offset)
     }
 }
 
@@ -127,19 +127,19 @@ where
             self.first.draw(
                 self.first.point_iter().into_iter().map(|p| {
                     let p = p.borrow();
-                    return (p.0 + x0, p.1 + y0);
+                    (p.0 + x0, p.1 + y0)
                 }),
                 backend,
             )?;
             self.second.draw(
                 self.second.point_iter().into_iter().map(|p| {
                     let p = p.borrow();
-                    return (p.0 + x0, p.1 + y0);
+                    (p.0 + x0, p.1 + y0)
                 }),
                 backend,
             )?;
         }
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -154,7 +154,7 @@ where
 {
     type Output = ComposedElement<Coord, A, ComposedElement<BackendCoord, B, C>>;
     fn add(self, rhs: C) -> Self::Output {
-        return ComposedElement {
+        ComposedElement {
             offset: self.offset,
             first: self.first,
             second: ComposedElement {
@@ -162,6 +162,6 @@ where
                 first: self.second,
                 second: rhs,
             },
-        };
+        }
     }
 }

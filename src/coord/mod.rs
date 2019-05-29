@@ -42,13 +42,13 @@ pub struct Shift(pub BackendCoord);
 impl CoordTranslate for Shift {
     type From = BackendCoord;
     fn translate(&self, from: &Self::From) -> BackendCoord {
-        return (from.0 + (self.0).0, from.1 + (self.0).1);
+        (from.0 + (self.0).0, from.1 + (self.0).1)
     }
 }
 
 impl ReverseCoordTranslate for Shift {
     fn reverse_translate(&self, input: BackendCoord) -> Option<BackendCoord> {
-        return Some((input.0 - (self.0).0, input.1 - (self.0).1));
+        Some((input.0 - (self.0).0, input.1 - (self.0).1))
     }
 }
 
@@ -59,12 +59,12 @@ impl<T: CoordTranslate> CoordTranslate for ShiftAndTrans<T> {
     type From = T::From;
     fn translate(&self, from: &Self::From) -> BackendCoord {
         let temp = self.1.translate(from);
-        return self.0.translate(&temp);
+        self.0.translate(&temp)
     }
 }
 
 impl<T: ReverseCoordTranslate> ReverseCoordTranslate for ShiftAndTrans<T> {
     fn reverse_translate(&self, input: BackendCoord) -> Option<T::From> {
-        return Some(self.1.reverse_translate(self.0.reverse_translate(input)?)?);
+        Some(self.1.reverse_translate(self.0.reverse_translate(input)?)?)
     }
 }

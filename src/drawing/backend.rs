@@ -15,10 +15,10 @@ pub enum DrawingErrorKind<E: Error> {
 
 impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        return match self {
+        match self {
             DrawingErrorKind::DrawingError(e) => write!(fmt, "Drawing backend error: {}", e),
             DrawingErrorKind::FontError(e) => write!(fmt, "Font loading error: {}", e),
-        };
+        }
     }
 }
 
@@ -65,17 +65,17 @@ pub trait DrawingBackend {
             (from, to)
         };
 
-        let grad = (to.1 - from.1) as f64 / (to.0 - from.0) as f64;
+        let grad = f64::from(to.1 - from.1) / f64::from(to.0 - from.0);
 
         let mut put_pixel = |(x, y): BackendCoord, b: f64| {
             if steep {
-                return self.draw_pixel((y, x), &color.mix(b));
+                self.draw_pixel((y, x), &color.mix(b))
             } else {
-                return self.draw_pixel((x, y), &color.mix(b));
+                self.draw_pixel((x, y), &color.mix(b))
             }
         };
 
-        let mut y = from.1 as f64;
+        let mut y = f64::from(from.1);
 
         for x in from.0..=to.0 {
             put_pixel((x, y as i32), 1.0 + y.floor() - y)?;
@@ -84,7 +84,7 @@ pub trait DrawingBackend {
             y += grad;
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// Draw a rectangle
@@ -138,7 +138,7 @@ pub trait DrawingBackend {
                 color,
             )?;
         }
-        return Ok(());
+        Ok(())
     }
 
     /// Draw a path
@@ -154,7 +154,7 @@ pub trait DrawingBackend {
             }
             begin = Some(end);
         }
-        return Ok(());
+        Ok(())
     }
 
     /// Draw a circle
@@ -166,8 +166,8 @@ pub trait DrawingBackend {
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         //let range = ((radius + 3) / 4) as i32..=(2 * radius - radius / 4) as i32;
-        let min = (radius as f64 * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
-        let max = (radius as f64 * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
+        let min = (f64::from(radius) * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
+        let max = (f64::from(radius) * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
 
         let range = min..=max;
 
@@ -180,7 +180,9 @@ pub trait DrawingBackend {
             let dy = dy - radius as i32;
             let y = center.1 + dy;
 
-            let lx = (radius as f64 * radius as f64 - (dy as f64 * dy as f64).max(1e-5)).sqrt();
+            let lx = (f64::from(radius) * f64::from(radius)
+                - (f64::from(dy) * f64::from(dy)).max(1e-5))
+            .sqrt();
 
             let left = center.0 - lx.floor() as i32;
             let right = center.0 + lx.floor() as i32;
@@ -209,7 +211,7 @@ pub trait DrawingBackend {
             self.draw_pixel((x, bottom + 1), &color.mix(v))?;
         }
 
-        return Ok(());
+        Ok(())
     }
 
     /// Draw a text
@@ -221,7 +223,7 @@ pub trait DrawingBackend {
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         match font.draw(text, (pos.0, pos.1), |x, y, v| {
-            self.draw_pixel((x as i32, y as i32), &color.mix(v as f64))
+            self.draw_pixel((x as i32, y as i32), &color.mix(f64::from(v)))
         }) {
             Ok(drawing_result) => drawing_result,
             Err(font_error) => Err(DrawingErrorKind::FontError(font_error)),

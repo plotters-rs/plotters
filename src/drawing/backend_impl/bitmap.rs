@@ -13,10 +13,10 @@ pub struct BitMapBackend<'a> {
 impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
     pub fn new(path: &'a str, dimension: (u32, u32)) -> Self {
-        return Self {
+        Self {
             path,
             img: RgbImage::new(dimension.0, dimension.1),
-        };
+        }
     }
 }
 
@@ -24,7 +24,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     type ErrorType = ImageError;
 
     fn get_size(&self) -> (u32, u32) {
-        return (self.img.width(), self.img.height());
+        (self.img.width(), self.img.height())
     }
 
     fn open(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
@@ -71,9 +71,10 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 .iter_mut()
                 .zip(&new_color)
                 .for_each(|(old, new)| {
-                    *old = (*old as f64 * (1.0 - alpha) + *new as f64 * alpha).min(255.0) as u8;
+                    *old = (f64::from(*old) * (1.0 - alpha) + f64::from(*new) * alpha).min(255.0)
+                        as u8;
                 });
         }
-        return Ok(());
+        Ok(())
     }
 }

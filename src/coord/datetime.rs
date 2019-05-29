@@ -12,7 +12,7 @@ pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
 
 impl<Z: TimeZone> From<Range<Date<Z>>> for RangedDate<Z> {
     fn from(range: Range<Date<Z>>) -> Self {
-        return Self(range.start, range.end);
+        Self(range.start, range.end)
     }
 }
 
@@ -20,14 +20,14 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
     type ValueType = Date<Z>;
 
     fn range(&self) -> Range<Date<Z>> {
-        return self.0.clone()..self.1.clone();
+        self.0.clone()..self.1.clone()
     }
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
         let total_days = (self.1.clone() - self.0.clone()).num_days() as f64;
         let value_days = (value.clone() - self.0.clone()).num_days() as f64;
 
-        return ((limit.1 - limit.0) as f64 * value_days / total_days) as i32 + limit.0;
+        (f64::from(limit.1 - limit.0) * value_days / total_days) as i32 + limit.0
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
@@ -50,7 +50,7 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
             return ret;
         }
 
-        return ret;
+        ret
     }
 }
 

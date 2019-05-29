@@ -17,6 +17,7 @@ pub struct CandleStick<'a, X, Y: PartialOrd> {
 
 impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
     /// Create a new candlestick element, which requires the Y coordinate can be compared
+    #[allow(clippy::too_many_arguments)]
     pub fn new<GS: Into<ShapeStyle<'a>>, LS: Into<ShapeStyle<'a>>>(
         x: X,
         open: Y,
@@ -27,7 +28,7 @@ impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
         loss_style: GS,
         width: u32,
     ) -> Self {
-        return Self {
+        Self {
             style: match open.partial_cmp(&close) {
                 Some(Ordering::Less) => gain_style.into(),
                 _ => loss_style.into(),
@@ -39,7 +40,7 @@ impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
                 (x.clone(), low),
                 (x.clone(), close),
             ],
-        };
+        }
     }
 }
 
@@ -47,7 +48,7 @@ impl<'b, 'a, X: 'a, Y: PartialOrd + 'a> PointCollection<'a, (X, Y)> for &'a Cand
     type Borrow = &'a (X, Y);
     type IntoIter = &'a [(X, Y)];
     fn point_iter(self) -> &'a [(X, Y)] {
-        return &self.points;
+        &self.points
     }
 }
 
@@ -61,9 +62,7 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
         if points.len() == 4 {
             let fill = false;
             if points[0].1 > points[3].1 {
-                let tmp = points[0].clone();
-                points[0] = points[3];
-                points[3] = tmp;
+                points.swap(0, 3);
             }
             let (l, r) = (
                 self.width as i32 / 2,
@@ -78,6 +77,6 @@ impl<'a, X: 'a, Y: 'a + PartialOrd> Drawable for CandleStick<'a, X, Y> {
 
             backend.draw_rect(points[0], points[3], &Box::new(self.style.color), fill)?;
         }
-        return Ok(());
+        Ok(())
     }
 }

@@ -13,10 +13,9 @@ pub struct PointSeries<'a, Coord, I: IntoIterator<Item = Coord>, E> {
 impl<'a, Coord, I: IntoIterator<Item = Coord>, E> Iterator for PointSeries<'a, Coord, I, E> {
     type Item = E;
     fn next(&mut self) -> Option<Self::Item> {
-        return self
-            .data_iter
+        self.data_iter
             .next()
-            .map(|x| (self.make_point)(x, self.size, self.style.clone()));
+            .map(|x| (self.make_point)(x, self.size, self.style.clone()))
     }
 }
 
@@ -28,12 +27,12 @@ where
     /// You may also use a more general way to create a point series with `of_element`
     /// function which allows a cusmotized element construction function
     pub fn new<S: Into<ShapeStyle<'a>>>(iter: I, size: u32, style: S) -> Self {
-        return Self {
+        Self {
             data_iter: iter.into_iter(),
             size,
             style: style.into(),
             make_point: &|a, b, c| E::make_point(a, b, c),
-        };
+        }
     }
 }
 
@@ -47,11 +46,11 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>, E> PointSeries<'a, Coord, I, E> {
         style: S,
         cons: &'a F,
     ) -> Self {
-        return Self {
+        Self {
             data_iter: iter.into_iter(),
             size,
             style: style.into(),
             make_point: cons,
-        };
+        }
     }
 }

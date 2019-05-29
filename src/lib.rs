@@ -16,23 +16,23 @@ Plotters is a flexible drawing library for data visualization written in pure Ru
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs, but APIs may change during the time.*
 
-Plotters is drawing library designed for rendering figures, plots and charts, in pure rust. 
+Plotters is drawing library designed for rendering figures, plots and charts, in pure rust.
 
 ### Reasons for Plotting in Rust
 
-* **Rust is fast.** If you need rendering a figure with trillions of data points, 
-Rust is a good choice. Rust's performance allows you combine data processing step 
+* **Rust is fast.** If you need rendering a figure with trillions of data points,
+Rust is a good choice. Rust's performance allows you combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
-within a signle program. You can also integrate the 
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+within a signle program. You can also integrate the
 figure rendering code into your application handling huge amount of data and visualize it in real-time.
 
 * **Iterators** Rust has a very good iterator system built into the standard library. With the help of iterators,
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ### What type of figure is supported?
@@ -46,7 +46,7 @@ But Plotter is aimed to be a platform that is fully extendable to supporting any
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Gallery
@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ))?;
 
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     backend.open()?;
     backend.draw_rect((50,50), (200, 150), &Red, true)?;
     backend.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -173,7 +173,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         area.fill(&Palette99::pick(color))?;
     }
     root_drawing_area.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -198,7 +198,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -236,7 +236,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -287,7 +287,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
     }))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 

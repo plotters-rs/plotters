@@ -23,19 +23,19 @@ pub struct TextStyle<'a> {
 impl<'a> TextStyle<'a> {
     /// Determine the color of the style
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
-        return Self {
+        Self {
             font: self.font,
             color,
-        };
+        }
     }
 }
 
 impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     fn from(font: &'a T) -> Self {
-        return Self {
+        Self {
             font: font.borrow(),
             color: &RGBColor(0, 0, 0),
-        };
+        }
     }
 }
 
@@ -49,18 +49,18 @@ pub struct ShapeStyle<'a> {
 impl<'a> ShapeStyle<'a> {
     /// Make a filled shape style
     pub fn filled(&self) -> Self {
-        return Self {
+        Self {
             color: self.color,
             filled: true,
-        };
+        }
     }
 }
 
 impl<'a, T: Color> From<&'a T> for ShapeStyle<'a> {
     fn from(f: &'a T) -> Self {
-        return ShapeStyle {
+        ShapeStyle {
             color: f,
             filled: false,
-        };
+        }
     }
 }

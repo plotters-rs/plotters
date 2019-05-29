@@ -29,14 +29,14 @@ where
     ) -> Self {
         let mut buffer = HashMap::<XR::ValueType, Y>::new();
         for (x, y) in iter.into_iter() {
-            *buffer.entry(x).or_insert(Default::default()) += y;
+            *buffer.entry(x).or_insert_with(Default::default) += y;
         }
-        return Self {
+        Self {
             style: style.into(),
             x_margin,
             iter: buffer.into_iter(),
             _p: PhantomData,
-        };
+        }
     }
 }
 
@@ -52,6 +52,6 @@ where
             rect.set_margin(0, 0, self.x_margin, self.x_margin);
             return Some(rect);
         }
-        return None;
+        None
     }
 }

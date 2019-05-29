@@ -12,7 +12,7 @@ use lazy_static::lazy_static;
 
 use font_loader::system_fonts;
 
-use super::FontData;
+use super::{FontData, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -25,11 +25,11 @@ pub enum FontError {
 
 impl std::fmt::Display for FontError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        return match self {
+        match self {
             FontError::LockError => write!(fmt, "Could not lock mutex"),
             FontError::NoSuchFont => write!(fmt, "No such font"),
             FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e),
-        };
+        }
     }
 }
 
@@ -59,7 +59,7 @@ impl OwnedFont {
                 std::mem::transmute::<_, Option<Font<'static>>>(Some(font));
         }
 
-        return Ok(boxed_font_obj);
+        Ok(boxed_font_obj)
     }
 }
 
@@ -71,7 +71,7 @@ impl Drop for OwnedFont {
 
 impl<'a> Into<&'a Font<'a>> for &'a OwnedFont {
     fn into(self) -> &'a Font<'a> {
-        return self.font.as_ref().unwrap();
+        self.font.as_ref().unwrap()
     }
 }
 
@@ -98,7 +98,7 @@ fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
         let font_ref: &'static OwnedFont =
             unsafe { std::mem::transmute(cache.get(face).unwrap().as_ref().get_ref()) };
         let addr = Into::<&'static Font<'static>>::into(font_ref) as *const Font<'static>;
-        return Ok(unsafe { addr.as_ref().unwrap() });
+        Ok(unsafe { addr.as_ref().unwrap() })
     }) {
         Ok(what) => what,
         Err(_) => Err(FontError::LockError),
@@ -112,7 +112,7 @@ pub unsafe fn clear_font_cache() -> FontResult<()> {
     if let Ok(mut cache) = FONT_DATA_CACHE.lock() {
         *cache = HashMap::new();
     }
-    return Err(FontError::LockError);
+    Err(FontError::LockError)
 }
 
 #[derive(Clone)]
@@ -121,13 +121,9 @@ pub struct FontDataInternal(&'static Font<'static>);
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
     fn new(face: &str) -> Result<Self, FontError> {
-        return Ok(FontDataInternal(load_font_data(face)?));
+        Ok(FontDataInternal(load_font_data(face)?))
     }
-    fn estimate_layout(
-        &self,
-        size: f64,
-        text: &str,
-    ) -> Result<((i32, i32), (i32, i32)), Self::ErrorType> {
+    fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let scale = Scale::uniform(size as f32);
 
         let (mut min_x, mut min_y) = (i32::MAX, i32::MAX);
@@ -149,7 +145,7 @@ impl FontData for FontDataInternal {
             return Ok(((0, 0), (0, 0)));
         }
 
-        return Ok(((min_x, min_y), (max_x, max_y)));
+        Ok(((min_x, min_y), (max_x, max_y)))
     }
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
@@ -174,7 +170,7 @@ impl FontData for FontDataInternal {
                 });
             }
         }
-        return Ok(result);
+        Ok(result)
     }
 }
 

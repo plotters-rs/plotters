@@ -33,12 +33,12 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `root`: The root drawing area
     /// - Returns: The chart builder object
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
-        return Self {
+        Self {
             x_label_size: 0,
             y_label_size: 0,
             root_area: root,
             titled_area: None,
-        };
+        }
     }
 
     /// Set the margin size of the chart
@@ -50,21 +50,21 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         }
         let size = size as i32;
         self.titled_area = Some(self.root_area.margin(size, size, size, size));
-        return self;
+        self
     }
 
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn x_label_area_size(&mut self, size: u32) -> &mut Self {
         self.x_label_size = size;
-        return self;
+        self
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn y_label_area_size(&mut self, size: u32) -> &mut Self {
         self.y_label_size = size;
-        return self;
+        self
     }
 
     /// Set the caption of the chart
@@ -85,7 +85,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
                 .titled(caption.as_ref(), style.into())
                 .expect("Unable to create caption for chart"),
         );
-        return self;
+        self
     }
 
     /// Builder the chart with a ranged coordinate system. The function will returns a chart
@@ -128,7 +128,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         let mut pixel_range = drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
-        return ChartContext {
+        ChartContext {
             x_label_area,
             y_label_area,
             series_area: None,
@@ -137,7 +137,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
                 y_spec,
                 pixel_range,
             )),
-        };
+        }
     }
 }
 
@@ -184,86 +184,86 @@ where
     /// - `value`: The offset in pixel
     pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
         self.x_label_offset = value;
-        return self;
+        self
     }
 
     /// Disable the mesh for the x axis.
     pub fn disable_x_mesh(&mut self) -> &mut Self {
         self.draw_x_mesh = false;
-        return self;
+        self
     }
 
     /// Disable the mesh for the y axis
     pub fn disable_y_mesh(&mut self) -> &mut Self {
         self.draw_y_mesh = false;
-        return self;
+        self
     }
 
     /// Disable drawing the X axis
     pub fn disable_x_axis(&mut self) -> &mut Self {
         self.draw_x_axis = false;
-        return self;
+        self
     }
 
     /// Disable drawing the Y axis
     pub fn disable_y_axis(&mut self) -> &mut Self {
         self.draw_y_axis = false;
-        return self;
+        self
     }
 
     /// Set the style definition for the axis
     /// - `style`
     pub fn axis_style<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
         self.axis_style = Some(style.into());
-        return self;
+        self
     }
     /// Set how many labels for the X axis at most
     /// - `value`: The maximum desired number of labels in the X axis
     pub fn x_labels(&mut self, value: usize) -> &mut Self {
         self.n_x_labels = value;
-        return self;
+        self
     }
 
     /// Set how many label for the Y axis at most
     /// - `value`: The maximum desired number of labels in the Y axis
     pub fn y_labels(&mut self, value: usize) -> &mut Self {
         self.n_y_labels = value;
-        return self;
+        self
     }
 
     /// Set the style for the coarse grind grid
     /// - `style`: This is the fcoarse grind grid style
     pub fn line_style_1<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
         self.line_style_1 = Some(style.into());
-        return self;
+        self
     }
 
     /// Set the style for the fine grind grid
     /// - `style`: The fine grind grid style
     pub fn line_style_2<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
         self.line_style_2 = Some(style.into());
-        return self;
+        self
     }
 
     /// Set the style of the label text
     /// - `style`: The text style that would be applied to the labels
     pub fn label_style<T: Into<TextStyle<'a>>>(&mut self, style: T) -> &mut Self {
         self.label_style = Some(style.into());
-        return self;
+        self
     }
 
     /// Set the formatter function for the X label text
     /// - `fmt`: The formatter function
     pub fn x_label_formatter(&mut self, fmt: &'a dyn Fn(&X::ValueType) -> String) -> &mut Self {
         self.format_x = fmt;
-        return self;
+        self
     }
 
     /// Set the formatter function for the Y label text
     /// - `fmt`: The formatter function
     pub fn y_label_formatter(&mut self, fmt: &'a dyn Fn(&Y::ValueType) -> String) -> &mut Self {
         self.format_y = fmt;
-        return self;
+        self
     }
 
     /// Draw the configured mesh on the target plot
@@ -307,7 +307,7 @@ where
             &axis_style,
         )?;
 
-        return target.draw_mesh(
+        target.draw_mesh(
             (self.n_y_labels, self.n_x_labels),
             &mesh_style_1,
             &label_style,
@@ -321,7 +321,7 @@ where
             self.draw_x_axis,
             self.draw_y_axis,
             &axis_style,
-        );
+        )
     }
 }
 
@@ -336,7 +336,7 @@ impl<
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
     /// the function `MeshStyle::draw`
     pub fn configure_mesh(&mut self) -> MeshStyle<X, Y, DB> {
-        return MeshStyle {
+        MeshStyle {
             axis_style: None,
             x_label_offset: 0,
             draw_x_mesh: true,
@@ -352,7 +352,7 @@ impl<
             format_y: &|y| format!("{:?}", y),
             target: Some(self),
             _pahtom_data: PhantomData,
-        };
+        }
     }
 }
 
@@ -360,26 +360,24 @@ impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
     /// Convert the chart context into an closure that can be used for coordinate translation
     pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
         let coord_spec = self.drawing_area.into_coord_spec();
-        return move |coord| {
-            return coord_spec.reverse_translate(coord);
-        };
+        move |coord| coord_spec.reverse_translate(coord)
     }
 }
 
 impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y>> {
     /// Get the range of X axis
     pub fn x_range(&self) -> Range<X::ValueType> {
-        return self.drawing_area.get_x_range();
+        self.drawing_area.get_x_range()
     }
 
     /// Get range of the Y axis
     pub fn y_range(&self) -> Range<Y::ValueType> {
-        return self.drawing_area.get_y_range();
+        self.drawing_area.get_y_range()
     }
 
     /// Get the plotting area
     pub fn plotting_area(&self) -> &DrawingArea<DB, RangedCoord<X, Y>> {
-        return &self.drawing_area;
+        &self.drawing_area
     }
 
     /// Defines a series label area
@@ -391,11 +389,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
         let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
-        return self.series_area.as_ref().unwrap().draw(&element);
+        self.series_area.as_ref().unwrap().draw(&element)
     }
 
     pub fn backend_coord(&self, coord: &(X::ValueType, Y::ValueType)) -> BackendCoord {
-        return self.drawing_area.map_coordinate(coord);
+        self.drawing_area.map_coordinate(coord)
     }
 
     /// Draw a series
@@ -409,10 +407,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         for element in series {
             self.drawing_area.draw(element.borrow())?;
         }
-        return Ok(());
+        Ok(())
     }
 
     /// Draw the mesh
+    #[allow(clippy::too_many_arguments)]
     fn draw_mesh<FmtLabel>(
         &mut self,
         (r, c): (usize, usize),
@@ -448,11 +447,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         draw = y_mesh;
                     }
                 };
-                return if draw {
+                if draw {
                     l.draw(b, mesh_line_style)
                 } else {
                     Ok(())
-                };
+                }
             },
             r,
             c,
@@ -511,6 +510,6 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
             }
         }
 
-        return Ok(());
+        Ok(())
     }
 }

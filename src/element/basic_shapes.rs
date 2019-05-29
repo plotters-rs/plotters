@@ -10,10 +10,10 @@ pub struct Pixel<'a, Coord> {
 
 impl<'a, Coord> Pixel<'a, Coord> {
     pub fn new<P: Into<Coord>, S: Into<ShapeStyle<'a>>>(pos: P, style: S) -> Self {
-        return Self {
+        Self {
             pos: pos.into(),
             style: style.into(),
-        };
+        }
     }
 }
 
@@ -21,7 +21,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return std::iter::once(&self.pos);
+        std::iter::once(&self.pos)
     }
 }
 
@@ -34,7 +34,7 @@ impl<'a, Coord: 'a> Drawable for Pixel<'a, Coord> {
         if let Some((x, y)) = points.next() {
             return backend.draw_pixel((x, y), &Box::new(self.style.color));
         }
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -49,10 +49,10 @@ impl<'a, Coord> Path<'a, Coord> {
     /// - `style`: The shape style
     /// - returns the created element
     pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle<'a>>>(points: P, style: S) -> Self {
-        return Self {
+        Self {
             points: points.into(),
             style: style.into(),
-        };
+        }
     }
 }
 
@@ -60,7 +60,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
-        return &self.points;
+        &self.points
     }
 }
 
@@ -70,7 +70,7 @@ impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
         points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        return backend.draw_path(points, &Box::new(self.style.color));
+        backend.draw_path(points, &Box::new(self.style.color))
     }
 }
 
@@ -87,11 +87,11 @@ impl<'a, Coord> Rectangle<'a, Coord> {
     /// - `style`: The shape style
     /// - returns the created element
     pub fn new<S: Into<ShapeStyle<'a>>>(points: [Coord; 2], style: S) -> Self {
-        return Self {
+        Self {
             points,
             style: style.into(),
             margin: (0, 0, 0, 0),
-        };
+        }
     }
 
     /// Set the margin of the rectangle
@@ -101,7 +101,7 @@ impl<'a, Coord> Rectangle<'a, Coord> {
     /// - `r`: The right margin
     pub fn set_margin(&mut self, t: u32, b: u32, l: u32, r: u32) -> &mut Self {
         self.margin = (t, b, l, r);
-        return self;
+        self
     }
 }
 
@@ -109,7 +109,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> 
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
-        return &self.points;
+        &self.points
     }
 }
 
@@ -125,11 +125,9 @@ impl<'a, Coord: 'a> Drawable for Rectangle<'a, Coord> {
                 b.1 -= self.margin.1 as i32;
                 a.0 += self.margin.2 as i32;
                 b.0 -= self.margin.3 as i32;
-                return backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled);
+                backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled)
             }
-            _ => {
-                return Ok(());
-            }
+            _ => Ok(()),
         }
     }
 }
@@ -152,11 +150,11 @@ impl<'a, Coord> Text<'a, Coord> {
         points: Coord,
         style: S,
     ) -> Self {
-        return Self {
+        Self {
             text: text.as_ref(),
             coord: points,
             style: style.into(),
-        };
+        }
     }
 }
 
@@ -164,7 +162,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return std::iter::once(&self.coord);
+        std::iter::once(&self.coord)
     }
 }
 
@@ -177,7 +175,7 @@ impl<'a, Coord: 'a> Drawable for Text<'a, Coord> {
         if let Some(a) = points.next() {
             return backend.draw_text(self.text, self.style.font, a, &Box::new(self.style.color));
         }
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -195,11 +193,11 @@ impl<'a, Coord> Circle<'a, Coord> {
     /// - `style` The style of the circle
     /// - Return: The newly created circle element
     pub fn new(coord: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
-        return Self {
+        Self {
             center: coord,
             size,
             style,
-        };
+        }
     }
 }
 
@@ -207,7 +205,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
-        return std::iter::once(&self.center);
+        std::iter::once(&self.center)
     }
 }
 
@@ -225,7 +223,7 @@ impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
                 self.style.filled,
             );
         }
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -244,11 +242,11 @@ impl<'a, Coord> OwnedText<'a, Coord> {
     /// - `style`: The font style
     /// - Return the newly created owned text object
     pub fn new<S: Into<TextStyle<'a>>>(text: String, points: Coord, style: S) -> Self {
-        return Self {
+        Self {
             text,
             coord: points,
             style: style.into(),
-        };
+        }
     }
 }
 
@@ -256,7 +254,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> 
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
-        return std::iter::once(&self.coord);
+        std::iter::once(&self.coord)
     }
 }
 
@@ -269,6 +267,6 @@ impl<'a, Coord: 'a> Drawable for OwnedText<'a, Coord> {
         if let Some(a) = points.next() {
             return backend.draw_text(&self.text, self.style.font, a, &Box::new(self.style.color));
         }
-        return Ok(());
+        Ok(())
     }
 }

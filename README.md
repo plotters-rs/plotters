@@ -92,7 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ))?;
 
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -113,7 +113,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     backend.open()?;
     backend.draw_rect((50,50), (200, 150), &RGBColor(255,0,0), true)?;
     backend.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -141,7 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         area.fill(&Palette99::pick(color))?;
     }
     root_drawing_area.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -166,7 +166,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&RGBColor(0, 255, 0))))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -204,7 +204,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 
@@ -255,7 +255,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
     }))?;
     root.close()?;
-    return Ok(());
+    Ok(())
 }
 ```
 

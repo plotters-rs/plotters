@@ -14,21 +14,21 @@ impl<'b, Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<'b, Coord
         if self.data_iter.is_some() {
             let mut data_iter = None;
             std::mem::swap(&mut self.data_iter, &mut data_iter);
-            return Some(Path::new(
+            Some(Path::new(
                 data_iter.unwrap().collect::<Vec<_>>(),
                 self.style.clone(),
-            ));
+            ))
         } else {
-            return None;
+            None
         }
     }
 }
 
 impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
     pub fn new<S: Into<ShapeStyle<'a>>>(iter: I, style: S) -> Self {
-        return Self {
+        Self {
             style: style.into(),
             data_iter: Some(iter.into_iter()),
-        };
+        }
     }
 }

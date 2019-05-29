@@ -17,11 +17,11 @@ pub struct Cross<'a, Coord> {
 
 impl<'a, Coord> Cross<'a, Coord> {
     pub fn new(coord: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
-        return Self {
+        Self {
             center: coord,
             size,
             style,
-        };
+        }
     }
 }
 
@@ -29,7 +29,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Cross<'b, Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
-        return std::iter::once(&self.center);
+        std::iter::once(&self.center)
     }
 }
 
@@ -46,23 +46,23 @@ impl<'a, Coord: 'a> Drawable for Cross<'a, Coord> {
             backend.draw_line((x0, y0), (x1, y1), &Box::new(self.style.color))?;
             backend.draw_line((x0, y1), (x1, y0), &Box::new(self.style.color))?;
         }
-        return Ok(());
+        Ok(())
     }
 }
 impl<'a, Coord> PointElement<'a, Coord> for Cross<'a, Coord> {
     fn make_point(pos: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
-        return Self::new(pos, size, style);
+        Self::new(pos, size, style)
     }
 }
 
 impl<'a, Coord> PointElement<'a, Coord> for Circle<'a, Coord> {
     fn make_point(pos: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
-        return Self::new(pos, size, style);
+        Self::new(pos, size, style)
     }
 }
 
 impl<'a, Coord> PointElement<'a, Coord> for Pixel<'a, Coord> {
     fn make_point(pos: Coord, _: u32, style: ShapeStyle<'a>) -> Self {
-        return Self::new(pos, style);
+        Self::new(pos, style)
     }
 }

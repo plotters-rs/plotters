@@ -44,11 +44,11 @@ pub struct LogRange<V: LogScalable>(pub Range<V>);
 
 impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
     fn from(range: LogRange<V>) -> LogCoord<V> {
-        return LogCoord {
+        LogCoord {
             linear: (range.0.start.as_f64().ln()..range.0.end.as_f64().ln()).into(),
             logic: range.0,
             marker: PhantomData,
-        };
+        }
     }
 }
 
@@ -69,7 +69,7 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
     fn map(&self, value: &V, limit: (i32, i32)) -> i32 {
         let value = value.as_f64();
         let value = value.max(self.logic.start.as_f64()).ln();
-        return self.linear.map(&value, limit);
+        self.linear.map(&value, limit)
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
@@ -110,7 +110,7 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             val *= multiply;
         }
 
-        return ret;
+        ret
     }
 
     fn range(&self) -> Range<V> {

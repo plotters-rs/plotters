@@ -52,7 +52,7 @@ pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
 impl<P: Palette> PaletteColor<P> {
     /// Pick a color from the palette
     pub fn pick(idx: usize) -> PaletteColor<P> {
-        return PaletteColor(idx % P::COLORS.len(), PhantomData);
+        PaletteColor(idx % P::COLORS.len(), PhantomData)
     }
 }
 
@@ -103,7 +103,7 @@ macro_rules! predefined_color {
                 return ($r, $g, $b);
             }
             fn alpha(&self) -> f64 {
-                return $a;
+                $a
             }
         }
     }
@@ -122,6 +122,7 @@ predefined_color!(Transparent, 0, 0, 0, 0.0, "The predefined transparent");
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl SimpleColor for HSLColor {
+    #[allow(clippy::many_single_char_names)]
     fn rgb(&self) -> (u8, u8, u8) {
         let (h, s, l) = (
             self.0.min(1.0).max(0.0),
@@ -157,9 +158,9 @@ impl SimpleColor for HSLColor {
             } else {
                 p
             };
-            return (value * 255.0).round() as u8;
+            (value * 255.0).round() as u8
         };
 
-        return (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0));
+        (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0))
     }
 }
