@@ -65,11 +65,11 @@ impl DrawingBackend for CanvasBackend {
         return (self.canvas.width(), self.canvas.height());
     }
 
-    fn open(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
         return Ok(());
     }
 
-    fn close(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
+    fn present(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
         return Ok(());
     }
 

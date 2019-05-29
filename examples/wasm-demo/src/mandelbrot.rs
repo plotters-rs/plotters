@@ -30,8 +30,7 @@ fn mandelbrot_set(
 fn draw_mandelbrot_impl(
     element: &str,
 ) -> Result<Box<Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
-    let mut backend = CanvasBackend::new(element).unwrap();
-    backend.open()?;
+    let backend = CanvasBackend::new(element).unwrap();
 
     let root: DrawingArea<_, _> = backend.into();
     root.fill(&White)?;
@@ -62,7 +61,7 @@ fn draw_mandelbrot_impl(
         }
     }
 
-    root.close()?;
+    root.present()?;
     return Ok(Box::new(chart.into_coord_trans()));
 }
 

@@ -5,8 +5,7 @@ fn start_plotting(
     element: &str,
     pow: i32,
 ) -> Result<Box<Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
-    let mut backend = CanvasBackend::new(element).unwrap();
-    backend.open()?;
+    let backend = CanvasBackend::new(element).unwrap();
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(20.0);
     root.fill(&White)?;
@@ -25,7 +24,7 @@ fn start_plotting(
         &Red,
     ))?;
 
-    root.close()?;
+    root.present()?;
     return Ok(Box::new(chart.into_coord_trans()));
 }
 

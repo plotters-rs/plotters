@@ -74,7 +74,6 @@ And you should be able to try the deployed version with the following [link](htt
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
-    backend.open()?;
     let root: DrawingArea<_, _> = backend.into();
     let font = Into::<FontDesc>::into("Arial").resize(20.0);
     root.fill(&RGBColor(255, 255, 255))?;
@@ -91,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &RGBColor(255, 0, 0),
     ))?;
 
-    root.close()?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -110,9 +109,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/1.png", (300,200));
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
-    backend.open()?;
     backend.draw_rect((50,50), (200, 150), &RGBColor(255,0,0), true)?;
-    backend.close()?;
+    backend.present()?;
     Ok(())
 }
 ```
@@ -140,7 +138,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area,color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
-    root_drawing_area.close()?;
+    root_drawing_area.present()?;
     Ok(())
 }
 ```
@@ -165,7 +163,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&RGBColor(255,255,255));
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&RGBColor(0, 255, 0))))?;
-    root.close()?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -203,7 +201,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
-    root.close()?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -254,7 +252,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
     }))?;
-    root.close()?;
+    root.present()?;
     Ok(())
 }
 ```
