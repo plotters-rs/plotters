@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(50)
         .y_label_area_size(60)
         .caption("Sine and Cosine", &font_small)
-        .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32);
+        .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
     cc.configure_mesh()
         .x_labels(20)
@@ -80,7 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(50)
             .y_label_area_size(60)
             .caption(format!("y = x^{}", 1 + 2 * idx), &font_small)
-            .build_ranged(-1f32..1f32, -1f32..1f32);
+            .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 
         cc.draw_series(LineSeries::new(

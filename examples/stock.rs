@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(40)
         .y_label_area_size(40)
         .caption("MSFT Stock Price", &font)
-        .build_ranged(from_date..to_date, 110f32..135f32);
+        .build_ranged(from_date..to_date, 110f32..135f32)?;
 
     chart
         .configure_mesh()

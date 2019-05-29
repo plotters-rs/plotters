@@ -1,31 +1,34 @@
 /*!
-The high-level chartting utils. `ChartBuilder` can be used to create a `ChartContext`.
+The high-level plotting abstractions. 
 
+`ChartBuilder` can be used to create a `ChartContext`.
 We are able to draw multiple series in the chart.
 A chart can be build on top of any drawing area based on a pixel coordinate.
 */
 
 use std::borrow::Borrow;
 use std::fmt::Debug;
-/// The abstraction of a chart
 use std::marker::PhantomData;
 use std::ops::Range;
 
 use crate::coord::{
     AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
 };
+
 use crate::drawing::backend::BackendCoord;
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, Path, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
-/// The helper object to create a chart context, which is used for the high-level plotting
+/// The helper object to create a chart context, which is used for the high-level figure drawing
 pub struct ChartBuilder<'a, DB: DrawingBackend> {
     x_label_size: u32,
     y_label_size: u32,
     root_area: &'a DrawingArea<DB, Shift>,
-    titled_area: Option<DrawingArea<DB, Shift>>,
+    title: Option<(String, TextStyle<'a>)>,
+    margin: u32,
+    //titled_area: Option<DrawingArea<DB, Shift>>,
 }
 
 impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
@@ -37,7 +40,8 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
             x_label_size: 0,
             y_label_size: 0,
             root_area: root,
-            titled_area: None,
+            title: None,
+            margin: 0,
         }
     }
 
@@ -45,11 +49,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `size`: The size of the chart margin. If the chart builder is titled, we don't apply any
     /// margin
     pub fn margin(&mut self, size: u32) -> &mut Self {
-        if self.titled_area.is_some() {
-            return self;
-        }
-        let size = size as i32;
-        self.titled_area = Some(self.root_area.margin(size, size, size, size));
+        self.margin = size;
         self
     }
 
@@ -71,20 +71,12 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `caption`: The caption of the chart
     /// - `style`: The text style
     /// - Note: If the caption is set, the margin option will be ignored
-    pub fn caption<'b, S: AsRef<str>, Style: Into<TextStyle<'b>>>(
+    pub fn caption<S: AsRef<str>, Style: Into<TextStyle<'a>>>(
         &mut self,
         caption: S,
         style: Style,
     ) -> &mut Self {
-        if self.titled_area.is_some() {
-            return self;
-        }
-
-        self.titled_area = Some(
-            self.root_area
-                .titled(caption.as_ref(), style.into())
-                .expect("Unable to create caption for chart"),
-        );
+        self.title = Some((caption.as_ref().to_string(), style.into()));
         self
     }
 
@@ -97,14 +89,20 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         &mut self,
         x_spec: X,
         y_spec: Y,
-    ) -> ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>> {
+    ) -> Result<ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>, DrawingAreaErrorKind<DB::ErrorType>> {
         let mut x_label_area = None;
         let mut y_label_area = None;
 
-        let mut temp = None;
-        std::mem::swap(&mut self.titled_area, &mut temp);
+        let mut drawing_area = DrawingArea::clone(self.root_area);
 
-        let mut drawing_area = temp.unwrap_or_else(|| DrawingArea::clone(self.root_area));
+        if self.margin > 0 {
+            let s = self.margin as i32;
+            drawing_area = drawing_area.margin(s, s, s, s);
+        }
+
+        if let Some((ref title, ref style)) = self.title {
+            drawing_area = drawing_area.titled(title, style.clone())?;
+        }
 
         if self.x_label_size > 0 {
             let (_, h) = drawing_area.dim_in_pixel();
@@ -128,7 +126,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         let mut pixel_range = drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
-        ChartContext {
+        Ok(ChartContext {
             x_label_area,
             y_label_area,
             series_area: None,
@@ -137,7 +135,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
                 y_spec,
                 pixel_range,
             )),
-        }
+        })
     }
 }
 

@@ -39,7 +39,7 @@ fn draw_mandelbrot_impl(
         .margin(20)
         .x_label_area_size(10)
         .y_label_area_size(10)
-        .build_ranged(-2.1f64..0.6f64, -1.2f64..1.2f64);
+        .build_ranged(-2.1f64..0.6f64, -1.2f64..1.2f64)?;
 
     chart
         .configure_mesh()

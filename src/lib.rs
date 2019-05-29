@@ -114,7 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("y=x^2", &font)
         .x_label_area_size(30)
         .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, -0.1f32..1f32);
+        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
 
     chart.configure_mesh().draw()?;
 
@@ -260,7 +260,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(20)
         .y_label_area_size(40)
         // Finally attach a coordinate on the drawing area and make a chart context
-        .build_ranged(0f32..10f32, 0f32..10f32);
+        .build_ranged(0f32..10f32, 0f32..10f32)?;
 
     // Then we can draw a mesh
     chart.configure_mesh()

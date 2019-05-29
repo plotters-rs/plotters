@@ -13,7 +13,7 @@ fn start_plotting(
         .caption(format!("y=x^{}", pow), &font)
         .x_label_area_size(30)
         .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, -1.2f32..1.2f32);
+        .build_ranged(-1f32..1f32, -1.2f32..1.2f32)?;
 
     chart.configure_mesh().x_labels(3).y_labels(3).draw()?;
 
