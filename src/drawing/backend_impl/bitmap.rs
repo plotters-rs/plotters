@@ -27,11 +27,11 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         (self.img.width(), self.img.height())
     }
 
-    fn open(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
         Ok(())
     }
 
-    fn close(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+    fn present(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
         self.img
             .save(&self.path)
             .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))
