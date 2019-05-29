@@ -101,7 +101,8 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
         while val <= self.logic.end.as_f64() {
             ret.push(V::from_f64(val));
             for i in 1..=tier_2_density {
-                let v = val * (1.0 + multiply / (tier_2_density + 1) as f64 * i as f64);
+                let v = val
+                    * (1.0 + multiply / f64::from(tier_2_density as u32 + 1) * f64::from(i as u32));
                 if v > self.logic.end.as_f64() {
                     break;
                 }

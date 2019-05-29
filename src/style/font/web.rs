@@ -1,4 +1,4 @@
-use super::FontData;
+use super::{FontData, LayoutBox};
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlElement};
 
@@ -9,9 +9,9 @@ pub enum FontError {
 
 impl std::fmt::Display for FontError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        return match self {
+        match self {
             _ => write!(fmt, "Unknown error"),
-        };
+        }
     }
 }
 
@@ -23,13 +23,9 @@ pub struct FontDataInternal(String);
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
     fn new(face: &str) -> Result<Self, FontError> {
-        return Ok(FontDataInternal(face.to_string()));
+        Ok(FontDataInternal(face.to_string()))
     }
-    fn estimate_layout(
-        &self,
-        size: f64,
-        text: &str,
-    ) -> Result<((i32, i32), (i32, i32)), Self::ErrorType> {
+    fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let window = window().unwrap();
         let document = window.document().unwrap();
         let body = document.body().unwrap();
@@ -42,6 +38,6 @@ impl FontData for FontDataInternal {
         let height = elem.offset_height() as i32;
         let width = elem.offset_width() as i32;
         elem.remove();
-        return Ok(((0, 0), (width, height)));
+        Ok(((0, 0), (width, height)))
     }
 }

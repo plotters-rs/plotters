@@ -1,5 +1,5 @@
 /*!
-The high-level plotting abstractions. 
+The high-level plotting abstractions.
 
 `ChartBuilder` can be used to create a `ChartContext`.
 We are able to draw multiple series in the chart.
@@ -85,11 +85,15 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `x_spec`: The specification of X axis
     /// - `y_spec`: The specification of Y axis
     /// - Returns: A chart context
+    #[allow(clippy::type_complexity)]
     pub fn build_ranged<X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
-    ) -> Result<ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>, DrawingAreaErrorKind<DB::ErrorType>> {
+    ) -> Result<
+        ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>,
+        DrawingAreaErrorKind<DB::ErrorType>,
+    > {
         let mut x_label_area = None;
         let mut y_label_area = None;
 

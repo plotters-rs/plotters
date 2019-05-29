@@ -21,7 +21,7 @@ impl std::fmt::Display for CanvasError {
             "Canvas Error: {}",
             JSON::stringify(&self.0)
                 .map(|s| Into::<String>::into(&s))
-                .unwrap_or("Unknown".to_string())
+                .unwrap_or_else(|_| "Unknown".to_string())
         );
     }
 }
@@ -33,7 +33,7 @@ impl std::fmt::Debug for CanvasError {
             "CanvasError({})",
             JSON::stringify(&self.0)
                 .map(|s| Into::<String>::into(&s))
-                .unwrap_or("Unknown".to_string())
+                .unwrap_or_else(|_| "Unknown".to_string())
         );
     }
 }
@@ -82,7 +82,7 @@ impl DrawingBackend for CanvasBackend {
         self.context
             .set_fill_style(&make_canvas_color(style.as_color()));
         self.context
-            .fill_rect(point.0 as f64, point.1 as f64, 1.0, 1.0);
+            .fill_rect(f64::from(point.0), f64::from(point.1), 1.0, 1.0);
         Ok(())
     }
 
@@ -95,8 +95,8 @@ impl DrawingBackend for CanvasBackend {
         self.context
             .set_stroke_style(&make_canvas_color(style.as_color()));
         self.context.begin_path();
-        self.context.move_to(from.0 as f64, from.1 as f64);
-        self.context.line_to(to.0 as f64, to.1 as f64);
+        self.context.move_to(f64::from(from.0), f64::from(from.1));
+        self.context.line_to(f64::from(to.0), f64::from(to.1));
         self.context.stroke();
         Ok(())
     }
@@ -112,19 +112,19 @@ impl DrawingBackend for CanvasBackend {
             self.context
                 .set_fill_style(&make_canvas_color(style.as_color()));
             self.context.fill_rect(
-                upper_left.0 as f64,
-                upper_left.1 as f64,
-                (bottom_right.0 - upper_left.0) as f64,
-                (bottom_right.1 - upper_left.1) as f64,
+                f64::from(upper_left.0),
+                f64::from(upper_left.1),
+                f64::from(bottom_right.0 - upper_left.0),
+                f64::from(bottom_right.1 - upper_left.1),
             );
         } else {
             self.context
                 .set_stroke_style(&make_canvas_color(style.as_color()));
             self.context.stroke_rect(
-                upper_left.0 as f64,
-                upper_left.1 as f64,
-                (bottom_right.0 - upper_left.0) as f64,
-                (bottom_right.1 - upper_left.1) as f64,
+                f64::from(upper_left.0),
+                f64::from(upper_left.1),
+                f64::from(bottom_right.0 - upper_left.0),
+                f64::from(bottom_right.1 - upper_left.1),
             );
         }
         Ok(())
@@ -140,9 +140,9 @@ impl DrawingBackend for CanvasBackend {
         if let Some(start) = path.next() {
             self.context
                 .set_stroke_style(&make_canvas_color(style.as_color()));
-            self.context.move_to(start.0 as f64, start.1 as f64);
+            self.context.move_to(f64::from(start.0), f64::from(start.1));
             for next in path {
-                self.context.line_to(next.0 as f64, next.1 as f64);
+                self.context.line_to(f64::from(next.0), f64::from(next.1));
             }
         }
         self.context.stroke();
@@ -166,9 +166,9 @@ impl DrawingBackend for CanvasBackend {
         self.context.begin_path();
         self.context
             .arc(
-                center.0 as f64,
-                center.1 as f64,
-                radius as f64,
+                f64::from(center.0),
+                f64::from(center.1),
+                f64::from(radius),
                 0.0,
                 std::f64::consts::PI * 2.0,
             )
@@ -193,7 +193,7 @@ impl DrawingBackend for CanvasBackend {
         self.context
             .set_font(&format!("{}px {}", font.get_size(), font.get_name()));
         self.context
-            .fill_text(text, pos.0 as f64, pos.1 as f64 + font.get_size())
+            .fill_text(text, f64::from(pos.0), f64::from(pos.1) + font.get_size())
             .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
         Ok(())
     }
