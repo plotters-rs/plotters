@@ -3,11 +3,13 @@
 */
 use crate::drawing::backend::BackendCoord;
 
+#[cfg(feature = "chrono")]
 mod datetime;
 mod logarithmic;
 mod numeric;
 mod ranged;
 
+#[cfg(feature = "chrono")]
 pub use datetime::{RangedDate, RangedDateTime};
 pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
