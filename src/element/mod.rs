@@ -9,7 +9,7 @@
   All element can be drawn onto the drawing area using API `DrawingArea::draw(...)`.
   Plotters use "iterator of elements" as the abstraction of any type of plot.
 
-  ## Implementing your
+  ## Implementing your own element
   You can also define your own element, `CandleStick` is a good sample of implementing complex
   element. There are two trait required for an element:
 
@@ -50,7 +50,10 @@
     }
 
     fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let root = BitMapBackend::new("examples/outputs/element-0.png", (640, 480)).into_drawing_area();
+        let root = BitMapBackend::new(
+            "examples/outputs/element-0.png", 
+            (640, 480)
+        ).into_drawing_area();
         root.draw(&RedBoxedX((200, 200)))?;
         Ok(())
     }
@@ -68,10 +71,19 @@
   ```rust
     use plotters::prelude::*;
     fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let root = BitMapBackend::new("examples/outputs/element-1.png", (640, 480)).into_drawing_area();
+        let root = BitMapBackend::new(
+            "examples/outputs/element-1.png", 
+            (640, 480)
+        ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
-        let style = TextStyle{ font: &font, color: &Red };
-        root.draw(&(EmptyElement::at((200, 200)) + OwnedText::new("X", (0, 0), &style) + Rectangle::new([(0,0), (10, 12)], &Red)))?;
+        let style = TextStyle { 
+            font: &font, 
+            color: &Red 
+        };
+        root.draw(&(EmptyElement::at((200, 200)) 
+                + OwnedText::new("X", (0, 0), &style) 
+                + Rectangle::new([(0,0), (10, 12)], &Red)
+        ))?;
         Ok(())
     }
   ```

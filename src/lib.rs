@@ -12,43 +12,7 @@
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust.
-
-### Reasons for Plotting in Rust
-
-Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
-But Rust is one of the best languages fits the need.
-
-* **Easy to use** Rust has a very good iterator system built into the standard library. With the help of iterators,
-Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
-can be very easy to use.
-
-* **Fast** If you need rendering a figure with trillions of data points,
-Rust is a good choice. Rust's performance allows you to combine data processing step
-and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization
-within a single program. You can also integrate the
-figure rendering code into your application handling a huge amount of data and visualize it in real-time.
-
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
-very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
-
-### What type of figure is supported?
-
-We are not limited to any specific type of figure at all. You can create your own types of figures easily with the Plotters API.
-But Plotters provides some builtin figure types for convenience.
-Currently, we support line series, point series, candlestick series, and histogram.
-And the library is designed to be able to render multiple figure into a single image.
-But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
-
-### Plotting on HTML5 canvas
-
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
-`CanvasBackend` instead of other backend and all other API remains the same!
-
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
-And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. 
 
 ## Gallery
 
@@ -103,6 +67,14 @@ And you should be able to try the deployed version with the following [link](htt
 
 ## Quick Start
 
+To use Plotters, you can simple add Plotters into your `Cargo.toml`
+```toml
+[depedencies]
+plotters = "^0.1.12"
+```
+
+And the following code draws the quadratic function. In `src/main.rs`,
+
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -127,6 +99,46 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
+
+To use the latest development version, pull the depedency from `https://github.com/38/plotters.git`
+
+
+### Reasons for Plotting in Rust
+
+Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
+But Rust is one of the best languages fits the need.
+
+* **Easy to use** Rust has a very good iterator system built into the standard library. With the help of iterators,
+Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
+can be very easy to use.
+
+* **Fast** If you need rendering a figure with trillions of data points, 
+Rust is a good choice. Rust's performance allows you to combine data processing step 
+and rendering step into a single application. When plotting in high-level programming languages,
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
+within a single program. You can also integrate the 
+figure rendering code into your application handling a huge amount of data and visualize it in real-time.
+
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
+
+### What type of figure is supported?
+
+We are not limited to any specific type of figure at all. You can create your own types of figures easily with the Plotters API.
+But Plotters provides some builtin figure types for convenience.
+Currently, we support line series, point series, candlestick series, and histogram.
+And the library is designed to be able to render multiple figure into a single image.
+But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
+
+### Plotting on HTML5 canvas
+
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
+`CanvasBackend` instead of other backend and all other API remains the same!
+
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+
 
 ## Concepts by examples
 
@@ -198,7 +210,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.
@@ -328,8 +340,8 @@ pub mod prelude {
     };
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, EmptyElement, IntoDynElement, OwnedText, Path, Pixel,
-        Rectangle, Text,
+        CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, OwnedText, Path,
+        Pixel, Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]

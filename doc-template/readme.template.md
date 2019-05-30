@@ -12,6 +12,48 @@
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. 
 
+## Gallery
+
+$$gallery$$
+
+## Quick Start
+
+To use Plotters, you can simple add Plotters into your `Cargo.toml`
+```toml
+[depedencies]
+plotters = "^0.1.12"
+```
+
+And the following code draws the quadratic function. In `src/main.rs`,
+
+```rust
+use plotters::prelude::*;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
+    let root = backend.into_drawing_area();
+    let font:FontDesc = ("Arial", 50.0).into();
+    root.fill(&White)?;
+    let mut chart = ChartBuilder::on(&root)
+        .caption("y=x^2", &font)
+        .x_label_area_size(30)
+        .y_label_area_size(30)
+        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
+
+    chart.configure_mesh().draw()?;
+
+    chart.draw_series(LineSeries::new(
+        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
+        &RGBColor(255, 0, 0),
+    ))?;
+    Ok(())
+}
+```
+
+![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
+
+To use the latest development version, pull the depedency from `https://github.com/38/plotters.git`
+
+
 ### Reasons for Plotting in Rust
 
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
@@ -48,36 +90,6 @@ Plotters currently supports backend that uses the HTML5 canvas. To use the WASM 
 There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
-## Gallery
-
-$$gallery$$
-
-## Quick Start
-
-```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
-    let root = backend.into_drawing_area();
-    let font:FontDesc = ("Arial", 50.0).into();
-    root.fill(&White)?;
-    let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &font)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
-
-    chart.configure_mesh().draw()?;
-
-    chart.draw_series(LineSeries::new(
-        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &RGBColor(255, 0, 0),
-    ))?;
-    Ok(())
-}
-```
-
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
 ## Concepts by examples
 
