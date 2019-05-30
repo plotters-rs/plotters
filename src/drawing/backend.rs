@@ -4,7 +4,7 @@ use std::error::Error;
 /// A coordiante in the image
 pub type BackendCoord = (i32, i32);
 
-/// The Error Type of a drawing backend
+/// The error produced by a drawing backend
 #[derive(Debug)]
 pub enum DrawingErrorKind<E: Error> {
     /// A drawing backend error
@@ -24,7 +24,7 @@ impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
 
 impl<E: Error> Error for DrawingErrorKind<E> {}
 
-/// The trait that describing a backend drawing style.
+/// The style data for the backend drawing API
 pub trait BackendStyle {
     /// The underlying type reprsents the color for this style
     type ColorType: Color;
@@ -41,12 +41,19 @@ impl<T: Color> BackendStyle for T {
     }
 }
 
-/// The drawing context
+///  The drawing backend trait, which implemenets the low-level drawing APIs.
+///  This trait has a set of default implementation. And the minimal requirement of
+///  implementing a drawing backend is implementing the `draw_pixel` function. 
+///
+///  If the drawing backend supports vector graphics, the other drawing APIs should be
+///  overrided by the backend specific implementation. Otherwise, the default implementation
+///  will use the pixel-based approach to draw other types of low-level shapes.
 pub trait DrawingBackend {
-    /// The error reported by the backend
+
+    /// The error type reported by the backend
     type ErrorType: Error;
 
-    /// Dimension
+    /// Get the dimension of the drawing backend in pixel 
     fn get_size(&self) -> (u32, u32);
 
     /// Ensure the backend is ready to draw
@@ -59,20 +66,30 @@ pub trait DrawingBackend {
     /// pending changes on the screen.
     fn present(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
-    /// Draw a pixel
+    /// Draw a pixel on the drawing backend
+    /// - `point`: The backend pixel-based coordinate to draw
+    /// - `color`: The color of the pixel
     fn draw_pixel<S: Color>(
         &mut self,
         point: BackendCoord,
         color: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
-    /// Draw a line
+    /// Draw a line on the drawing backend
+    /// - `from`: The start point of the line
+    /// - `to`: The end point of the line
+    /// - `style`: The style of the line
     fn draw_line<S: BackendStyle>(
         &mut self,
         mut from: BackendCoord,
         mut to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+
         let steep = (from.0 - to.0).abs() < (from.1 - to.1).abs();
 
         if steep {
@@ -108,7 +125,11 @@ pub trait DrawingBackend {
         Ok(())
     }
 
-    /// Draw a rectangle
+    /// Draw a rectangle on the drawing backend
+    /// - `upper_left`: The coordinate of the upper-left corner of the rect
+    /// - `bottom_right`: The coordinate of the bottom-right corner of the rect
+    /// - `style`: The style
+    /// - `fill`: If the rectangle should be filled
     fn draw_rect<S: BackendStyle>(
         &mut self,
         upper_left: BackendCoord,
@@ -116,6 +137,9 @@ pub trait DrawingBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let (upper_left, bottom_right) = (
             (
                 upper_left.0.min(bottom_right.0),
@@ -162,12 +186,19 @@ pub trait DrawingBackend {
         Ok(())
     }
 
-    /// Draw a path
+    /// Draw a path on the drawing backend
+    /// - `path`: The iterator of key points of the path
+    /// - `style`: The style of the path
     fn draw_path<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
         &mut self,
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+
         let mut begin: Option<BackendCoord> = None;
         for end in path.into_iter() {
             if let Some(begin) = begin {
@@ -178,7 +209,11 @@ pub trait DrawingBackend {
         Ok(())
     }
 
-    /// Draw a circle
+    /// Draw a circle on the drawing backend
+    /// - `center`: The center coordinate of the circle
+    /// - `radius`: The radius of the circle
+    /// - `style`: The style of the shape
+    /// - `fill`: If the circle should be filled
     fn draw_circle<S: BackendStyle>(
         &mut self,
         center: BackendCoord,
@@ -186,7 +221,10 @@ pub trait DrawingBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        //let range = ((radius + 3) / 4) as i32..=(2 * radius - radius / 4) as i32;
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+        
         let min = (f64::from(radius) * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
         let max = (f64::from(radius) * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
 
@@ -235,7 +273,11 @@ pub trait DrawingBackend {
         Ok(())
     }
 
-    /// Draw a text
+    /// Draw a text on the drawing backend
+    /// - `text`: The text to draw 
+    /// - `font`: The description of the font
+    /// - `pos` : The position backend 
+    /// - `color`: The color of the text
     fn draw_text<'a, C: Color>(
         &mut self,
         text: &str,
@@ -243,6 +285,10 @@ pub trait DrawingBackend {
         pos: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if color.alpha() == 0.0 {
+            return Ok(());
+        }
+
         match font.draw(text, (pos.0, pos.1), |x, y, v| {
             self.draw_pixel((x as i32, y as i32), &color.mix(f64::from(v)))
         }) {

@@ -74,11 +74,15 @@ impl DrawingBackend for CanvasBackend {
         Ok(())
     }
 
-    fn draw_pixel<S: BackendStyle>(
+    fn draw_pixel<C: Color>(
         &mut self,
         point: BackendCoord,
-        style: &S,
+        style: &C,
     ) -> Result<(), DrawingErrorKind<CanvasError>> {
+        if style.alpha() == 0.0 {
+            return Ok(());
+        }
+
         self.context
             .set_fill_style(&make_canvas_color(style.as_color()));
         self.context
@@ -92,6 +96,10 @@ impl DrawingBackend for CanvasBackend {
         to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+
         self.context
             .set_stroke_style(&make_canvas_color(style.as_color()));
         self.context.begin_path();
@@ -108,6 +116,9 @@ impl DrawingBackend for CanvasBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         if fill {
             self.context
                 .set_fill_style(&make_canvas_color(style.as_color()));
@@ -135,6 +146,9 @@ impl DrawingBackend for CanvasBackend {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let mut path = path.into_iter();
         self.context.begin_path();
         if let Some(start) = path.next() {
@@ -156,6 +170,9 @@ impl DrawingBackend for CanvasBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         if fill {
             self.context
                 .set_fill_style(&make_canvas_color(style.as_color()));
@@ -188,6 +205,9 @@ impl DrawingBackend for CanvasBackend {
         pos: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if color.alpha() == 0.0 {
+            return Ok(());
+        }
         self.context.set_text_baseline("bottom");
         self.context.set_fill_style(&make_canvas_color(color));
         self.context

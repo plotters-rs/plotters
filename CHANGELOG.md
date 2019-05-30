@@ -12,6 +12,7 @@
 - Documentation polish
 - Stabilized APIs
 - New conversion traits impls
+- Now transparent color is ignored by SVG, bitmap and HTML Canvas backend
 
 ### Fix
 - Changed the oepn-close pattern to a `present` function which indicates the end of drawing one frame
