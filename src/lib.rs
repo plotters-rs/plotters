@@ -12,7 +12,7 @@
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust.
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. 
 
 ### Reasons for Plotting in Rust
 
@@ -23,15 +23,15 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Rust is fast.** If you need rendering a figure with trillions of data points,
-Rust is a good choice. Rust's performance allows you to combine data processing step
+* **Rust is fast.** If you need rendering a figure with trillions of data points, 
+Rust is a good choice. Rust's performance allows you to combine data processing step 
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization
-within a single program. You can also integrate the
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
+within a single program. You can also integrate the 
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ### What type of figure is supported?
@@ -47,7 +47,7 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Gallery
@@ -122,8 +122,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
         &RGBColor(255, 0, 0),
     ))?;
-
-    root.present()?;
     Ok(())
 }
 ```
@@ -143,7 +141,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50,50), (200, 150), &Red, true)?;
-    backend.present()?;
     Ok(())
 }
 ```
@@ -169,7 +166,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area,color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
-    root_drawing_area.present()?;
     Ok(())
 }
 ```
@@ -193,7 +189,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&White);
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
-    root.present()?;
     Ok(())
 }
 ```
@@ -203,7 +198,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.
@@ -229,7 +224,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
-    root.present()?;
     Ok(())
 }
 ```
@@ -280,7 +274,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
     }))?;
-    root.present()?;
     Ok(())
 }
 ```

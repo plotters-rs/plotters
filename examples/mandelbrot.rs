@@ -33,8 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    root.present()?;
-    return Ok(());
+    Ok(())
 }
 
 fn mandelbrot_set(

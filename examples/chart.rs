@@ -94,7 +94,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ))?;
     }
 
-    root_area.present()?;
-
     return Ok(());
 }

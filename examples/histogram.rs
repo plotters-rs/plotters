@@ -28,6 +28,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Into::<ShapeStyle>::into(&RGBColor(255, 0, 0).mix(0.5)).filled(),
     ))?;
 
-    root.present()?;
-    return Ok(());
+    Ok(())
 }

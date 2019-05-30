@@ -43,8 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     }))?;
 
-    root.present()?;
-    return Ok(());
+    Ok(())
 }
 
 fn get_data() -> Vec<(&'static str, f32, f32, f32, f32)> {
