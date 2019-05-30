@@ -4,7 +4,7 @@ use std::ops::Range;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600));
 
-    let root: DrawingArea<_, _> = backend.into();
+    let root = backend.into_drawing_area();
     root.fill(&White)?;
 
     let mut chart = ChartBuilder::on(&root)

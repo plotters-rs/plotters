@@ -76,7 +76,7 @@ And you should be able to try the deployed version with the following [link](htt
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
-    let root: DrawingArea<_, _> = backend.into();
+    let root = backend.into_drawing_area();
     let font = Into::<FontDesc>::into("Arial").resize(50.0);
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
@@ -128,7 +128,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/2.png", (300, 200));
     // A backend object can be converted into a drawing area
-    let root_drawing_area:DrawingArea<_,_> = backend.into();
+    let root_drawing_area = backend.into_drawing_area();
     // And we can split the drawing area into 3x3 grid
     let child_drawing_areas = root_drawing_area.split_evenly((3,3));
     // Then we fill the drawing area with different color
@@ -154,7 +154,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/3.png", (300, 200));
     // A backend object can be converted into a drawing area
-    let root:DrawingArea<_,_> = backend.into();
+    let root = backend.into_drawing_area();
     root.fill(&White);
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
@@ -178,7 +178,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/4.png", (640, 480));
     // A backend object can be converted into a drawing area
-    let root:DrawingArea<_,_> = backend.into();
+    let root = backend.into_drawing_area();
     root.fill(&RGBColor(240,200,200))?;
 
     let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
@@ -210,7 +210,7 @@ of the chart context object.
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/5.png", (640, 480));
-    let root:DrawingArea<_,_> = backend.into();
+    let root = backend.into_drawing_area();
     root.fill(&White);
     let root = root.margin(10,10,10,10);
     // After this point, we should be able to draw construct a chart context

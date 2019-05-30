@@ -20,7 +20,7 @@ mod backend_impl;
 
 pub mod backend;
 
-pub use area::{DrawingArea, DrawingAreaErrorKind};
+pub use area::{DrawingArea, DrawingAreaErrorKind, IntoDrawingArea};
 
 pub use backend_impl::*;
 

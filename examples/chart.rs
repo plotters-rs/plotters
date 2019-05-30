@@ -3,7 +3,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let img = BitMapBackend::new("examples/outputs/sample.png", (1024, 768));
 
-    let root_area: DrawingArea<_, _> = img.into();
+    let root_area = img.into_drawing_area();
 
     root_area.fill(&RGBColor(255, 255, 255))?;
 

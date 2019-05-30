@@ -5,6 +5,7 @@
 ### Added
 - New abstraction of backend style with `BackendStyle` trait which should be able to extend easier in the future
 - Backend support features, now feature options can be used to control which backend should be supported
+- Add new trait `IntoDrawingArea`, now we can use `backend.into_drawing_area()` to convert the backend into a raw drawing area
 
 ### Improvement
 - Improved the overall code quality

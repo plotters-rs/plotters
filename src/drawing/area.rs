@@ -133,6 +133,18 @@ impl<DB: DrawingBackend> From<DB> for DrawingArea<DB, Shift> {
     }
 }
 
+/// A type which can be converted into a root drawing area
+pub trait IntoDrawingArea: DrawingBackend + Sized {
+    /// Convert the type into a root drawing area
+    fn into_drawing_area(self) -> DrawingArea<Self, Shift>;
+}
+
+impl<T: DrawingBackend> IntoDrawingArea for T {
+    fn into_drawing_area(self) -> DrawingArea<T, Shift> {
+        self.into()
+    }
+}
+
 impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>> {
     /// Draw the mesh on a area
     pub fn draw_mesh<DrawFunc>(
