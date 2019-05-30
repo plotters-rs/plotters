@@ -69,6 +69,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         point: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Error>> {
+        if color.alpha() == 0.0 {
+            return Ok(());
+        }
         let node = Rectangle::new()
             .set("x", point.0)
             .set("y", point.1)
@@ -87,6 +90,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let node = Line::new()
             .set("x1", from.0)
             .set("y1", from.1)
@@ -105,6 +111,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let mut node = Rectangle::new()
             .set("x", upper_left.0)
             .set("y", upper_left.1)
@@ -132,6 +141,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let node = Polyline::new()
             .set("fill", "none")
             .set("opacity", make_svg_opacity(style.as_color()))
@@ -154,6 +166,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
         let mut node = Circle::new()
             .set("cx", center.0)
             .set("cy", center.1)
@@ -181,6 +196,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         pos: BackendCoord,
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if color.alpha() == 0.0 {
+            return Ok(());
+        }
         let context = svg::node::Text::new(text);
         let ((_, b), (_, _)) = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
         let node = Text::new()
