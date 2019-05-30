@@ -11,8 +11,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = get_data();
     let backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
     let root = backend.into_drawing_area();
-    let font = Into::<FontDesc>::into("Arial").resize(50.0);
-    root.fill(&RGBColor(255, 255, 255))?;
+    let font: FontDesc = ("Arial", 50.0).into();
+    root.fill(&White)?;
 
     let (to_date, from_date) = (
         parse_time(&data[0].0) + Duration::days(1),
@@ -25,23 +25,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("MSFT Stock Price", &font)
         .build_ranged(from_date..to_date, 110f32..135f32)?;
 
-    chart
-        .configure_mesh()
-        .line_style_2(&RGBColor(255, 255, 255))
-        .draw()?;
+    chart.configure_mesh().line_style_2(&White).draw()?;
 
-    chart.draw_series(data.iter().map(|x| {
-        CandleStick::<_, _>::new::<&RGBColor, &RGBColor>(
-            parse_time(x.0),
-            x.1,
-            x.2,
-            x.3,
-            x.4,
-            &RGBColor(0, 255, 0),
-            &RGBColor(255, 0, 0),
-            15,
-        )
-    }))?;
+    chart.draw_series(
+        data.iter()
+            .map(|x| CandleStick::new(parse_time(x.0), x.1, x.2, x.3, x.4, &Green, &Red, 15)),
+    )?;
 
     Ok(())
 }

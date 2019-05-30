@@ -2,7 +2,7 @@ use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = BitMapBackend::new("examples/outputs/histogram.png", (640, 480));
     let root = backend.into_drawing_area();
-    let font = Into::<FontDesc>::into("Arial").resize(50.0);
+    let font: FontDesc = ("Arial", 50.0).into();
     root.fill(&RGBColor(255, 255, 255))?;
 
     let mut chart = ChartBuilder::on(&root)

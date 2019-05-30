@@ -6,8 +6,8 @@ fn start_plotting(
     pow: i32,
 ) -> Result<Box<Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
     let backend = CanvasBackend::new(element).unwrap();
-    let root: DrawingArea<_, _> = backend.into();
-    let font = Into::<FontDesc>::into("Arial").resize(20.0);
+    let root = backend.into_drawing_area();
+    let font: FontDesc = ("Arial", 20.0).into();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
         .caption(format!("y=x^{}", pow), &font)

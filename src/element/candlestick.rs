@@ -25,7 +25,7 @@ impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
         low: Y,
         close: Y,
         gain_style: GS,
-        loss_style: GS,
+        loss_style: LS,
         width: u32,
     ) -> Self {
         Self {

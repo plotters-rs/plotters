@@ -7,9 +7,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root_area.fill(&RGBColor(255, 255, 255))?;
 
-    let font: FontDesc = "Arial".into();
-    let font_large = &font.resize(60.0);
-    let font_small = &font.resize(40.0);
+    let font_large: FontDesc = ("Arial", 60.0).into();
+    let font_small: FontDesc = ("Arial", 40.0).into();
     let root_area = root_area
         .titled("Image Title", &font_large)?
         .margin(0, 0, 0, 20);
@@ -30,12 +29,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_formatter(&|v| format!("{:.1}", v))
         .y_label_formatter(&|v| format!("{:.1}", v))
         .draw()?;
-
-    /*cc.define_series_label_area(
-        (720, 130),
-        (240, 100),
-        Into::<ShapeStyle>::into(&RGBColor(255, 255, 255).mix(0.7)).filled(),
-    )?;*/
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),

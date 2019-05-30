@@ -32,7 +32,7 @@ fn draw_mandelbrot_impl(
 ) -> Result<Box<Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
     let backend = CanvasBackend::new(element).unwrap();
 
-    let root: DrawingArea<_, _> = backend.into();
+    let root = backend.into_drawing_area();
     root.fill(&White)?;
 
     let mut chart = ChartBuilder::on(&root)

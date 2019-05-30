@@ -11,6 +11,7 @@
 - Improved the overall code quality
 - Documentation polish
 - Stabilized APIs
+- New conversion traits impls
 
 ### Fix
 - Changed the oepn-close pattern to a `present` function which indicates the end of drawing one frame

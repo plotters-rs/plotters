@@ -23,6 +23,12 @@ impl<'a> From<&'a str> for FontDesc<'a> {
     }
 }
 
+impl<'a> From<(&'a str, f64)> for FontDesc<'a> {
+    fn from((typeface, size): (&'a str, f64)) -> FontDesc<'a> {
+        FontDesc::new(typeface, size)
+    }
+}
+
 impl<'a> FontDesc<'a> {
     /// Create a new font
     pub fn new(typeface: &'a str, size: f64) -> Self {
