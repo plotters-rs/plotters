@@ -2,22 +2,25 @@ use super::*;
 use crate::drawing::backend::DrawingBackend;
 use std::borrow::Borrow;
 use std::iter::{once, Once};
-use std::ops::Add;
 use std::marker::PhantomData;
+use std::ops::Add;
 
 /// An empty composibable element, which is the start point of an ad-hoc composible element
-pub struct EmptyElement<Coord, DB:DrawingBackend> {
+pub struct EmptyElement<Coord, DB: DrawingBackend> {
     coord: Coord,
     phantom: PhantomData<DB>,
 }
 
-impl<Coord, DB:DrawingBackend> EmptyElement<Coord, DB> {
+impl<Coord, DB: DrawingBackend> EmptyElement<Coord, DB> {
     pub fn at(coord: Coord) -> Self {
-        Self { coord , phantom: PhantomData }
+        Self {
+            coord,
+            phantom: PhantomData,
+        }
     }
 }
 
-impl<Coord, Other, DB:DrawingBackend> Add<Other> for EmptyElement<Coord, DB>
+impl<Coord, Other, DB: DrawingBackend> Add<Other> for EmptyElement<Coord, DB>
 where
     Other: Drawable<DB>,
     for<'a> &'a Other: PointCollection<'a, BackendCoord>,
@@ -32,7 +35,7 @@ where
     }
 }
 
-impl<'a, Coord, DB:DrawingBackend> PointCollection<'a, Coord> for &'a EmptyElement<Coord, DB> {
+impl<'a, Coord, DB: DrawingBackend> PointCollection<'a, Coord> for &'a EmptyElement<Coord, DB> {
     type Borrow = &'a Coord;
     type IntoIter = Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
@@ -47,7 +50,9 @@ pub struct BoxedElement<Coord, DB: DrawingBackend, A: Drawable<DB>> {
     phantom: PhantomData<DB>,
 }
 
-impl<'b, Coord, DB:DrawingBackend, A: Drawable<DB>> PointCollection<'b, Coord> for &'b BoxedElement<Coord, DB, A> {
+impl<'b, Coord, DB: DrawingBackend, A: Drawable<DB>> PointCollection<'b, Coord>
+    for &'b BoxedElement<Coord, DB, A>
+{
     type Borrow = &'b Coord;
     type IntoIter = Once<&'b Coord>;
     fn point_iter(self) -> Self::IntoIter {
@@ -55,7 +60,7 @@ impl<'b, Coord, DB:DrawingBackend, A: Drawable<DB>> PointCollection<'b, Coord> f
     }
 }
 
-impl<Coord, DB:DrawingBackend, A> Drawable<DB> for BoxedElement<Coord, DB, A>
+impl<Coord, DB: DrawingBackend, A> Drawable<DB> for BoxedElement<Coord, DB, A>
 where
     for<'a> &'a A: PointCollection<'a, BackendCoord>,
     A: Drawable<DB>,
@@ -78,7 +83,7 @@ where
     }
 }
 
-impl<Coord, DB:DrawingBackend, My, Yours> Add<Yours> for BoxedElement<Coord, DB, My>
+impl<Coord, DB: DrawingBackend, My, Yours> Add<Yours> for BoxedElement<Coord, DB, My>
 where
     My: Drawable<DB>,
     for<'a> &'a My: PointCollection<'a, BackendCoord>,
@@ -97,7 +102,7 @@ where
 }
 
 /// The composed element which has at least two components
-pub struct ComposedElement<Coord, DB:DrawingBackend, A, B>
+pub struct ComposedElement<Coord, DB: DrawingBackend, A, B>
 where
     A: Drawable<DB>,
     B: Drawable<DB>,
@@ -108,7 +113,8 @@ where
     phantom: PhantomData<DB>,
 }
 
-impl<'b, Coord, DB:DrawingBackend, A, B> PointCollection<'b, Coord> for &'b ComposedElement<Coord, DB, A, B>
+impl<'b, Coord, DB: DrawingBackend, A, B> PointCollection<'b, Coord>
+    for &'b ComposedElement<Coord, DB, A, B>
 where
     A: Drawable<DB>,
     B: Drawable<DB>,
@@ -120,7 +126,7 @@ where
     }
 }
 
-impl<Coord, DB:DrawingBackend, A, B> Drawable<DB> for ComposedElement<Coord, DB, A, B>
+impl<Coord, DB: DrawingBackend, A, B> Drawable<DB> for ComposedElement<Coord, DB, A, B>
 where
     for<'a> &'a A: PointCollection<'a, BackendCoord>,
     for<'b> &'b B: PointCollection<'b, BackendCoord>,
@@ -152,7 +158,7 @@ where
     }
 }
 
-impl<Coord, DB:DrawingBackend, A, B, C> Add<C> for ComposedElement<Coord, DB, A, B>
+impl<Coord, DB: DrawingBackend, A, B, C> Add<C> for ComposedElement<Coord, DB, A, B>
 where
     A: Drawable<DB>,
     for<'a> &'a A: PointCollection<'a, BackendCoord>,

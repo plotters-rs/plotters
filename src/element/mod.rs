@@ -77,8 +77,8 @@
   ```
   ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
 */
-use std::borrow::Borrow;
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use std::borrow::Borrow;
 
 mod basic_shapes;
 pub use basic_shapes::*;
@@ -105,7 +105,7 @@ pub trait PointCollection<'a, Coord> {
 }
 
 /// The trait indicates we are able to draw it on a drawing area
-pub trait Drawable<DB:DrawingBackend> {
+pub trait Drawable<DB: DrawingBackend> {
     /// Actually draws the element. The key points is already translated into the
     /// image cooridnate and can be used by DC directly
     fn draw<I: Iterator<Item = BackendCoord>>(
@@ -115,3 +115,76 @@ pub trait Drawable<DB:DrawingBackend> {
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
+trait DynDrawable<DB: DrawingBackend> {
+    fn draw_dyn(
+        &self,
+        points: &mut Iterator<Item = BackendCoord>,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
+}
+
+impl<DB: DrawingBackend, T: Drawable<DB>> DynDrawable<DB> for T {
+    fn draw_dyn(
+        &self,
+        points: &mut Iterator<Item = BackendCoord>,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        T::draw(self, points, backend)
+    }
+}
+
+/// The container for a dynamically dispatched element
+pub struct DynElement<DB, Coord>
+where
+    DB: DrawingBackend,
+    Coord: Clone,
+{
+    points: Vec<Coord>,
+    drawable: Box<dyn DynDrawable<DB>>,
+}
+
+impl<'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
+    for &'a DynElement<DB, Coord>
+{
+    type Borrow = &'a Coord;
+    type IntoIter = std::slice::Iter<'a, Coord>;
+    fn point_iter(self) -> Self::IntoIter {
+        self.points.iter()
+    }
+}
+
+impl<DB: DrawingBackend, Coord: Clone> Drawable<DB> for DynElement<DB, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut pos: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        self.drawable.draw_dyn(&mut pos, backend)
+    }
+}
+
+/// The trait that makes the conversion from the statically dispatched element
+/// to the dynamically dispatched element
+pub trait IntoDynElement<DB: DrawingBackend, Coord: Clone> {
+    /// Make the conversion
+    fn into_dyn(self) -> DynElement<DB, Coord>;
+}
+
+impl<T, DB, Coord> IntoDynElement<DB, Coord> for T
+where
+    T: Drawable<DB> + 'static,
+    for<'a> &'a T: PointCollection<'a, Coord>,
+    Coord: Clone,
+    DB: DrawingBackend,
+{
+    fn into_dyn(self) -> DynElement<DB, Coord> {
+        DynElement {
+            points: self
+                .point_iter()
+                .into_iter()
+                .map(|x| x.borrow().clone())
+                .collect(),
+            drawable: Box::new(self),
+        }
+    }
+}

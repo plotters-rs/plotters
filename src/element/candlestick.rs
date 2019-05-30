@@ -52,7 +52,7 @@ impl<'b, 'a, X: 'a, Y: PartialOrd + 'a> PointCollection<'a, (X, Y)> for &'a Cand
     }
 }
 
-impl<'a, X: 'a, Y: 'a + PartialOrd, DB:DrawingBackend> Drawable<DB> for CandleStick<'a, X, Y> {
+impl<'a, X: 'a, Y: 'a + PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<'a, X, Y> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         points: I,
