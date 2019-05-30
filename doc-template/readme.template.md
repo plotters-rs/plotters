@@ -21,7 +21,7 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Rust is fast.** If you need rendering a figure with trillions of data points, 
+* **Fast** If you need rendering a figure with trillions of data points, 
 Rust is a good choice. Rust's performance allows you to combine data processing step 
 and rendering step into a single application. When plotting in high-level programming languages,
 e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 

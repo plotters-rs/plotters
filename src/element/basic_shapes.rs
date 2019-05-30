@@ -241,9 +241,9 @@ impl<'a, Coord> OwnedText<'a, Coord> {
     /// - `points`: The left upper conner
     /// - `style`: The font style
     /// - Return the newly created owned text object
-    pub fn new<S: Into<TextStyle<'a>>>(text: String, points: Coord, style: S) -> Self {
+    pub fn new<T: Into<String>, S: Into<TextStyle<'a>>>(text: T, points: Coord, style: S) -> Self {
         Self {
-            text,
+            text: text.into(),
             coord: points,
             style: style.into(),
         }

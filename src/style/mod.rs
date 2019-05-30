@@ -31,6 +31,12 @@ impl<'a> TextStyle<'a> {
     }
 }
 
+impl<'a, 'b: 'a> Into<TextStyle<'a>> for &'b TextStyle<'a> {
+    fn into(self) -> TextStyle<'a> {
+        self.clone()
+    }
+}
+
 impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     fn from(font: &'a T) -> Self {
         Self {

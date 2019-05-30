@@ -43,17 +43,16 @@ impl<T: Color> BackendStyle for T {
 
 ///  The drawing backend trait, which implemenets the low-level drawing APIs.
 ///  This trait has a set of default implementation. And the minimal requirement of
-///  implementing a drawing backend is implementing the `draw_pixel` function. 
+///  implementing a drawing backend is implementing the `draw_pixel` function.
 ///
 ///  If the drawing backend supports vector graphics, the other drawing APIs should be
 ///  overrided by the backend specific implementation. Otherwise, the default implementation
 ///  will use the pixel-based approach to draw other types of low-level shapes.
 pub trait DrawingBackend {
-
     /// The error type reported by the backend
     type ErrorType: Error;
 
-    /// Get the dimension of the drawing backend in pixel 
+    /// Get the dimension of the drawing backend in pixel
     fn get_size(&self) -> (u32, u32);
 
     /// Ensure the backend is ready to draw
@@ -85,7 +84,6 @@ pub trait DrawingBackend {
         mut to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
@@ -194,7 +192,6 @@ pub trait DrawingBackend {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
@@ -224,7 +221,7 @@ pub trait DrawingBackend {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        
+
         let min = (f64::from(radius) * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
         let max = (f64::from(radius) * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
 
@@ -274,9 +271,9 @@ pub trait DrawingBackend {
     }
 
     /// Draw a text on the drawing backend
-    /// - `text`: The text to draw 
+    /// - `text`: The text to draw
     /// - `font`: The description of the font
-    /// - `pos` : The position backend 
+    /// - `pos` : The position backend
     /// - `color`: The color of the text
     fn draw_text<'a, C: Color>(
         &mut self,

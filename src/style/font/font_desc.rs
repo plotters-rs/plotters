@@ -23,9 +23,9 @@ impl<'a> From<&'a str> for FontDesc<'a> {
     }
 }
 
-impl<'a> From<(&'a str, f64)> for FontDesc<'a> {
-    fn from((typeface, size): (&'a str, f64)) -> FontDesc<'a> {
-        FontDesc::new(typeface, size)
+impl<'a, T: Into<f64>> From<(&'a str, T)> for FontDesc<'a> {
+    fn from((typeface, size): (&'a str, T)) -> FontDesc<'a> {
+        FontDesc::new(typeface, size.into())
     }
 }
 
