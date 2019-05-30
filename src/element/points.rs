@@ -33,8 +33,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Cross<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Cross<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for Cross<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,

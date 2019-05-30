@@ -404,7 +404,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     pub fn draw_series<E, R, S>(&self, series: S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         for<'a> &'a E: PointCollection<'a, (X::ValueType, Y::ValueType)>,
-        E: Drawable,
+        E: Drawable<DB>,
         R: Borrow<E>,
         S: IntoIterator<Item = R>,
     {

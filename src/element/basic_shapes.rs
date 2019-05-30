@@ -25,8 +25,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Pixel<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for Pixel<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
@@ -64,8 +64,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Path<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for Path<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         points: I,
         backend: &mut DB,
@@ -113,8 +113,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> 
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Rectangle<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for Rectangle<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
@@ -166,8 +166,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Text<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Text<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
@@ -209,8 +209,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a> Drawable for Circle<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for Circle<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
@@ -258,8 +258,8 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> 
     }
 }
 
-impl<'a, Coord: 'a> Drawable for OwnedText<'a, Coord> {
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+impl<'a, Coord: 'a, DB:DrawingBackend> Drawable<DB> for OwnedText<'a, Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,

@@ -37,8 +37,8 @@
     }
 
     // How to actually draw this element
-    impl Drawable for RedBoxedX {
-        fn draw<DB: DrawingBackend, I:Iterator<Item = BackendCoord>>(
+    impl <DB:DrawingBackend> Drawable<DB> for RedBoxedX {
+        fn draw<I:Iterator<Item = BackendCoord>>(
             &self,
             mut pos: I,
             backend: &mut DB
@@ -77,8 +77,8 @@
   ```
   ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
 */
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
+use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 mod basic_shapes;
 pub use basic_shapes::*;
@@ -105,12 +105,13 @@ pub trait PointCollection<'a, Coord> {
 }
 
 /// The trait indicates we are able to draw it on a drawing area
-pub trait Drawable {
+pub trait Drawable<DB:DrawingBackend> {
     /// Actually draws the element. The key points is already translated into the
     /// image cooridnate and can be used by DC directly
-    fn draw<DB: DrawingBackend, I: Iterator<Item = BackendCoord>>(
+    fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         pos: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
+

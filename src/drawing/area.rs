@@ -251,7 +251,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn draw<'a, E>(&self, element: &'a E) -> Result<(), DrawingAreaError<DB>>
     where
         &'a E: PointCollection<'a, CT::From>,
-        E: Drawable,
+        E: Drawable<DB>,
     {
         let backend_coords = element.point_iter().into_iter().map(|p| {
             let b = p.borrow();
