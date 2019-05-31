@@ -16,7 +16,7 @@
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters support multiple backends, including, bitmap, vector graph and WebAssembly. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, including bitmap, vector graph and WebAssembly. 
 
 ## Gallery
 
