@@ -25,7 +25,7 @@ $$gallery$$
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [depedencies]
-plotters = "^0.1.12"
+plotters = "^$LATEST_VERSION"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,

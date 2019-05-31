@@ -10,4 +10,4 @@ awk '{
 		print $0;
 	}
 }
-' $1
+' $1 | sed 's/\$LATEST_VERSION/'$(cat ${DIR}/../latest_version)'/g'
