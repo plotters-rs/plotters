@@ -142,7 +142,7 @@ $$examples/chart.rs$$
 
 ## Misc
 
-To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.tmol`
+To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.toml`
 
 ```toml
 [dependencies]
