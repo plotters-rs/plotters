@@ -10,9 +10,13 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 
+<a href="https://plumberserver.com/plotters-docs/plotters">
+	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
+</a>
+
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters support preduce bitmap, vector graph and WebAssembly. 
 
 ## Gallery
 
@@ -100,10 +104,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
-To use the latest development version, pull the depedency from `https://github.com/38/plotters.git`
+To use the latest development version, pull the depedency with `plotters = {git = "https://github.com/38/plotters.git" }` in `Cargo.toml`.
 
 
-### Reasons for Plotting in Rust
+### Motivation of Plotting in Rust
 
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
 But Rust is one of the best languages fits the need.
