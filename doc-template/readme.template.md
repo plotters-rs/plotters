@@ -31,26 +31,7 @@ plotters = "^0.1.12"
 And the following code draws a quadratic function. `src/main.rs`,
 
 ```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480))
-	    .into_drawing_area();
-    let font:FontDesc = ("Arial", 50.0).into();
-    root.fill(&White)?;
-    let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &font)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
-
-    chart.configure_mesh().draw()?;
-
-    chart.draw_series(LineSeries::new(
-        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &RGBColor(255, 0, 0),
-    ))?;
-    Ok(())
-}
+$$examples/quick_start.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
@@ -101,15 +82,7 @@ And you should be able to try the deployed version with the following [link](htt
 Plotters can use different drawing backends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
 
 ```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a 800*600 bitmap and start drawing
-    let mut backend = BitMapBackend::new("examples/outputs/1.png", (300,200));
-    // And if we want SVG backend
-    // let backend = SVGBackend::new("output.svg", (800, 600));
-    backend.draw_rect((50,50), (200, 150), &Red, true)?;
-    Ok(())
-}
+$$examples/drawing_backends.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/1.png)
@@ -122,18 +95,7 @@ This is done by creating sub-drawing-areas.
 Besides that, the drawing area also allows the customized coordinate system, by doing so, the coordinate mapping is done by the drawing area automatically.
 
 ```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root_drawing_area = BitMapBackend::new("examples/outputs/2.png", (300, 200))
-	    .into_drawing_area();
-    // And we can split the drawing area into 3x3 grid
-    let child_drawing_areas = root_drawing_area.split_evenly((3,3));
-    // Then we fill the drawing area with different color
-    for (area,color) in child_drawing_areas.into_iter().zip(0..) {
-        area.fill(&Palette99::pick(color))?;
-    }
-    Ok(())
-}
+$$examples/drawing_area.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/2.png)
@@ -147,15 +109,7 @@ You can also define your own element in the application code.
 You may also combine existing elements to build a complex element.
 
 ```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200))
-	    .into_drawing_area();
-    root.fill(&White)?;
-    // Draw an circle on the drawing area
-    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
-    Ok(())
-}
+$$examples/elements.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/3.png)
@@ -169,28 +123,7 @@ coordinate which has the upper-left corner defined as `(0,0)` is used for furthe
 For example, we can have an element which includes a dot and its coordinate.
 
 ```rust
-use plotters::prelude::*;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480))
-        .into_drawing_area();
-
-    root.fill(&RGBColor(240,200,200))?;
-
-    let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
-    let font:FontDesc = ("Arial", 15.0).into();
-
-    let dot_and_label = |x:f32,y:f32| {
-        return EmptyElement::at((x,y))
-               + Circle::new((0,0), 3, ShapeStyle::from(&Black).filled())
-               + OwnedText::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
-    };
-
-    root.draw(&dot_and_label(0.5, 0.6))?;
-    root.draw(&dot_and_label(0.25, 0.33))?;
-    root.draw(&dot_and_label(0.8, 0.8))?;
-    Ok(())
-}
+$$examples/composable_elements.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
@@ -203,44 +136,7 @@ For example, you can define the label areas, meshes, and put a data series onto 
 of the chart context object.
 
 ```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480))
-        .into_drawing_area();
-    root.fill(&White);
-    let root = root.margin(10,10,10,10);
-    // After this point, we should be able to draw construct a chart context
-    let font:FontDesc = ("Arial", 40.0).into();
-    // Create the chart object
-    let mut chart = ChartBuilder::on(&root)
-        // Set the caption of the chart
-        .caption("This is our first plot", &font)
-        // Set the size of the label region
-        .x_label_area_size(20)
-        .y_label_area_size(40)
-        // Finally attach a coordinate on the drawing area and make a chart context
-        .build_ranged(0f32..10f32, 0f32..10f32)?;
-
-    // Then we can draw a mesh
-    chart.configure_mesh()
-        // We can customize the maximum number of labels allowed for each axis
-        .x_labels(5)
-        .y_labels(5)
-        // We can also change the format of the label text
-        .y_label_formatter(&|x| format!("{:.3}", x))
-        .draw()?;
-
-    // And we can draw something in the drawing area
-    let smaller_font = font.resize(10.0);
-    chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &Red))?;
-    // Similarly, we can draw point series
-    chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &Red, &|c,s,st| {
-        return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
-            + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
-            + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
-    }))?;
-    Ok(())
-}
+$$examples/chart.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)

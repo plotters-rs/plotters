@@ -11,7 +11,7 @@ pub use color::{
     SimpleColor, Transparent, White, Yellow,
 };
 
-pub use font::{FontDesc, FontError, FontResult};
+pub use font::{FontDesc, FontError, FontResult, IntoFont};
 pub use palette::*;
 
 /// Denotes an style of a text

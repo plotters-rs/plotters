@@ -76,12 +76,8 @@
             (640, 480)
         ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
-        let style = TextStyle {
-            font: &font,
-            color: &Red
-        };
         root.draw(&(EmptyElement::at((200, 200))
-                + OwnedText::new("X", (0, 0), &style)
+                + OwnedText::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
                 + Rectangle::new([(0,0), (10, 12)], &Red)
         ))?;
         Ok(())

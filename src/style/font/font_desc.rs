@@ -1,7 +1,6 @@
 use super::{FontData, FontDataInternal};
-/// The font management utilities
-/// This file retains a font cache and makes font object.
-///
+use crate::style::{Color, TextStyle};
+
 use std::convert::From;
 
 /// The error type for the font implementation
@@ -29,6 +28,16 @@ impl<'a, T: Into<f64>> From<(&'a str, T)> for FontDesc<'a> {
     }
 }
 
+pub trait IntoFont<'a> {
+    fn into_font(self) -> FontDesc<'a>;
+}
+
+impl<'a, T: Into<FontDesc<'a>>> IntoFont<'a> for T {
+    fn into_font(self) -> FontDesc<'a> {
+        self.into()
+    }
+}
+
 impl<'a> FontDesc<'a> {
     /// Create a new font
     pub fn new(typeface: &'a str, size: f64) -> Self {
@@ -46,6 +55,11 @@ impl<'a> FontDesc<'a> {
             name: self.name,
             data: self.data.clone(),
         }
+    }
+
+    /// Set the color of the font and return the result text style object
+    pub fn color<C: Color>(&'a self, color: &'a C) -> TextStyle<'a> {
+        TextStyle { font: self, color }
     }
 
     /// Get the name of the font

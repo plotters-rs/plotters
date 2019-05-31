@@ -82,12 +82,10 @@ And the following code draws a quadratic function. `src/main.rs`,
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480))
-        .into_drawing_area();
-    let font:FontDesc = ("Arial", 50.0).into();
+    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480)).into_drawing_area();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &font)
+        .caption("y=x^2", &("Arial", 50).into_font())
         .x_label_area_size(30)
         .y_label_area_size(30)
         .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
@@ -153,10 +151,10 @@ Plotters can use different drawing backends, including SVG, BitMap, and even rea
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a 800*600 bitmap and start drawing
-    let mut backend = BitMapBackend::new("examples/outputs/1.png", (300,200));
+    let mut backend = BitMapBackend::new("examples/outputs/1.png", (300, 200));
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
-    backend.draw_rect((50,50), (200, 150), &Red, true)?;
+    backend.draw_rect((50, 50), (200, 150), &Red, true)?;
     Ok(())
 }
 ```
@@ -173,12 +171,12 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root_drawing_area = BitMapBackend::new("examples/outputs/2.png", (300, 200))
-        .into_drawing_area();
+    let root_drawing_area =
+        BitMapBackend::new("examples/outputs/2.png", (300, 200)).into_drawing_area();
     // And we can split the drawing area into 3x3 grid
-    let child_drawing_areas = root_drawing_area.split_evenly((3,3));
+    let child_drawing_areas = root_drawing_area.split_evenly((3, 3));
     // Then we fill the drawing area with different color
-    for (area,color) in child_drawing_areas.into_iter().zip(0..) {
+    for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
     Ok(())
@@ -198,11 +196,14 @@ You may also combine existing elements to build a complex element.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200))
-        .into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200)).into_drawing_area();
     root.fill(&White)?;
     // Draw an circle on the drawing area
-    root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
+    root.draw(&Circle::new(
+        (100, 100),
+        50,
+        Into::<ShapeStyle>::into(&Green).filled(),
+    ))?;
     Ok(())
 }
 ```
@@ -221,18 +222,21 @@ For example, we can have an element which includes a dot and its coordinate.
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480))
-        .into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480)).into_drawing_area();
 
-    root.fill(&RGBColor(240,200,200))?;
+    root.fill(&RGBColor(240, 200, 200))?;
 
-    let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
-    let font:FontDesc = ("Arial", 15.0).into();
+    let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(
+        0f32..1f32,
+        0f32..1f32,
+        (0..640, 0..480),
+    ));
+    let font = ("Arial", 15.0).into_font();
 
-    let dot_and_label = |x:f32,y:f32| {
-        return EmptyElement::at((x,y))
-               + Circle::new((0,0), 3, ShapeStyle::from(&Black).filled())
-               + OwnedText::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
+    let dot_and_label = |x: f32, y: f32| {
+        return EmptyElement::at((x, y))
+            + Circle::new((0, 0), 3, ShapeStyle::from(&Black).filled())
+            + OwnedText::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
     };
 
     root.draw(&dot_and_label(0.5, 0.6))?;
@@ -254,12 +258,11 @@ of the chart context object.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480))
-        .into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480)).into_drawing_area();
     root.fill(&White);
-    let root = root.margin(10,10,10,10);
+    let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
-    let font:FontDesc = ("Arial", 40.0).into();
+    let font: FontDesc = ("Arial", 40.0).into();
     // Create the chart object
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
@@ -271,7 +274,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_ranged(0f32..10f32, 0f32..10f32)?;
 
     // Then we can draw a mesh
-    chart.configure_mesh()
+    chart
+        .configure_mesh()
         // We can customize the maximum number of labels allowed for each axis
         .x_labels(5)
         .y_labels(5)
@@ -281,13 +285,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // And we can draw something in the drawing area
     let smaller_font = font.resize(10.0);
-    chart.draw_series(LineSeries::new(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], &Red))?;
+    chart.draw_series(LineSeries::new(
+        vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
+        &Red,
+    ))?;
     // Similarly, we can draw point series
-    chart.draw_series(PointSeries::of_element(vec![(0.0,0.0), (5.0, 5.0), (8.0, 7.0)], 5, &Red, &|c,s,st| {
-        return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
+    chart.draw_series(PointSeries::of_element(
+        vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
+        5,
+        &Red,
+        &|c, s, st| {
+            return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
             + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
-    }))?;
+        },
+    ))?;
     Ok(())
 }
 ```
@@ -336,9 +348,9 @@ pub mod prelude {
     pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
-        Black, Blue, Color, Cyan, FontDesc, Green, HSLColor, Magenta, Mixable, Palette, Palette100,
-        Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle, SimpleColor, TextStyle,
-        Transparent, White, Yellow,
+        Black, Blue, Color, Cyan, FontDesc, Green, HSLColor, IntoFont, Magenta, Mixable, Palette,
+        Palette100, Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle, SimpleColor,
+        TextStyle, Transparent, White, Yellow,
     };
 
     pub use crate::element::{
