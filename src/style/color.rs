@@ -119,6 +119,7 @@ predefined_color!(Cyan, 0, 255, 255, "The predefined cyan color");
 predefined_color!(Magenta, 255, 0, 255, "The predefined magenta color");
 predefined_color!(Transparent, 0, 0, 0, 0.0, "The predefined transparent");
 
+/// The color described by HSL color space
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl SimpleColor for HSLColor {

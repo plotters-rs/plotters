@@ -51,8 +51,8 @@ And the following code draws a quadratic function. `src/main.rs`,
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480))
+	    .into_drawing_area();
     let font:FontDesc = ("Arial", 50.0).into();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
@@ -142,9 +142,8 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/2.png", (300, 200));
-    // A backend object can be converted into a drawing area
-    let root_drawing_area = backend.into_drawing_area();
+    let root_drawing_area = BitMapBackend::new("examples/outputs/2.png", (300, 200))
+	    .into_drawing_area();
     // And we can split the drawing area into 3x3 grid
     let child_drawing_areas = root_drawing_area.split_evenly((3,3));
     // Then we fill the drawing area with different color
@@ -168,10 +167,9 @@ You may also combine existing elements to build a complex element.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/3.png", (300, 200));
-    // A backend object can be converted into a drawing area
-    let root = backend.into_drawing_area();
-    root.fill(&White);
+    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200))
+	    .into_drawing_area();
+    root.fill(&White)?;
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
     Ok(())
@@ -192,9 +190,9 @@ For example, we can have an element which includes a dot and its coordinate.
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/4.png", (640, 480));
-    // A backend object can be converted into a drawing area
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480))
+        .into_drawing_area();
+
     root.fill(&RGBColor(240,200,200))?;
 
     let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
@@ -225,8 +223,8 @@ of the chart context object.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/5.png", (640, 480));
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480))
+        .into_drawing_area();
     root.fill(&White);
     let root = root.margin(10,10,10,10);
     // After this point, we should be able to draw construct a chart context

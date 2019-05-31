@@ -2,8 +2,11 @@ use super::{AsRangedCoord, Ranged, RangedCoordf64};
 use std::marker::PhantomData;
 use std::ops::Range;
 
+/// The trait for the type that is able to be presented in the log scale
 pub trait LogScalable: Clone {
+    /// Make the conversion from the type to the floating point number
     fn as_f64(&self) -> f64;
+    /// Convert a floating point number to the scale
     fn from_f64(f: f64) -> Self;
 }
 
@@ -14,6 +17,10 @@ macro_rules! impl_log_scalable {
                 if *self != 0 {
                     return *self as f64;
                 }
+                // If this is an integer, we should allow zero point to be shown
+                // on the chart, thus we can't map the zero point to inf.
+                // So we just assigning a value smaller than 1 as the alternative
+                // of the zero point.
                 return 0.5;
             }
             fn from_f64(f: f64) -> $t {
@@ -40,6 +47,7 @@ impl_log_scalable!(i, u64);
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
 
+/// The wrapper type for a range of a log-scaled value
 pub struct LogRange<V: LogScalable>(pub Range<V>);
 
 impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
@@ -57,6 +65,7 @@ impl<V: LogScalable> AsRangedCoord for LogRange<V> {
     type Value = V;
 }
 
+/// A log scaled coordinate axis
 pub struct LogCoord<V: LogScalable> {
     linear: RangedCoordf64,
     logic: Range<V>,
@@ -88,10 +97,10 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             exp - 1
         };
 
-        let mut multiply = 10.0;
+        let mut multiplier = 10.0;
         let mut cnt = 1;
         while max_points < tier_1 / cnt {
-            multiply *= 10.0;
+            multiplier *= 10.0;
             cnt += 1;
         }
 
@@ -102,13 +111,14 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             ret.push(V::from_f64(val));
             for i in 1..=tier_2_density {
                 let v = val
-                    * (1.0 + multiply / f64::from(tier_2_density as u32 + 1) * f64::from(i as u32));
+                    * (1.0
+                        + multiplier / f64::from(tier_2_density as u32 + 1) * f64::from(i as u32));
                 if v > self.logic.end.as_f64() {
                     break;
                 }
                 ret.push(V::from_f64(v));
             }
-            val *= multiply;
+            val *= multiplier;
         }
 
         ret

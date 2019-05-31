@@ -1,9 +1,15 @@
 /*!
 The high-level plotting abstractions.
 
-`ChartBuilder` can be used to create a `ChartContext`.
-We are able to draw multiple series in the chart.
-A chart can be build on top of any drawing area based on a pixel coordinate.
+Plotters uses `ChartContext`, a thin layer on the top of `DrawingArea`,  to provide
+high-level chart specific drawing funcionalities, like, mesh line, coordinate label
+and other common components for the data chart.
+
+To draw a series, `ChartContext::draw_series` is used to draw a series on the chart.
+In Plotters, a series is abstracted as an iterator of elements.
+
+`ChartBuilder` is used to construct a chart. To learn more detailed information, check the
+detailed description for each struct.
 */
 
 use std::borrow::Borrow;
@@ -15,8 +21,7 @@ use crate::coord::{
     AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
 };
 
-use crate::drawing::backend::BackendCoord;
-use crate::drawing::backend::DrawingBackend;
+use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, Path, PointCollection, Rectangle};
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};

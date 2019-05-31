@@ -145,6 +145,7 @@ where
     fn next_value(this: &Self::ValueType) -> Self::ValueType;
 }
 
+/// The trait for the type that can be converted into a ranged coordinate axis
 pub trait AsRangedCoord: Sized {
     type CoordDescType: Ranged + From<Self>;
     type Value;

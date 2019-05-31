@@ -1,5 +1,24 @@
 /*!
-  The abstraction of the coordinate system
+Coordinate system abstractions.
+
+Coordinate systems can be attached to drawing areas. By doing so,
+the drawing area can draw elements in the guest coordinate system.
+`DrawingArea::apply_coord_spec` is used to attach new coordinate system
+to the drawing area.
+
+`CoordTranslate` is the trait required by `DrawingArea::apply_coord_spec`. It provides
+the forward coordinate translation: from the logic coordinate to the pixel-based absolute
+backend coordinate system.
+
+When the coordinate type implements `ReverseCoordTranslate`,
+the backward translation is possible, which allows mapping pixel-based coordinate into
+the logic coordinate. It's not usually used for static figure rendering, but may be useful
+for a interactive figure.
+
+`RangedCoord` is the 2D cartesian coordinate system that has two `Ranged` axis.
+A ranged axis can be logarithmic and by applying an logarithmic axis, the figure is logarithmic scale.
+Also, the ranged axis can be decereted, and this is required by the histogram series.
+
 */
 use crate::drawing::backend::BackendCoord;
 

@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -11,12 +11,12 @@
 </a>
 
 <a href="https://plumberserver.com/plotters-docs/plotters">
-	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
+    <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, including bitmap, vector graph and WebAssembly. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, including bitmap, vector graph and WebAssembly.
 
 ## Gallery
 
@@ -82,8 +82,8 @@ And the following code draws a quadratic function. `src/main.rs`,
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut backend = BitMapBackend::new("examples/outputs/0.png", (640, 480));
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480))
+        .into_drawing_area();
     let font:FontDesc = ("Arial", 50.0).into();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
@@ -116,15 +116,15 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Fast** If you need rendering a figure with trillions of data points, 
-Rust is a good choice. Rust's performance allows you to combine data processing step 
+* **Fast** If you need rendering a figure with trillions of data points,
+Rust is a good choice. Rust's performance allows you to combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
-within a single program. You can also integrate the 
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+within a single program. You can also integrate the
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ### What type of figure is supported?
@@ -140,7 +140,7 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 
@@ -173,9 +173,8 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/2.png", (300, 200));
-    // A backend object can be converted into a drawing area
-    let root_drawing_area = backend.into_drawing_area();
+    let root_drawing_area = BitMapBackend::new("examples/outputs/2.png", (300, 200))
+        .into_drawing_area();
     // And we can split the drawing area into 3x3 grid
     let child_drawing_areas = root_drawing_area.split_evenly((3,3));
     // Then we fill the drawing area with different color
@@ -199,10 +198,9 @@ You may also combine existing elements to build a complex element.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/3.png", (300, 200));
-    // A backend object can be converted into a drawing area
-    let root = backend.into_drawing_area();
-    root.fill(&White);
+    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200))
+        .into_drawing_area();
+    root.fill(&White)?;
     // Draw an circle on the drawing area
     root.draw(&Circle::new((100,100), 50, Into::<ShapeStyle>::into(&Green).filled()))?;
     Ok(())
@@ -214,7 +212,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.
@@ -223,9 +221,9 @@ For example, we can have an element which includes a dot and its coordinate.
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/4.png", (640, 480));
-    // A backend object can be converted into a drawing area
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480))
+        .into_drawing_area();
+
     root.fill(&RGBColor(240,200,200))?;
 
     let root = root.apply_coord_spec(RangedCoord::<RangedCoordf32, RangedCoordf32>::new(0f32..1f32, 0f32..1f32, (0..640, 0..480)));
@@ -256,8 +254,8 @@ of the chart context object.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/5.png", (640, 480));
-    let root = backend.into_drawing_area();
+    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480))
+        .into_drawing_area();
     root.fill(&White);
     let root = root.margin(10,10,10,10);
     // After this point, we should be able to draw construct a chart context

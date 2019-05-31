@@ -51,7 +51,7 @@
 
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new(
-            "examples/outputs/element-0.png", 
+            "examples/outputs/element-0.png",
             (640, 480)
         ).into_drawing_area();
         root.draw(&RedBoxedX((200, 200)))?;
@@ -72,16 +72,16 @@
     use plotters::prelude::*;
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new(
-            "examples/outputs/element-1.png", 
+            "examples/outputs/element-1.png",
             (640, 480)
         ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
-        let style = TextStyle { 
-            font: &font, 
-            color: &Red 
+        let style = TextStyle {
+            font: &font,
+            color: &Red
         };
-        root.draw(&(EmptyElement::at((200, 200)) 
-                + OwnedText::new("X", (0, 0), &style) 
+        root.draw(&(EmptyElement::at((200, 200))
+                + OwnedText::new("X", (0, 0), &style)
                 + Rectangle::new([(0,0), (10, 12)], &Red)
         ))?;
         Ok(())
