@@ -103,7 +103,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
 
-### Motivation of Plotting in Rust
+## Motivation of Plotting in Rust
 
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
 But Rust is one of the best languages fits the need.
@@ -123,22 +123,23 @@ figure rendering code into your application handling a huge amount of data and v
 * **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
-### What type of figure is supported?
+## What types of figure are supported?
 
-We are not limited to any specific type of figure at all. You can create your own types of figures easily with the Plotters API.
+Plotters is not limited to any specific type of figure.
+You can create your own types of figures easily with the Plotters API.
+
 But Plotters provides some builtin figure types for convenience.
 Currently, we support line series, point series, candlestick series, and histogram.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
 
-### Plotting on HTML5 canvas
+## Plotting on HTML5 canvas
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
 There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
-
+To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Concepts by examples
 
@@ -304,7 +305,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
 
-### Misc
+## Misc
 
 To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.tmol`
 
