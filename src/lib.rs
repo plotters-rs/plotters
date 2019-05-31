@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - A Rust Drawing Library for Plotting with Multiple Backend Support, Including WebAssembly  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
