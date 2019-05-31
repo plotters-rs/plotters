@@ -1,4 +1,4 @@
-# Plotters - A drawing library for Plotting
+# Plotters - A Rust Drawing Library for Plotting with Multiple Backend Support, Including WebAssembly  🦀 📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -22,13 +22,13 @@ $$gallery$$
 
 ## Quick Start
 
-To use Plotters, you can simple add Plotters into your `Cargo.toml`
+To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [depedencies]
 plotters = "^0.1.12"
 ```
 
-And the following code draws the quadratic function. In `src/main.rs`,
+And the following code draws a quadratic function. `src/main.rs`,
 
 ```rust
 use plotters::prelude::*;
@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
-To use the latest development version, pull the depedency with `plotters = {git = "https://github.com/38/plotters.git" }` in `Cargo.toml`.
+To use the latest development version, put `plotters = {git = "https://github.com/38/plotters.git" }` in `Cargo.toml`'s depedencies section.
 
 
 ### Motivation of Plotting in Rust
