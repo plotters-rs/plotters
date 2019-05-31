@@ -71,8 +71,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
-To use the latest development version, put `plotters = {git = "https://github.com/38/plotters.git" }` in `Cargo.toml`'s depedencies section.
-
 
 ### Motivation of Plotting in Rust
 
@@ -274,4 +272,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+
+### Misc
+
+To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.tmol`
+
+```toml
+[dependencies]
+plotters = { git = "https://github.com/38/plotters.git" }
+```
+
+Plotters now supports use features to control the backend dependencies. By default, `BitMapBackend` and `SVGBackend` are supported,
+use `default_features = false` in the dependency description in `Cargo.toml` and you can cherrypick the backend implementations.
+
+- `svg` Enable the `SVGBackend`
+- `bitmap` Enable the `BitMapBackend`
+
+For example, the following dependency description would avoid compiling with bitmap support:
+
+```toml
+[dependencies]
+plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
+```
 

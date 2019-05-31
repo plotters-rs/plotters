@@ -36,8 +36,6 @@ $$examples/quick_start.rs$$
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
-To use the latest development version, put `plotters = {git = "https://github.com/38/plotters.git" }` in `Cargo.toml`'s depedencies section.
-
 
 ### Motivation of Plotting in Rust
 
@@ -59,9 +57,11 @@ figure rendering code into your application handling a huge amount of data and v
 * **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
-### What type of figure is supported?
+### What types of figure are supported?
 
-We are not limited to any specific type of figure at all. You can create your own types of figures easily with the Plotters API.
+Plotters is not limited to any specific type of figure.
+You can create your own types of figures easily with the Plotters API.
+
 But Plotters provides some builtin figure types for convenience.
 Currently, we support line series, point series, candlestick series, and histogram.
 And the library is designed to be able to render multiple figure into a single image.
@@ -69,12 +69,11 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 
 ### Plotting on HTML5 canvas
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply create
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
 There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-And you should be able to try the deployed version with the following [link](https://plumberserver.com/plotters-wasm-demo/index.html).
-
+To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Concepts by examples
 
@@ -140,5 +139,27 @@ $$examples/chart.rs$$
 ```
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+
+### Misc
+
+To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.tmol`
+
+```toml
+[dependencies]
+plotters = { git = "https://github.com/38/plotters.git" }
+```
+
+Plotters now supports use features to control the backend dependencies. By default, `BitMapBackend` and `SVGBackend` are supported,
+use `default_features = false` in the dependency description in `Cargo.toml` and you can cherrypick the backend implementations.
+
+- `svg` Enable the `SVGBackend`
+- `bitmap` Enable the `BitMapBackend`
+
+For example, the following dependency description would avoid compiling with bitmap support:
+
+```toml
+[dependencies]
+plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
+```
 
 $$style$$
