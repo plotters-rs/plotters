@@ -9,7 +9,7 @@ pub type FontError = <FontDataInternal as FontData>::ErrorType;
 /// The type we used to represent a result of any font operations
 pub type FontResult<T> = Result<T, FontError>;
 
-/// How the text is transformed
+/// Specifying text transformations
 #[derive(Clone)]
 pub enum FontTransform {
     None,
@@ -19,6 +19,8 @@ pub enum FontTransform {
 }
 
 impl FontTransform {
+    /// Compute the offset of the "top-left" cornor of the text.
+    /// "Top-left" defined as the first char's top-left in reading orientation.
     pub fn offset(&self, layout: LayoutBox) -> (i32, i32) {
         match self {
             FontTransform::None => (0, 0),
@@ -28,6 +30,7 @@ impl FontTransform {
         }
     }
 
+    /// Transform the coordinate to performe the rotation
     pub fn transform(&self, x: i32, y: i32) -> (i32, i32) {
         match self {
             FontTransform::None => (x, y),
