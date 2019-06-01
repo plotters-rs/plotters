@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters 0.1.13 (?)
+## Plotters 0.1.13 (2019-05-31)
 
 ### Added
 - New abstraction of backend style with `BackendStyle` trait which should be able to extend easier in the future

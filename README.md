@@ -43,7 +43,7 @@ Plotters is drawing library designed for rendering figures, plots, and charts, i
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [depedencies]
-plotters = "^0.1.12"
+plotters = "^0.1.13"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
