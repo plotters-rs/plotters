@@ -29,6 +29,8 @@ impl<'a> TextStyle<'a> {
             color,
         }
     }
+
+    // TODO: How to make the font transform inside the text style
 }
 
 impl<'a, 'b: 'a> Into<TextStyle<'a>> for &'b TextStyle<'a> {

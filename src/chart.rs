@@ -24,7 +24,7 @@ use crate::coord::{
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, Path, PointCollection, Rectangle};
-use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
+use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle, FontTransform};
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing
 pub struct ChartBuilder<'a, DB: DrawingBackend> {
@@ -169,6 +169,8 @@ where
     x_label_offset: i32,
     n_x_labels: usize,
     n_y_labels: usize,
+    x_desc: Option<String>,
+    y_desc: Option<String>,
     line_style_1: Option<ShapeStyle<'a>>,
     line_style_2: Option<ShapeStyle<'a>>,
     axis_style: Option<ShapeStyle<'a>>,
@@ -272,6 +274,20 @@ where
         self
     }
 
+    /// Set the X axis's description
+    /// - `desc`: The description of the X axis
+    pub fn x_desc<T:Into<String>>(&mut self, desc:T) -> &mut Self {
+        self.x_desc = Some(desc.into());
+        self
+    }
+    
+    /// Set the Y axis's description
+    /// - `desc`: The description of the Y axis
+    pub fn y_desc<T:Into<String>>(&mut self, desc:T) -> &mut Self {
+        self.y_desc = Some(desc.into());
+        self
+    }
+
     /// Draw the configured mesh on the target plot
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let mut target = None;
@@ -311,6 +327,8 @@ where
             false,
             false,
             &axis_style,
+            self.x_desc.clone(),
+            self.y_desc.clone(),
         )?;
 
         target.draw_mesh(
@@ -327,6 +345,8 @@ where
             self.draw_x_axis,
             self.draw_y_axis,
             &axis_style,
+            None,
+            None,
         )
     }
 }
@@ -358,6 +378,8 @@ impl<
             format_y: &|y| format!("{:?}", y),
             target: Some(self),
             _pahtom_data: PhantomData,
+            x_desc: None,
+            y_desc: None,
         }
     }
 }
@@ -432,6 +454,8 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         x_axis: bool,
         y_axis: bool,
         axis_style: &ShapeStyle,
+        x_desc: Option<String>,
+        y_desc: Option<String>,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
@@ -468,7 +492,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         let (x0, y0) = self.drawing_area.get_base_pixel();
 
         if let Some(ref xl) = self.x_label_area {
-            let (tw, _) = xl.dim_in_pixel();
+            let (tw, th) = xl.dim_in_pixel();
             if x_axis {
                 xl.draw(&Path::new(vec![(0, 0), (tw as i32, 0)], axis_style.clone()))?;
             }
@@ -489,6 +513,19 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         (p - x0 - w as i32 / 2 + x_label_offset, 10),
                     )?;
                 }
+            }
+
+            if let Some(ref text) = x_desc {
+                let (w, h) = label_style.font.box_size(text).unwrap_or((0, 0));
+
+                let left = (tw - w) / 2;
+                let top  = th - h;
+
+                xl.draw_text(
+                    &text,
+                    label_style,
+                    (left as i32, top as i32)
+                )?;
             }
         }
 
@@ -515,6 +552,22 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                         ))?;
                     }
                 }
+            }
+            
+            if let Some(ref text) = y_desc {
+                let (w, _) = label_style.font.box_size(text).unwrap_or((0, 0));
+
+                let top  = (th - w) / 2;
+
+                let mut y_style = label_style.clone();
+                let y_font = label_style.font.transform(FontTransform::Rotate270);
+                y_style.font = &y_font;
+
+                yl.draw_text(
+                    &text,
+                    &y_style,
+                    (0, top as i32)
+                )?;
             }
         }
 

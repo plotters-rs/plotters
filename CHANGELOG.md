@@ -4,6 +4,7 @@
 
 ### Added
 - Font is now support rotation transformation. Use `FontDesc::transform` to apply an rotation to transformation. For example, `font.transform(FontTransform::Rotate90)`.
+- ChartContext now support drawing axis description. Use `MeshStyle::x_desc` and `MeshStyle::y_desc` to specify the axis description text.
 
 ## Plotters 0.1.13 (2019-05-31)
 

@@ -7,6 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut chart = ChartBuilder::on(&root)
         .x_label_area_size(25)
         .y_label_area_size(40)
+        .margin(5)
         .caption("Histogram Test", &("Arial", 50.0).into_font())
         .build_ranged(0u32..10u32, 0u32..10u32)?;
 
@@ -15,6 +16,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .disable_x_mesh()
         .line_style_1(&White.mix(0.3))
         .x_label_offset(30)
+        .y_desc("Count")
+        .x_desc("Bucket")
         .draw()?;
 
     let data = [
