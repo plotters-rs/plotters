@@ -32,7 +32,7 @@ echo ${NEW_VERSION} > doc-template/latest_version
 
 git add -u .
 git commit -m "Bump version number from ${OLD_VERSION} to ${NEW_VERSION}"
-git tag -l "v${NEW_VERSION}"
+git tag -a "v${NEW_VERSION}" -m "Plotters ${NEW_VERSION} release"
 
 cargo publish
 git push origin
