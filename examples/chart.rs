@@ -1,16 +1,13 @@
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let img = BitMapBackend::new("examples/outputs/sample.png", (1024, 768));
+    let root_area =
+        BitMapBackend::new("examples/outputs/sample.png", (1024, 768)).into_drawing_area();
 
-    let root_area = img.into_drawing_area();
+    root_area.fill(&White)?;
 
-    root_area.fill(&RGBColor(255, 255, 255))?;
-
-    let font_large: FontDesc = ("Arial", 60.0).into();
-    let font_small: FontDesc = ("Arial", 40.0).into();
     let root_area = root_area
-        .titled("Image Title", &font_large)?
+        .titled("Image Title", &("Arial", 60).into_font())?
         .margin(0, 0, 0, 20);
 
     let (upper, lower) = root_area.split_vertically(512);
@@ -18,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cc = ChartBuilder::on(&upper)
         .x_label_area_size(50)
         .y_label_area_size(60)
-        .caption("Sine and Cosine", &font_small)
+        .caption("Sine and Cosine", &("Arial", 40).into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
     cc.configure_mesh()
@@ -32,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
-        &RGBColor(255, 0, 0),
+        &Red,
     ))?;
 
     cc.draw_series(LineSeries::new(
@@ -42,27 +39,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ((x - 3400) as f32 / 1000.0).cos(),
             )
         }),
-        &RGBColor(0, 0, 255),
+        &Blue,
     ))?;
 
-    // It's possible to use a existing pointing element
     /*
+    // It's possible to use a existing pointing element
      cc.draw_series(PointSeries::<_, _, Circle<_>>::new(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
         Into::<ShapeStyle>::into(&RGBColor(255,0,0)).filled(),
     ))?;*/
 
-    let point_font = font_small.resize(15.0);
     // Otherwise you can use a function to construct your pointing element yourself
+    let point_font = ("Arial", 15).into_font();
     cc.draw_series(PointSeries::of_element(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
-        Into::<ShapeStyle>::into(&RGBColor(255, 0, 0)).filled(),
+        ShapeStyle::from(&Red).filled(),
         &|coord, size, style| {
-            return EmptyElement::at(coord)
+            EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
-                + OwnedText::new(format!("{:?}", coord), (0, 15), &point_font);
+                + OwnedText::new(format!("{:?}", coord), (0, 15), &point_font)
         },
     ))?;
 
@@ -72,7 +69,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut cc = ChartBuilder::on(&drawing_area)
             .x_label_area_size(50)
             .y_label_area_size(60)
-            .caption(format!("y = x^{}", 1 + 2 * idx), &font_small)
+            .caption(format!("y = x^{}", 1 + 2 * idx), &("Arial", 40).into_font())
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 
@@ -83,9 +80,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     (x as f32 / 100.0).powf(idx as f32 * 2.0 + 1.0),
                 )
             }),
-            &RGBColor(0, 0, 255),
+            &Blue,
         ))?;
     }
 
-    return Ok(());
+    Ok(())
 }

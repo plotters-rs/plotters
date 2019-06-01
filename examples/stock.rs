@@ -2,16 +2,14 @@ use chrono::offset::{Local, TimeZone};
 use chrono::{Date, Duration};
 use plotters::prelude::*;
 fn parse_time(t: &str) -> Date<Local> {
-    return Local
+    Local
         .datetime_from_str(&format!("{} 0:0", t), "%Y-%m-%d %H:%M")
         .unwrap()
-        .date();
+        .date()
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = get_data();
-    let backend = BitMapBackend::new("examples/outputs/stock.png", (1024, 768));
-    let root = backend.into_drawing_area();
-    let font: FontDesc = ("Arial", 50.0).into();
+    let root = BitMapBackend::new("examples/outputs/stock.png", (1024, 768)).into_drawing_area();
     root.fill(&White)?;
 
     let (to_date, from_date) = (
@@ -22,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut chart = ChartBuilder::on(&root)
         .x_label_area_size(40)
         .y_label_area_size(40)
-        .caption("MSFT Stock Price", &font)
+        .caption("MSFT Stock Price", &("Arial", 50.0).into_font())
         .build_ranged(from_date..to_date, 110f32..135f32)?;
 
     chart.configure_mesh().line_style_2(&White).draw()?;

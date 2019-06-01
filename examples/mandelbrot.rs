@@ -2,9 +2,9 @@ use plotters::prelude::*;
 use std::ops::Range;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let backend = BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600));
+    let root =
+        BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600)).into_drawing_area();
 
-    let root = backend.into_drawing_area();
     root.fill(&White)?;
 
     let mut chart = ChartBuilder::on(&root)
@@ -22,6 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let plotting_area = chart.plotting_area();
 
     let range = plotting_area.get_pixel_range();
+
     let (pw, ph) = (range.0.end - range.0.start, range.1.end - range.1.start);
     let (xr, yr) = (chart.x_range(), chart.y_range());
 
