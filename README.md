@@ -30,7 +30,7 @@ Plotters is drawing library designed for rendering figures, plots, and charts, i
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/quick_start.rs">
+<a href="https://github.com/38/plotters#quick-start">
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem" width=200px></img>
 </a>
 
