@@ -5,7 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&White)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .x_label_area_size(25)
+        .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
         .caption("Histogram Test", &("Arial", 50.0).into_font())
@@ -18,6 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_offset(30)
         .y_desc("Count")
         .x_desc("Bucket")
+        .axis_desc_style(&("Arial", 15).into_font())
         .draw()?;
 
     let data = [

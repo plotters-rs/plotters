@@ -169,6 +169,7 @@ where
     x_label_offset: i32,
     n_x_labels: usize,
     n_y_labels: usize,
+    axis_desc_style: Option<TextStyle<'a>>,
     x_desc: Option<String>,
     y_desc: Option<String>,
     line_style_1: Option<ShapeStyle<'a>>,
@@ -274,6 +275,14 @@ where
         self
     }
 
+    /// Set the axis description's style. If not given, use label style instead.
+    /// - `style`: The text style that would be applied to descriptions
+    pub fn axis_desc_style<T: Into<TextStyle<'a>>>(&mut self, style: T) -> &mut Self {
+        self.axis_desc_style = Some(style.into());
+        self
+    }
+
+
     /// Set the X axis's description
     /// - `desc`: The description of the X axis
     pub fn x_desc<T:Into<String>>(&mut self, desc:T) -> &mut Self {
@@ -315,6 +324,10 @@ where
         let label_style =
             unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.label_style.clone()) }
                 .unwrap_or_else(|| (&default_label_font).into());
+        
+        let axis_desc_style =
+            unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.axis_desc_style.clone()) }
+                .unwrap_or_else(|| label_style.clone());
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
@@ -327,6 +340,7 @@ where
             false,
             false,
             &axis_style,
+            &axis_desc_style,
             self.x_desc.clone(),
             self.y_desc.clone(),
         )?;
@@ -345,6 +359,7 @@ where
             self.draw_x_axis,
             self.draw_y_axis,
             &axis_style,
+            &axis_desc_style,
             None,
             None,
         )
@@ -380,6 +395,7 @@ impl<
             _pahtom_data: PhantomData,
             x_desc: None,
             y_desc: None,
+            axis_desc_style: None,
         }
     }
 }
@@ -454,6 +470,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         x_axis: bool,
         y_axis: bool,
         axis_style: &ShapeStyle,
+        axis_desc_style: &TextStyle,
         x_desc: Option<String>,
         y_desc: Option<String>,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
@@ -523,7 +540,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
 
                 xl.draw_text(
                     &text,
-                    label_style,
+                    axis_desc_style,
                     (left as i32, top as i32)
                 )?;
             }
@@ -559,8 +576,8 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
 
                 let top  = (th - w) / 2;
 
-                let mut y_style = label_style.clone();
-                let y_font = label_style.font.transform(FontTransform::Rotate270);
+                let mut y_style = axis_desc_style.clone();
+                let y_font = axis_desc_style.font.transform(FontTransform::Rotate270);
                 y_style.font = &y_font;
 
                 yl.draw_text(
