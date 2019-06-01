@@ -1,5 +1,5 @@
 use super::{FontData, FontDataInternal};
-use crate::style::{Color, TextStyle};
+use crate::style::{Color, LayoutBox, TextStyle};
 
 use std::convert::From;
 
@@ -9,11 +9,41 @@ pub type FontError = <FontDataInternal as FontData>::ErrorType;
 /// The type we used to represent a result of any font operations
 pub type FontResult<T> = Result<T, FontError>;
 
+/// How the text is transformed
+#[derive(Clone)]
+pub enum FontTransform {
+    None,
+    Rotate90,
+    Rotate180,
+    Rotate270,
+}
+
+impl FontTransform {
+    pub fn offset(&self, layout: LayoutBox) -> (i32, i32) {
+        match self {
+            FontTransform::None => (0, 0),
+            FontTransform::Rotate90 => ((layout.1).1 - (layout.0).1, 0),
+            FontTransform::Rotate180 => ((layout.1).0 - (layout.0).0, (layout.1).1 - (layout.0).1),
+            FontTransform::Rotate270 => (0, (layout.1).0 - (layout.0).0),
+        }
+    }
+
+    pub fn transform(&self, x: i32, y: i32) -> (i32, i32) {
+        match self {
+            FontTransform::None => (x, y),
+            FontTransform::Rotate90 => (-y, x),
+            FontTransform::Rotate180 => (-x, -y),
+            FontTransform::Rotate270 => (y, -x),
+        }
+    }
+}
+
 /// Describes a font
 pub struct FontDesc<'a> {
     size: f64,
     name: &'a str,
     data: FontResult<FontDataInternal>,
+    transform: FontTransform,
 }
 
 impl<'a> From<&'a str> for FontDesc<'a> {
@@ -45,6 +75,7 @@ impl<'a> FontDesc<'a> {
             size,
             name: typeface,
             data: FontDataInternal::new(typeface),
+            transform: FontTransform::None,
         }
     }
 
@@ -54,7 +85,23 @@ impl<'a> FontDesc<'a> {
             size,
             name: self.name,
             data: self.data.clone(),
+            transform: self.transform.clone(),
         }
+    }
+
+    /// Set the font transformation
+    pub fn transform(&self, trans: FontTransform) -> Self {
+        Self {
+            size: self.size,
+            name: self.name,
+            data: self.data.clone(),
+            transform: trans,
+        }
+    }
+
+    /// Get the font transformation description
+    pub fn get_transform(&self) -> FontTransform {
+        self.transform.clone()
     }
 
     /// Set the color of the font and return the result text style object
@@ -94,7 +141,7 @@ impl<'a> FontDesc<'a> {
         draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
         match &self.data {
-            Ok(ref font) => font.draw((x, y), self.size, text, draw),
+            Ok(ref font) => font.draw((x, y), self.size, text, self.get_transform(), draw),
             Err(e) => Err(e.clone()),
         }
     }

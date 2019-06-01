@@ -3,7 +3,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc};
+use crate::style::{Color, FontDesc, FontTransform};
 
 /// The backend that is drawing on the HTML canvas
 /// TODO: Support double bufferring
@@ -208,13 +208,43 @@ impl DrawingBackend for CanvasBackend {
         if color.alpha() == 0.0 {
             return Ok(());
         }
+
+        let (mut x, mut y) = (pos.0, pos.1);
+
+        let degree = match font.get_transform() {
+            FontTransform::None => 0.0,
+            FontTransform::Rotate90 => 90.0,
+            FontTransform::Rotate180 => 180.0,
+            FontTransform::Rotate270 => 270.0,
+        } / 180.0
+            * std::f64::consts::PI;
+
+        if degree != 0.0 {
+            self.context.save();
+            let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+            let offset = font.get_transform().offset(layout);
+            self.context
+                .translate(f64::from(x + offset.0), f64::from(y + offset.1))
+                .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+            self.context
+                .rotate(degree)
+                .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+            x = 0;
+            y = 0;
+        }
+
         self.context.set_text_baseline("bottom");
         self.context.set_fill_style(&make_canvas_color(color));
         self.context
             .set_font(&format!("{}px {}", font.get_size(), font.get_name()));
         self.context
-            .fill_text(text, f64::from(pos.0), f64::from(pos.1) + font.get_size())
+            .fill_text(text, f64::from(x), f64::from(y) + font.get_size())
             .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+
+        if degree != 0.0 {
+            self.context.restore();
+        }
+
         Ok(())
     }
 }

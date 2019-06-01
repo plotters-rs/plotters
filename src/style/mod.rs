@@ -11,10 +11,10 @@ pub use color::{
     SimpleColor, Transparent, White, Yellow,
 };
 
-pub use font::{FontDesc, FontError, FontResult, IntoFont};
+pub use font::{FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox};
 pub use palette::*;
 
-/// Denotes an style of a text
+/// Style of a text
 #[derive(Clone)]
 pub struct TextStyle<'a> {
     pub font: &'a FontDesc<'a>,
@@ -46,7 +46,7 @@ impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     }
 }
 
-/// Denotes an style for any of shape
+/// Style for any of shape
 #[derive(Clone)]
 pub struct ShapeStyle<'a> {
     pub color: &'a dyn Color,

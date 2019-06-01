@@ -6,7 +6,7 @@ use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc};
+use crate::style::{Color, FontDesc, FontTransform};
 
 use std::io::Error;
 use std::path::Path;
@@ -200,16 +200,35 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             return Ok(());
         }
         let context = svg::node::Text::new(text);
-        let ((_, b), (_, _)) = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+
+        let trans = font.get_transform();
+        let offset = trans.offset(layout);
+        let x0 = pos.0 + offset.0;
+        let y0 = pos.1 + offset.1;
+
         let node = Text::new()
-            .set("x", pos.0)
-            .set("y", pos.1 - b)
+            .set("x", x0)
+            .set("y", y0 - (layout.0).1)
             .set("font-famliy", font.get_name())
             .set("font-size", font.get_size())
             .set("opacity", make_svg_opacity(color))
-            .set("fill", make_svg_color(color))
-            .add(context);
+            .set("fill", make_svg_color(color));
+
+        let node = match trans {
+            FontTransform::Rotate90 => node.set("transform", format!("rotate(90, {}, {})", x0, y0)),
+            FontTransform::Rotate180 => {
+                node.set("transform", format!("rotate(180, {}, {})", x0, y0))
+            }
+            FontTransform::Rotate270 => {
+                node.set("transform", format!("rotate(270, {}, {})", x0, y0))
+            }
+            _ => node,
+        }
+        .add(context);
+
         self.update_document(|d| d.add(node));
+
         Ok(())
     }
 }

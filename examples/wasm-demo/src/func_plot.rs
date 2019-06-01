@@ -8,7 +8,9 @@ fn start_plotting(
     let backend = CanvasBackend::new(element).unwrap();
     let root = backend.into_drawing_area();
     let font: FontDesc = ("Arial", 20.0).into();
+
     root.fill(&White)?;
+
     let mut chart = ChartBuilder::on(&root)
         .caption(format!("y=x^{}", pow), &font)
         .x_label_area_size(30)
