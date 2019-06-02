@@ -84,7 +84,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         self
     }
 
-    /// Builder the chart with a ranged coordinate system. The function will returns a chart
+    /// Build the chart with a 2D Cartesian coordinate system. The function will returns a chart
     /// context, where data series can be rendered on.
     /// - `x_spec`: The specification of X axis
     /// - `y_spec`: The specification of Y axis
@@ -424,6 +424,8 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         &self.drawing_area
     }
 
+    /*
+     //TODO: Redesign this
     /// Defines a series label area
     pub fn define_series_label_area<'a, S: Into<ShapeStyle<'a>>>(
         &mut self,
@@ -436,6 +438,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
         self.series_area.as_ref().unwrap().draw(&element)
     }
+    */
 
     /// Maps the coordinate to the backend coordinate. This is typically used
     /// with an interactive chart.
