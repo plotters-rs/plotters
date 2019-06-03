@@ -1,6 +1,6 @@
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use crate::style::{ShapeStyle, TextStyle};
+use crate::style::ShapeStyle;
 
 /// An element of a single pixel
 pub struct Pixel<'a, Coord> {
@@ -132,53 +132,6 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Rectangle<'a, Coord> {
     }
 }
 
-/// A text element
-pub struct Text<'a, Coord> {
-    text: &'a str,
-    coord: Coord,
-    style: TextStyle<'a>,
-}
-
-impl<'a, Coord> Text<'a, Coord> {
-    /// Create a new text element
-    /// - `text`: The text for the element
-    /// - `points`: The upper left conner for the text element
-    /// - `style`: The text style
-    /// - Return the newly created text element
-    pub fn new<T: AsRef<str>, S: Into<TextStyle<'a>>>(
-        text: &'a T,
-        points: Coord,
-        style: S,
-    ) -> Self {
-        Self {
-            text: text.as_ref(),
-            coord: points,
-            style: style.into(),
-        }
-    }
-}
-
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Text<'b, Coord> {
-    type Borrow = &'a Coord;
-    type IntoIter = std::iter::Once<&'a Coord>;
-    fn point_iter(self) -> Self::IntoIter {
-        std::iter::once(&self.coord)
-    }
-}
-
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Text<'a, Coord> {
-    fn draw<I: Iterator<Item = BackendCoord>>(
-        &self,
-        mut points: I,
-        backend: &mut DB,
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        if let Some(a) = points.next() {
-            return backend.draw_text(self.text, self.style.font, a, &Box::new(self.style.color));
-        }
-        Ok(())
-    }
-}
-
 /// A circle element
 pub struct Circle<'a, Coord> {
     center: Coord,
@@ -227,46 +180,3 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Circle<'a, Coord> {
     }
 }
 
-/// A text element. This is similar to the text element, but it owns the
-/// string.
-pub struct OwnedText<'a, Coord> {
-    text: String,
-    coord: Coord,
-    style: TextStyle<'a>,
-}
-
-impl<'a, Coord> OwnedText<'a, Coord> {
-    /// Create a new owned text element
-    /// - `text`: The text to create
-    /// - `points`: The left upper conner
-    /// - `style`: The font style
-    /// - Return the newly created owned text object
-    pub fn new<T: Into<String>, S: Into<TextStyle<'a>>>(text: T, points: Coord, style: S) -> Self {
-        Self {
-            text: text.into(),
-            coord: points,
-            style: style.into(),
-        }
-    }
-}
-
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a OwnedText<'b, Coord> {
-    type Borrow = &'a Coord;
-    type IntoIter = std::iter::Once<&'a Coord>;
-    fn point_iter(self) -> Self::IntoIter {
-        std::iter::once(&self.coord)
-    }
-}
-
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for OwnedText<'a, Coord> {
-    fn draw<I: Iterator<Item = BackendCoord>>(
-        &self,
-        mut points: I,
-        backend: &mut DB,
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        if let Some(a) = points.next() {
-            return backend.draw_text(&self.text, self.style.font, a, &Box::new(self.style.color));
-        }
-        Ok(())
-    }
-}

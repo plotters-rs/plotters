@@ -59,7 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|coord, size, style| {
             EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
-                + OwnedText::new(format!("{:?}", coord), (0, 15), &point_font)
+                + Text::new(format!("{:?}", coord), (0, 15), &point_font)
         },
     ))?;
 

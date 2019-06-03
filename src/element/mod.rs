@@ -77,7 +77,7 @@
         ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
         root.draw(&(EmptyElement::at((200, 200))
-                + OwnedText::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
+                + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
                 + Rectangle::new([(0,0), (10, 12)], &Red)
         ))?;
         Ok(())
@@ -90,6 +90,9 @@ use std::borrow::Borrow;
 
 mod basic_shapes;
 pub use basic_shapes::*;
+
+mod text;
+pub use text::*;
 
 mod points;
 pub use points::*;
