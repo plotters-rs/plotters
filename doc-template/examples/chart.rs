@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
-            + OwnedText::new(format!("{:?}", c), (10, 0), &smaller_font);
+            + Text::new(format!("{:?}", c), (10, 0), &smaller_font);
         },
     ))?;
     Ok(())

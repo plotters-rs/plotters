@@ -145,7 +145,7 @@ impl<'a, Coord> Circle<'a, Coord> {
     /// - `size` The radius of the circle
     /// - `style` The style of the circle
     /// - Return: The newly created circle element
-    pub fn new<S:Into<ShapeStyle<'a>>>(coord: Coord, size: u32, style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle<'a>>>(coord: Coord, size: u32, style: S) -> Self {
         Self {
             center: coord,
             size,
@@ -179,4 +179,3 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Circle<'a, Coord> {
         Ok(())
     }
 }
-

@@ -4,24 +4,21 @@ use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::TextStyle;
 
-/// A text element
+/// A single line text element. This can be owned or borrowed string, dependeneds on
+/// `String` or `str` moved into.
 pub struct Text<'a, Coord, T: Borrow<str>> {
     text: T,
     coord: Coord,
     style: TextStyle<'a>,
 }
 
-impl<'a, Coord, T:Borrow<str>> Text<'a, Coord, T> {
+impl<'a, Coord, T: Borrow<str>> Text<'a, Coord, T> {
     /// Create a new text element
     /// - `text`: The text for the element
     /// - `points`: The upper left conner for the text element
     /// - `style`: The text style
     /// - Return the newly created text element
-    pub fn new<S: Into<TextStyle<'a>>>(
-        text: T,
-        points: Coord,
-        style: S,
-    ) -> Self {
+    pub fn new<S: Into<TextStyle<'a>>>(text: T, points: Coord, style: S) -> Self {
         Self {
             text,
             coord: points,
@@ -45,9 +42,13 @@ impl<'a, Coord: 'a, DB: DrawingBackend, T: Borrow<str>> Drawable<DB> for Text<'a
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some(a) = points.next() {
-            return backend.draw_text(self.text.borrow(), self.style.font, a, &Box::new(self.style.color));
+            return backend.draw_text(
+                self.text.borrow(),
+                self.style.font,
+                a,
+                &Box::new(self.style.color),
+            );
         }
         Ok(())
     }
 }
-

@@ -375,8 +375,8 @@ pub mod prelude {
     };
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, Path,
-        Pixel, Rectangle, Text,
+        CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, Path, Pixel,
+        Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]

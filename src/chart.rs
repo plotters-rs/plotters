@@ -24,7 +24,7 @@ use crate::coord::{
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, Path, PointCollection, Rectangle};
-use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle, FontTransform};
+use crate::style::{FontDesc, FontTransform, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing
 pub struct ChartBuilder<'a, DB: DrawingBackend> {
@@ -282,17 +282,16 @@ where
         self
     }
 
-
     /// Set the X axis's description
     /// - `desc`: The description of the X axis
-    pub fn x_desc<T:Into<String>>(&mut self, desc:T) -> &mut Self {
+    pub fn x_desc<T: Into<String>>(&mut self, desc: T) -> &mut Self {
         self.x_desc = Some(desc.into());
         self
     }
-    
+
     /// Set the Y axis's description
     /// - `desc`: The description of the Y axis
-    pub fn y_desc<T:Into<String>>(&mut self, desc:T) -> &mut Self {
+    pub fn y_desc<T: Into<String>>(&mut self, desc: T) -> &mut Self {
         self.y_desc = Some(desc.into());
         self
     }
@@ -324,7 +323,7 @@ where
         let label_style =
             unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.label_style.clone()) }
                 .unwrap_or_else(|| (&default_label_font).into());
-        
+
         let axis_desc_style =
             unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.axis_desc_style.clone()) }
                 .unwrap_or_else(|| label_style.clone());
@@ -536,13 +535,9 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                 let (w, h) = label_style.font.box_size(text).unwrap_or((0, 0));
 
                 let left = (tw - w) / 2;
-                let top  = th - h;
+                let top = th - h;
 
-                xl.draw_text(
-                    &text,
-                    axis_desc_style,
-                    (left as i32, top as i32)
-                )?;
+                xl.draw_text(&text, axis_desc_style, (left as i32, top as i32))?;
             }
         }
 
@@ -570,21 +565,17 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
                     }
                 }
             }
-            
+
             if let Some(ref text) = y_desc {
                 let (w, _) = label_style.font.box_size(text).unwrap_or((0, 0));
 
-                let top  = (th - w) / 2;
+                let top = (th - w) / 2;
 
                 let mut y_style = axis_desc_style.clone();
                 let y_font = axis_desc_style.font.transform(FontTransform::Rotate270);
                 y_style.font = &y_font;
 
-                yl.draw_text(
-                    &text,
-                    &y_style,
-                    (0, top as i32)
-                )?;
+                yl.draw_text(&text, &y_style, (0, top as i32))?;
             }
         }
 
