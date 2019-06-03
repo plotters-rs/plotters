@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use crate::style::TextStyle;
+use crate::style::{FontDesc, TextStyle};
 
 /// A single line text element. This can be owned or borrowed string, dependeneds on
 /// `String` or `str` moved into.
@@ -83,7 +83,60 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
         self.lines.push(line.into());
     }
 
-    // TODO: The layout iterator
+    fn layout_lines(&self, (x0, y0): BackendCoord) -> impl Iterator<Item = BackendCoord> {
+        let font_height = self.style.font.get_size();
+        let actual_line_height = font_height * self.line_height;
+        (0..self.lines.len() as u32).map(move |idx| {
+            let y = f64::from(y0) + f64::from(idx) * actual_line_height;
+            // TODO: Support text alignment as well, currently everything is left aligned
+            let x = f64::from(x0);
+            (x.round() as i32, y.round() as i32)
+        })
+    }
+}
+
+fn layout_multiline_text<'a, F: FnMut(&'a str)>(
+    text: &'a str,
+    max_width: u32,
+    font: &'a FontDesc<'a>,
+    mut func: F,
+) {
+    for line in text.lines() {
+        if max_width == 0 {
+            func(line);
+        } else {
+            let mut remaining = &line[0..];
+
+            while remaining.len() > 0 {
+                let mut width = 0;
+                let mut left = 0;
+                while left < remaining.len() {
+                    let char_width = {
+                        let ((x0, _), (x1, _)) = font
+                            .layout_box(&remaining[left..(left + 1)])
+                            .unwrap_or(((0, 0), (0, 0)));
+                        x1 - x0
+                    };
+
+                    width += char_width;
+
+                    if width > max_width as i32 {
+                        break;
+                    }
+                    left += 1;
+                }
+
+                if left == 0 {
+                    left += 1;
+                }
+
+                let cur_line = &remaining[..left];
+                remaining = &remaining[left..];
+
+                func(cur_line);
+            }
+        }
+    }
 }
 
 // TODO: Think about how to generalize this
@@ -104,43 +157,64 @@ impl<'a, Coord> MultiLineText<'a, Coord, &'a str> {
     ) -> Self {
         let text = text.into();
         let mut ret = MultiLineText::new(pos, style);
-        for line in text.split(|c| c == '\n') {
-            if max_width == 0 {
-                ret.push_line(line);
-            } else {
-                let mut remaining = &line[0..];
 
-                while remaining.len() > 0 {
-                    let mut width = 0;
-
-                    let mut left = 0;
-                    while left < remaining.len() {
-                        let ((x0, _), (x1, _)) = ret
-                            .style
-                            .font
-                            .layout_box(&remaining[left..(left + 1)])
-                            .unwrap_or(((0, 0), (0, 0)));
-                        let w = x1 - x0;
-                        width += w;
-                        if width > max_width as i32 {
-                            break;
-                        }
-                        left += 1;
-                    }
-
-                    if left == 0 {
-                        left = 1;
-                    }
-
-                    let part = &remaining[0..left];
-                    remaining = &remaining[left..];
-
-                    ret.push_line(part);
-                }
-            }
-        }
+        layout_multiline_text(text, max_width, ret.style.font, |l| ret.push_line(l));
         ret
     }
 }
 
-// TODO: Render the multi-line text
+impl<'a, Coord> MultiLineText<'a, Coord, String> {
+    /// Parse a multi-line text into an multi-line element.
+    ///
+    /// `text`: The text that is parsed
+    /// `pos`: The position of the text
+    /// `style`: The style for this text
+    /// `max_width`: The width of the multi-line text element, the line will break
+    /// into two lines if the line is wider than the max_width. If 0 is given, do not
+    /// do any line wrapping
+    pub fn from_string<S: Into<TextStyle<'a>>>(
+        text: String,
+        pos: Coord,
+        style: S,
+        max_width: u32,
+    ) -> Self {
+        let mut ret = MultiLineText::new(pos, style);
+
+        layout_multiline_text(text.as_str(), max_width, ret.style.font, |l| {
+            ret.push_line(l.to_string())
+        });
+        ret
+    }
+}
+
+impl<'b, 'a, Coord: 'a, T: Borrow<str> + 'a> PointCollection<'a, Coord>
+    for &'a MultiLineText<'b, Coord, T>
+{
+    type Borrow = &'a Coord;
+    type IntoIter = std::iter::Once<&'a Coord>;
+    fn point_iter(self) -> Self::IntoIter {
+        std::iter::once(&self.coord)
+    }
+}
+
+impl<'a, Coord: 'a, DB: DrawingBackend, T: Borrow<str>> Drawable<DB>
+    for MultiLineText<'a, Coord, T>
+{
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        if let Some(a) = points.next() {
+            for (point, text) in self.layout_lines(a).zip(self.lines.iter()) {
+                backend.draw_text(
+                    text.borrow(),
+                    self.style.font,
+                    point,
+                    &Box::new(self.style.color),
+                )?;
+            }
+        }
+        Ok(())
+    }
+}
