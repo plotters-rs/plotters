@@ -83,10 +83,9 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
     pub fn push_line<L: Into<T>>(&mut self, line: L) {
         self.lines.push(line.into());
     }
-    
+
     /// Estimate the multi-line text element's dimension
     pub fn estimate_dimension(&self) -> FontResult<(i32, i32)> {
-
         let (mut mx, mut my) = (0, 0);
 
         for ((x, y), t) in self.layout_lines((0, 0)).zip(self.lines.iter()) {
@@ -99,7 +98,7 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
     }
 
     /// Move the location to the sepecified location
-    pub fn relocate(&mut self, coord:Coord) {
+    pub fn relocate(&mut self, coord: Coord) {
         self.coord = coord
     }
 
