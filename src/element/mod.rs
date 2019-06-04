@@ -100,7 +100,7 @@ For example, the following code counts the number of factors of integer and mark
 use plotters::prelude::*;
 fn num_of_factor(n: i32) -> i32 {
     let mut ret = 2;
-    for i in 2..(n / 2) {
+    for i in 2..n {
         if i * i > n {
             break;
         }
