@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::i32;
 
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
@@ -81,6 +82,25 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
     /// `line`: The line to be pushed
     pub fn push_line<L: Into<T>>(&mut self, line: L) {
         self.lines.push(line.into());
+    }
+    
+    /// Estimate the multi-line text element's dimension
+    pub fn estimate_dimension(&self) -> FontResult<(i32, i32)> {
+
+        let (mut mx, mut my) = (0, 0);
+
+        for ((x, y), t) in self.layout_lines((0, 0)).zip(self.lines.iter()) {
+            let ((x0, y0), (x1, y1)) = self.style.font.layout_box(t.borrow())?;
+            mx = mx.max(x + x1 - x0);
+            my = my.max(y + y1 - y0);
+        }
+
+        Ok((mx, my))
+    }
+
+    /// Move the location to the sepecified location
+    pub fn relocate(&mut self, coord:Coord) {
+        self.coord = coord
     }
 
     fn layout_lines(&self, (x0, y0): BackendCoord) -> impl Iterator<Item = BackendCoord> {

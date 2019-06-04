@@ -12,6 +12,8 @@ In Plotters, a series is abstracted as an iterator of elements.
 detailed description for each struct.
 */
 
+//TODO redesign the legend 
+
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -23,7 +25,7 @@ use crate::coord::{
 
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, Path, PointCollection, Rectangle};
+use crate::element::{Drawable, Path, PointCollection};
 use crate::style::{FontDesc, FontTransform, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing
@@ -137,7 +139,6 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         Ok(ChartContext {
             x_label_area,
             y_label_area,
-            series_area: None,
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
                 x_spec,
                 y_spec,
@@ -153,7 +154,6 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
 pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
     x_label_area: Option<DrawingArea<DB, Shift>>,
     y_label_area: Option<DrawingArea<DB, Shift>>,
-    series_area: Option<DrawingArea<DB, Shift>>,
     drawing_area: DrawingArea<DB, CT>,
 }
 
@@ -421,19 +421,6 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     /// Get a reference of underlying plotting area
     pub fn plotting_area(&self) -> &DrawingArea<DB, RangedCoord<X, Y>> {
         &self.drawing_area
-    }
-
-    /// Defines a series label area
-    pub fn define_series_label_area<'a, S: Into<ShapeStyle<'a>>>(
-        &mut self,
-        pos: (u32, u32),
-        size: (u32, u32),
-        bg_style: S,
-    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
-        // TODO: we should be able to draw the label
-        self.series_area = Some(self.drawing_area.strip_coord_spec().shrink(pos, size));
-        let element = Rectangle::new([(0, 0), (size.0 as i32, size.1 as i32)], bg_style.into());
-        self.series_area.as_ref().unwrap().draw(&element)
     }
 
     /// Maps the coordinate to the backend coordinate. This is typically used
