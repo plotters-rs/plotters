@@ -84,6 +84,65 @@
     }
   ```
   ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
+
+  ## Dynamic Elements
+  By default, Plotters uses static dispatch for all the elements and series. For example,
+  the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements 
+  all the traits a element should implement. Although, we can use the series of composable element
+  for complex series drawing. But sometimes, we still want to make the series heterogyous, which means
+  the iterator should be able to holds elements in different type. 
+  For example, a point series with corss and circle. This requires the dynamically dispatched elements.
+  In plotters, all the elements can be converted into `DynElement`, the dynamic dispatch container for
+  all elements (include exernal implemented ones).
+
+  For example, the following code counts the number of factors of integer and mark all prime numbers in cross.
+  ```rust
+        use plotters::prelude::*;
+        fn num_of_factor(n: i32) -> i32 {
+            let mut ret = 2;
+            for i in 2..(n / 2) {
+                if i * i > n {
+                    break;
+                }
+
+                if n % i == 0 {
+                    if i * i != n {
+                        ret += 2;
+                    } else {
+                        ret += 1;
+                    }
+                }
+            }
+            return ret;
+        }
+        fn main() -> Result<(), Box<dyn std::error::Error>> {
+            let root = BitMapBackend::new("examples/outputs/element-3.png", (640, 480)).into_drawing_area();
+            root.fill(&White)?;
+            let mut chart = ChartBuilder::on(&root)
+                .x_label_area_size(40)
+                .y_label_area_size(40)
+                .margin(5)
+                .build_ranged(0..50, 0..10)?;
+
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .draw()?;
+
+            chart.draw_series((0..50).map(|x| {
+                let center = (x, num_of_factor(x));
+                if center.1 == 2 {
+                    Cross::new(center, 4, Into::<ShapeStyle>::into(&Red).filled()).into_dyn()
+                } else {
+                    Circle::new(center, 4, Into::<ShapeStyle>::into(&Green).filled()).into_dyn()
+                }
+            }))?;
+
+            Ok(())
+        }
+    ```
+    ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-3.png)
 */
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
