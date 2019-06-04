@@ -107,6 +107,8 @@ You can also define your own element in the application code.
 
 You may also combine existing elements to build a complex element.
 
+To learn more about the element system, please read the [element module documentation](./element/index.html).
+
 ```rust
 $$examples/elements.rs$$
 ```

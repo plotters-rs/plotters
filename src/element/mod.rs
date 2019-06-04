@@ -1,148 +1,155 @@
 /*!
-Defines the drawing elements, the high-level drawing unit in Plotters drawing system
+    Defines the drawing elements, the high-level drawing unit in Plotters drawing system
 
-## Introduction
-An element is the drawing unit for Plotter's high-level drawing API.
-Different from low-level drawing API, an element is a logic unit of component in the image.
-There are few built-in elements, including `Circle`, `Pixel`, `Rectangle`, `Path`, `Text`, etc.
+    ## Introduction
+    An element is the drawing unit for Plotter's high-level drawing API.
+    Different from low-level drawing API, an element is a logic unit of component in the image.
+    There are few built-in elements, including `Circle`, `Pixel`, `Rectangle`, `Path`, `Text`, etc.
 
-All element can be drawn onto the drawing area using API `DrawingArea::draw(...)`.
-Plotters use "iterator of elements" as the abstraction of any type of plot.
+    All element can be drawn onto the drawing area using API `DrawingArea::draw(...)`.
+    Plotters use "iterator of elements" as the abstraction of any type of plot.
 
-## Implementing your own element
-You can also define your own element, `CandleStick` is a good sample of implementing complex
-element. There are two trait required for an element:
+    ## Implementing your own element
+    You can also define your own element, `CandleStick` is a good sample of implementing complex
+    element. There are two trait required for an element:
 
-- `PointCollection` - the struct should be able to return an iterator of key-points under guest coordinate
-- `Drawable` - the struct should be able to use performe drawing on a drawing backend with pixel-based coordinate
+    - `PointCollection` - the struct should be able to return an iterator of key-points under guest coordinate
+    - `Drawable` - the struct should be able to use performe drawing on a drawing backend with pixel-based coordinate
 
-An example of element that draws a red "X" in a red rectangle onto the backend:
+    An example of element that draws a red "X" in a red rectangle onto the backend:
 
-```rust
-use std::iter::{Once, once};
-use plotters::element::{PointCollection, Drawable};
-use plotters::drawing::backend::{BackendCoord, DrawingErrorKind};
-use plotters::prelude::*;
+    ```rust
+    use std::iter::{Once, once};
+    use plotters::element::{PointCollection, Drawable};
+    use plotters::drawing::backend::{BackendCoord, DrawingErrorKind};
+    use plotters::prelude::*;
 
-// Any example drawing a red X
-struct RedBoxedX((i32, i32));
+    // Any example drawing a red X
+    struct RedBoxedX((i32, i32));
 
-// For any reference to RedX, we can convert it into an iterator of points
-impl <'a> PointCollection<'a, (i32, i32)> for &'a RedBoxedX {
-    type Borrow = &'a (i32, i32);
-    type IntoIter = Once<&'a (i32, i32)>;
-    fn point_iter(self) -> Self::IntoIter {
-        once(&self.0)
-    }
-}
-
-// How to actually draw this element
-impl <DB:DrawingBackend> Drawable<DB> for RedBoxedX {
-    fn draw<I:Iterator<Item = BackendCoord>>(
-        &self,
-        mut pos: I,
-        backend: &mut DB
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        let pos = pos.next().unwrap();
-        backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &Red, false)?;
-        backend.draw_text("X", &("Arial", 20).into(), pos, &Red)
-    }
-}
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new(
-        "examples/outputs/element-0.png",
-        (640, 480)
-    ).into_drawing_area();
-    root.draw(&RedBoxedX((200, 200)))?;
-    Ok(())
-}
-```
-  ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-0.png)
-
-  ## Composable Elements
-  You also have an convenient way to build an element that isn't built into the Plotters library by
-  combining existing elements into a logic group. To build an composable elemnet, you need to use an
-  logic empty element that draws nothing to the backend but denotes the relative zero point of the logical
-  group. Any element defined with pixel based offset coordinate can be added into the group later using
-  the `+` operator.
-
-  For example, the red boxed X element can be implemented with Composable element in the following way:
-```rust
-use plotters::prelude::*;
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new(
-        "examples/outputs/element-1.png",
-        (640, 480)
-    ).into_drawing_area();
-    let font:FontDesc = ("Arial", 20).into();
-    root.draw(&(EmptyElement::at((200, 200))
-            + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
-            + Rectangle::new([(0,0), (10, 12)], &Red)
-    ))?;
-    Ok(())
-}
-```
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
-
-## Dynamic Elements
-By default, Plotters uses static dispatch for all the elements and series. For example,
-the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements
-all the traits a element should implement. Although, we can use the series of composable element
-for complex series drawing. But sometimes, we still want to make the series heterogyous, which means
-the iterator should be able to holds elements in different type.
-For example, a point series with corss and circle. This requires the dynamically dispatched elements.
-In plotters, all the elements can be converted into `DynElement`, the dynamic dispatch container for
-all elements (include exernal implemented ones).
-
-For example, the following code counts the number of factors of integer and mark all prime numbers in cross.
-```rust
-use plotters::prelude::*;
-fn num_of_factor(n: i32) -> i32 {
-    let mut ret = 2;
-    for i in 2..n {
-        if i * i > n {
-            break;
+    // For any reference to RedX, we can convert it into an iterator of points
+    impl <'a> PointCollection<'a, (i32, i32)> for &'a RedBoxedX {
+        type Borrow = &'a (i32, i32);
+        type IntoIter = Once<&'a (i32, i32)>;
+        fn point_iter(self) -> Self::IntoIter {
+            once(&self.0)
         }
+    }
 
-        if n % i == 0 {
-            if i * i != n {
-                ret += 2;
-            } else {
-                ret += 1;
+    // How to actually draw this element
+    impl <DB:DrawingBackend> Drawable<DB> for RedBoxedX {
+        fn draw<I:Iterator<Item = BackendCoord>>(
+            &self,
+            mut pos: I,
+            backend: &mut DB
+        ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+            let pos = pos.next().unwrap();
+            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &Red, false)?;
+            backend.draw_text("X", &("Arial", 20).into(), pos, &Red)
+        }
+    }
+
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let root = BitMapBackend::new(
+            "examples/outputs/element-0.png",
+            (640, 480)
+        ).into_drawing_area();
+        root.draw(&RedBoxedX((200, 200)))?;
+        Ok(())
+    }
+    ```
+      ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-0.png)
+
+      ## Composable Elements
+      You also have an convenient way to build an element that isn't built into the Plotters library by
+      combining existing elements into a logic group. To build an composable elemnet, you need to use an
+      logic empty element that draws nothing to the backend but denotes the relative zero point of the logical
+      group. Any element defined with pixel based offset coordinate can be added into the group later using
+      the `+` operator.
+
+      For example, the red boxed X element can be implemented with Composable element in the following way:
+    ```rust
+    use plotters::prelude::*;
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let root = BitMapBackend::new(
+            "examples/outputs/element-1.png",
+            (640, 480)
+        ).into_drawing_area();
+        let font:FontDesc = ("Arial", 20).into();
+        root.draw(&(EmptyElement::at((200, 200))
+                + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
+                + Rectangle::new([(0,0), (10, 12)], &Red)
+        ))?;
+        Ok(())
+    }
+    ```
+    ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
+
+    ## Dynamic Elements
+    By default, Plotters uses static dispatch for all the elements and series. For example,
+    the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements
+    all the traits a element should implement. Although, we can use the series of composable element
+    for complex series drawing. But sometimes, we still want to make the series heterogyous, which means
+    the iterator should be able to holds elements in different type.
+    For example, a point series with corss and circle. This requires the dynamically dispatched elements.
+    In plotters, all the elements can be converted into `DynElement`, the dynamic dispatch container for
+    all elements (include exernal implemented ones).
+    Plotters automatically implements `IntoDynElement` for all elements, by doing so, any dynamic element should have
+    `into_dyn` function which would wrap the element into a dynmanic element wrapper.
+
+    For example, the following code counts the number of factors of integer and mark all prime numbers in cross.
+    ```rust
+    use plotters::prelude::*;
+    fn num_of_factor(n: i32) -> i32 {
+        let mut ret = 2;
+        for i in 2..n {
+            if i * i > n {
+                break;
+            }
+
+            if n % i == 0 {
+                if i * i != n {
+                    ret += 2;
+                } else {
+                    ret += 1;
+                }
             }
         }
+        return ret;
     }
-    return ret;
-}
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/element-3.png", (640, 480)).into_drawing_area();
-    root.fill(&White)?;
-    let mut chart = ChartBuilder::on(&root)
-        .x_label_area_size(40)
-        .y_label_area_size(40)
-        .margin(5)
-        .build_ranged(0..50, 0..10)?;
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let root =
+            BitMapBackend::new("examples/outputs/element-3.png", (640, 480))
+            .into_drawing_area();
+        root.fill(&White)?;
+        let mut chart = ChartBuilder::on(&root)
+            .x_label_area_size(40)
+            .y_label_area_size(40)
+            .margin(5)
+            .build_ranged(0..50, 0..10)?;
 
-    chart
-        .configure_mesh()
-        .disable_x_mesh()
-        .disable_y_mesh()
-        .draw()?;
+        chart
+            .configure_mesh()
+            .disable_x_mesh()
+            .disable_y_mesh()
+            .draw()?;
 
-    chart.draw_series((0..50).map(|x| {
-        let center = (x, num_of_factor(x));
-        if center.1 == 2 {
-            Cross::new(center, 4, Into::<ShapeStyle>::into(&Red).filled()).into_dyn()
-        } else {
-            Circle::new(center, 4, Into::<ShapeStyle>::into(&Green).filled()).into_dyn()
-        }
-    }))?;
+        chart.draw_series((0..50).map(|x| {
+            let center = (x, num_of_factor(x));
+            // Although the arms of if statement has different types,
+            // but they can be placed into a dynamic element wrapper,
+            // by doing so, the type is unified.
+            if center.1 == 2 {
+                Cross::new(center, 4, Into::<ShapeStyle>::into(&Red).filled()).into_dyn()
+            } else {
+                Circle::new(center, 4, Into::<ShapeStyle>::into(&Green).filled()).into_dyn()
+            }
+        }))?;
 
-    Ok(())
-} 
-```
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-3.png)
+        Ok(())
+    }
+    ```
+    ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-3.png)
 */
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
