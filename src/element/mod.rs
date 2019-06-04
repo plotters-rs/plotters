@@ -87,10 +87,10 @@
 
   ## Dynamic Elements
   By default, Plotters uses static dispatch for all the elements and series. For example,
-  the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements 
+  the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements
   all the traits a element should implement. Although, we can use the series of composable element
   for complex series drawing. But sometimes, we still want to make the series heterogyous, which means
-  the iterator should be able to holds elements in different type. 
+  the iterator should be able to holds elements in different type.
   For example, a point series with corss and circle. This requires the dynamically dispatched elements.
   In plotters, all the elements can be converted into `DynElement`, the dynamic dispatch container for
   all elements (include exernal implemented ones).
