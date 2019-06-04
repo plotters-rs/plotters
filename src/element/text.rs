@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use crate::style::{FontDesc, TextStyle};
+use crate::style::{FontDesc, FontResult, LayoutBox, TextStyle};
 
 /// A single line text element. This can be owned or borrowed string, dependeneds on
 /// `String` or `str` moved into.
@@ -73,7 +73,7 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
             lines: vec![],
             coord: pos,
             style: style.into(),
-            line_height: 1.5,
+            line_height: 1.25,
         }
     }
 
@@ -102,7 +102,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     mut func: F,
 ) {
     for line in text.lines() {
-        if max_width == 0 {
+        if max_width == 0 || line.len() == 0 {
             func(line);
         } else {
             let mut remaining = &line[0..];
@@ -139,7 +139,18 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     }
 }
 
-// TODO: Think about how to generalize this
+impl<'a, T: Borrow<str>> MultiLineText<'a, BackendCoord, T> {
+    /// Compute the line layout
+    pub fn compute_line_layout(&self) -> FontResult<Vec<LayoutBox>> {
+        let mut ret = vec![];
+        for ((x, y), t) in self.layout_lines(self.coord).zip(self.lines.iter()) {
+            let ((x0, y0), (x1, y1)) = self.style.font.layout_box(t.borrow())?;
+            ret.push(((x, y), (x + x1 - x0, y + y1 - y0)));
+        }
+        Ok(ret)
+    }
+}
+
 impl<'a, Coord> MultiLineText<'a, Coord, &'a str> {
     /// Parse a multi-line text into an multi-line element.
     ///
