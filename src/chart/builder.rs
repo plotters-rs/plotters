@@ -121,6 +121,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
                 y_spec,
                 pixel_range,
             )),
+            series_anno: vec![],
         })
     }
 }

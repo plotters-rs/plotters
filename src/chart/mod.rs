@@ -15,6 +15,7 @@ detailed description for each struct.
 mod builder;
 mod context;
 mod mesh;
+mod series;
 
 pub use builder::ChartBuilder;
 pub use context::ChartContext;

@@ -78,6 +78,12 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
         }
     }
 
+    /// Set the line height of the multi-line text element
+    pub fn set_line_height(&mut self, value: f64) -> &mut Self {
+        self.line_height = value;
+        self
+    }
+
     /// Push a new line into the given multi-line text
     /// `line`: The line to be pushed
     pub fn push_line<L: Into<T>>(&mut self, line: L) {

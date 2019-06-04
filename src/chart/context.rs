@@ -4,12 +4,52 @@ use std::marker::PhantomData;
 use std::ops::Range;
 
 use super::mesh::MeshStyle;
+use super::series::SeriesLabelStyle;
 
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift};
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, Path, PointCollection};
+use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection};
 use crate::style::{FontTransform, ShapeStyle, TextStyle};
+
+/// The annotations (such as the label of the series, the legend element, etc)
+pub struct SeriesAnno<DB: DrawingBackend> {
+    label: Option<String>,
+    draw_func: Option<Box<FnOnce(BackendCoord) -> DynElement<DB, BackendCoord>>>,
+    phantom_data: PhantomData<DB>,
+}
+
+impl<DB: DrawingBackend> SeriesAnno<DB> {
+    fn new() -> Self {
+        Self {
+            label: None,
+            draw_func: None,
+            phantom_data: PhantomData,
+        }
+    }
+
+    /// Set the series label
+    /// `label`: The string would be use as label for current series
+    pub fn label<L: Into<String>>(&mut self, label: L) -> &mut Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Set the legend element creator function
+    /// - `func`: The function use to create the element
+    /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
+    /// point (0,0) to the mid-right point of the shape
+    pub fn draw_legend<
+        E: IntoDynElement<DB, BackendCoord>,
+        T: FnOnce(BackendCoord) -> E + 'static,
+    >(
+        &mut self,
+        func: T,
+    ) -> &mut Self {
+        self.draw_func = Some(Box::new(move |p| func(p).into_dyn()));
+        self
+    }
+}
 
 /// The context of the chart. This is the core object of Plotters.
 /// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
@@ -18,6 +58,7 @@ pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) x_label_area: Option<DrawingArea<DB, Shift>>,
     pub(super) y_label_area: Option<DrawingArea<DB, Shift>>,
     pub(super) drawing_area: DrawingArea<DB, CT>,
+    pub(super) series_anno: Vec<SeriesAnno<DB>>,
 }
 
 impl<
@@ -60,6 +101,11 @@ impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
         let coord_spec = self.drawing_area.into_coord_spec();
         move |coord| coord_spec.reverse_translate(coord)
     }
+
+    /// Configure the styles for drawing series labels in the chart
+    pub fn configure_series_labels(&mut self) -> SeriesLabelStyle<DB, CT> {
+        SeriesLabelStyle::new(self)
+    }
 }
 
 impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y>> {
@@ -85,7 +131,10 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     }
 
     /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
-    pub fn draw_series<E, R, S>(&self, series: S) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    pub fn draw_series<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<&mut SeriesAnno<DB>, DrawingAreaErrorKind<DB::ErrorType>>
     where
         for<'a> &'a E: PointCollection<'a, (X::ValueType, Y::ValueType)>,
         E: Drawable<DB>,
@@ -95,7 +144,12 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
         for element in series {
             self.drawing_area.draw(element.borrow())?;
         }
-        Ok(())
+
+        let idx = self.series_anno.len();
+
+        self.series_anno.push(SeriesAnno::new());
+
+        Ok(&mut self.series_anno[idx])
     }
 
     #[allow(clippy::too_many_arguments)]

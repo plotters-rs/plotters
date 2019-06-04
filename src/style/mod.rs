@@ -29,10 +29,9 @@ impl<'a> TextStyle<'a> {
             color,
         }
     }
-
-    // TODO: How to make the font transform inside the text style
 }
 
+/// Make sure that we are able to automatically copy the `TextStyle`
 impl<'a, 'b: 'a> Into<TextStyle<'a>> for &'b TextStyle<'a> {
     fn into(self) -> TextStyle<'a> {
         self.clone()
@@ -43,7 +42,7 @@ impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     fn from(font: &'a T) -> Self {
         Self {
             font: font.borrow(),
-            color: &RGBColor(0, 0, 0),
+            color: &Black,
         }
     }
 }
