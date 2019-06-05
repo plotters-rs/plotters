@@ -15,11 +15,21 @@ use crate::style::{FontTransform, ShapeStyle, TextStyle};
 /// The annotations (such as the label of the series, the legend element, etc)
 pub struct SeriesAnno<DB: DrawingBackend> {
     label: Option<String>,
-    draw_func: Option<Box<FnOnce(BackendCoord) -> DynElement<DB, BackendCoord>>>,
+    draw_func: Option<Box<dyn Fn(BackendCoord) -> DynElement<DB, BackendCoord>>>,
     phantom_data: PhantomData<DB>,
 }
 
 impl<DB: DrawingBackend> SeriesAnno<DB> {
+    pub(crate) fn get_label(&self) -> &str {
+        self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
+    }
+
+    pub(crate) fn get_draw_func(
+        &self,
+    ) -> Option<&dyn Fn(BackendCoord) -> DynElement<DB, BackendCoord>> {
+        self.draw_func.as_ref().map(|x| x.borrow())
+    }
+
     fn new() -> Self {
         Self {
             label: None,
@@ -39,10 +49,7 @@ impl<DB: DrawingBackend> SeriesAnno<DB> {
     /// - `func`: The function use to create the element
     /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
     /// point (0,0) to the mid-right point of the shape
-    pub fn draw_legend<
-        E: IntoDynElement<DB, BackendCoord>,
-        T: FnOnce(BackendCoord) -> E + 'static,
-    >(
+    pub fn legend<E: IntoDynElement<DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'static>(
         &mut self,
         func: T,
     ) -> &mut Self {
@@ -95,16 +102,23 @@ impl<
     }
 }
 
+impl<DB: DrawingBackend, CT: CoordTranslate> ChartContext<DB, CT> {
+    /// Configure the styles for drawing series labels in the chart
+    pub fn configure_series_labels(&mut self) -> SeriesLabelStyle<DB, CT> {
+        SeriesLabelStyle::new(self)
+    }
+
+    /// Get a reference of underlying plotting area
+    pub fn plotting_area(&self) -> &DrawingArea<DB, CT> {
+        &self.drawing_area
+    }
+}
+
 impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
     /// Convert the chart context into an closure that can be used for coordinate translation
     pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
         let coord_spec = self.drawing_area.into_coord_spec();
         move |coord| coord_spec.reverse_translate(coord)
-    }
-
-    /// Configure the styles for drawing series labels in the chart
-    pub fn configure_series_labels(&mut self) -> SeriesLabelStyle<DB, CT> {
-        SeriesLabelStyle::new(self)
     }
 }
 
@@ -117,11 +131,6 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     /// Get range of the Y axis
     pub fn y_range(&self) -> Range<Y::ValueType> {
         self.drawing_area.get_y_range()
-    }
-
-    /// Get a reference of underlying plotting area
-    pub fn plotting_area(&self) -> &DrawingArea<DB, RangedCoord<X, Y>> {
-        &self.drawing_area
     }
 
     /// Maps the coordinate to the backend coordinate. This is typically used

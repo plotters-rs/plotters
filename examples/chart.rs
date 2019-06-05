@@ -30,7 +30,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
         &Red,
-    ))?;
+    ))?
+    .label("Sine")
+    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &Red));
 
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
@@ -40,7 +42,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
         }),
         &Blue,
-    ))?;
+    ))?
+    .label("Cosine")
+    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &Blue));
+
+    cc.configure_series_labels().border_style(&Black).draw()?;
 
     /*
     // It's possible to use a existing pointing element

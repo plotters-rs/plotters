@@ -43,6 +43,16 @@ impl<'a, Coord, DB: DrawingBackend> PointCollection<'a, Coord> for &'a EmptyElem
     }
 }
 
+impl<Coord, DB: DrawingBackend> Drawable<DB> for EmptyElement<Coord, DB> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        _pos: I,
+        _backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        Ok(())
+    }
+}
+
 /// An composed element has only one component
 pub struct BoxedElement<Coord, DB: DrawingBackend, A: Drawable<DB>> {
     inner: A,
