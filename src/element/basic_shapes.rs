@@ -38,6 +38,23 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Pixel<'a, Coord> {
     }
 }
 
+#[cfg(test)]
+#[test]
+fn test_pixel_element() {
+    use crate::prelude::*;
+    let da = crate::create_mocked_drawing_area(300, 300, |m| {
+        m.check_draw_pixel(|c, (x, y)| {
+            assert_eq!(x, 150);
+            assert_eq!(y, 152);
+            assert_eq!(c.0, 255);
+            assert_eq!(c.1, 0);
+            assert_eq!(c.2, 0);
+            assert_eq!(c.3, 1.0);
+        });
+    });
+    da.draw(&Pixel::new((150, 152), &Red)).expect("Drawing Failure");
+}
+
 /// An element of a series of connected lines
 pub struct Path<'a, Coord> {
     points: Vec<Coord>,
@@ -72,6 +89,22 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Path<'a, Coord> {
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         backend.draw_path(points, &Box::new(self.style.color))
     }
+}
+
+#[cfg(test)]
+#[test]
+fn test_path_element() {
+    use crate::prelude::*;
+    let da = crate::create_mocked_drawing_area(300, 300, |m| {
+        m.check_draw_path(|c, path| {
+            assert_eq!(c.0, 0);
+            assert_eq!(c.1, 0);
+            assert_eq!(c.2, 255);
+            assert_eq!(c.3, 1.0);
+            assert_eq!(path, vec![(100, 101), (105, 107), (150, 157)]);
+        });
+    });
+    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &Blue)).expect("Drawing Failure");
 }
 
 /// A rectangle element

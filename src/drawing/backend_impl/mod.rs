@@ -14,4 +14,6 @@ mod canvas;
 pub use canvas::CanvasBackend;
 
 #[cfg(test)]
-pub mod mocked;
+mod mocked;
+#[cfg(test)]
+pub use mocked::{MockedBackend, create_mocked_drawing_area};

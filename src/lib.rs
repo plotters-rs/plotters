@@ -357,6 +357,9 @@ pub mod element;
 pub mod series;
 pub mod style;
 
+#[cfg(test)]
+pub use crate::drawing::create_mocked_drawing_area;
+
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext};

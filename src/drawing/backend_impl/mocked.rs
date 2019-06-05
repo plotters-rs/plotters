@@ -1,7 +1,10 @@
 use crate::drawing::backend::{BackendCoord, DrawingErrorKind, DrawingBackend, BackendStyle};
+use crate::drawing::DrawingArea;
+use crate::coord::Shift;
+use crate::drawing::area::IntoDrawingArea;
 use crate::style::{Color, FontDesc};
 
-pub struct RGBA(u8, u8, u8, f64);
+pub struct RGBA(pub u8, pub u8, pub u8, pub f64);
 
 pub struct MockedBackend {
     height: u32,
@@ -48,7 +51,8 @@ impl MockedBackend {
     def_set_checker_func!(check_draw_circle, RGBA, bool, BackendCoord, u32);
     def_set_checker_func!(check_draw_text, RGBA, &str, f64, BackendCoord, &str);
 
-    fn check_before_draw(&self) {
+    fn check_before_draw(&mut self) {
+        self.draw_count += 1;
         assert_eq!(self.init_count, self.draw_count);
     }
 }
@@ -173,4 +177,10 @@ impl DrawingBackend for MockedBackend {
         Ok(())
     }
 
+}
+
+pub fn create_mocked_drawing_area<F:FnOnce(&mut MockedBackend)>(width:u32, height:u32, setup: F) -> DrawingArea<MockedBackend, Shift> {
+    let mut backend = MockedBackend::new(width, height);
+    setup(&mut backend);
+    backend.into_drawing_area()
 }
