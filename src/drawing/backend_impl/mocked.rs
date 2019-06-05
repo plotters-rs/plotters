@@ -10,13 +10,20 @@ pub struct MockedBackend {
     height: u32,
     width: u32,
     init_count: u32,
-    draw_count: u32,
+    pub draw_count: u32,
+    pub num_draw_pixel_call: u32,
+    pub num_draw_line_call: u32,
+    pub num_draw_rect_call: u32,
+    pub num_draw_circle_call: u32,
+    pub num_draw_text_call: u32,
+    pub num_draw_path_call: u32,
     check_draw_pixel: Option<Box<dyn FnMut(RGBA, BackendCoord)>>,
     check_draw_line: Option<Box<dyn FnMut(RGBA, BackendCoord, BackendCoord)>>,
     check_draw_rect: Option<Box<dyn FnMut(RGBA, bool, BackendCoord, BackendCoord)>>,
     check_draw_path: Option<Box<dyn FnMut(RGBA, Vec<BackendCoord>)>>,
     check_draw_circle: Option<Box<dyn FnMut(RGBA, bool, BackendCoord, u32)>>,
     check_draw_text: Option<Box<dyn FnMut(RGBA, &str, f64, BackendCoord, &str)>>,
+    drop_check: Option<Box<dyn FnMut(&Self)>>,
 }
 
 macro_rules! def_set_checker_func {
@@ -35,12 +42,19 @@ impl MockedBackend {
             width,
             init_count: 0,
             draw_count: 0,
+            num_draw_pixel_call: 0,
+            num_draw_line_call: 0,
+            num_draw_rect_call: 0,
+            num_draw_circle_call: 0,
+            num_draw_text_call: 0,
+            num_draw_path_call: 0,
             check_draw_pixel: None,
             check_draw_line: None,
             check_draw_rect: None,
             check_draw_path: None,
             check_draw_circle: None,
             check_draw_text: None,
+            drop_check: None,
         }
     }
 
@@ -50,6 +64,7 @@ impl MockedBackend {
     def_set_checker_func!(check_draw_path, RGBA, Vec<BackendCoord>);
     def_set_checker_func!(check_draw_circle, RGBA, bool, BackendCoord, u32);
     def_set_checker_func!(check_draw_text, RGBA, &str, f64, BackendCoord, &str);
+    def_set_checker_func!(drop_check, &Self);
 
     fn check_before_draw(&mut self) {
         self.draw_count += 1;
@@ -98,6 +113,7 @@ impl DrawingBackend for MockedBackend {
         color: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_pixel_call += 1;
         let color = to_rgba(color);
         if let Some(ref mut checker) = self.check_draw_pixel {
             checker(color, point);
@@ -112,6 +128,7 @@ impl DrawingBackend for MockedBackend {
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_line_call += 1;
         let color = to_rgba(style.as_color());
         if let Some(ref mut checker) = self.check_draw_line {
             checker(color, from, to);
@@ -127,6 +144,7 @@ impl DrawingBackend for MockedBackend {
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_rect_call += 1;
         let color = to_rgba(style.as_color());
         if let Some(ref mut checker) = self.check_draw_rect {
             checker(color, fill, upper_left, bottom_right);
@@ -140,6 +158,7 @@ impl DrawingBackend for MockedBackend {
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_path_call += 1;
         let color = to_rgba(style.as_color());
         if let Some(ref mut checker) = self.check_draw_path {
             checker(color, path.into_iter().collect());
@@ -155,6 +174,7 @@ impl DrawingBackend for MockedBackend {
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_circle_call += 1;
         let color = to_rgba(style.as_color());
         if let Some(ref mut checker) = self.check_draw_circle {
             checker(color, fill, center, radius);
@@ -170,11 +190,23 @@ impl DrawingBackend for MockedBackend {
         color: &C,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
+        self.num_draw_text_call += 1;
         let color = to_rgba(color);
         if let Some(ref mut checker) = self.check_draw_text {
             checker(color, font.get_name(), font.get_size(), pos, text);
         }
         Ok(())
+    }
+}
+
+impl Drop for MockedBackend {
+    fn drop(&mut self) {
+        let mut temp = None;
+        std::mem::swap(&mut temp, &mut self.drop_check);
+
+        if let Some(mut checker) = temp {
+            checker(self);
+        }
     }
 }
 
