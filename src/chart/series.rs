@@ -145,7 +145,7 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> SeriesLabelStyle<'a, DB, CT> {
 
         drawing_area.draw(&Rectangle::new(
             [(label_x, label_y), (label_x + w, label_y + h)],
-            self.background.clone(),
+            self.background.filled(),
         ))?;
         drawing_area.draw(&Rectangle::new(
             [(label_x, label_y), (label_x + w, label_y + h)],

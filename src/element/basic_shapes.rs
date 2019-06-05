@@ -52,7 +52,8 @@ fn test_pixel_element() {
             assert_eq!(c.3, 1.0);
         });
     });
-    da.draw(&Pixel::new((150, 152), &Red)).expect("Drawing Failure");
+    da.draw(&Pixel::new((150, 152), &Red))
+        .expect("Drawing Failure");
 }
 
 /// An element of a series of connected lines
@@ -104,7 +105,8 @@ fn test_path_element() {
             assert_eq!(path, vec![(100, 101), (105, 107), (150, 157)]);
         });
     });
-    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &Blue)).expect("Drawing Failure");
+    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &Blue))
+        .expect("Drawing Failure");
 }
 
 /// A rectangle element

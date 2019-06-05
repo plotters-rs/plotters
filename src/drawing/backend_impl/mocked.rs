@@ -1,7 +1,7 @@
-use crate::drawing::backend::{BackendCoord, DrawingErrorKind, DrawingBackend, BackendStyle};
-use crate::drawing::DrawingArea;
 use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
+use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
+use crate::drawing::DrawingArea;
 use crate::style::{Color, FontDesc};
 
 pub struct RGBA(pub u8, pub u8, pub u8, pub f64);
@@ -68,10 +68,10 @@ impl std::fmt::Display for MockedError {
 
 impl std::error::Error for MockedError {}
 
-fn to_rgba<T:Color>(color:&T) -> RGBA {
-    let (r,g,b) = color.rgb();
+fn to_rgba<T: Color>(color: &T) -> RGBA {
+    let (r, g, b) = color.rgb();
     let a = color.alpha();
-    RGBA(r,g,b,a)
+    RGBA(r, g, b, a)
 }
 
 impl DrawingBackend for MockedBackend {
@@ -118,7 +118,7 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-    
+
     fn draw_rect<S: BackendStyle>(
         &mut self,
         upper_left: BackendCoord,
@@ -133,7 +133,7 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-    
+
     fn draw_path<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
         &mut self,
         path: I,
@@ -146,7 +146,7 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-    
+
     fn draw_circle<S: BackendStyle>(
         &mut self,
         center: BackendCoord,
@@ -161,7 +161,7 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-    
+
     fn draw_text<'a, C: Color>(
         &mut self,
         text: &str,
@@ -176,10 +176,13 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-
 }
 
-pub fn create_mocked_drawing_area<F:FnOnce(&mut MockedBackend)>(width:u32, height:u32, setup: F) -> DrawingArea<MockedBackend, Shift> {
+pub fn create_mocked_drawing_area<F: FnOnce(&mut MockedBackend)>(
+    width: u32,
+    height: u32,
+    setup: F,
+) -> DrawingArea<MockedBackend, Shift> {
     let mut backend = MockedBackend::new(width, height);
     setup(&mut backend);
     backend.into_drawing_area()
