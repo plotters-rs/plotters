@@ -12,3 +12,6 @@ pub use bitmap::BitMapBackend;
 mod canvas;
 #[cfg(target_arch = "wasm32")]
 pub use canvas::CanvasBackend;
+
+#[cfg(test)]
+pub mod mocked;
