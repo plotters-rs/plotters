@@ -12,6 +12,7 @@
 ### Improvement
 - Unify `OwnedText` and `Text` into `Text`. Previously, `OwnedText` and `Text` are two seperate types, one holds a `String` another holds a `&str`. Now `OwnedText` is removed.
 use `Text::new("text".to_string(),...)` for owned text element and `Text::new("text", ...)` for borrowed text.
+- Refactor the color representation code, since previously it's heavily relies on the trait object and hard to use
 - More test cases
 
 ## Plotters 0.1.13 (2019-05-31)
