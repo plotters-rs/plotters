@@ -36,6 +36,46 @@ $$examples/quick_start.rs$$
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
+## Trying with Jupyter evcxr Kernel Interactively
+
+Plotters now supports integrate with `evcxr` and is able to interactively drawing plots in Jupyter Notebook.
+The feature `evcxr` should be enabled when including Plotters to Jupyter Notebook.
+
+The following code shows a minimal example of this.
+
+```text
+:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
+extern crate plotters;
+use plotters::prelude::*;
+
+let figure = evcxr_figure((640, 480), |root| {
+    root.fill(&White);
+    let mut chart = ChartBuilder::on(&root)
+        .caption("y=x^2", &("Arial", 50).into_font())
+        .margin(5)
+        .x_label_area_size(30)
+        .y_label_area_size(30)
+        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
+
+    chart.configure_mesh().draw()?;
+
+    chart.draw_series(LineSeries::new(
+        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
+        &Red,
+    )).unwrap()
+        .label("y = x^2")
+        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
+
+    chart.configure_series_labels()
+        .background_style(&White.mix(0.8))
+        .border_style(&Black)
+        .draw()?;
+    Ok(())
+});
+figure
+```
+
+![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif)
 
 ## Motivation of Plotting in Rust
 
@@ -165,45 +205,6 @@ For example, the following dependency description would avoid compiling with bit
 ```toml
 [dependencies]
 plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
-```
-
-### excvr Integration
-
-Plotters now supports integrate with `excvr` and is able to interactively drawing plots in Jupyter Notebook.
-The feature `excvr` should be enabled when including Plotters to Jupyter Notebook.
-
-The following code shows a minimal example of this.
-
-```text
-:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
-extern crate plotters;
-use plotters::prelude::*;
-
-let figure = evcxr_figure((640, 480), |root| {
-    root.fill(&White);
-    let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &("Arial", 50).into_font())
-        .margin(5)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
-
-    chart.configure_mesh().draw()?;
-
-    chart.draw_series(LineSeries::new(
-        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &Red,
-    )).unwrap()
-        .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
-
-    chart.configure_series_labels()
-        .background_style(&White.mix(0.8))
-        .border_style(&Black)
-        .draw()?;
-    Ok(())
-});
-figure
 ```
 
 $$style$$

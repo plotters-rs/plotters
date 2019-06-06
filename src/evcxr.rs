@@ -7,10 +7,7 @@ pub struct SVGWrapper(Vec<u8>);
 impl SVGWrapper {
     pub fn evcxr_display(&self) {
         let svg = String::from_utf8_lossy(self.0.as_slice());
-        println!(
-            "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
-            svg
-        );
+        println!("EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT", svg);
     }
 }
 
