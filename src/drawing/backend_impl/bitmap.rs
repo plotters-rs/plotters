@@ -1,5 +1,5 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use crate::style::Color;
+use crate::style::{Color, RGBAColor};
 use image::{ImageError, Rgb, RgbImage};
 
 use std::path::Path;
@@ -44,10 +44,10 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         Ok(())
     }
 
-    fn draw_pixel<C: Color>(
+    fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<ImageError>> {
         if point.0 as u32 >= self.img.width()
             || point.0 < 0
