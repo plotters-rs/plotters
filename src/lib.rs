@@ -404,5 +404,5 @@ pub mod prelude {
         Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
 
     #[cfg(feature = "evcxr")]
-    pub use crate::evcxr::start_render;
+    pub use crate::evcxr::evcxr_figure;
 }
