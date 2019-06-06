@@ -7,7 +7,7 @@ use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
 
 /// The struct that is used for tracking the configuration of a mesh of any chart
-pub struct MeshStyle<'a, X: Ranged, Y: Ranged, DB>
+pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB>
 where
     DB: DrawingBackend,
 {
@@ -18,20 +18,20 @@ where
     pub(super) x_label_offset: i32,
     pub(super) n_x_labels: usize,
     pub(super) n_y_labels: usize,
-    pub(super) axis_desc_style: Option<TextStyle<'a>>,
+    pub(super) axis_desc_style: Option<TextStyle<'b>>,
     pub(super) x_desc: Option<String>,
     pub(super) y_desc: Option<String>,
-    pub(super) line_style_1: Option<ShapeStyle<'a>>,
-    pub(super) line_style_2: Option<ShapeStyle<'a>>,
-    pub(super) axis_style: Option<ShapeStyle<'a>>,
-    pub(super) label_style: Option<TextStyle<'a>>,
-    pub(super) format_x: &'a dyn Fn(&X::ValueType) -> String,
-    pub(super) format_y: &'a dyn Fn(&Y::ValueType) -> String,
-    pub(super) target: Option<&'a mut ChartContext<DB, RangedCoord<X, Y>>>,
+    pub(super) line_style_1: Option<ShapeStyle<'b>>,
+    pub(super) line_style_2: Option<ShapeStyle<'b>>,
+    pub(super) axis_style: Option<ShapeStyle<'b>>,
+    pub(super) label_style: Option<TextStyle<'b>>,
+    pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
+    pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
+    pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
     pub(super) _pahtom_data: PhantomData<(X, Y)>,
 }
 
-impl<'a, X, Y, DB> MeshStyle<'a, X, Y, DB>
+impl<'a, 'b, X, Y, DB> MeshStyle<'a, 'b, X, Y, DB>
 where
     X: Ranged,
     Y: Ranged,
@@ -91,42 +91,42 @@ where
 
     /// Set the style for the coarse grind grid
     /// - `style`: This is the fcoarse grind grid style
-    pub fn line_style_1<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+    pub fn line_style_1<T: Into<ShapeStyle<'b>>>(&mut self, style: T) -> &mut Self {
         self.line_style_1 = Some(style.into());
         self
     }
 
     /// Set the style for the fine grind grid
     /// - `style`: The fine grind grid style
-    pub fn line_style_2<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+    pub fn line_style_2<T: Into<ShapeStyle<'b>>>(&mut self, style: T) -> &mut Self {
         self.line_style_2 = Some(style.into());
         self
     }
 
     /// Set the style of the label text
     /// - `style`: The text style that would be applied to the labels
-    pub fn label_style<T: Into<TextStyle<'a>>>(&mut self, style: T) -> &mut Self {
+    pub fn label_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
         self.label_style = Some(style.into());
         self
     }
 
     /// Set the formatter function for the X label text
     /// - `fmt`: The formatter function
-    pub fn x_label_formatter(&mut self, fmt: &'a dyn Fn(&X::ValueType) -> String) -> &mut Self {
+    pub fn x_label_formatter(&mut self, fmt: &'b dyn Fn(&X::ValueType) -> String) -> &mut Self {
         self.format_x = fmt;
         self
     }
 
     /// Set the formatter function for the Y label text
     /// - `fmt`: The formatter function
-    pub fn y_label_formatter(&mut self, fmt: &'a dyn Fn(&Y::ValueType) -> String) -> &mut Self {
+    pub fn y_label_formatter(&mut self, fmt: &'b dyn Fn(&Y::ValueType) -> String) -> &mut Self {
         self.format_y = fmt;
         self
     }
 
     /// Set the axis description's style. If not given, use label style instead.
     /// - `style`: The text style that would be applied to descriptions
-    pub fn axis_desc_style<T: Into<TextStyle<'a>>>(&mut self, style: T) -> &mut Self {
+    pub fn axis_desc_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
         self.axis_desc_style = Some(style.into());
         self
     }

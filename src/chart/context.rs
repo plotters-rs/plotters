@@ -13,20 +13,20 @@ use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection
 use crate::style::{FontTransform, ShapeStyle, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
-pub struct SeriesAnno<DB: DrawingBackend> {
+pub struct SeriesAnno<'a, DB: DrawingBackend> {
     label: Option<String>,
-    draw_func: Option<Box<dyn Fn(BackendCoord) -> DynElement<DB, BackendCoord>>>,
+    draw_func: Option<Box<dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord> + 'a>>,
     phantom_data: PhantomData<DB>,
 }
 
-impl<DB: DrawingBackend> SeriesAnno<DB> {
+impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
     pub(crate) fn get_label(&self) -> &str {
         self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
     }
 
     pub(crate) fn get_draw_func(
         &self,
-    ) -> Option<&dyn Fn(BackendCoord) -> DynElement<DB, BackendCoord>> {
+    ) -> Option<&dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord>> {
         self.draw_func.as_ref().map(|x| x.borrow())
     }
 
@@ -49,7 +49,7 @@ impl<DB: DrawingBackend> SeriesAnno<DB> {
     /// - `func`: The function use to create the element
     /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
     /// point (0,0) to the mid-right point of the shape
-    pub fn legend<E: IntoDynElement<DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'static>(
+    pub fn legend<E: IntoDynElement<'a, DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'a>(
         &mut self,
         func: T,
     ) -> &mut Self {
@@ -61,24 +61,25 @@ impl<DB: DrawingBackend> SeriesAnno<DB> {
 /// The context of the chart. This is the core object of Plotters.
 /// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
 /// context.
-pub struct ChartContext<DB: DrawingBackend, CT: CoordTranslate> {
+pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) x_label_area: Option<DrawingArea<DB, Shift>>,
     pub(super) y_label_area: Option<DrawingArea<DB, Shift>>,
     pub(super) drawing_area: DrawingArea<DB, CT>,
-    pub(super) series_anno: Vec<SeriesAnno<DB>>,
+    pub(super) series_anno: Vec<SeriesAnno<'a, DB>>,
 }
 
 impl<
+        'a,
         DB: DrawingBackend,
         XT: Debug,
         YT: Debug,
         X: Ranged<ValueType = XT>,
         Y: Ranged<ValueType = YT>,
-    > ChartContext<DB, RangedCoord<X, Y>>
+    > ChartContext<'a, DB, RangedCoord<X, Y>>
 {
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
     /// the function `MeshStyle::draw`
-    pub fn configure_mesh(&mut self) -> MeshStyle<X, Y, DB> {
+    pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
         MeshStyle {
             axis_style: None,
             x_label_offset: 0,
@@ -102,9 +103,9 @@ impl<
     }
 }
 
-impl<DB: DrawingBackend, CT: CoordTranslate> ChartContext<DB, CT> {
+impl<'a, DB: DrawingBackend + 'a, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Configure the styles for drawing series labels in the chart
-    pub fn configure_series_labels(&mut self) -> SeriesLabelStyle<DB, CT> {
+    pub fn configure_series_labels<'b>(&'b mut self) -> SeriesLabelStyle<'a, 'b, DB, CT> {
         SeriesLabelStyle::new(self)
     }
 
@@ -114,7 +115,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> ChartContext<DB, CT> {
     }
 }
 
-impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
+impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
     /// Convert the chart context into an closure that can be used for coordinate translation
     pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
         let coord_spec = self.drawing_area.into_coord_spec();
@@ -122,7 +123,7 @@ impl<DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<DB, CT> {
     }
 }
 
-impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y>> {
+impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCoord<X, Y>> {
     /// Get the range of X axis
     pub fn x_range(&self) -> Range<X::ValueType> {
         self.drawing_area.get_x_range()
@@ -143,9 +144,9 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<DB, RangedCoord<X, Y
     pub fn draw_series<E, R, S>(
         &mut self,
         series: S,
-    ) -> Result<&mut SeriesAnno<DB>, DrawingAreaErrorKind<DB::ErrorType>>
+    ) -> Result<&mut SeriesAnno<'a, DB>, DrawingAreaErrorKind<DB::ErrorType>>
     where
-        for<'a> &'a E: PointCollection<'a, (X::ValueType, Y::ValueType)>,
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
         E: Drawable<DB>,
         R: Borrow<E>,
         S: IntoIterator<Item = R>,

@@ -6,15 +6,15 @@ use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::TextStyle;
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing
-pub struct ChartBuilder<'a, DB: DrawingBackend> {
+pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     x_label_size: u32,
     y_label_size: u32,
     root_area: &'a DrawingArea<DB, Shift>,
-    title: Option<(String, TextStyle<'a>)>,
+    title: Option<(String, TextStyle<'b>)>,
     margin: u32,
 }
 
-impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
+impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// Create a chart builder on the given drawing area
     /// - `root`: The root drawing area
     /// - Returns: The chart builder object
@@ -54,7 +54,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
     /// - `caption`: The caption of the chart
     /// - `style`: The text style
     /// - Note: If the caption is set, the margin option will be ignored
-    pub fn caption<S: AsRef<str>, Style: Into<TextStyle<'a>>>(
+    pub fn caption<S: AsRef<str>, Style: Into<TextStyle<'b>>>(
         &mut self,
         caption: S,
         style: Style,
@@ -74,7 +74,7 @@ impl<'a, DB: DrawingBackend> ChartBuilder<'a, DB> {
         x_spec: X,
         y_spec: Y,
     ) -> Result<
-        ChartContext<DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>,
+        ChartContext<'a, DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
         let mut x_label_area = None;

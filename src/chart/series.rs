@@ -30,18 +30,18 @@ impl SeriesLabelPosition {
 }
 
 /// The struct to sepcify the series label of a target chart context
-pub struct SeriesLabelStyle<'a, DB: DrawingBackend, CT: CoordTranslate> {
-    target: &'a mut ChartContext<DB, CT>,
+pub struct SeriesLabelStyle<'a, 'b, DB: DrawingBackend, CT: CoordTranslate> {
+    target: &'b mut ChartContext<'a, DB, CT>,
     position: SeriesLabelPosition,
     legend_area_size: u32,
-    border_style: ShapeStyle<'a>,
-    background: ShapeStyle<'a>,
-    label_font: Option<TextStyle<'a>>,
+    border_style: ShapeStyle<'b>,
+    background: ShapeStyle<'b>,
+    label_font: Option<TextStyle<'b>>,
     margin: u32,
 }
 
-impl<'a, DB: DrawingBackend, CT: CoordTranslate> SeriesLabelStyle<'a, DB, CT> {
-    pub(super) fn new(target: &'a mut ChartContext<DB, CT>) -> Self {
+impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, 'b, DB, CT> {
+    pub(super) fn new(target: &'b mut ChartContext<'a, DB, CT>) -> Self {
         Self {
             target,
             position: SeriesLabelPosition::MiddleRight,
@@ -74,30 +74,27 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> SeriesLabelStyle<'a, DB, CT> {
 
     /// Set the style of the label series area
     /// `style` - The style of the border
-    pub fn border_style<S: Into<ShapeStyle<'a>>>(&mut self, style: S) -> &mut Self {
+    pub fn border_style<S: Into<ShapeStyle<'b>>>(&mut self, style: S) -> &mut Self {
         self.border_style = style.into();
         self
     }
 
     /// Set the background style
     /// `style` - The style of the border
-    pub fn background_style<S: Into<ShapeStyle<'a>>>(&mut self, style: S) -> &mut Self {
+    pub fn background_style<S: Into<ShapeStyle<'b>>>(&mut self, style: S) -> &mut Self {
         self.background = style.into();
         self
     }
 
     /// Set the series label font
     /// `font` - The font
-    pub fn label_font<F: Into<TextStyle<'a>>>(&mut self, font: F) -> &mut Self {
+    pub fn label_font<F: Into<TextStyle<'b>>>(&mut self, font: F) -> &mut Self {
         self.label_font = Some(font.into());
         self
     }
 
     /// Draw the series label area
-    pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
-    where
-        DB: 'static,
-    {
+    pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let drawing_area = self.target.plotting_area().strip_coord_spec();
         let default_font = ("Arial", 12).into_font();
         let default_style: TextStyle = (&default_font).into();

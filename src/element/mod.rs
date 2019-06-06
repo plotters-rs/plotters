@@ -192,18 +192,21 @@ pub trait Drawable<DB: DrawingBackend> {
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
-trait DynDrawable<DB: DrawingBackend> {
+trait DynDrawable<'a, DB: DrawingBackend>
+where
+    Self: 'a,
+{
     fn draw_dyn(
         &self,
-        points: &mut Iterator<Item = BackendCoord>,
+        points: &mut dyn Iterator<Item = BackendCoord>,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
-impl<DB: DrawingBackend, T: Drawable<DB>> DynDrawable<DB> for T {
+impl<'a, DB: DrawingBackend, T: Drawable<DB> + 'a> DynDrawable<'a, DB> for T {
     fn draw_dyn(
         &self,
-        points: &mut Iterator<Item = BackendCoord>,
+        points: &mut dyn Iterator<Item = BackendCoord>,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         T::draw(self, points, backend)
@@ -211,17 +214,17 @@ impl<DB: DrawingBackend, T: Drawable<DB>> DynDrawable<DB> for T {
 }
 
 /// The container for a dynamically dispatched element
-pub struct DynElement<DB, Coord>
+pub struct DynElement<'a, DB, Coord>
 where
     DB: DrawingBackend,
     Coord: Clone,
 {
     points: Vec<Coord>,
-    drawable: Box<dyn DynDrawable<DB>>,
+    drawable: Box<dyn DynDrawable<'a, DB> + 'a>,
 }
 
-impl<'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
-    for &'a DynElement<DB, Coord>
+impl<'a, 'b: 'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
+    for &'a DynElement<'b, DB, Coord>
 {
     type Borrow = &'a Coord;
     type IntoIter = std::slice::Iter<'a, Coord>;
@@ -230,7 +233,7 @@ impl<'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
     }
 }
 
-impl<DB: DrawingBackend, Coord: Clone> Drawable<DB> for DynElement<DB, Coord> {
+impl<'a, DB: DrawingBackend + 'a, Coord: Clone> Drawable<DB> for DynElement<'a, DB, Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut pos: I,
@@ -242,19 +245,22 @@ impl<DB: DrawingBackend, Coord: Clone> Drawable<DB> for DynElement<DB, Coord> {
 
 /// The trait that makes the conversion from the statically dispatched element
 /// to the dynamically dispatched element
-pub trait IntoDynElement<DB: DrawingBackend, Coord: Clone> {
+pub trait IntoDynElement<'a, DB: DrawingBackend, Coord: Clone>
+where
+    Self: 'a,
+{
     /// Make the conversion
-    fn into_dyn(self) -> DynElement<DB, Coord>;
+    fn into_dyn(self) -> DynElement<'a, DB, Coord>;
 }
 
-impl<T, DB, Coord> IntoDynElement<DB, Coord> for T
+impl<'b, T, DB, Coord> IntoDynElement<'b, DB, Coord> for T
 where
-    T: Drawable<DB> + 'static,
+    T: Drawable<DB> + 'b,
     for<'a> &'a T: PointCollection<'a, Coord>,
     Coord: Clone,
     DB: DrawingBackend,
 {
-    fn into_dyn(self) -> DynElement<DB, Coord> {
+    fn into_dyn(self) -> DynElement<'b, DB, Coord> {
         DynElement {
             points: self
                 .point_iter()
