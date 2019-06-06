@@ -8,7 +8,7 @@ impl SVGWrapper {
     pub fn evcxr_display(&self) {
         let svg = String::from_utf8_lossy(self.0.as_slice());
         println!(
-            "EVCXR_BEGIN_CONTENT text/html\n<svg>{}</svg>\nEVCXR_END_CONTENT",
+            "EVCXR_BEGIN_CONTENT text/html\n{}\nEVCXR_END_CONTENT",
             svg
         );
     }
