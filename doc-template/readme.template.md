@@ -144,6 +144,8 @@ $$examples/chart.rs$$
 
 ## Misc
 
+### Development Version
+
 To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.toml`
 
 ```toml
@@ -151,6 +153,7 @@ To use the latest development version, pull https://github.com/38/plotters.git. 
 plotters = { git = "https://github.com/38/plotters.git" }
 ```
 
+### Reducing Depending Libraries && Turning Off Backends
 Plotters now supports use features to control the backend dependencies. By default, `BitMapBackend` and `SVGBackend` are supported,
 use `default_features = false` in the dependency description in `Cargo.toml` and you can cherrypick the backend implementations.
 
@@ -162,6 +165,45 @@ For example, the following dependency description would avoid compiling with bit
 ```toml
 [dependencies]
 plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
+```
+
+### excvr Integration
+
+Plotters now supports integrate with `excvr` and is able to interactively drawing plots in Jupyter Notebook.
+The feature `excvr` should be enabled when including Plotters to Jupyter Notebook.
+
+The following code shows a minimal example of this.
+
+```text
+:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
+extern crate plotters;
+use plotters::prelude::*;
+
+let figure = evcxr_figure((640, 480), |root| {
+    root.fill(&White);
+    let mut chart = ChartBuilder::on(&root)
+        .caption("y=x^2", &("Arial", 50).into_font())
+        .margin(5)
+        .x_label_area_size(30)
+        .y_label_area_size(30)
+        .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
+
+    chart.configure_mesh().draw()?;
+
+    chart.draw_series(LineSeries::new(
+        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
+        &Red,
+    )).unwrap()
+        .label("y = x^2")
+        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
+
+    chart.configure_series_labels()
+        .background_style(&White.mix(0.8))
+        .border_style(&Black)
+        .draw()?;
+    Ok(())
+});
+figure
 ```
 
 $$style$$

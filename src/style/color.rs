@@ -19,7 +19,7 @@ pub trait Mixable: Color {
     }
 }
 
-impl<T: Color + Sized> Mixable for T {}
+impl<T: Color> Mixable for T {}
 
 impl Color for Box<&dyn Color> {
     fn rgb(&self) -> (u8, u8, u8) {
