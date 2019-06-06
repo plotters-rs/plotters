@@ -6,7 +6,7 @@ use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc, FontTransform};
+use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
 
 use std::io::{Cursor, Error};
 use std::path::Path;
@@ -85,10 +85,10 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
-    fn draw_pixel<C: Color>(
+    fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Error>> {
         if color.alpha() == 0.0 {
             return Ok(());
@@ -119,8 +119,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("y1", from.1)
             .set("x2", to.0)
             .set("y2", to.1)
-            .set("opacity", make_svg_opacity(style.as_color()))
-            .set("stroke", make_svg_color(style.as_color()));
+            .set("opacity", make_svg_opacity(&style.as_color()))
+            .set("stroke", make_svg_color(&style.as_color()));
         self.update_document(|d| d.add(node));
         Ok(())
     }
@@ -143,13 +143,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
-                .set("opacity", make_svg_opacity(style.as_color()))
-                .set("stroke", make_svg_color(style.as_color()))
+                .set("opacity", make_svg_opacity(&style.as_color()))
+                .set("stroke", make_svg_color(&style.as_color()))
                 .set("fill", "none");
         } else {
             node = node
-                .set("opacity", make_svg_opacity(style.as_color()))
-                .set("fill", make_svg_color(style.as_color()))
+                .set("opacity", make_svg_opacity(&style.as_color()))
+                .set("fill", make_svg_color(&style.as_color()))
                 .set("stroke", "none");
         }
 
@@ -167,8 +167,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         }
         let node = Polyline::new()
             .set("fill", "none")
-            .set("opacity", make_svg_opacity(style.as_color()))
-            .set("stroke", make_svg_color(style.as_color()))
+            .set("opacity", make_svg_opacity(&style.as_color()))
+            .set("stroke", make_svg_color(&style.as_color()))
             .set(
                 "points",
                 path.into_iter().fold(String::new(), |mut s, (x, y)| {
@@ -197,25 +197,25 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         if !fill {
             node = node
-                .set("opacity", make_svg_opacity(style.as_color()))
-                .set("stroke", make_svg_color(style.as_color()))
+                .set("opacity", make_svg_opacity(&style.as_color()))
+                .set("stroke", make_svg_color(&style.as_color()))
                 .set("fill", "none");
         } else {
             node = node
-                .set("opacity", make_svg_opacity(style.as_color()))
-                .set("fill", make_svg_color(style.as_color()))
+                .set("opacity", make_svg_opacity(&style.as_color()))
+                .set("fill", make_svg_color(&style.as_color()))
                 .set("stroke", "none");
         }
 
         self.update_document(|d| d.add(node));
         Ok(())
     }
-    fn draw_text<'b, C: Color>(
+    fn draw_text<'b>(
         &mut self,
         text: &str,
         font: &FontDesc<'b>,
         pos: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         if color.alpha() == 0.0 {
             return Ok(());
