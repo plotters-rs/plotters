@@ -4,19 +4,19 @@ use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
 
 /// The element that used to describe a point
-pub trait PointElement<'a, Coord> {
-    fn make_point(pos: Coord, size: u32, style: ShapeStyle<'a>) -> Self;
+pub trait PointElement<Coord> {
+    fn make_point(pos: Coord, size: u32, style: ShapeStyle) -> Self;
 }
 
 /// Describe a cross
-pub struct Cross<'a, Coord> {
+pub struct Cross<Coord> {
     center: Coord,
     size: u32,
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
 }
 
-impl<'a, Coord> Cross<'a, Coord> {
-    pub fn new(coord: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
+impl<Coord> Cross<Coord> {
+    pub fn new(coord: Coord, size: u32, style: ShapeStyle) -> Self {
         Self {
             center: coord,
             size,
@@ -25,7 +25,7 @@ impl<'a, Coord> Cross<'a, Coord> {
     }
 }
 
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Cross<'b, Coord> {
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Cross<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
@@ -33,7 +33,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Cross<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Cross<'a, Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Cross<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
@@ -43,26 +43,26 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Cross<'a, Coord> {
             let size = self.size as i32;
             let (x0, y0) = (x - size, y - size);
             let (x1, y1) = (x + size, y + size);
-            backend.draw_line((x0, y0), (x1, y1), &Box::new(self.style.color))?;
-            backend.draw_line((x0, y1), (x1, y0), &Box::new(self.style.color))?;
+            backend.draw_line((x0, y0), (x1, y1), &self.style.color)?;
+            backend.draw_line((x0, y1), (x1, y0), &self.style.color)?;
         }
         Ok(())
     }
 }
-impl<'a, Coord> PointElement<'a, Coord> for Cross<'a, Coord> {
-    fn make_point(pos: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
+impl<Coord> PointElement<Coord> for Cross<Coord> {
+    fn make_point(pos: Coord, size: u32, style: ShapeStyle) -> Self {
         Self::new(pos, size, style)
     }
 }
 
-impl<'a, Coord> PointElement<'a, Coord> for Circle<'a, Coord> {
-    fn make_point(pos: Coord, size: u32, style: ShapeStyle<'a>) -> Self {
+impl<Coord> PointElement<Coord> for Circle<Coord> {
+    fn make_point(pos: Coord, size: u32, style: ShapeStyle) -> Self {
         Self::new(pos, size, style)
     }
 }
 
-impl<'a, Coord> PointElement<'a, Coord> for Pixel<'a, Coord> {
-    fn make_point(pos: Coord, _: u32, style: ShapeStyle<'a>) -> Self {
+impl<Coord> PointElement<Coord> for Pixel<Coord> {
+    fn make_point(pos: Coord, _: u32, style: ShapeStyle) -> Self {
         Self::new(pos, style)
     }
 }

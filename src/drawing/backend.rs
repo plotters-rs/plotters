@@ -1,4 +1,4 @@
-use crate::style::{Color, FontDesc, FontError, Mixable};
+use crate::style::{Color, FontDesc, FontError, RGBAColor};
 use std::error::Error;
 
 /// A coordiante in the image
@@ -30,14 +30,14 @@ pub trait BackendStyle {
     type ColorType: Color;
 
     /// Convert the style into the underlying color
-    fn as_color(&self) -> &Self::ColorType;
+    fn as_color(&self) -> RGBAColor;
     // TODO: In the future we should support stroke width, line shape, etc....
 }
 
 impl<T: Color> BackendStyle for T {
     type ColorType = T;
-    fn as_color(&self) -> &T {
-        self
+    fn as_color(&self) -> RGBAColor {
+        self.to_rgba()
     }
 }
 
@@ -68,10 +68,10 @@ pub trait DrawingBackend {
     /// Draw a pixel on the drawing backend
     /// - `point`: The backend pixel-based coordinate to draw
     /// - `color`: The color of the pixel
-    fn draw_pixel<S: Color>(
+    fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &S,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a line on the drawing backend
@@ -275,12 +275,12 @@ pub trait DrawingBackend {
     /// - `font`: The description of the font
     /// - `pos` : The position backend
     /// - `color`: The color of the text
-    fn draw_text<'a, C: Color>(
+    fn draw_text<'a>(
         &mut self,
         text: &str,
         font: &FontDesc<'a>,
         pos: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         if color.alpha() == 0.0 {
             return Ok(());

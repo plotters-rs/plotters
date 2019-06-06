@@ -34,8 +34,8 @@ pub struct SeriesLabelStyle<'a, 'b, DB: DrawingBackend, CT: CoordTranslate> {
     target: &'b mut ChartContext<'a, DB, CT>,
     position: SeriesLabelPosition,
     legend_area_size: u32,
-    border_style: ShapeStyle<'b>,
-    background: ShapeStyle<'b>,
+    border_style: ShapeStyle,
+    background: ShapeStyle,
     label_font: Option<TextStyle<'b>>,
     margin: u32,
 }
@@ -74,14 +74,14 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
 
     /// Set the style of the label series area
     /// `style` - The style of the border
-    pub fn border_style<S: Into<ShapeStyle<'b>>>(&mut self, style: S) -> &mut Self {
+    pub fn border_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.border_style = style.into();
         self
     }
 
     /// Set the background style
     /// `style` - The style of the border
-    pub fn background_style<S: Into<ShapeStyle<'b>>>(&mut self, style: S) -> &mut Self {
+    pub fn background_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.background = style.into();
         self
     }

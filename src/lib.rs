@@ -428,8 +428,8 @@ pub mod prelude {
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
         Black, Blue, Color, Cyan, FontDesc, FontTransform, Green, HSLColor, IntoFont, Magenta,
-        Mixable, Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, Red,
-        ShapeStyle, SimpleColor, TextStyle, Transparent, White, Yellow,
+        Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle,
+        SimpleColor, TextStyle, Transparent, White, Yellow,
     };
 
     pub use crate::element::{

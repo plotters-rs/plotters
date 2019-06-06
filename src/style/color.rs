@@ -9,25 +9,38 @@ pub trait Color {
 
     /// Get the alpha channel of the color
     fn alpha(&self) -> f64;
-}
 
-/// The trait for any color that can composite with other color
-pub trait Mixable: Color {
-    /// Introduce alpha channel to the color
-    fn mix(&self, alpha: f64) -> CompsitableColor<Self> {
-        CompsitableColor(self, alpha)
+    /// Mix the color with given opacity
+    fn mix(&self, value: f64) -> RGBAColor {
+        let (r, g, b) = self.rgb();
+        let a = self.alpha() * value;
+        RGBAColor(r, g, b, a)
+    }
+
+    /// Convert the color into the RGBA color which is intrenally used by Plotters
+    fn to_rgba(&self) -> RGBAColor {
+        let (r, g, b) = self.rgb();
+        let a = self.alpha();
+        RGBAColor(r, g, b, a)
     }
 }
 
-impl<T: Color> Mixable for T {}
+/// The RGBA representation of the color, Plotters use RGBA as the internal representation
+/// of color
+#[derive(Clone, PartialEq, Debug)]
+pub struct RGBAColor(u8, u8, u8, f64);
 
-impl Color for Box<&dyn Color> {
+impl Color for RGBAColor {
     fn rgb(&self) -> (u8, u8, u8) {
-        self.as_ref().rgb()
+        (self.0, self.1, self.2)
     }
 
     fn alpha(&self) -> f64 {
-        self.as_ref().alpha()
+        self.3
+    }
+
+    fn to_rgba(&self) -> RGBAColor {
+        self.clone()
     }
 }
 
@@ -59,19 +72,6 @@ impl<P: Palette> PaletteColor<P> {
 impl<P: Palette> SimpleColor for PaletteColor<P> {
     fn rgb(&self) -> (u8, u8, u8) {
         P::COLORS[self.0]
-    }
-}
-
-/// Simple color with additional alpha channel
-pub struct CompsitableColor<'a, T: Color + ?Sized>(&'a T, f64);
-
-impl<'a, T: Color> Color for CompsitableColor<'a, T> {
-    fn rgb(&self) -> (u8, u8, u8) {
-        (self.0).rgb()
-    }
-
-    fn alpha(&self) -> f64 {
-        (self.0).alpha() * self.1
     }
 }
 

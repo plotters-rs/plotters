@@ -44,8 +44,8 @@
             backend: &mut DB
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
-            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &Red, false)?;
-            backend.draw_text("X", &("Arial", 20).into(), pos, &Red)
+            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &Red.to_rgba(), false)?;
+            backend.draw_text("X", &("Arial", 20).into(), pos, &Red.to_rgba())
         }
     }
 

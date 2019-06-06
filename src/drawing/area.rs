@@ -239,7 +239,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         color: &ColorType,
     ) -> Result<(), DrawingAreaError<DB>> {
         let pos = self.coord.translate(&pos);
-        self.backend_ops(|b| b.draw_pixel(pos, color))
+        self.backend_ops(|b| b.draw_pixel(pos, &color.to_rgba()))
     }
 
     /// Present all the pending changes to the backend
@@ -370,7 +370,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 text,
                 style.font,
                 (self.rect.x0 + padding, self.rect.y0 + 5),
-                &Box::new(style.color),
+                &style.color,
             )
         })?;
 
@@ -398,7 +398,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 text,
                 style.font,
                 (pos.0 + self.rect.x0, pos.1 + self.rect.y0),
-                &Box::new(style.color),
+                &style.color,
             )
         })
     }

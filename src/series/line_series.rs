@@ -3,13 +3,13 @@ use crate::style::ShapeStyle;
 
 /// The line series object, which takes an iterator of points in guest coordinate system
 /// and creates the element rendering the line plot
-pub struct LineSeries<'a, Coord, I: IntoIterator<Item = Coord>> {
-    style: ShapeStyle<'a>,
+pub struct LineSeries<Coord, I: IntoIterator<Item = Coord>> {
+    style: ShapeStyle,
     data_iter: Option<I::IntoIter>,
 }
 
-impl<'b, Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<'b, Coord, I> {
-    type Item = Path<'b, Coord>;
+impl<Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<Coord, I> {
+    type Item = Path<Coord>;
     fn next(&mut self) -> Option<Self::Item> {
         if self.data_iter.is_some() {
             let mut data_iter = None;
@@ -24,8 +24,8 @@ impl<'b, Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<'b, Coord
     }
 }
 
-impl<'a, Coord, I: IntoIterator<Item = Coord>> LineSeries<'a, Coord, I> {
-    pub fn new<S: Into<ShapeStyle<'a>>>(iter: I, style: S) -> Self {
+impl<Coord, I: IntoIterator<Item = Coord>> LineSeries<Coord, I> {
+    pub fn new<S: Into<ShapeStyle>>(iter: I, style: S) -> Self {
         Self {
             style: style.into(),
             data_iter: Some(iter.into_iter()),

@@ -3,13 +3,13 @@ use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
 
 /// An element of a single pixel
-pub struct Pixel<'a, Coord> {
+pub struct Pixel<Coord> {
     pos: Coord,
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
 }
 
-impl<'a, Coord> Pixel<'a, Coord> {
-    pub fn new<P: Into<Coord>, S: Into<ShapeStyle<'a>>>(pos: P, style: S) -> Self {
+impl<Coord> Pixel<Coord> {
+    pub fn new<P: Into<Coord>, S: Into<ShapeStyle>>(pos: P, style: S) -> Self {
         Self {
             pos: pos.into(),
             style: style.into(),
@@ -17,7 +17,7 @@ impl<'a, Coord> Pixel<'a, Coord> {
     }
 }
 
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<'b, Coord> {
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
@@ -25,14 +25,14 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Pixel<'a, Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Pixel<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_pixel((x, y), &Box::new(self.style.color));
+            return backend.draw_pixel((x, y), &self.style.color);
         }
         Ok(())
     }
@@ -46,10 +46,7 @@ fn test_pixel_element() {
         m.check_draw_pixel(|c, (x, y)| {
             assert_eq!(x, 150);
             assert_eq!(y, 152);
-            assert_eq!(c.0, 255);
-            assert_eq!(c.1, 0);
-            assert_eq!(c.2, 0);
-            assert_eq!(c.3, 1.0);
+            assert_eq!(c, Red.to_rgba());
         });
 
         m.drop_check(|b| {
@@ -62,16 +59,16 @@ fn test_pixel_element() {
 }
 
 /// An element of a series of connected lines
-pub struct Path<'a, Coord> {
+pub struct Path<Coord> {
     points: Vec<Coord>,
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
 }
-impl<'a, Coord> Path<'a, Coord> {
+impl<Coord> Path<Coord> {
     /// Create a new path
     /// - `points`: The iterator of the points
     /// - `style`: The shape style
     /// - returns the created element
-    pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle<'a>>>(points: P, style: S) -> Self {
+    pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle>>(points: P, style: S) -> Self {
         Self {
             points: points.into(),
             style: style.into(),
@@ -79,7 +76,7 @@ impl<'a, Coord> Path<'a, Coord> {
     }
 }
 
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -87,13 +84,13 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Path<'a, Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        backend.draw_path(points, &Box::new(self.style.color))
+        backend.draw_path(points, &self.style.color)
     }
 }
 
@@ -103,10 +100,7 @@ fn test_path_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_path(|c, path| {
-            assert_eq!(c.0, 0);
-            assert_eq!(c.1, 0);
-            assert_eq!(c.2, 255);
-            assert_eq!(c.3, 1.0);
+            assert_eq!(c, Blue.to_rgba());
             assert_eq!(path, vec![(100, 101), (105, 107), (150, 157)]);
         });
         m.drop_check(|b| {
@@ -119,18 +113,18 @@ fn test_path_element() {
 }
 
 /// A rectangle element
-pub struct Rectangle<'a, Coord> {
+pub struct Rectangle<Coord> {
     points: [Coord; 2],
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
     margin: (u32, u32, u32, u32),
 }
 
-impl<'a, Coord> Rectangle<'a, Coord> {
+impl<Coord> Rectangle<Coord> {
     /// Create a new path
     /// - `points`: The left upper and right lower coner of the rectangle
     /// - `style`: The shape style
     /// - returns the created element
-    pub fn new<S: Into<ShapeStyle<'a>>>(points: [Coord; 2], style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle>>(points: [Coord; 2], style: S) -> Self {
         Self {
             points,
             style: style.into(),
@@ -149,7 +143,7 @@ impl<'a, Coord> Rectangle<'a, Coord> {
     }
 }
 
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> {
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -157,7 +151,7 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<'b, Coord> 
     }
 }
 
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Rectangle<'a, Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Rectangle<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
@@ -169,7 +163,7 @@ impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Rectangle<'a, Coord> {
                 b.1 -= self.margin.1 as i32;
                 a.0 += self.margin.2 as i32;
                 b.0 -= self.margin.3 as i32;
-                backend.draw_rect(a, b, &Box::new(self.style.color), self.style.filled)
+                backend.draw_rect(a, b, &self.style.color, self.style.filled)
             }
             _ => Ok(()),
         }
@@ -182,10 +176,7 @@ fn test_rect_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_rect(|c, f, u, d| {
-            assert_eq!(c.0, 0);
-            assert_eq!(c.1, 0);
-            assert_eq!(c.2, 255);
-            assert_eq!(c.3, 1.0);
+            assert_eq!(c, Blue.to_rgba());
             assert_eq!(f, false);
             assert_eq!([u, d], [(100, 101), (105, 107)]);
         });
@@ -199,19 +190,19 @@ fn test_rect_element() {
 }
 
 /// A circle element
-pub struct Circle<'a, Coord> {
+pub struct Circle<Coord> {
     center: Coord,
     size: u32,
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
 }
 
-impl<'a, Coord> Circle<'a, Coord> {
+impl<Coord> Circle<Coord> {
     /// Create a new circle element
     /// - `coord` The center of the circle
     /// - `size` The radius of the circle
     /// - `style` The style of the circle
     /// - Return: The newly created circle element
-    pub fn new<S: Into<ShapeStyle<'a>>>(coord: Coord, size: u32, style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle>>(coord: Coord, size: u32, style: S) -> Self {
         Self {
             center: coord,
             size,
@@ -220,7 +211,7 @@ impl<'a, Coord> Circle<'a, Coord> {
     }
 }
 
-impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<'b, Coord> {
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
@@ -228,19 +219,14 @@ impl<'b, 'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<'b, Coord> {
     }
 }
 
-impl<'a, Coord: 'a, DB: DrawingBackend> Drawable<DB> for Circle<'a, Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_circle(
-                (x, y),
-                self.size,
-                &Box::new(self.style.color),
-                self.style.filled,
-            );
+            return backend.draw_circle((x, y), self.size, &self.style.color, self.style.filled);
         }
         Ok(())
     }
@@ -252,10 +238,7 @@ fn test_circle_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_circle(|c, f, s, r| {
-            assert_eq!(c.0, 0);
-            assert_eq!(c.1, 0);
-            assert_eq!(c.2, 255);
-            assert_eq!(c.3, 1.0);
+            assert_eq!(c, Blue.to_rgba());
             assert_eq!(f, false);
             assert_eq!(s, (150, 151));
             assert_eq!(r, 20);

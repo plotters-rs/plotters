@@ -7,7 +7,7 @@ mod palette;
 use std::borrow::Borrow;
 
 pub use color::{
-    Black, Blue, Color, Cyan, Green, HSLColor, Magenta, Mixable, PaletteColor, RGBColor, Red,
+    Black, Blue, Color, Cyan, Green, HSLColor, Magenta, PaletteColor, RGBAColor, RGBColor, Red,
     SimpleColor, Transparent, White, Yellow,
 };
 
@@ -18,7 +18,7 @@ pub use palette::*;
 #[derive(Clone)]
 pub struct TextStyle<'a> {
     pub font: &'a FontDesc<'a>,
-    pub color: &'a dyn Color,
+    pub color: RGBAColor,
 }
 
 impl<'a> TextStyle<'a> {
@@ -26,7 +26,7 @@ impl<'a> TextStyle<'a> {
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         Self {
             font: self.font,
-            color,
+            color: color.to_rgba(),
         }
     }
 }
@@ -42,32 +42,32 @@ impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
     fn from(font: &'a T) -> Self {
         Self {
             font: font.borrow(),
-            color: &Black,
+            color: Black.to_rgba(),
         }
     }
 }
 
 /// Style for any of shape
 #[derive(Clone)]
-pub struct ShapeStyle<'a> {
-    pub color: &'a dyn Color,
+pub struct ShapeStyle {
+    pub color: RGBAColor,
     pub filled: bool,
 }
 
-impl<'a> ShapeStyle<'a> {
+impl ShapeStyle {
     /// Make a filled shape style
     pub fn filled(&self) -> Self {
         Self {
-            color: self.color,
+            color: self.color.to_rgba(),
             filled: true,
         }
     }
 }
 
-impl<'a, T: Color> From<&'a T> for ShapeStyle<'a> {
+impl<'a, T: Color> From<&'a T> for ShapeStyle {
     fn from(f: &'a T) -> Self {
         ShapeStyle {
-            color: f,
+            color: f.to_rgba(),
             filled: false,
         }
     }

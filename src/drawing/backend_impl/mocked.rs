@@ -2,9 +2,7 @@ use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::drawing::DrawingArea;
-use crate::style::{Color, FontDesc};
-
-pub struct RGBA(pub u8, pub u8, pub u8, pub f64);
+use crate::style::{Color, FontDesc, RGBAColor};
 
 pub struct MockedBackend {
     height: u32,
@@ -17,12 +15,12 @@ pub struct MockedBackend {
     pub num_draw_circle_call: u32,
     pub num_draw_text_call: u32,
     pub num_draw_path_call: u32,
-    check_draw_pixel: Option<Box<dyn FnMut(RGBA, BackendCoord)>>,
-    check_draw_line: Option<Box<dyn FnMut(RGBA, BackendCoord, BackendCoord)>>,
-    check_draw_rect: Option<Box<dyn FnMut(RGBA, bool, BackendCoord, BackendCoord)>>,
-    check_draw_path: Option<Box<dyn FnMut(RGBA, Vec<BackendCoord>)>>,
-    check_draw_circle: Option<Box<dyn FnMut(RGBA, bool, BackendCoord, u32)>>,
-    check_draw_text: Option<Box<dyn FnMut(RGBA, &str, f64, BackendCoord, &str)>>,
+    check_draw_pixel: Option<Box<dyn FnMut(RGBAColor, BackendCoord)>>,
+    check_draw_line: Option<Box<dyn FnMut(RGBAColor, BackendCoord, BackendCoord)>>,
+    check_draw_rect: Option<Box<dyn FnMut(RGBAColor, bool, BackendCoord, BackendCoord)>>,
+    check_draw_path: Option<Box<dyn FnMut(RGBAColor, Vec<BackendCoord>)>>,
+    check_draw_circle: Option<Box<dyn FnMut(RGBAColor, bool, BackendCoord, u32)>>,
+    check_draw_text: Option<Box<dyn FnMut(RGBAColor, &str, f64, BackendCoord, &str)>>,
     drop_check: Option<Box<dyn FnMut(&Self)>>,
 }
 
@@ -58,12 +56,12 @@ impl MockedBackend {
         }
     }
 
-    def_set_checker_func!(check_draw_pixel, RGBA, BackendCoord);
-    def_set_checker_func!(check_draw_line, RGBA, BackendCoord, BackendCoord);
-    def_set_checker_func!(check_draw_rect, RGBA, bool, BackendCoord, BackendCoord);
-    def_set_checker_func!(check_draw_path, RGBA, Vec<BackendCoord>);
-    def_set_checker_func!(check_draw_circle, RGBA, bool, BackendCoord, u32);
-    def_set_checker_func!(check_draw_text, RGBA, &str, f64, BackendCoord, &str);
+    def_set_checker_func!(check_draw_pixel, RGBAColor, BackendCoord);
+    def_set_checker_func!(check_draw_line, RGBAColor, BackendCoord, BackendCoord);
+    def_set_checker_func!(check_draw_rect, RGBAColor, bool, BackendCoord, BackendCoord);
+    def_set_checker_func!(check_draw_path, RGBAColor, Vec<BackendCoord>);
+    def_set_checker_func!(check_draw_circle, RGBAColor, bool, BackendCoord, u32);
+    def_set_checker_func!(check_draw_text, RGBAColor, &str, f64, BackendCoord, &str);
     def_set_checker_func!(drop_check, &Self);
 
     fn check_before_draw(&mut self) {
@@ -83,12 +81,6 @@ impl std::fmt::Display for MockedError {
 
 impl std::error::Error for MockedError {}
 
-fn to_rgba<T: Color>(color: &T) -> RGBA {
-    let (r, g, b) = color.rgb();
-    let a = color.alpha();
-    RGBA(r, g, b, a)
-}
-
 impl DrawingBackend for MockedBackend {
     type ErrorType = MockedError;
 
@@ -107,14 +99,14 @@ impl DrawingBackend for MockedBackend {
         Ok(())
     }
 
-    fn draw_pixel<S: Color>(
+    fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &S,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_pixel_call += 1;
-        let color = to_rgba(color);
+        let color = color.to_rgba();
         if let Some(ref mut checker) = self.check_draw_pixel {
             checker(color, point);
         }
@@ -129,7 +121,7 @@ impl DrawingBackend for MockedBackend {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_line_call += 1;
-        let color = to_rgba(style.as_color());
+        let color = style.as_color().to_rgba();
         if let Some(ref mut checker) = self.check_draw_line {
             checker(color, from, to);
         }
@@ -145,7 +137,7 @@ impl DrawingBackend for MockedBackend {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_rect_call += 1;
-        let color = to_rgba(style.as_color());
+        let color = style.as_color().to_rgba();
         if let Some(ref mut checker) = self.check_draw_rect {
             checker(color, fill, upper_left, bottom_right);
         }
@@ -159,7 +151,7 @@ impl DrawingBackend for MockedBackend {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_path_call += 1;
-        let color = to_rgba(style.as_color());
+        let color = style.as_color().to_rgba();
         if let Some(ref mut checker) = self.check_draw_path {
             checker(color, path.into_iter().collect());
         }
@@ -175,23 +167,23 @@ impl DrawingBackend for MockedBackend {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_circle_call += 1;
-        let color = to_rgba(style.as_color());
+        let color = style.as_color().to_rgba();
         if let Some(ref mut checker) = self.check_draw_circle {
             checker(color, fill, center, radius);
         }
         Ok(())
     }
 
-    fn draw_text<'a, C: Color>(
+    fn draw_text<'a>(
         &mut self,
         text: &str,
         font: &FontDesc<'a>,
         pos: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         self.check_before_draw();
         self.num_draw_text_call += 1;
-        let color = to_rgba(color);
+        let color = color.to_rgba();
         if let Some(ref mut checker) = self.check_draw_text {
             checker(color, font.get_name(), font.get_size(), pos, text);
         }

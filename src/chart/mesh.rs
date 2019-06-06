@@ -4,7 +4,7 @@ use super::context::ChartContext;
 use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
-use crate::style::{FontDesc, Mixable, RGBColor, ShapeStyle, TextStyle};
+use crate::style::{Color, FontDesc, RGBColor, ShapeStyle, TextStyle};
 
 /// The struct that is used for tracking the configuration of a mesh of any chart
 pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB>
@@ -21,9 +21,9 @@ where
     pub(super) axis_desc_style: Option<TextStyle<'b>>,
     pub(super) x_desc: Option<String>,
     pub(super) y_desc: Option<String>,
-    pub(super) line_style_1: Option<ShapeStyle<'b>>,
-    pub(super) line_style_2: Option<ShapeStyle<'b>>,
-    pub(super) axis_style: Option<ShapeStyle<'b>>,
+    pub(super) line_style_1: Option<ShapeStyle>,
+    pub(super) line_style_2: Option<ShapeStyle>,
+    pub(super) axis_style: Option<ShapeStyle>,
     pub(super) label_style: Option<TextStyle<'b>>,
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
@@ -71,7 +71,7 @@ where
 
     /// Set the style definition for the axis
     /// - `style`: The style for the axis
-    pub fn axis_style<T: Into<ShapeStyle<'a>>>(&mut self, style: T) -> &mut Self {
+    pub fn axis_style<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
         self.axis_style = Some(style.into());
         self
     }
@@ -91,14 +91,14 @@ where
 
     /// Set the style for the coarse grind grid
     /// - `style`: This is the fcoarse grind grid style
-    pub fn line_style_1<T: Into<ShapeStyle<'b>>>(&mut self, style: T) -> &mut Self {
+    pub fn line_style_1<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
         self.line_style_1 = Some(style.into());
         self
     }
 
     /// Set the style for the fine grind grid
     /// - `style`: The fine grind grid style
-    pub fn line_style_2<T: Into<ShapeStyle<'b>>>(&mut self, style: T) -> &mut Self {
+    pub fn line_style_2<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
         self.line_style_2 = Some(style.into());
         self
     }

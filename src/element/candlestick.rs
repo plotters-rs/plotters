@@ -9,16 +9,16 @@ use crate::element::{Drawable, PointCollection};
 use crate::style::ShapeStyle;
 
 /// The candelstick data point element
-pub struct CandleStick<'a, X, Y: PartialOrd> {
-    style: ShapeStyle<'a>,
+pub struct CandleStick<X, Y: PartialOrd> {
+    style: ShapeStyle,
     width: u32,
     points: [(X, Y); 4],
 }
 
-impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
+impl<X: Clone, Y: PartialOrd> CandleStick<X, Y> {
     /// Create a new candlestick element, which requires the Y coordinate can be compared
     #[allow(clippy::too_many_arguments)]
-    pub fn new<GS: Into<ShapeStyle<'a>>, LS: Into<ShapeStyle<'a>>>(
+    pub fn new<GS: Into<ShapeStyle>, LS: Into<ShapeStyle>>(
         x: X,
         open: Y,
         high: Y,
@@ -44,7 +44,7 @@ impl<'a, X: Clone, Y: PartialOrd> CandleStick<'a, X, Y> {
     }
 }
 
-impl<'b, 'a, X: 'a, Y: PartialOrd + 'a> PointCollection<'a, (X, Y)> for &'a CandleStick<'b, X, Y> {
+impl<'a, X: 'a, Y: PartialOrd + 'a> PointCollection<'a, (X, Y)> for &'a CandleStick<X, Y> {
     type Borrow = &'a (X, Y);
     type IntoIter = &'a [(X, Y)];
     fn point_iter(self) -> &'a [(X, Y)] {
@@ -52,7 +52,7 @@ impl<'b, 'a, X: 'a, Y: PartialOrd + 'a> PointCollection<'a, (X, Y)> for &'a Cand
     }
 }
 
-impl<'a, X: 'a, Y: 'a + PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<'a, X, Y> {
+impl<X, Y: PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<X, Y> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         points: I,
@@ -69,13 +69,13 @@ impl<'a, X: 'a, Y: 'a + PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleS
                 self.width as i32 - self.width as i32 / 2,
             );
 
-            backend.draw_line(points[0], points[1], &Box::new(self.style.color))?;
-            backend.draw_line(points[2], points[3], &Box::new(self.style.color))?;
+            backend.draw_line(points[0], points[1], &self.style.color)?;
+            backend.draw_line(points[2], points[3], &self.style.color)?;
 
             points[0].0 -= l;
             points[3].0 += r;
 
-            backend.draw_rect(points[0], points[3], &Box::new(self.style.color), fill)?;
+            backend.draw_rect(points[0], points[3], &self.style.color, fill)?;
         }
         Ok(())
     }

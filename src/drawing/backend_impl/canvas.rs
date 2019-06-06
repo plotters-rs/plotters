@@ -3,7 +3,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc, FontTransform};
+use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
 
 /// The backend that is drawing on the HTML canvas
 /// TODO: Support double bufferring
@@ -53,7 +53,7 @@ impl CanvasBackend {
     }
 }
 
-fn make_canvas_color<C: Color>(color: &C) -> JsValue {
+fn make_canvas_color(color: RGBAColor) -> JsValue {
     let (r, g, b) = color.rgb();
     let a = color.alpha();
     format!("rgba({},{},{},{})", r, g, b, a).into()
@@ -74,10 +74,10 @@ impl DrawingBackend for CanvasBackend {
         Ok(())
     }
 
-    fn draw_pixel<C: Color>(
+    fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        style: &C,
+        style: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<CanvasError>> {
         if style.alpha() == 0.0 {
             return Ok(());
@@ -198,12 +198,12 @@ impl DrawingBackend for CanvasBackend {
         Ok(())
     }
 
-    fn draw_text<'b, C: Color>(
+    fn draw_text<'b>(
         &mut self,
         text: &str,
         font: &FontDesc<'b>,
         pos: BackendCoord,
-        color: &C,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         if color.alpha() == 0.0 {
             return Ok(());
@@ -234,7 +234,8 @@ impl DrawingBackend for CanvasBackend {
         }
 
         self.context.set_text_baseline("bottom");
-        self.context.set_fill_style(&make_canvas_color(color));
+        self.context
+            .set_fill_style(&make_canvas_color(color.clone()));
         self.context
             .set_font(&format!("{}px {}", font.get_size(), font.get_name()));
         self.context

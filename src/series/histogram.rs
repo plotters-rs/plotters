@@ -8,21 +8,21 @@ use crate::element::Rectangle;
 use crate::style::ShapeStyle;
 
 /// The series that aggregate data into a histogram
-pub struct Histogram<'a, XR: DescreteRanged, Y: AddAssign<Y> + Default>
+pub struct Histogram<XR: DescreteRanged, Y: AddAssign<Y> + Default>
 where
     XR::ValueType: Eq + Hash + Default,
 {
-    style: ShapeStyle<'a>,
+    style: ShapeStyle,
     x_margin: u32,
     iter: IntoIter<XR::ValueType, Y>,
     _p: PhantomData<XR>,
 }
 
-impl<'a, XR: DescreteRanged, Y: AddAssign<Y> + Default> Histogram<'a, XR, Y>
+impl<XR: DescreteRanged, Y: AddAssign<Y> + Default> Histogram<XR, Y>
 where
     XR::ValueType: Eq + Hash + Default,
 {
-    pub fn new<S: Into<ShapeStyle<'a>>, I: IntoIterator<Item = (XR::ValueType, Y)>>(
+    pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (XR::ValueType, Y)>>(
         iter: I,
         x_margin: u32,
         style: S,
@@ -40,11 +40,11 @@ where
     }
 }
 
-impl<'a, XR: DescreteRanged, Y: AddAssign<Y> + Default> Iterator for Histogram<'a, XR, Y>
+impl<XR: DescreteRanged, Y: AddAssign<Y> + Default> Iterator for Histogram<XR, Y>
 where
     XR::ValueType: Eq + Hash + Default,
 {
-    type Item = Rectangle<'a, (XR::ValueType, Y)>;
+    type Item = Rectangle<(XR::ValueType, Y)>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((x, y)) = self.iter.next() {
             let nx = XR::next_value(&x);

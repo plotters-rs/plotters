@@ -109,7 +109,10 @@ impl<'a> FontDesc<'a> {
 
     /// Set the color of the font and return the result text style object
     pub fn color<C: Color>(&'a self, color: &'a C) -> TextStyle<'a> {
-        TextStyle { font: self, color }
+        TextStyle {
+            font: self,
+            color: color.to_rgba(),
+        }
     }
 
     /// Get the name of the font
