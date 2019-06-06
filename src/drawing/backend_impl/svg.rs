@@ -8,7 +8,7 @@ use svg::Document;
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, FontDesc, FontTransform};
 
-use std::io::Error;
+use std::io::{Cursor, Error};
 use std::path::Path;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
@@ -20,9 +20,14 @@ fn make_svg_opacity<C: Color>(color: &C) -> String {
     return format!("{}", color.alpha());
 }
 
+enum Target<'a> {
+    File(&'a Path),
+    Buffer(Cursor<&'a mut Vec<u8>>),
+}
+
 /// The SVG image drawing backend
 pub struct SVGBackend<'a> {
-    path: &'a Path,
+    target: Target<'a>,
     size: (u32, u32),
     document: Option<Document>,
     saved: bool,
@@ -38,7 +43,17 @@ impl<'a> SVGBackend<'a> {
     /// Create a new SVG drawing backend
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, size: (u32, u32)) -> Self {
         Self {
-            path: path.as_ref(),
+            target: Target::File(path.as_ref()),
+            size,
+            document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
+            saved: false,
+        }
+    }
+
+    /// Create a new SVG drawing backend and store the document into a u8 buffer
+    pub fn with_buffer(buf: &'a mut Vec<u8>, size: (u32, u32)) -> Self {
+        Self {
+            target: Target::Buffer(Cursor::new(buf)),
             size,
             document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
             saved: false,
@@ -58,9 +73,15 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     }
 
     fn present(&mut self) -> Result<(), DrawingErrorKind<Error>> {
-        svg::save(self.path, self.document.as_ref().unwrap())
-            .map_err(DrawingErrorKind::DrawingError)?;
-        self.saved = true;
+        if !self.saved {
+            match self.target {
+                Target::File(path) => svg::save(path, self.document.as_ref().unwrap())
+                    .map_err(DrawingErrorKind::DrawingError)?,
+                Target::Buffer(ref mut w) => svg::write(w, self.document.as_ref().unwrap())
+                    .map_err(DrawingErrorKind::DrawingError)?,
+            }
+            self.saved = true;
+        }
         Ok(())
     }
 
