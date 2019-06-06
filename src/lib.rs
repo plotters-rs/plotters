@@ -366,6 +366,9 @@ pub mod element;
 pub mod series;
 pub mod style;
 
+#[cfg(feature = "evcxr")]
+pub mod evcxr;
+
 #[cfg(test)]
 pub use crate::drawing::create_mocked_drawing_area;
 
@@ -399,4 +402,7 @@ pub mod prelude {
     /// - `D`: The drawing backend type
     pub type DrawResult<T, D: DrawingBackend> =
         Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
+
+    #[cfg(feature = "evcxr")]
+    pub use crate::evcxr::start_render;
 }

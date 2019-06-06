@@ -30,3 +30,4 @@ wasm-bindgen = "0.2.43"
 default = ["bitmap", "svg", "chrono"]
 bitmap = ["image"]
 datetime = ["chrono"]
+evcxr = ["svg"]
