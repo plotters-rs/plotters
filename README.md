@@ -3,11 +3,9 @@
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
 </a>
-
 <a href="https://docs.rs/plotters">
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
-
 <a href="https://plumberserver.com/plotters-docs/plotters">
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
@@ -119,7 +117,7 @@ let figure = evcxr_figure((640, 480), |root| {
 figure
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif)
+<img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" width="450px"></img>
 
 ## Motivation of Plotting in Rust
 
