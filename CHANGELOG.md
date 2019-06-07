@@ -3,7 +3,7 @@
 ## Plotters development (?)
 
 ### Added
-- Add relative sizing by added function `DrawingArea::relative_height` and `DrawingArea::relative_width`.
+- Add relative sizing by added function `DrawingArea::relative_to_height` and `DrawingArea::relative_to_width`.
 
 ## Plotters 0.1.14 (2019-06-06)
 

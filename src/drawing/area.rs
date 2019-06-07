@@ -197,12 +197,12 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     }
 
     /// Compute the relative size based on the drawing area's height
-    pub fn relative_height(&self, p: f64) -> f64 {
+    pub fn relative_to_height(&self, p: f64) -> f64 {
         f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.min(1.0).max(0.0))
     }
 
     /// Compute the relative size based on the drawing area's width
-    pub fn relative_width(&self, p: f64) -> f64 {
+    pub fn relative_to_width(&self, p: f64) -> f64 {
         f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.min(1.0).max(0.0))
     }
 
