@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters Development (?)
+## Plotters 0.1.14 (2019-06-06)
 
 ### Added
 - Font is now support rotation transformation. Use `FontDesc::transform` to apply an rotation to transformation. For example, `font.transform(FontTransform::Rotate90)`.
