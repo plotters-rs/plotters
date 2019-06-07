@@ -169,13 +169,15 @@ where
             .clone()
             .unwrap_or_else(|| (&default_axis_color).into());
 
-        let label_style =
-            unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.label_style.clone()) }
-                .unwrap_or_else(|| default_label_font.into());
+        let label_style = self
+            .label_style
+            .clone()
+            .unwrap_or_else(|| default_label_font.into());
 
-        let axis_desc_style =
-            unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.axis_desc_style.clone()) }
-                .unwrap_or_else(|| label_style.clone());
+        let axis_desc_style = self
+            .axis_desc_style
+            .clone()
+            .unwrap_or_else(|| label_style.clone());
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
