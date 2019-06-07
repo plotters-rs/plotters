@@ -1,5 +1,10 @@
 # Changelog
 
+## Plotters development (?)
+
+### Added
+- Add relative sizing by added function `DrawingArea::relative_height` and `DrawingArea::relative_width`.
+
 ## Plotters 0.1.14 (2019-06-06)
 
 ### Added
@@ -33,7 +38,3 @@ use `Text::new("text".to_string(),...)` for owned text element and `Text::new("t
 ### Fix
 - Changed the oepn-close pattern to a `present` function which indicates the end of drawing one frame
 - Fix the but that `ChartBuilder::title` and `ChartBuilder::margin` cannot be called at the same time && `build_ranged` now returning a result.
-
-## Plotters 0.1.12 (2019-05-25)
-
-The unstable version

@@ -162,6 +162,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(&mut self.series_anno[idx])
     }
 
+    // TODO: Remove the hardcoded size
     #[allow(clippy::too_many_arguments)]
     pub(super) fn draw_mesh<FmtLabel>(
         &mut self,
