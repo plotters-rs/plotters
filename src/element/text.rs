@@ -43,7 +43,7 @@ impl<'a, Coord: 'a, DB: DrawingBackend, T: Borrow<str>> Drawable<DB> for Text<'a
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some(a) = points.next() {
-            return backend.draw_text(self.text.borrow(), self.style.font, a, &self.style.color);
+            return backend.draw_text(self.text.borrow(), &self.style.font, a, &self.style.color);
         }
         Ok(())
     }
@@ -118,7 +118,7 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
 fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     text: &'a str,
     max_width: u32,
-    font: &'a FontDesc<'a>,
+    font: FontDesc<'a>,
     mut func: F,
 ) {
     for line in text.lines() {
@@ -189,7 +189,9 @@ impl<'a, Coord> MultiLineText<'a, Coord, &'a str> {
         let text = text.into();
         let mut ret = MultiLineText::new(pos, style);
 
-        layout_multiline_text(text, max_width, ret.style.font, |l| ret.push_line(l));
+        layout_multiline_text(text, max_width, ret.style.font.clone(), |l| {
+            ret.push_line(l)
+        });
         ret
     }
 }
@@ -211,7 +213,7 @@ impl<'a, Coord> MultiLineText<'a, Coord, String> {
     ) -> Self {
         let mut ret = MultiLineText::new(pos, style);
 
-        layout_multiline_text(text.as_str(), max_width, ret.style.font, |l| {
+        layout_multiline_text(text.as_str(), max_width, ret.style.font.clone(), |l| {
             ret.push_line(l.to_string())
         });
         ret
@@ -238,7 +240,7 @@ impl<'a, Coord: 'a, DB: DrawingBackend, T: Borrow<str>> Drawable<DB>
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some(a) = points.next() {
             for (point, text) in self.layout_lines(a).zip(self.lines.iter()) {
-                backend.draw_text(text.borrow(), self.style.font, point, &self.style.color)?;
+                backend.draw_text(text.borrow(), &self.style.font, point, &self.style.color)?;
             }
         }
         Ok(())

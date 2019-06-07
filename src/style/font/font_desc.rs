@@ -42,6 +42,7 @@ impl FontTransform {
 }
 
 /// Describes a font
+#[derive(Clone)]
 pub struct FontDesc<'a> {
     size: f64,
     name: &'a str,
@@ -108,9 +109,9 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Set the color of the font and return the result text style object
-    pub fn color<C: Color>(&'a self, color: &'a C) -> TextStyle<'a> {
+    pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
         TextStyle {
-            font: self,
+            font: self.clone(),
             color: color.to_rgba(),
         }
     }

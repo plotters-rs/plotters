@@ -368,7 +368,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         self.backend_ops(|b| {
             b.draw_text(
                 text,
-                style.font,
+                &style.font,
                 (self.rect.x0 + padding, self.rect.y0 + 5),
                 &style.color,
             )
@@ -396,7 +396,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         self.backend_ops(|b| {
             b.draw_text(
                 text,
-                style.font,
+                &style.font,
                 (pos.0 + self.rect.x0, pos.1 + self.rect.y0),
                 &style.color,
             )

@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀
+# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -9,12 +9,12 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 <a href="https://plumberserver.com/plotters-docs/plotters">
-    <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
+	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, including bitmap, vector graph and WebAssembly.
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, including bitmap, vector graph and WebAssembly. 
 
 ## Gallery
 
@@ -83,14 +83,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("examples/outputs/0.png", (640, 480)).into_drawing_area();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &("Arial", 50).into_font())
+        .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
         .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
 
     chart.configure_mesh().draw()?;
-
+ 
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
         &Red,
@@ -124,7 +124,7 @@ use plotters::prelude::*;
 let figure = evcxr_figure((640, 480), |root| {
     root.fill(&White);
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &("Arial", 50).into_font())
+        .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
@@ -159,15 +159,15 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Fast** If you need rendering a figure with trillions of data points,
-Rust is a good choice. Rust's performance allows you to combine data processing step
+* **Fast** If you need rendering a figure with trillions of data points, 
+Rust is a good choice. Rust's performance allows you to combine data processing step 
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization
-within a single program. You can also integrate the
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
+within a single program. You can also integrate the 
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## What types of figure are supported?
@@ -182,10 +182,10 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 
 ## Plotting on HTML5 canvas
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
 To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Concepts by examples
@@ -261,7 +261,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.
@@ -279,12 +279,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         0f32..1f32,
         (0..640, 0..480),
     ));
-    let font = ("Arial", 15.0).into_font();
 
     let dot_and_label = |x: f32, y: f32| {
         return EmptyElement::at((x, y))
             + Circle::new((0, 0), 3, ShapeStyle::from(&Black).filled())
-            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
+            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), ("Arial", 15.0).into_font());
     };
 
     root.draw(&dot_and_label(0.5, 0.6))?;
@@ -310,11 +309,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&White);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
-    let font: FontDesc = ("Arial", 40.0).into();
-    // Create the chart object
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
-        .caption("This is our first plot", &font)
+        .caption("This is our first plot", ("Arial",40).into_font())
         // Set the size of the label region
         .x_label_area_size(20)
         .y_label_area_size(40)
@@ -332,7 +329,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
 
     // And we can draw something in the drawing area
-    let smaller_font = font.resize(10.0);
     chart.draw_series(LineSeries::new(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
         &Red,
@@ -345,7 +341,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
-            + Text::new(format!("{:?}", c), (10, 0), &smaller_font);
+            + Text::new(format!("{:?}", c), (10, 0), ("Arial", 10).into_font());
         },
     ))?;
     Ok(())

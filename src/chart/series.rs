@@ -97,7 +97,7 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let drawing_area = self.target.plotting_area().strip_coord_spec();
         let default_font = ("Arial", 12).into_font();
-        let default_style: TextStyle = (&default_font).into();
+        let default_style: TextStyle = default_font.into();
 
         let font = {
             let mut temp = None;

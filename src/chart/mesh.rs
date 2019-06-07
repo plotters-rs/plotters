@@ -171,7 +171,7 @@ where
 
         let label_style =
             unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.label_style.clone()) }
-                .unwrap_or_else(|| (&default_label_font).into());
+                .unwrap_or_else(|| default_label_font.into());
 
         let axis_desc_style =
             unsafe { std::mem::transmute::<_, Option<TextStyle>>(self.axis_desc_style.clone()) }

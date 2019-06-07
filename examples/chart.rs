@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root_area.fill(&White)?;
 
     let root_area = root_area
-        .titled("Image Title", &("Arial", 60).into_font())?
+        .titled("Image Title", ("Arial", 60).into_font())?
         .margin(0, 0, 0, 20);
 
     let (upper, lower) = root_area.split_vertically(512);
@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cc = ChartBuilder::on(&upper)
         .x_label_area_size(50)
         .y_label_area_size(60)
-        .caption("Sine and Cosine", &("Arial", 40).into_font())
+        .caption("Sine and Cosine", ("Arial", 40).into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
     cc.configure_mesh()
@@ -57,7 +57,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ))?;*/
 
     // Otherwise you can use a function to construct your pointing element yourself
-    let point_font = ("Arial", 15).into_font();
     cc.draw_series(PointSeries::of_element(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
@@ -65,7 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|coord, size, style| {
             EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
-                + Text::new(format!("{:?}", coord), (0, 15), &point_font)
+                + Text::new(format!("{:?}", coord), (0, 15), ("Arial", 15).into_font())
         },
     ))?;
 
@@ -75,7 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut cc = ChartBuilder::on(&drawing_area)
             .x_label_area_size(50)
             .y_label_area_size(60)
-            .caption(format!("y = x^{}", 1 + 2 * idx), &("Arial", 40).into_font())
+            .caption(format!("y = x^{}", 1 + 2 * idx), ("Arial", 40).into_font())
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 

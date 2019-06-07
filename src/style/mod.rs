@@ -4,7 +4,6 @@
 mod color;
 mod font;
 mod palette;
-use std::borrow::Borrow;
 
 pub use color::{
     Black, Blue, Color, Cyan, Green, HSLColor, Magenta, PaletteColor, RGBAColor, RGBColor, Red,
@@ -17,7 +16,7 @@ pub use palette::*;
 /// Style of a text
 #[derive(Clone)]
 pub struct TextStyle<'a> {
-    pub font: &'a FontDesc<'a>,
+    pub font: FontDesc<'a>,
     pub color: RGBAColor,
 }
 
@@ -25,8 +24,15 @@ impl<'a> TextStyle<'a> {
     /// Determine the color of the style
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         Self {
-            font: self.font,
+            font: self.font.clone(),
             color: color.to_rgba(),
+        }
+    }
+
+    pub fn transform(&self, trans: FontTransform) -> Self {
+        Self {
+            font: self.font.clone().transform(trans),
+            color: self.color.clone(),
         }
     }
 }
@@ -38,10 +44,10 @@ impl<'a, 'b: 'a> Into<TextStyle<'a>> for &'b TextStyle<'a> {
     }
 }
 
-impl<'a, T: Borrow<FontDesc<'a>>> From<&'a T> for TextStyle<'a> {
-    fn from(font: &'a T) -> Self {
+impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
+    fn from(font: T) -> Self {
         Self {
-            font: font.borrow(),
+            font: font.into(),
             color: Black.to_rgba(),
         }
     }

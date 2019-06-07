@@ -277,11 +277,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
                 let top = (th - w) / 2;
 
-                let mut y_style = axis_desc_style.clone();
-                let y_font = axis_desc_style.font.transform(FontTransform::Rotate270);
-                y_style.font = &y_font;
-
-                yl.draw_text(&text, &y_style, (0, top as i32))?;
+                yl.draw_text(
+                    &text,
+                    &axis_desc_style.transform(FontTransform::Rotate270),
+                    (0, top as i32),
+                )?;
             }
         }
 

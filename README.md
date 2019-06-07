@@ -52,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("examples/outputs/0.png", (640, 480)).into_drawing_area();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &("Arial", 50).into_font())
+        .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
@@ -93,7 +93,7 @@ use plotters::prelude::*;
 let figure = evcxr_figure((640, 480), |root| {
     root.fill(&White);
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", &("Arial", 50).into_font())
+        .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
@@ -248,12 +248,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         0f32..1f32,
         (0..640, 0..480),
     ));
-    let font = ("Arial", 15.0).into_font();
 
     let dot_and_label = |x: f32, y: f32| {
         return EmptyElement::at((x, y))
             + Circle::new((0, 0), 3, ShapeStyle::from(&Black).filled())
-            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), &font);
+            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), ("Arial", 15.0).into_font());
     };
 
     root.draw(&dot_and_label(0.5, 0.6))?;
@@ -279,11 +278,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&White);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
-    let font: FontDesc = ("Arial", 40.0).into();
-    // Create the chart object
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
-        .caption("This is our first plot", &font)
+        .caption("This is our first plot", ("Arial",40).into_font())
         // Set the size of the label region
         .x_label_area_size(20)
         .y_label_area_size(40)
@@ -301,7 +298,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
 
     // And we can draw something in the drawing area
-    let smaller_font = font.resize(10.0);
     chart.draw_series(LineSeries::new(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
         &Red,
@@ -314,7 +310,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
-            + Text::new(format!("{:?}", c), (10, 0), &smaller_font);
+            + Text::new(format!("{:?}", c), (10, 0), ("Arial", 10).into_font());
         },
     ))?;
     Ok(())
