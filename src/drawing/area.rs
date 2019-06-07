@@ -119,17 +119,14 @@ type DrawingAreaError<T: DrawingBackend> = DrawingAreaErrorKind<T::ErrorType>;
 
 impl<DB: DrawingBackend> From<DB> for DrawingArea<DB, Shift> {
     fn from(backend: DB) -> Self {
-        let (x1, y1) = backend.get_size();
-        Self {
-            rect: Rect {
-                x0: 0,
-                y0: 0,
-                x1: x1 as i32,
-                y1: y1 as i32,
-            },
-            backend: Rc::new(RefCell::new(backend)),
-            coord: Shift((0, 0)),
-        }
+        Self::with_rc_cell(Rc::new(RefCell::new(backend)))
+    }
+
+}
+
+impl <'a, DB: DrawingBackend> From<&'a Rc<RefCell<DB>>> for DrawingArea<DB, Shift> {
+    fn from(backend: &'a Rc<RefCell<DB>>) -> Self {
+        Self::with_rc_cell(backend.clone())
     }
 }
 
@@ -174,6 +171,7 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
+
     /// Get the left upper conner of this area in the drawing backend
     pub fn get_base_pixel(&self) -> BackendCoord {
         (self.rect.x0, self.rect.y0)
@@ -277,6 +275,21 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
+
+    fn with_rc_cell(backend: Rc<RefCell<DB>>) -> Self {
+        let (x1, y1) = RefCell::borrow(backend.borrow()).get_size();
+        Self {
+            rect: Rect {
+                x0: 0,
+                y0: 0,
+                x1: x1 as i32,
+                y1: y1 as i32,
+            },
+            backend,
+            coord: Shift((0, 0)),
+        }
+    }
+
     /// Shrink the region, note all the locaitions are in guest coordinate
     pub fn shrink(
         mut self,
