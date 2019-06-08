@@ -17,3 +17,8 @@ pub use canvas::CanvasBackend;
 mod mocked;
 #[cfg(test)]
 pub use mocked::{create_mocked_drawing_area, MockedBackend};
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "piston"))]
+mod piston;
+#[cfg(all(not(target_arch = "wasm32"), feature = "piston"))]
+pub use piston::{draw_piston_window, PistonBackend};

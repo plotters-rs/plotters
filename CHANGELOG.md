@@ -4,6 +4,7 @@
 
 ### Added
 - Add relative sizing by added function `DrawingArea::relative_to_height` and `DrawingArea::relative_to_width`.
+- Added piston backend, now we can render plot on a window and dynamically render the plot
 
 ### Improved
 - Creating drawing area with `&Rc<RefCell<DrawingBackend>>`. Previously, the drawing area creation requires take over the drawing backend's ownership. But sometimes the drawing backend may have additonal options. With new API, this can be done by putting the backend drawing area into smart pointers, thus, the drawing backend is accessible after creates the root drawing area.
