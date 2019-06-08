@@ -9,7 +9,7 @@ const FPS: u32 = 1;
 const LENGTH: u32 = 20;
 const N_DATA_POINTS: usize = (FPS * LENGTH) as usize;
 fn main() {
-    let mut window: PistonWindow = WindowSettings::new("Realtime CPU Usage", [800, 400])
+    let mut window: PistonWindow = WindowSettings::new("Realtime CPU Usage", [450, 300])
         .samples(4)
         .build()
         .unwrap();

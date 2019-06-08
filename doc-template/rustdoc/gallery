@@ -46,3 +46,23 @@
         <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">[code]</a>
     </div>
 </div>
+
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Interactive Plotting with Jupyter-evcxr
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif">
+        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		Realtime rendering with Piston Window
+		<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
+    </div>
+</div>

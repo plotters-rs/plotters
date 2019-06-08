@@ -35,6 +35,7 @@ $$examples/quick_start.rs$$
 
 ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
 
+
 ## Trying with Jupyter evcxr Kernel Interactively
 
 Plotters now supports integrate with `evcxr` and is able to interactively drawing plots in Jupyter Notebook.
@@ -76,7 +77,7 @@ figure
 
 <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" width="450px"></img>
 
-## Motivation of Plotting in Rust
+## Plotting in Rust
 
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
 But Rust is one of the best languages fits the need.
@@ -96,6 +97,15 @@ figure rendering code into your application handling a huge amount of data and v
 * **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
+## Plotting on HTML5 canvas with WASM Backend
+
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
+`CanvasBackend` instead of other backend and all other API remains the same!
+
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+
+
 ## What types of figure are supported?
 
 Plotters is not limited to any specific type of figure.
@@ -105,14 +115,6 @@ But Plotters provides some builtin figure types for convenience.
 Currently, we support line series, point series, candlestick series, and histogram.
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
-
-## Plotting on HTML5 canvas
-
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
-`CanvasBackend` instead of other backend and all other API remains the same!
-
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 ## Concepts by examples
 

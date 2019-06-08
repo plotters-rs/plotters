@@ -17,3 +17,12 @@
 <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
+
+<a href="https://github.com/38/plotters#trying-with-jupyter-evcxr-kernel-interactively">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem" width=200px></img>
+</a>
+
+
+<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">
+    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem" width=200px></img>
+</a>
