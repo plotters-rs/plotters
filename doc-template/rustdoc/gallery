@@ -53,7 +53,7 @@
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        Interactive Plotting with Jupyter-evcxr
+        Jupyter Support
     </div>
 </div>
 
@@ -62,7 +62,7 @@
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-		Realtime rendering with Piston Window
+		Realtime Rendering
 		<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
     </div>
 </div>

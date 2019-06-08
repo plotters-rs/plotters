@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -9,13 +9,13 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 <a href="https://plumberserver.com/plotters-docs/plotters">
-	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
+    <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
 
 *Please note: This library is in a very early stage. I am trying my best to stabilize the APIs and improving the overall quality. APIs may change at this time.*
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
-including bitmap, vector graph, piston window and WebAssembly. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends,
+including bitmap, vector graph, piston window and WebAssembly.
 
 ## Gallery
 
@@ -74,7 +74,7 @@ including bitmap, vector graph, piston window and WebAssembly.
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        Interactive Plotting with Jupyter-evcxr
+        Jupyter Support
     </div>
 </div>
 
@@ -83,10 +83,29 @@ including bitmap, vector graph, piston window and WebAssembly.
         <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-		Realtime rendering with Piston Window
-		<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
+        Realtime Rendering
+        <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
     </div>
 </div>
+
+## Table of Content
+  * [Gallery](#gallery)
+  * [Quick Start](#quick-start)
+  * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
+  * [Plotting in Rust](#plotting-in-rust)
+  * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
+  * [What types of figure are supported?](#what-types-of-figure-are-supported-)
+  * [Concepts by examples](#concepts-by-examples)
+    + [Drawing Backends](#drawing-backends)
+    + [Drawing Area](#drawing-area)
+    + [Elements](#elements)
+    + [Composable Elements](#composable-elements)
+    + [Chart Context](#chart-context)
+  * [Misc](#misc)
+    + [Development Version](#development-version)
+    + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries----turning-off-backends)
+
+
 
 ## Quick Start
 
@@ -111,7 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
 
     chart.configure_mesh().draw()?;
- 
+
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
         &Red,
@@ -181,23 +200,23 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Fast** If you need rendering a figure with trillions of data points, 
-Rust is a good choice. Rust's performance allows you to combine data processing step 
+* **Fast** If you need rendering a figure with trillions of data points,
+Rust is a good choice. Rust's performance allows you to combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
-within a single program. You can also integrate the 
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+within a single program. You can also integrate the
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## Plotting on HTML5 canvas with WASM Backend
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 
@@ -284,7 +303,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.

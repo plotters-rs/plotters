@@ -46,6 +46,25 @@ including bitmap, vector graph, piston window and WebAssembly.
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
+## Table of Content
+  * [Gallery](#gallery)
+  * [Quick Start](#quick-start)
+  * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
+  * [Plotting in Rust](#plotting-in-rust)
+  * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
+  * [What types of figure are supported?](#what-types-of-figure-are-supported-)
+  * [Concepts by examples](#concepts-by-examples)
+    + [Drawing Backends](#drawing-backends)
+    + [Drawing Area](#drawing-area)
+    + [Elements](#elements)
+    + [Composable Elements](#composable-elements)
+    + [Chart Context](#chart-context)
+  * [Misc](#misc)
+    + [Development Version](#development-version)
+    + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries----turning-off-backends)
+
+
+
 ## Quick Start
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
