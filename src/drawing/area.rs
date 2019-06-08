@@ -89,7 +89,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
 
 /// The error description of any drawing area API
 #[derive(Debug)]
-pub enum DrawingAreaErrorKind<E: Error> {
+pub enum DrawingAreaErrorKind<E: Error + Send + Sync> {
     /// The error is due to drawing backend failure
     BackendError(DrawingErrorKind<E>),
     /// We are not able to get the mutable reference of the backend,
@@ -100,7 +100,7 @@ pub enum DrawingAreaErrorKind<E: Error> {
     LayoutError,
 }
 
-impl<E: Error> std::fmt::Display for DrawingAreaErrorKind<E> {
+impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             DrawingAreaErrorKind::BackendError(e) => write!(fmt, "backend error: {}", e),
@@ -112,7 +112,7 @@ impl<E: Error> std::fmt::Display for DrawingAreaErrorKind<E> {
     }
 }
 
-impl<E: Error> Error for DrawingAreaErrorKind<E> {}
+impl<E: Error + Send + Sync> Error for DrawingAreaErrorKind<E> {}
 
 #[allow(type_alias_bounds)]
 type DrawingAreaError<T: DrawingBackend> = DrawingAreaErrorKind<T::ErrorType>;

@@ -6,14 +6,14 @@ pub type BackendCoord = (i32, i32);
 
 /// The error produced by a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Error> {
+pub enum DrawingErrorKind<E: Error + Send + Sync> {
     /// A drawing backend error
     DrawingError(E),
     /// A font rendering error
     FontError(FontError),
 }
 
-impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
+impl<E: Error + Send + Sync> std::fmt::Display for DrawingErrorKind<E> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             DrawingErrorKind::DrawingError(e) => write!(fmt, "Drawing backend error: {}", e),
@@ -22,7 +22,7 @@ impl<E: Error> std::fmt::Display for DrawingErrorKind<E> {
     }
 }
 
-impl<E: Error> Error for DrawingErrorKind<E> {}
+impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
 
 /// The style data for the backend drawing API
 pub trait BackendStyle {
@@ -50,7 +50,7 @@ impl<T: Color> BackendStyle for T {
 ///  will use the pixel-based approach to draw other types of low-level shapes.
 pub trait DrawingBackend {
     /// The error type reported by the backend
-    type ErrorType: Error;
+    type ErrorType: Error + Send + Sync;
 
     /// Get the dimension of the drawing backend in pixel
     fn get_size(&self) -> (u32, u32);
