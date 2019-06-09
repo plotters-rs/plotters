@@ -1,0 +1,16 @@
+language: rust
+
+language: rust
+
+rust:
+    - stable
+    - nightly
+    - beta
+
+os:
+    - linux
+
+script:
+    - env
+    - cargo test
+
