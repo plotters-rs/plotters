@@ -11,7 +11,7 @@
 </a>
 
 <a href="https://travis-ci.org/38/plotters">
-	<img style="display: inline! important" src=https://travis-ci.org/38/plotters.svg?branch=master"></img>
+	<img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
 </a>
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
