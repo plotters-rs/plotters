@@ -10,6 +10,10 @@
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
 
+<a href="https://travis-ci.org/38/plotters">
+	<img style="display: inline! important" src=https://travis-ci.org/38/plotters.svg?branch=master"></img>
+</a>
+
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
