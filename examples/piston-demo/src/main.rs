@@ -5,7 +5,7 @@ use systemstat::System;
 
 use std::collections::vec_deque::VecDeque;
 
-const FPS: u32 = 1;
+const FPS: u32 = 10;
 const LENGTH: u32 = 20;
 const N_DATA_POINTS: usize = (FPS * LENGTH) as usize;
 fn main() {
@@ -15,10 +15,11 @@ fn main() {
         .unwrap();
     let sys = System::new();
     window.set_max_fps(FPS as u64);
-    let mut load_measurement = sys.cpu_load().unwrap();
+    let mut load_measurement:Vec<_> = (0..FPS).map(|_| sys.cpu_load().unwrap()).collect();
+    let mut epoch = 0;
     let mut data = vec![];
     while let Some(_) = draw_piston_window(&mut window, |b| {
-        let cpu_loads = load_measurement.done()?;
+        let cpu_loads = load_measurement[epoch%FPS as usize].done()?;
 
         let root = b.into_drawing_area();
         root.fill(&White)?;
@@ -69,7 +70,8 @@ fn main() {
             .border_style(&Black)
             .draw()?;
 
-        load_measurement = sys.cpu_load()?;
+        load_measurement[epoch % FPS as usize] = sys.cpu_load()?;
+        epoch += 1;
         Ok(())
     }) {}
 }

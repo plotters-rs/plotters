@@ -44,7 +44,8 @@ including bitmap, vector graph, piston window and WebAssembly.
     <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
-## Table of Content
+
+## Table of Contents
   * [Gallery](#gallery)
   * [Quick Start](#quick-start)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
@@ -60,8 +61,6 @@ including bitmap, vector graph, piston window and WebAssembly.
   * [Misc](#misc)
     + [Development Version](#development-version)
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries----turning-off-backends)
-
-
 
 ## Quick Start
 

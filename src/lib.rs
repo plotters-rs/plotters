@@ -86,7 +86,8 @@ including bitmap, vector graph, piston window and WebAssembly.
     </div>
 </div>
 
-## Table of Content
+
+## Table of Contents
   * [Gallery](#gallery)
   * [Quick Start](#quick-start)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
@@ -102,8 +103,6 @@ including bitmap, vector graph, piston window and WebAssembly.
   * [Misc](#misc)
     + [Development Version](#development-version)
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries----turning-off-backends)
-
-
 
 ## Quick Start
 
