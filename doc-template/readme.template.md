@@ -82,6 +82,26 @@ figure
 
 <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" width="450px"></img>
 
+## Interactive Tutorial with Jupyter Notebook
+
+*This tutorial is now working in progress and isn't complete*
+
+Thanks to the evcxr, now we have an interactive tutorial for Plotters!
+To use the interactive notebook, you must have Jupyter and evcxr installed on your computer. 
+Follow the instruction on [this page](https://github.com/google/evcxr/tree/master/evcxr_jupyter) below to install it.
+
+After that, you should be able to start your Jupyer server locally and load the tutorial!
+
+```bash
+git clone https://github.com/38/plotters-doc-data
+cd plotteres-doc-data
+jupyter notebook
+```
+
+And select the notebook called `evcxr-jupyter-integration.ipynb`.
+
+Also, there's a static HTML version of this notebook available at the [this location](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+
 ## Plotting in Rust
 
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages.
