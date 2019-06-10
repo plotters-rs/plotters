@@ -6,3 +6,4 @@ backup/*
 **/Cargo.lock
 **/target
 examples/wasm-demo/www/pkg
+examples/.ipynb_checkpoints/
