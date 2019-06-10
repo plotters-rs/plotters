@@ -1,6 +1,7 @@
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/histogram.png", (640, 480)).into_drawing_area();
+    let root =
+        BitMapBackend::new("plotters-doc-data/histogram.png", (640, 480)).into_drawing_area();
 
     root.fill(&White)?;
 
