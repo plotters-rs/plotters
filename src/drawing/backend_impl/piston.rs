@@ -192,7 +192,7 @@ impl<'a, 'b> DrawingBackend for PistonBackend<'a, 'b> {
     }
 }
 
-pub fn draw_piston_window<F: FnOnce(PistonBackend) -> Result<(), Box<std::error::Error>>>(
+pub fn draw_piston_window<F: FnOnce(PistonBackend) -> Result<(), Box<dyn std::error::Error>>>(
     window: &mut PistonWindow,
     draw: F,
 ) -> Option<Event> {
