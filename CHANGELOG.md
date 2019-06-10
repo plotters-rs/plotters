@@ -1,5 +1,20 @@
 # Changelog
 
+## Plotters deveopment (?)
+
+### Added
+
+- More documentation: a Jupyter interactive notebook of Plotters tutorial 
+
+## Plotters 0.2.1 (2019-06-10)
+
+### Improvement
+
+- Move the sample images and other documentaiton data out of this repository.
+
+### Fix
+- Make drawing errors shareable across threads. Otherwise, it causes compile error in some cases. (Thanks to @rkarp)
+
 ## Plotters 0.2.0 (2019-06-08)
 
 ### Added
