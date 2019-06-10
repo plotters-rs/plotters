@@ -20,32 +20,32 @@ including bitmap, vector graph, piston window and WebAssembly.
 ## Gallery
 
 <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/stock.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters#quick-start">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters#trying-with-jupyter-evcxr-kernel-interactively">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" class="galleryItem" width=200px></img>
 </a>
 
 
 <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">
-    <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem" width=200px></img>
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
 
@@ -79,7 +79,7 @@ And the following code draws a quadratic function. `src/main.rs`,
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/0.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
     root.fill(&White)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
@@ -106,7 +106,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png)
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -148,7 +148,7 @@ let figure = evcxr_figure((640, 480), |root| {
 figure
 ```
 
-<img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" width="450px"></img>
+<img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" width="450px"></img>
 
 ## Plotting in Rust
 
@@ -198,7 +198,7 @@ Plotters can use different drawing backends, including SVG, BitMap, and even rea
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a 800*600 bitmap and start drawing
-    let mut backend = BitMapBackend::new("examples/outputs/1.png", (300, 200));
+    let mut backend = BitMapBackend::new("plotters-doc-data/1.png", (300, 200));
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50, 50), (200, 150), &Red, true)?;
@@ -206,7 +206,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/1.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/1.png)
 
 ### Drawing Area
 Plotters uses a concept called drawing area for layout purpose.
@@ -219,7 +219,7 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_drawing_area =
-        BitMapBackend::new("examples/outputs/2.png", (300, 200)).into_drawing_area();
+        BitMapBackend::new("plotters-doc-data/2.png", (300, 200)).into_drawing_area();
     // And we can split the drawing area into 3x3 grid
     let child_drawing_areas = root_drawing_area.split_evenly((3, 3));
     // Then we fill the drawing area with different color
@@ -230,7 +230,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/2.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/2.png)
 
 ### Elements
 
@@ -245,7 +245,7 @@ To learn more about the element system, please read the [element module document
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/3.png", (300, 200)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/3.png", (300, 200)).into_drawing_area();
     root.fill(&White)?;
     // Draw an circle on the drawing area
     root.draw(&Circle::new(
@@ -257,7 +257,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/3.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/3.png)
 
 ### Composable Elements
 
@@ -271,7 +271,7 @@ For example, we can have an element which includes a dot and its coordinate.
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/4.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
 
     root.fill(&RGBColor(240, 200, 200))?;
 
@@ -294,7 +294,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/4.png)
 
 ### Chart Context
 
@@ -306,7 +306,7 @@ of the chart context object.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("examples/outputs/5.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
     root.fill(&White);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
@@ -349,7 +349,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/5.png)
 
 ## Misc
 

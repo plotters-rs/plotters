@@ -3,7 +3,7 @@ use std::ops::Range;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
-        BitMapBackend::new("examples/outputs/mandelbrot.png", (800, 600)).into_drawing_area();
+        BitMapBackend::new("plotters-doc-data/mandelbrot.png", (800, 600)).into_drawing_area();
 
     root.fill(&White)?;
 

@@ -1,0 +1,3 @@
+[submodule "plotters-doc-data"]
+	path = plotters-doc-data
+	url = ./plotters-doc-data

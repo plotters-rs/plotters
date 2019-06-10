@@ -9,7 +9,7 @@ fn parse_time(t: &str) -> Date<Local> {
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = get_data();
-    let root = BitMapBackend::new("examples/outputs/stock.png", (1024, 768)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/stock.png", (1024, 768)).into_drawing_area();
     root.fill(&White)?;
 
     let (to_date, from_date) = (

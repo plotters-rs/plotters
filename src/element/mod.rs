@@ -51,14 +51,14 @@
 
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new(
-            "examples/outputs/element-0.png",
+            "plotters-doc-data/element-0.png",
             (640, 480)
         ).into_drawing_area();
         root.draw(&RedBoxedX((200, 200)))?;
         Ok(())
     }
     ```
-      ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-0.png)
+      ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-0.png)
 
       ## Composable Elements
       You also have an convenient way to build an element that isn't built into the Plotters library by
@@ -72,7 +72,7 @@
     use plotters::prelude::*;
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new(
-            "examples/outputs/element-1.png",
+            "plotters-doc-data/element-1.png",
             (640, 480)
         ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
@@ -83,7 +83,7 @@
         Ok(())
     }
     ```
-    ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-1.png)
+    ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-1.png)
 
     ## Dynamic Elements
     By default, Plotters uses static dispatch for all the elements and series. For example,
@@ -119,7 +119,7 @@
     }
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root =
-            BitMapBackend::new("examples/outputs/element-3.png", (640, 480))
+            BitMapBackend::new("plotters-doc-data/element-3.png", (640, 480))
             .into_drawing_area();
         root.fill(&White)?;
         let mut chart = ChartBuilder::on(&root)
@@ -149,7 +149,7 @@
         Ok(())
     }
     ```
-    ![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/element-3.png)
+    ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-3.png)
 */
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;

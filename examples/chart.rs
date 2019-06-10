@@ -2,7 +2,7 @@ use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area =
-        BitMapBackend::new("examples/outputs/sample.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::new("plotters-doc-data/sample.png", (1024, 768)).into_drawing_area();
 
     root_area.fill(&White)?;
 

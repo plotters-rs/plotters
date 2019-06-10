@@ -38,7 +38,7 @@ And the following code draws a quadratic function. `src/main.rs`,
 $$examples/quick_start.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png)
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -80,7 +80,7 @@ let figure = evcxr_figure((640, 480), |root| {
 figure
 ```
 
-<img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" width="450px"></img>
+<img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" width="450px"></img>
 
 ## Plotting in Rust
 
@@ -130,7 +130,7 @@ Plotters can use different drawing backends, including SVG, BitMap, and even rea
 $$examples/drawing_backends.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/1.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/1.png)
 
 ### Drawing Area
 Plotters uses a concept called drawing area for layout purpose.
@@ -143,7 +143,7 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 $$examples/drawing_area.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/2.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/2.png)
 
 ### Elements
 
@@ -159,7 +159,7 @@ To learn more about the element system, please read the [element module document
 $$examples/elements.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/3.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/3.png)
 
 ### Composable Elements
 
@@ -173,7 +173,7 @@ For example, we can have an element which includes a dot and its coordinate.
 $$examples/composable_elements.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/4.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/4.png)
 
 ### Chart Context
 
@@ -186,7 +186,7 @@ of the chart context object.
 $$examples/chart.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters/master/examples/outputs/5.png)
+![](https://raw.githubusercontent.com/38/plotters-doc-data/master/5.png)
 
 ## Misc
 

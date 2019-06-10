@@ -1,6 +1,6 @@
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/sample.png" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Multiple Plot
@@ -9,8 +9,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/stock.png" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Candlestick Plot
@@ -19,8 +19,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/histogram.png" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
        Histogram
@@ -29,8 +29,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/0.png" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Simple Chart
@@ -38,8 +38,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/mandelbrot.png" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Mandelbrot set
@@ -49,8 +49,8 @@
 
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/evcxr_animation.gif" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Jupyter Support
@@ -58,8 +58,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif">
-        <img src="https://raw.githubusercontent.com/38/plotters/master/examples/outputs/plotters-piston.gif" class="galleryItem"></img>
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
 		Realtime Rendering
