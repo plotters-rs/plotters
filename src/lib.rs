@@ -98,7 +98,7 @@ including bitmap, vector graph, piston window and WebAssembly.
   * [Interactive Tutorial with Jupyter Notebook](#interactive-tutorial-with-jupyter-notebook)
   * [Plotting in Rust](#plotting-in-rust)
   * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
-  * [What types of figure are supported?](#what-types-of-figure-are-supported-)
+  * [What types of figure are supported?](#what-types-of-figure-are-supported)
   * [Concepts by examples](#concepts-by-examples)
     + [Drawing Backends](#drawing-backends)
     + [Drawing Area](#drawing-area)
@@ -107,7 +107,7 @@ including bitmap, vector graph, piston window and WebAssembly.
     + [Chart Context](#chart-context)
   * [Misc](#misc)
     + [Development Version](#development-version)
-    + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries----turning-off-backends)
+    + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
 
 ## Quick Start
 
