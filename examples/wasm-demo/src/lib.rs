@@ -10,7 +10,7 @@ pub use func_plot::draw_func;
 pub use mandelbrot::draw_mandelbrot;
 
 pub fn make_coord_mapping_closure<T: Into<f64> + 'static>(
-    map_func: Option<Box<Fn((i32, i32)) -> Option<(T, T)>>>,
+    map_func: Option<Box<dyn Fn((i32, i32)) -> Option<(T, T)>>>,
 ) -> JsValue {
     if let Some(mapping_func) = map_func {
         let closure = Closure::wrap(Box::new(move |x: i32, y: i32, idx: u32| {
@@ -22,7 +22,7 @@ pub fn make_coord_mapping_closure<T: Into<f64> + 'static>(
             } else {
                 return std::f64::NAN;
             }
-        }) as Box<FnMut(i32, i32, u32) -> f64>);
+        }) as Box<dyn FnMut(i32, i32, u32) -> f64>);
 
         let js_value = closure.as_ref().clone();
         closure.forget();

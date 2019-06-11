@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -9,15 +9,15 @@
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
 <a href="https://plumberserver.com/plotters-docs/plotters">
-	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
+    <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
 
 <a href="https://travis-ci.org/38/plotters">
-	<img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
+    <img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
 </a>
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
-including bitmap, vector graph, piston window and WebAssembly. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends,
+including bitmap, vector graph, piston window and WebAssembly.
 
 Now an interactive Jupyter notebook is avaiable, check the static HTML version and follow the instruction to have a try! [link](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
 
@@ -87,8 +87,8 @@ Now an interactive Jupyter notebook is avaiable, check the static HTML version a
         <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-		Realtime Rendering
-		<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
+        Realtime Rendering
+        <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
     </div>
 </div>
 
@@ -134,7 +134,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_ranged(-1f32..1f32, -0.1f32..1f32)?;
 
     chart.configure_mesh().draw()?;
- 
+
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
         &Red,
@@ -200,7 +200,7 @@ figure
 *This tutorial is now working in progress and isn't complete*
 
 Thanks to the evcxr, now we have an interactive tutorial for Plotters!
-To use the interactive notebook, you must have Jupyter and evcxr installed on your computer. 
+To use the interactive notebook, you must have Jupyter and evcxr installed on your computer.
 Follow the instruction on [this page](https://github.com/google/evcxr/tree/master/evcxr_jupyter) below to install it.
 
 After that, you should be able to start your Jupyer server locally and load the tutorial!
@@ -224,23 +224,23 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Fast** If you need rendering a figure with trillions of data points, 
-Rust is a good choice. Rust's performance allows you to combine data processing step 
+* **Fast** If you need rendering a figure with trillions of data points,
+Rust is a good choice. Rust's performance allows you to combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting 
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
-within a single program. You can also integrate the 
+e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+within a single program. You can also integrate the
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## Plotting on HTML5 canvas with WASM Backend
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 
@@ -327,7 +327,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.

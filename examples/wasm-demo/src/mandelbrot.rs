@@ -29,7 +29,7 @@ fn mandelbrot_set(
 
 fn draw_mandelbrot_impl(
     element: &str,
-) -> Result<Box<Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
+) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
     let backend = CanvasBackend::new(element).unwrap();
 
     let root = backend.into_drawing_area();

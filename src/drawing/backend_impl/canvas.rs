@@ -12,29 +12,27 @@ pub struct CanvasBackend {
     context: CanvasRenderingContext2d,
 }
 
-pub struct CanvasError(JsValue);
+pub struct CanvasError(String);
 
 impl std::fmt::Display for CanvasError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        return write!(
-            fmt,
-            "Canvas Error: {}",
-            JSON::stringify(&self.0)
-                .map(|s| Into::<String>::into(&s))
-                .unwrap_or_else(|_| "Unknown".to_string())
-        );
+        return write!(fmt, "Canvas Error: {}", self.0);
     }
 }
 
 impl std::fmt::Debug for CanvasError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        return write!(
-            fmt,
-            "CanvasError({})",
-            JSON::stringify(&self.0)
+        return write!(fmt, "CanvasError({})", self.0);
+    }
+}
+
+impl From<JsValue> for DrawingErrorKind<CanvasError> {
+    fn from(e: JsValue) -> DrawingErrorKind<CanvasError> {
+        DrawingErrorKind::DrawingError(CanvasError(
+            JSON::stringify(&e)
                 .map(|s| Into::<String>::into(&s))
-                .unwrap_or_else(|_| "Unknown".to_string())
-        );
+                .unwrap_or_else(|_| "Unknown".to_string()),
+        ))
     }
 }
 
@@ -181,15 +179,13 @@ impl DrawingBackend for CanvasBackend {
                 .set_stroke_style(&make_canvas_color(style.as_color()));
         }
         self.context.begin_path();
-        self.context
-            .arc(
-                f64::from(center.0),
-                f64::from(center.1),
-                f64::from(radius),
-                0.0,
-                std::f64::consts::PI * 2.0,
-            )
-            .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+        self.context.arc(
+            f64::from(center.0),
+            f64::from(center.1),
+            f64::from(radius),
+            0.0,
+            std::f64::consts::PI * 2.0,
+        )?;
         if fill {
             self.context.fill();
         } else {
@@ -224,11 +220,8 @@ impl DrawingBackend for CanvasBackend {
             let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
             let offset = font.get_transform().offset(layout);
             self.context
-                .translate(f64::from(x + offset.0), f64::from(y + offset.1))
-                .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
-            self.context
-                .rotate(degree)
-                .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+                .translate(f64::from(x + offset.0), f64::from(y + offset.1))?;
+            self.context.rotate(degree)?;
             x = 0;
             y = 0;
         }
@@ -239,8 +232,7 @@ impl DrawingBackend for CanvasBackend {
         self.context
             .set_font(&format!("{}px {}", font.get_size(), font.get_name()));
         self.context
-            .fill_text(text, f64::from(x), f64::from(y) + font.get_size())
-            .map_err(|e| DrawingErrorKind::DrawingError(CanvasError(e)))?;
+            .fill_text(text, f64::from(x), f64::from(y) + font.get_size())?;
 
         if degree != 0.0 {
             self.context.restore();

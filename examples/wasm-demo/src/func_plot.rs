@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 fn start_plotting(
     element: &str,
     pow: i32,
-) -> Result<Box<Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
+) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
     let backend = CanvasBackend::new(element).unwrap();
     let root = backend.into_drawing_area();
     let font: FontDesc = ("Arial", 20.0).into();
@@ -12,7 +12,7 @@ fn start_plotting(
     root.fill(&White)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption(format!("y=x^{}", pow), &font)
+        .caption(format!("y=x^{}", pow), font)
         .x_label_area_size(30)
         .y_label_area_size(30)
         .build_ranged(-1f32..1f32, -1.2f32..1.2f32)?;

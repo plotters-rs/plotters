@@ -16,7 +16,7 @@ pub struct Cross<Coord> {
 }
 
 impl<Coord> Cross<Coord> {
-    pub fn new<T:Into<ShapeStyle>>(coord: Coord, size: u32, style: T) -> Self {
+    pub fn new<T: Into<ShapeStyle>>(coord: Coord, size: u32, style: T) -> Self {
         Self {
             center: coord,
             size,

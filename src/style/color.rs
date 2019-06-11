@@ -26,7 +26,10 @@ pub trait Color {
     }
 
     /// Make a filled style form the color
-    fn filled(&self) -> ShapeStyle where Self:Sized {
+    fn filled(&self) -> ShapeStyle
+    where
+        Self: Sized,
+    {
         Into::<ShapeStyle>::into(self).filled()
     }
 }
