@@ -1,5 +1,6 @@
 use super::palette::Palette;
-/// The abstraction of a color
+use super::ShapeStyle;
+
 use std::marker::PhantomData;
 
 /// Any color representation
@@ -22,6 +23,11 @@ pub trait Color {
         let (r, g, b) = self.rgb();
         let a = self.alpha();
         RGBAColor(r, g, b, a)
+    }
+
+    /// Make a filled style form the color
+    fn filled(&self) -> ShapeStyle where Self:Sized {
+        Into::<ShapeStyle>::into(self).filled()
     }
 }
 
