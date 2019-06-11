@@ -19,6 +19,8 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
+Now an interactive Jupyter notebook is avaiable, check the static HTML version and follow the instruction to have a try! [link](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+
 ## Gallery
 
 <div class="galleryItem">
