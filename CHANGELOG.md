@@ -6,6 +6,10 @@
 
 - More documentation: a Jupyter interactive notebook of Plotters tutorial 
 
+### Imporvement
+
+- Histogram imporvements, horizental bar is supported, new creation API which compiler can infer the type
+
 ### Fix
 
 - Rectangle drawing bug when the axis is reversed

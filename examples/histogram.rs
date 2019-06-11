@@ -26,11 +26,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         0u32, 1, 1, 1, 4, 2, 5, 7, 8, 6, 4, 2, 1, 8, 3, 3, 3, 4, 4, 3, 3, 3,
     ];
 
-    chart.draw_series(Histogram::<RangedCoordu32, _>::new(
-        data.iter().map(|x: &u32| (*x, 1u32)),
-        5,
-        ShapeStyle::from(&Red.mix(0.5)).filled(),
-    ))?;
+    chart.draw_series(
+        Histogram::on(&chart)
+            .style(Red.mix(0.5).filled())
+            .data(data.iter().map(|x: &u32| (*x, 1))),
+    )?;
 
     Ok(())
 }

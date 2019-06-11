@@ -1,55 +1,171 @@
-use std::collections::{hash_map::IntoIter, HashMap};
+use std::collections::{hash_map::IntoIter as HashMapIter, HashMap};
 use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::AddAssign;
 
-use crate::coord::DescreteRanged;
+use crate::chart::ChartContext;
+use crate::coord::{DescreteRanged, Ranged, RangedCoord};
+use crate::drawing::DrawingBackend;
 use crate::element::Rectangle;
-use crate::style::ShapeStyle;
+use crate::style::{Color, Green, ShapeStyle};
+
+pub trait HistogramType {}
+pub struct Vertical;
+pub struct Horizental;
+
+impl HistogramType for Vertical {}
+impl HistogramType for Horizental {}
 
 /// The series that aggregate data into a histogram
-pub struct Histogram<XR: DescreteRanged, Y: AddAssign<Y> + Default>
+pub struct Histogram<BR, A, Tag = Vertical>
 where
-    XR::ValueType: Eq + Hash + Default,
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
+    Tag: HistogramType,
 {
     style: ShapeStyle,
-    x_margin: u32,
-    iter: IntoIter<XR::ValueType, Y>,
-    _p: PhantomData<XR>,
+    margin: u32,
+    iter: HashMapIter<BR::ValueType, A>,
+    baseline: Box<dyn Fn() -> A>,
+    _p: PhantomData<(BR, Tag)>,
 }
 
-impl<XR: DescreteRanged, Y: AddAssign<Y> + Default> Histogram<XR, Y>
+impl<BR, A, Tag> Histogram<BR, A, Tag>
 where
-    XR::ValueType: Eq + Hash + Default,
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
+    Tag: HistogramType,
 {
-    pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (XR::ValueType, Y)>>(
+    fn empty() -> Self {
+        Self {
+            style: Green.filled(),
+            margin: 5,
+            iter: HashMap::new().into_iter(),
+            baseline: Box::new(|| A::default()),
+            _p: PhantomData,
+        }
+    }
+    /// Set the style of the histogram
+    pub fn style<S: Into<ShapeStyle>>(mut self, style: S) -> Self {
+        self.style = style.into();
+        self
+    }
+
+    /// Set the baseline of the histogram
+    pub fn baseline(mut self, baseline: A) -> Self
+    where
+        A: Clone + 'static,
+    {
+        self.baseline = Box::new(move || baseline.clone());
+        self
+    }
+
+    /// Set the margin for each bar
+    pub fn margin(mut self, value: u32) -> Self {
+        self.margin = value;
+        self
+    }
+
+    /// Set the data iterator
+    pub fn data<I: IntoIterator<Item = (BR::ValueType, A)>>(mut self, iter: I) -> Self {
+        let mut buffer = HashMap::<BR::ValueType, A>::new();
+        for (x, y) in iter.into_iter() {
+            *buffer.entry(x).or_insert_with(Default::default) += y;
+        }
+        self.iter = buffer.into_iter();
+        self
+    }
+}
+
+impl<BR, A> Histogram<BR, A, Vertical>
+where
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
+{
+    /// Create a new histogram series.
+    ///
+    /// - `iter`: The data iterator
+    /// - `margin`: The margin between bars
+    /// - `style`: The style of bars
+    ///
+    /// Returns the newly created histogram series
+    pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (BR::ValueType, A)>>(
         iter: I,
-        x_margin: u32,
+        margin: u32,
         style: S,
     ) -> Self {
-        let mut buffer = HashMap::<XR::ValueType, Y>::new();
+        let mut buffer = HashMap::<BR::ValueType, A>::new();
         for (x, y) in iter.into_iter() {
             *buffer.entry(x).or_insert_with(Default::default) += y;
         }
         Self {
             style: style.into(),
-            x_margin,
+            margin,
             iter: buffer.into_iter(),
+            baseline: Box::new(|| A::default()),
             _p: PhantomData,
         }
     }
+
+    pub fn vertical<ACoord, DB: DrawingBackend>(
+        _: &ChartContext<DB, RangedCoord<BR, ACoord>>,
+    ) -> Self
+    where
+        ACoord: Ranged<ValueType = A>,
+    {
+        Self::empty()
+    }
 }
 
-impl<XR: DescreteRanged, Y: AddAssign<Y> + Default> Iterator for Histogram<XR, Y>
+impl<BR, A> Histogram<BR, A, Horizental>
 where
-    XR::ValueType: Eq + Hash + Default,
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
 {
-    type Item = Rectangle<(XR::ValueType, Y)>;
+    pub fn horizental<ACoord, DB: DrawingBackend>(
+        _: &ChartContext<DB, RangedCoord<ACoord, BR>>,
+    ) -> Self
+    where
+        ACoord: Ranged<ValueType = A>,
+    {
+        Self::empty()
+    }
+}
+
+impl<BR, A> Iterator for Histogram<BR, A, Vertical>
+where
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
+{
+    type Item = Rectangle<(BR::ValueType, A)>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((x, y)) = self.iter.next() {
-            let nx = XR::next_value(&x);
-            let mut rect = Rectangle::new([(x, y), (nx, Y::default())], self.style.clone());
-            rect.set_margin(0, 0, self.x_margin, self.x_margin);
+            let nx = BR::next_value(&x);
+            let mut rect = Rectangle::new([(x, y), (nx, (self.baseline)())], self.style.clone());
+            rect.set_margin(0, 0, self.margin, self.margin);
+            return Some(rect);
+        }
+        None
+    }
+}
+
+impl<BR, A> Iterator for Histogram<BR, A, Horizental>
+where
+    BR: DescreteRanged,
+    BR::ValueType: Eq + Hash + Default,
+    A: AddAssign<A> + Default,
+{
+    type Item = Rectangle<(A, BR::ValueType)>;
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some((y, x)) = self.iter.next() {
+            let ny = BR::next_value(&y);
+            let mut rect = Rectangle::new([(x, y), ((self.baseline)(), ny)], self.style.clone());
+            rect.set_margin(self.margin, self.margin, 0, 0);
             return Some(rect);
         }
         None
