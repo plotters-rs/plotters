@@ -6,6 +6,10 @@
 
 - More documentation: a Jupyter interactive notebook of Plotters tutorial 
 
+### Fix
+
+- Rectangle drawing bug when the axis is reversed
+
 ### Improvement
 
 - More style conversion APIs
