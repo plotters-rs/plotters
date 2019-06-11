@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     chart.draw_series(
-        Histogram::on(&chart)
+        Histogram::vertical(&chart)
             .style(Red.mix(0.5).filled())
             .data(data.iter().map(|x: &u32| (*x, 1))),
     )?;
