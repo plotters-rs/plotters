@@ -50,6 +50,10 @@ Now an interactive Jupyter notebook is avaiable, check the static HTML version a
     <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/normal-dist.rs">
+    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

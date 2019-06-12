@@ -33,3 +33,6 @@ bitmap = ["image"]
 datetime = ["chrono"]
 evcxr = ["svg"]
 piston = ["piston_window"]
+
+[dev-dependencies]
+rand = "^0.6.5"

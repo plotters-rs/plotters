@@ -64,6 +64,37 @@ impl Rect {
             })
     }
 
+    fn split_grid(&self, x_breaks: &[i32], y_breaks: &[i32]) -> impl Iterator<Item = Rect> {
+        let mut xs = vec![self.x0, self.x1];
+        let mut ys = vec![self.y0, self.y1];
+        xs.extend(x_breaks.iter().map(|v| v + self.x0));
+        ys.extend(y_breaks.iter().map(|v| v + self.y0));
+
+        xs.sort();
+        ys.sort();
+
+        let xsegs: Vec<_> = xs
+            .iter()
+            .zip(xs.iter().skip(1))
+            .map(|(a, b)| (*a, *b))
+            .collect();
+        let ysegs: Vec<_> = ys
+            .iter()
+            .zip(ys.iter().skip(1))
+            .map(|(a, b)| (*a, *b))
+            .collect();
+
+        ysegs
+            .into_iter()
+            .map(move |(y0, y1)| {
+                xsegs
+                    .clone()
+                    .into_iter()
+                    .map(move |(x0, x1)| Self { x0, y0, x1, y1 })
+            })
+            .flatten()
+    }
+
     /// Make the coordinate in the range of the rectangle
     fn truncate(&self, p: (i32, i32)) -> (i32, i32) {
         (p.0.min(self.x1).max(self.x0), p.1.min(self.y1).max(self.y0))
@@ -355,6 +386,22 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     pub fn split_evenly(&self, (row, col): (usize, usize)) -> Vec<Self> {
         self.rect
             .split_evenly((row, col))
+            .map(|rect| Self {
+                rect: rect.clone(),
+                backend: self.copy_backend_ref(),
+                coord: Shift((rect.x0, rect.y0)),
+            })
+            .collect()
+    }
+
+    /// Split the drawing area into a grid with specified breakpoints on both X axis and Y axis
+    pub fn split_by_breakpoints<XS: AsRef<[i32]>, YS: AsRef<[i32]>>(
+        &self,
+        xs: XS,
+        ys: YS,
+    ) -> Vec<Self> {
+        self.rect
+            .split_grid(xs.as_ref(), ys.as_ref())
             .map(|rect| Self {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),

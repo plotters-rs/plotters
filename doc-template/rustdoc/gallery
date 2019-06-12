@@ -66,3 +66,13 @@
 		<a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
     </div>
 </div>
+
+<div class="galleryItem">
+    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png">
+        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		Histogram with Scatter
+        <a href="https://github.com/38/plotters/blob/master/examples/normal-dist.rs">[code]</a>
+    </div>
+</div>
