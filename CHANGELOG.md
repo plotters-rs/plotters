@@ -15,10 +15,6 @@
 
 - Rectangle drawing bug when the axis is reversed
 
-### Improvement
-
-- More style conversion APIs
-
 ## Plotters 0.2.1 (2019-06-10)
 
 ### Improvement
