@@ -11,7 +11,6 @@
 <a href="https://plumberserver.com/plotters-docs/plotters">
     <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
-
 <a href="https://travis-ci.org/38/plotters">
     <img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
 </a>
@@ -19,7 +18,7 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends,
 including bitmap, vector graph, piston window and WebAssembly.
 
-- You can try Plotters with Jupyter notebook, or view ![here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- You can try Plotters with Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 
 ## Gallery
 
