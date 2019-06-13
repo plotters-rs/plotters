@@ -58,7 +58,7 @@
         Ok(())
     }
     ```
-      ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-0.png)
+      ![](https://plotters-rs.github.io/plotters-doc-data/element-0.png)
 
       ## Composable Elements
       You also have an convenient way to build an element that isn't built into the Plotters library by
@@ -83,7 +83,7 @@
         Ok(())
     }
     ```
-    ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-1.png)
+    ![](https://plotters-rs.github.io/plotters-doc-data/element-1.png)
 
     ## Dynamic Elements
     By default, Plotters uses static dispatch for all the elements and series. For example,
@@ -149,7 +149,7 @@
         Ok(())
     }
     ```
-    ![](https://raw.githubusercontent.com/38/plotters/master/plotters-doc-data/element-3.png)
+    ![](https://plotters-rs.github.io/plotters-doc-data/element-3.png)
 */
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;

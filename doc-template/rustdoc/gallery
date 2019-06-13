@@ -1,6 +1,6 @@
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/sample.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/sample.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Multiple Plot
@@ -9,8 +9,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/stock.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/stock.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Candlestick Plot
@@ -19,8 +19,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/histogram.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/histogram.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
        Histogram
@@ -29,8 +29,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/0.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/0.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Simple Chart
@@ -38,8 +38,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Mandelbrot set
@@ -49,8 +49,8 @@
 
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Jupyter Support
@@ -58,8 +58,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
 		Realtime Rendering
@@ -68,8 +68,8 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png">
-        <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
 		Histogram with Scatter

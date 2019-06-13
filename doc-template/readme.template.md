@@ -17,7 +17,7 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
-Now an interactive Jupyter notebook is avaiable, check the static HTML version and follow the instruction to have a try! [link](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+- You can try Plotters with Jupyter notebook, or view ![here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 
 ## Gallery
 
@@ -40,7 +40,7 @@ And the following code draws a quadratic function. `src/main.rs`,
 $$examples/quick_start.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png)
+![](https://plotters-rs.github.io/plotters-doc-data/0.png)
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -82,7 +82,7 @@ let figure = evcxr_figure((640, 480), |root| {
 figure
 ```
 
-<img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" width="450px"></img>
+<img src="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif" width="450px"></img>
 
 ## Interactive Tutorial with Jupyter Notebook
 
@@ -152,7 +152,7 @@ Plotters can use different drawing backends, including SVG, BitMap, and even rea
 $$examples/drawing_backends.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/1.png)
+![](https://plotters-rs.github.io/plotters-doc-data/1.png)
 
 ### Drawing Area
 Plotters uses a concept called drawing area for layout purpose.
@@ -165,7 +165,7 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 $$examples/drawing_area.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/2.png)
+![](https://plotters-rs.github.io/plotters-doc-data/2.png)
 
 ### Elements
 
@@ -181,7 +181,7 @@ To learn more about the element system, please read the [element module document
 $$examples/elements.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/3.png)
+![](https://plotters-rs.github.io/plotters-doc-data/3.png)
 
 ### Composable Elements
 
@@ -195,7 +195,7 @@ For example, we can have an element which includes a dot and its coordinate.
 $$examples/composable_elements.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/4.png)
+![](https://plotters-rs.github.io/plotters-doc-data/4.png)
 
 ### Chart Context
 
@@ -208,7 +208,7 @@ of the chart context object.
 $$examples/chart.rs$$
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/5.png)
+![](https://plotters-rs.github.io/plotters-doc-data/5.png)
 
 ## Misc
 

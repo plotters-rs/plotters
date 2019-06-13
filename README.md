@@ -17,41 +17,41 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
-Now an interactive Jupyter notebook is avaiable, check the static HTML version and follow the instruction to have a try! [link](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+- You can try Plotters with Jupyter notebook, or view ![here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 
 ## Gallery
 
 <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/sample.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/sample.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/stock.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/stock.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/stock.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/histogram.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/histogram.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters#quick-start">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/0.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/mandelbrot.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters#trying-with-jupyter-evcxr-kernel-interactively">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif" class="galleryItem" width=200px></img>
 </a>
 
 
 <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/plotters-piston.gif" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/normal-dist.rs">
-    <img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/normal-dist.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png" class="galleryItem" width=200px></img>
 </a>
 
 
@@ -113,7 +113,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/0.png)
+![](https://plotters-rs.github.io/plotters-doc-data/0.png)
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -155,7 +155,7 @@ let figure = evcxr_figure((640, 480), |root| {
 figure
 ```
 
-<img src="https://raw.githubusercontent.com/38/plotters-doc-data/master/evcxr_animation.gif" width="450px"></img>
+<img src="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif" width="450px"></img>
 
 ## Interactive Tutorial with Jupyter Notebook
 
@@ -233,7 +233,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/1.png)
+![](https://plotters-rs.github.io/plotters-doc-data/1.png)
 
 ### Drawing Area
 Plotters uses a concept called drawing area for layout purpose.
@@ -257,7 +257,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/2.png)
+![](https://plotters-rs.github.io/plotters-doc-data/2.png)
 
 ### Elements
 
@@ -284,7 +284,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/3.png)
+![](https://plotters-rs.github.io/plotters-doc-data/3.png)
 
 ### Composable Elements
 
@@ -321,7 +321,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/4.png)
+![](https://plotters-rs.github.io/plotters-doc-data/4.png)
 
 ### Chart Context
 
@@ -376,7 +376,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-![](https://raw.githubusercontent.com/38/plotters-doc-data/master/5.png)
+![](https://plotters-rs.github.io/plotters-doc-data/5.png)
 
 ## Misc
 
