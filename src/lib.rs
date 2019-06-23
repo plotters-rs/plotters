@@ -486,7 +486,7 @@ pub use crate::drawing::create_mocked_drawing_area;
 
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
-    pub use crate::chart::{ChartBuilder, ChartContext};
+    pub use crate::chart::{ChartBuilder, ChartContext, SeriesLabelPosition};
     pub use crate::coord::{
         CoordTranslate, LogCoord, LogRange, LogScalable, Ranged, RangedCoord, RangedCoordf32,
         RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,

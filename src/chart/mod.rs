@@ -20,4 +20,4 @@ mod series;
 pub use builder::ChartBuilder;
 pub use context::{ChartContext, SeriesAnno};
 pub use mesh::MeshStyle;
-pub use series::{SeriesLabelStyle, SeriesLabelPosition};
+pub use series::{SeriesLabelPosition, SeriesLabelStyle};

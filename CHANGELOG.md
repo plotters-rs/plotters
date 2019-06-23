@@ -5,6 +5,7 @@
 ### Added
 
 - More documentation: a Jupyter interactive notebook of Plotters tutorial 
+- Add more quadrants to the `SeriesLabelPosition` (Credit to @wolfjagger).
 
 ### Imporvement
 

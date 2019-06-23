@@ -24,16 +24,20 @@ impl SeriesLabelPosition {
         (
             match self {
                 UpperLeft | MiddleLeft | LowerLeft => 0,
-                UpperMiddle | MiddleMiddle | LowerMiddle => (area_dim.0 as i32 - label_dim.0 as i32) / 2,
+                UpperMiddle | MiddleMiddle | LowerMiddle => {
+                    (area_dim.0 as i32 - label_dim.0 as i32) / 2
+                }
                 UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32,
-                Coordinate(x, _) => *x
+                Coordinate(x, _) => *x,
             },
             match self {
                 UpperLeft | UpperMiddle | UpperRight => 0,
-                MiddleLeft | MiddleMiddle | MiddleRight => (area_dim.1 as i32 - label_dim.1 as i32) / 2,
+                MiddleLeft | MiddleMiddle | MiddleRight => {
+                    (area_dim.1 as i32 - label_dim.1 as i32) / 2
+                }
                 LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32,
-                Coordinate(_, y) => *y
-            }
+                Coordinate(_, y) => *y,
+            },
         )
     }
 }

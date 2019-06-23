@@ -4,7 +4,7 @@ use rand::distributions::Distribution;
 use rand::distributions::Normal;
 use rand::thread_rng;
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
         BitMapBackend::new("plotters-doc-data/normal-dist.png", (1024, 768)).into_drawing_area();
 
