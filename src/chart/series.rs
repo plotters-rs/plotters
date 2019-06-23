@@ -6,6 +6,12 @@ use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
 use crate::style::{IntoFont, ShapeStyle, TextStyle, Transparent};
 
 pub enum SeriesLabelPosition {
+    UpperLeft,
+    MiddleLeft,
+    LowerLeft,
+    UpperMiddle,
+    MiddleMiddle,
+    LowerMiddle,
     UpperRight,
     MiddleRight,
     LowerRight,
@@ -14,18 +20,21 @@ pub enum SeriesLabelPosition {
 
 impl SeriesLabelPosition {
     fn layout_label_area(&self, label_dim: (i32, i32), area_dim: (u32, u32)) -> (i32, i32) {
-        match self {
-            SeriesLabelPosition::UpperRight => (area_dim.0 as i32 - label_dim.0 as i32, 0),
-            SeriesLabelPosition::MiddleRight => (
-                area_dim.0 as i32 - label_dim.0 as i32,
-                (area_dim.1 as i32 - label_dim.1 as i32) / 2,
-            ),
-            SeriesLabelPosition::LowerRight => (
-                area_dim.0 as i32 - label_dim.0 as i32,
-                area_dim.1 as i32 - label_dim.1 as i32,
-            ),
-            SeriesLabelPosition::Coordinate(x, y) => (*x, *y),
-        }
+        use SeriesLabelPosition::*;
+        (
+            match self {
+                UpperLeft | MiddleLeft | LowerLeft => 0,
+                UpperMiddle | MiddleMiddle | LowerMiddle => (area_dim.0 as i32 - label_dim.0 as i32) / 2,
+                UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32,
+                Coordinate(x, _) => *x
+            },
+            match self {
+                UpperLeft | UpperMiddle | UpperRight => 0,
+                MiddleLeft | MiddleMiddle | MiddleRight => (area_dim.1 as i32 - label_dim.1 as i32) / 2,
+                LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32,
+                Coordinate(_, y) => *y
+            }
+        )
     }
 }
 
