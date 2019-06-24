@@ -29,7 +29,7 @@ $$[TOC]$$
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
-[depedencies]
+[dependencies]
 plotters = "^$LATEST_VERSION"
 ```
 
