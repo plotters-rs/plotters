@@ -76,7 +76,7 @@ including bitmap, vector graph, piston window and WebAssembly.
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
-[depedencies]
+[dependencies]
 plotters = "^0.2.1"
 ```
 
