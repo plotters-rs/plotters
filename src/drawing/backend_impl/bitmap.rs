@@ -6,7 +6,7 @@ use std::path::Path;
 
 enum Target<'a> {
     File(&'a Path),
-    Buffer,
+    Buffer(&'a mut Vec<u8>),
 }
 
 /// The backend that drawing a bitmap
@@ -30,25 +30,11 @@ impl<'a> BitMapBackend<'a> {
     }
 
     /// Create a new bitmap backend which only lives in-memory
-    pub fn in_memory(dimension: (u32, u32)) -> Self {
+    pub fn with_buffer(buf: &'a mut Vec<u8>, dimension: (u32, u32)) -> Self {
         Self {
-            target: Target::Buffer,
+            target: Target::Buffer(buf),
             img: RgbImage::new(dimension.0, dimension.1),
             saved: false,
-        }
-    }
-
-    /// Try to convert the bitmap backend into the memory buffer
-    /// If the backend is backed with a file, this function won't make
-    /// the conversion and return the backend object back as the error
-    pub fn try_into_buffer(mut self) -> Result<Vec<u8>, Self> {
-        match self.target {
-            Target::File(_) => Err(self),
-            Target::Buffer => {
-                let mut actual_img = RgbImage::new(1, 1);
-                std::mem::swap(&mut actual_img, &mut self.img);
-                Ok(actual_img.into_raw())
-            }
         }
     }
 }
@@ -65,7 +51,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 
     fn present(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
-        match self.target {
+        match &mut self.target {
             Target::File(path) => {
                 self.img
                     .save(&path)
@@ -73,7 +59,13 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 self.saved = true;
                 Ok(())
             }
-            Target::Buffer => Ok(()),
+            Target::Buffer(target) => {
+                let mut actual_img = RgbImage::new(1, 1);
+                std::mem::swap(&mut actual_img, &mut self.img);
+                target.clear();
+                target.append(&mut actual_img.into_raw());
+                Ok(())
+            }
         }
     }
 

@@ -1,6 +1,6 @@
-#[cfg(all(not(target_arch = "wasm32"), feature = "svg"))]
+#[cfg(feature = "svg")]
 mod svg;
-#[cfg(all(not(target_arch = "wasm32"), feature = "svg"))]
+#[cfg(feature = "svg")]
 pub use self::svg::SVGBackend;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]

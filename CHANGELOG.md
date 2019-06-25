@@ -11,6 +11,8 @@
 
 - Histogram imporvements, horizental bar is supported, new creation API which compiler can infer the type
 - Supporting split the drawing area with a list of breakpoints using `DrawingArea::split_by_breakpoints`
+- Enable SVG support for WASM
+- Make the `BitMapBackend` takes an in memory mutable buffer
 
 ### Fix
 
