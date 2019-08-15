@@ -37,7 +37,7 @@ pub trait Color {
 /// The RGBA representation of the color, Plotters use RGBA as the internal representation
 /// of color
 #[derive(Clone, PartialEq, Debug)]
-pub struct RGBAColor(u8, u8, u8, f64);
+pub struct RGBAColor(pub(super) u8, pub(super) u8, pub(super) u8, pub(super) f64);
 
 impl Color for RGBAColor {
     fn rgb(&self) -> (u8, u8, u8) {
@@ -92,41 +92,6 @@ impl SimpleColor for RGBColor {
         (self.0, self.1, self.2)
     }
 }
-
-macro_rules! predefined_color {
-    ($name:ident, $r:expr, $g:expr, $b:expr, $doc: expr) => {
-        #[doc = $doc]
-        pub struct $name;
-        impl SimpleColor for $name {
-            fn rgb(&self) -> (u8,u8,u8) {
-                return ($r, $g, $b);
-            }
-        }
-    };
-
-    ($name:ident, $r:expr, $g:expr, $b:expr, $a: expr, $doc: expr) => {
-        #[doc = $doc]
-        pub struct $name;
-        impl Color for $name {
-            fn rgb(&self) -> (u8,u8,u8) {
-                return ($r, $g, $b);
-            }
-            fn alpha(&self) -> f64 {
-                $a
-            }
-        }
-    }
-}
-
-predefined_color!(White, 255, 255, 255, "The predefined white color");
-predefined_color!(Black, 0, 0, 0, "The predefined black color");
-predefined_color!(Red, 255, 0, 0, "The predefined red color");
-predefined_color!(Green, 0, 255, 0, "The predefined green color");
-predefined_color!(Blue, 0, 0, 255, "The predefined blue color");
-predefined_color!(Yellow, 255, 255, 0, "The predefined yellow color");
-predefined_color!(Cyan, 0, 255, 255, "The predefined cyan color");
-predefined_color!(Magenta, 255, 0, 255, "The predefined magenta color");
-predefined_color!(Transparent, 0, 0, 0, 0.0, "The predefined transparent");
 
 /// The color described by HSL color space
 pub struct HSLColor(pub f64, pub f64, pub f64);

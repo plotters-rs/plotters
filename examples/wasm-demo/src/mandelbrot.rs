@@ -33,7 +33,7 @@ fn draw_mandelbrot_impl(
     let backend = CanvasBackend::new(element).unwrap();
 
     let root = backend.into_drawing_area();
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
         .margin(20)
@@ -57,7 +57,7 @@ fn draw_mandelbrot_impl(
         if c != 100 {
             plotting_area.draw_pixel((x, y), &HSLColor(c as f64 / 100.0, 1.0, 0.5))?;
         } else {
-            plotting_area.draw_pixel((x, y), &Black)?;
+            plotting_area.draw_pixel((x, y), &BLACK)?;
         }
     }
 

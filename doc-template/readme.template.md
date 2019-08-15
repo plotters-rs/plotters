@@ -55,7 +55,7 @@ extern crate plotters;
 use plotters::prelude::*;
 
 let figure = evcxr_figure((640, 480), |root| {
-    root.fill(&White);
+    root.fill(&WHITE);
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
@@ -67,14 +67,14 @@ let figure = evcxr_figure((640, 480), |root| {
 
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &Red,
+        &RED,
     )).unwrap()
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
+        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
 
     chart.configure_series_labels()
-        .background_style(&White.mix(0.8))
-        .border_style(&Black)
+        .background_style(&WHITE.mix(0.8))
+        .border_style(&BLACK)
         .draw()?;
     Ok(())
 });
@@ -233,5 +233,8 @@ For example, the following dependency description would avoid compiling with bit
 [dependencies]
 plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
 ```
+
+The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
+This behaviour can also be turned off by setting `default_features = false`.
 
 $$style$$

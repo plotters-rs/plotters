@@ -9,7 +9,7 @@ fn start_plotting(
     let root = backend.into_drawing_area();
     let font: FontDesc = ("Arial", 20.0).into();
 
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
         .caption(format!("y=x^{}", pow), font)
@@ -23,7 +23,7 @@ fn start_plotting(
         (-50..=50)
             .map(|x| x as f32 / 50.0)
             .map(|x| (x, x.powf(pow as f32))),
-        &Red,
+        &RED,
     ))?;
 
     root.present()?;

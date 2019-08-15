@@ -13,8 +13,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let dot_and_label = |x: f32, y: f32| {
         return EmptyElement::at((x, y))
-            + Circle::new((0, 0), 3, ShapeStyle::from(&Black).filled())
-            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), ("Arial", 15.0).into_font());
+            + Circle::new((0, 0), 3, ShapeStyle::from(&BLACK).filled())
+            + Text::new(
+                format!("({:.2},{:.2})", x, y),
+                (10, 0),
+                ("Arial", 15.0).into_font(),
+            );
     };
 
     root.draw(&dot_and_label(0.5, 0.6))?;

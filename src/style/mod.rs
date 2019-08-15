@@ -2,16 +2,18 @@
   The style for shapes and text, font, color, etc.
 */
 mod color;
+pub mod colors;
 mod font;
 mod palette;
 
-pub use color::{
-    Black, Blue, Color, Cyan, Green, HSLColor, Magenta, PaletteColor, RGBAColor, RGBColor, Red,
-    SimpleColor, Transparent, White, Yellow,
-};
+#[cfg(feature = "palette_ext")]
+mod palette_ext;
 
+/// Definitions of palettes of accessibility
+pub use self::palette::*;
+pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor, SimpleColor};
+pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 pub use font::{FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox};
-pub use palette::*;
 
 /// Style of a text
 #[derive(Clone)]
@@ -48,7 +50,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
     fn from(font: T) -> Self {
         Self {
             font: font.into(),
-            color: Black.to_rgba(),
+            color: BLACK.to_rgba(),
         }
     }
 }

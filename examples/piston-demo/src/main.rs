@@ -15,18 +15,18 @@ fn main() {
         .unwrap();
     let sys = System::new();
     window.set_max_fps(FPS as u64);
-    let mut load_measurement:Vec<_> = (0..FPS).map(|_| sys.cpu_load().unwrap()).collect();
+    let mut load_measurement: Vec<_> = (0..FPS).map(|_| sys.cpu_load().unwrap()).collect();
     let mut epoch = 0;
     let mut data = vec![];
     while let Some(_) = draw_piston_window(&mut window, |b| {
-        let cpu_loads = load_measurement[epoch%FPS as usize].done()?;
+        let cpu_loads = load_measurement[epoch % FPS as usize].done()?;
 
         let root = b.into_drawing_area();
-        root.fill(&White)?;
+        root.fill(&WHITE)?;
 
         if data.len() < cpu_loads.len() {
             for _ in data.len()..cpu_loads.len() {
-                data.push(VecDeque::from(vec![0f32;N_DATA_POINTS+1]));
+                data.push(VecDeque::from(vec![0f32; N_DATA_POINTS + 1]));
             }
         }
 
@@ -66,8 +66,8 @@ fn main() {
         }
 
         cc.configure_series_labels()
-            .background_style(&White.mix(0.8))
-            .border_style(&Black)
+            .background_style(&WHITE.mix(0.8))
+            .border_style(&BLACK)
             .draw()?;
 
         load_measurement[epoch % FPS as usize] = sys.cpu_load()?;

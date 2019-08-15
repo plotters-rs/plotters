@@ -1,12 +1,12 @@
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
-    root.fill(&White);
+    root.fill(&WHITE);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
-        .caption("This is our first plot", ("Arial",40).into_font())
+        .caption("This is our first plot", ("Arial", 40).into_font())
         // Set the size of the label region
         .x_label_area_size(20)
         .y_label_area_size(40)
@@ -26,13 +26,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And we can draw something in the drawing area
     chart.draw_series(LineSeries::new(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
-        &Red,
+        &RED,
     ))?;
     // Similarly, we can draw point series
     chart.draw_series(PointSeries::of_element(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
         5,
-        &Red,
+        &RED,
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established

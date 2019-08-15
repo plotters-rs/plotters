@@ -5,7 +5,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
         BitMapBackend::new("plotters-doc-data/mandelbrot.png", (800, 600)).into_drawing_area();
 
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
         .margin(20)
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if c != 100 {
             plotting_area.draw_pixel((x, y), &HSLColor(c as f64 / 100.0, 1.0, 0.5))?;
         } else {
-            plotting_area.draw_pixel((x, y), &Black)?;
+            plotting_area.draw_pixel((x, y), &BLACK)?;
         }
     }
 

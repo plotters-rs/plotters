@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
         BitMapBackend::new("plotters-doc-data/normal-dist.png", (1024, 768)).into_drawing_area();
 
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
 
     let sd = 0.13;
 
@@ -40,10 +40,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     scatter_ctx.draw_series(
         random_points
             .iter()
-            .map(|(x, y)| Circle::new((*x, *y), 2, Green.filled())),
+            .map(|(x, y)| Circle::new((*x, *y), 2, GREEN.filled())),
     )?;
     let x_hist = Histogram::vertical(&x_hist_ctx)
-        .style(Green.filled())
+        .style(GREEN.filled())
         .margin(0)
         .data(
             random_points
@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .map(|(x, _)| ((x * 100.0) as u32, 0.002)),
         );
     let y_hist = Histogram::horizental(&y_hist_ctx)
-        .style(Green.filled())
+        .style(GREEN.filled())
         .margin(0)
         .data(
             random_points

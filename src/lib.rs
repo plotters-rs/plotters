@@ -134,7 +134,7 @@ And the following code draws a quadratic function. `src/main.rs`,
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
@@ -146,14 +146,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &Red,
+        &RED,
     ))?
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
+        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
 
     chart.configure_series_labels()
-        .background_style(&White.mix(0.8))
-        .border_style(&Black)
+        .background_style(&WHITE.mix(0.8))
+        .border_style(&BLACK)
         .draw()?;
 
     Ok(())
@@ -176,7 +176,7 @@ extern crate plotters;
 use plotters::prelude::*;
 
 let figure = evcxr_figure((640, 480), |root| {
-    root.fill(&White);
+    root.fill(&WHITE);
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
@@ -188,14 +188,14 @@ let figure = evcxr_figure((640, 480), |root| {
 
     chart.draw_series(LineSeries::new(
         (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &Red,
+        &RED,
     )).unwrap()
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &Red));
+        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
 
     chart.configure_series_labels()
-        .background_style(&White.mix(0.8))
-        .border_style(&Black)
+        .background_style(&WHITE.mix(0.8))
+        .border_style(&BLACK)
         .draw()?;
     Ok(())
 });
@@ -275,7 +275,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut backend = BitMapBackend::new("plotters-doc-data/1.png", (300, 200));
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
-    backend.draw_rect((50, 50), (200, 150), &Red, true)?;
+    backend.draw_rect((50, 50), (200, 150), &RED, true)?;
     Ok(())
 }
 ```
@@ -320,12 +320,12 @@ To learn more about the element system, please read the [element module document
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/3.png", (300, 200)).into_drawing_area();
-    root.fill(&White)?;
+    root.fill(&WHITE)?;
     // Draw an circle on the drawing area
     root.draw(&Circle::new(
         (100, 100),
         50,
-        Into::<ShapeStyle>::into(&Green).filled(),
+        Into::<ShapeStyle>::into(&GREEN).filled(),
     ))?;
     Ok(())
 }
@@ -357,7 +357,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let dot_and_label = |x: f32, y: f32| {
         return EmptyElement::at((x, y))
-            + Circle::new((0, 0), 3, ShapeStyle::from(&Black).filled())
+            + Circle::new((0, 0), 3, ShapeStyle::from(&BLACK).filled())
             + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), ("Arial", 15.0).into_font());
     };
 
@@ -381,7 +381,7 @@ of the chart context object.
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
-    root.fill(&White);
+    root.fill(&WHITE);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
     let mut chart = ChartBuilder::on(&root)
@@ -406,13 +406,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And we can draw something in the drawing area
     chart.draw_series(LineSeries::new(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
-        &Red,
+        &RED,
     ))?;
     // Similarly, we can draw point series
     chart.draw_series(PointSeries::of_element(
         vec![(0.0, 0.0), (5.0, 5.0), (8.0, 7.0)],
         5,
-        &Red,
+        &RED,
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
@@ -484,6 +484,9 @@ pub mod evcxr;
 #[cfg(test)]
 pub use crate::drawing::create_mocked_drawing_area;
 
+#[cfg(feature = "palette_ext")]
+pub use palette;
+
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext, SeriesLabelPosition};
@@ -498,10 +501,10 @@ pub mod prelude {
     pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{
-        Black, Blue, Color, Cyan, FontDesc, FontTransform, Green, HSLColor, IntoFont, Magenta,
-        Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, Red, ShapeStyle,
-        SimpleColor, TextStyle, Transparent, White, Yellow,
+        colors, Color, FontDesc, FontTransform, HSLColor, IntoFont, Palette, Palette100, Palette99,
+        Palette9999, PaletteColor, RGBColor, ShapeStyle, SimpleColor, TextStyle,
     };
+    pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
         CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, MultiLineText, Path,

@@ -3,7 +3,7 @@ use crate::coord::CoordTranslate;
 use crate::drawing::backend::{BackendCoord, DrawingErrorKind};
 use crate::drawing::{DrawingAreaErrorKind, DrawingBackend};
 use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
-use crate::style::{IntoFont, ShapeStyle, TextStyle, Transparent};
+use crate::style::{IntoFont, ShapeStyle, TextStyle, TRANSPARENT};
 
 pub enum SeriesLabelPosition {
     UpperLeft,
@@ -59,8 +59,8 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
             target,
             position: SeriesLabelPosition::MiddleRight,
             legend_area_size: 30,
-            border_style: (&Transparent).into(),
-            background: (&Transparent).into(),
+            border_style: (&TRANSPARENT).into(),
+            background: (&TRANSPARENT).into(),
             label_font: None,
             margin: 10,
         }

@@ -7,7 +7,7 @@ use crate::chart::ChartContext;
 use crate::coord::{DescreteRanged, Ranged, RangedCoord};
 use crate::drawing::DrawingBackend;
 use crate::element::Rectangle;
-use crate::style::{Color, Green, ShapeStyle};
+use crate::style::{Color, ShapeStyle, GREEN};
 
 pub trait HistogramType {}
 pub struct Vertical;
@@ -40,7 +40,7 @@ where
 {
     fn empty() -> Self {
         Self {
-            style: Green.filled(),
+            style: GREEN.filled(),
             margin: 5,
             iter: HashMap::new().into_iter(),
             baseline: Box::new(|| A::default()),

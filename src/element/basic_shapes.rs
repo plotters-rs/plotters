@@ -46,7 +46,7 @@ fn test_pixel_element() {
         m.check_draw_pixel(|c, (x, y)| {
             assert_eq!(x, 150);
             assert_eq!(y, 152);
-            assert_eq!(c, Red.to_rgba());
+            assert_eq!(c, RED.to_rgba());
         });
 
         m.drop_check(|b| {
@@ -54,7 +54,7 @@ fn test_pixel_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Pixel::new((150, 152), &Red))
+    da.draw(&Pixel::new((150, 152), &RED))
         .expect("Drawing Failure");
 }
 
@@ -100,7 +100,7 @@ fn test_path_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_path(|c, path| {
-            assert_eq!(c, Blue.to_rgba());
+            assert_eq!(c, BLUE.to_rgba());
             assert_eq!(path, vec![(100, 101), (105, 107), (150, 157)]);
         });
         m.drop_check(|b| {
@@ -108,7 +108,7 @@ fn test_path_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &Blue))
+    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &BLUE))
         .expect("Drawing Failure");
 }
 
@@ -177,7 +177,7 @@ fn test_rect_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_rect(|c, f, u, d| {
-            assert_eq!(c, Blue.to_rgba());
+            assert_eq!(c, BLUE.to_rgba());
             assert_eq!(f, false);
             assert_eq!([u, d], [(100, 101), (105, 107)]);
         });
@@ -186,7 +186,7 @@ fn test_rect_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Rectangle::new([(100, 101), (105, 107)], &Blue))
+    da.draw(&Rectangle::new([(100, 101), (105, 107)], &BLUE))
         .expect("Drawing Failure");
 }
 
@@ -239,7 +239,7 @@ fn test_circle_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_circle(|c, f, s, r| {
-            assert_eq!(c, Blue.to_rgba());
+            assert_eq!(c, BLUE.to_rgba());
             assert_eq!(f, false);
             assert_eq!(s, (150, 151));
             assert_eq!(r, 20);
@@ -249,6 +249,6 @@ fn test_circle_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Circle::new((150, 151), 20, &Blue))
+    da.draw(&Circle::new((150, 151), 20, &BLUE))
         .expect("Drawing Failure");
 }

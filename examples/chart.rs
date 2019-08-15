@@ -4,7 +4,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area =
         BitMapBackend::new("plotters-doc-data/sample.png", (1024, 768)).into_drawing_area();
 
-    root_area.fill(&White)?;
+    root_area.fill(&WHITE)?;
 
     let root_area = root_area
         .titled("Image Title", ("Arial", 60).into_font())?
@@ -29,10 +29,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cc.draw_series(LineSeries::new(
         (0..12).map(|x| ((x - 6) as f32 / 2.0, ((x - 6) as f32 / 2.0).sin())),
-        &Red,
+        &RED,
     ))?
     .label("Sine")
-    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &Red));
+    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
 
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
@@ -41,12 +41,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ((x - 3400) as f32 / 1000.0).cos(),
             )
         }),
-        &Blue,
+        &BLUE,
     ))?
     .label("Cosine")
-    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &Blue));
+    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &BLUE));
 
-    cc.configure_series_labels().border_style(&Black).draw()?;
+    cc.configure_series_labels().border_style(&BLACK).draw()?;
 
     /*
     // It's possible to use a existing pointing element
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     cc.draw_series(PointSeries::of_element(
         (0..6).map(|x| ((x - 3) as f32 / 1.0, ((x - 3) as f32 / 1.0).sin())),
         5,
-        ShapeStyle::from(&Red).filled(),
+        ShapeStyle::from(&RED).filled(),
         &|coord, size, style| {
             EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
@@ -85,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     (x as f32 / 100.0).powf(idx as f32 * 2.0 + 1.0),
                 )
             }),
-            &Blue,
+            &BLUE,
         ))?;
     }
 

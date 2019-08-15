@@ -44,8 +44,8 @@
             backend: &mut DB
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
-            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &Red.to_rgba(), false)?;
-            backend.draw_text("X", &("Arial", 20).into(), pos, &Red.to_rgba())
+            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &RED.to_rgba(), false)?;
+            backend.draw_text("X", &("Arial", 20).into(), pos, &RED.to_rgba())
         }
     }
 
@@ -77,8 +77,8 @@
         ).into_drawing_area();
         let font:FontDesc = ("Arial", 20).into();
         root.draw(&(EmptyElement::at((200, 200))
-                + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&Red))
-                + Rectangle::new([(0,0), (10, 12)], &Red)
+                + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&RED))
+                + Rectangle::new([(0,0), (10, 12)], &RED)
         ))?;
         Ok(())
     }
@@ -121,7 +121,7 @@
         let root =
             BitMapBackend::new("plotters-doc-data/element-3.png", (640, 480))
             .into_drawing_area();
-        root.fill(&White)?;
+        root.fill(&WHITE)?;
         let mut chart = ChartBuilder::on(&root)
             .x_label_area_size(40)
             .y_label_area_size(40)
@@ -140,9 +140,9 @@
             // but they can be placed into a dynamic element wrapper,
             // by doing so, the type is unified.
             if center.1 == 2 {
-                Cross::new(center, 4, Into::<ShapeStyle>::into(&Red).filled()).into_dyn()
+                Cross::new(center, 4, Into::<ShapeStyle>::into(&RED).filled()).into_dyn()
             } else {
-                Circle::new(center, 4, Into::<ShapeStyle>::into(&Green).filled()).into_dyn()
+                Circle::new(center, 4, Into::<ShapeStyle>::into(&GREEN).filled()).into_dyn()
             }
         }))?;
 
