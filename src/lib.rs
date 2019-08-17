@@ -144,14 +144,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.configure_mesh().draw()?;
 
-    chart.draw_series(LineSeries::new(
-        (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
-        &RED,
-    ))?
+    chart
+        .draw_series(LineSeries::new(
+            (-50..=50).map(|x| x as f32 / 50.0).map(|x| (x, x * x)),
+            &RED,
+        ))?
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
+        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
 
-    chart.configure_series_labels()
+    chart
+        .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .draw()?;
@@ -358,7 +360,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dot_and_label = |x: f32, y: f32| {
         return EmptyElement::at((x, y))
             + Circle::new((0, 0), 3, ShapeStyle::from(&BLACK).filled())
-            + Text::new(format!("({:.2},{:.2})", x, y), (10, 0), ("Arial", 15.0).into_font());
+            + Text::new(
+                format!("({:.2},{:.2})", x, y),
+                (10, 0),
+                ("Arial", 15.0).into_font(),
+            );
     };
 
     root.draw(&dot_and_label(0.5, 0.6))?;
@@ -386,7 +392,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // After this point, we should be able to draw construct a chart context
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
-        .caption("This is our first plot", ("Arial",40).into_font())
+        .caption("This is our first plot", ("Arial", 40).into_font())
         // Set the size of the label region
         .x_label_area_size(20)
         .y_label_area_size(40)
@@ -449,6 +455,9 @@ For example, the following dependency description would avoid compiling with bit
 [dependencies]
 plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
 ```
+
+The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
+This behaviour can also be turned off by setting `default_features = false`.
 
 
 <style>

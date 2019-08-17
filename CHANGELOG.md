@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters Latest (?)
+
+### Improvement
+
+- Color system now is based on `palette` crate (Credit to @Veykril)
+
 ## Plotters 0.2.2 (2019-06-25)
 
 ### Added
@@ -7,7 +13,7 @@
 - More documentation: a Jupyter interactive notebook of Plotters tutorial 
 - Add more quadrants to the `SeriesLabelPosition` (Credit to @wolfjagger).
 
-### Imporvement
+### Improvement
 
 - Histogram imporvements, horizental bar is supported, new creation API which compiler can infer the type
 - Supporting split the drawing area with a list of breakpoints using `DrawingArea::split_by_breakpoints`
