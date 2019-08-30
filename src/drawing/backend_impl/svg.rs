@@ -231,7 +231,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         let node = Text::new()
             .set("x", x0)
             .set("y", y0 - (layout.0).1)
-            .set("font-famliy", font.get_name())
+            .set("font-family", font.get_name())
             .set("font-size", font.get_size())
             .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color));
