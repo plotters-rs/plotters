@@ -153,6 +153,8 @@ gen_key_points_comp!(integer, compute_i32_key_points, i32);
 gen_key_points_comp!(integer, compute_u32_key_points, u32);
 gen_key_points_comp!(integer, compute_i64_key_points, i64);
 gen_key_points_comp!(integer, compute_u64_key_points, u64);
+gen_key_points_comp!(integer, compute_i128_key_points, i128);
+gen_key_points_comp!(integer, compute_u128_key_points, u128);
 
 make_numeric_coord!(
     f32,
@@ -190,11 +192,25 @@ make_numeric_coord!(
     compute_i64_key_points,
     "The ranged coordinate for type i64"
 );
+make_numeric_coord!(
+    u128,
+    RangedCoordu128,
+    compute_u128_key_points,
+    "The ranged coordinate for type u128"
+);
+make_numeric_coord!(
+    i128,
+    RangedCoordi128,
+    compute_i128_key_points,
+    "The ranged coordinate for type i128"
+);
 
 impl_descrete_trait!(RangedCoordu32);
 impl_descrete_trait!(RangedCoordi32);
 impl_descrete_trait!(RangedCoordu64);
 impl_descrete_trait!(RangedCoordi64);
+impl_descrete_trait!(RangedCoordu128);
+impl_descrete_trait!(RangedCoordi128);
 
 impl_ranged_type_trait!(f32, RangedCoordf32);
 impl_ranged_type_trait!(f64, RangedCoordf64);
@@ -202,6 +218,8 @@ impl_ranged_type_trait!(i32, RangedCoordi32);
 impl_ranged_type_trait!(i64, RangedCoordi64);
 impl_ranged_type_trait!(u32, RangedCoordu32);
 impl_ranged_type_trait!(u64, RangedCoordu64);
+impl_ranged_type_trait!(i128, RangedCoordi128);
+impl_ranged_type_trait!(u128, RangedCoordu128);
 
 /*
 pub fn keypoints_i64(range:(i64,i64), n:usize) -> Vec<i64> {
