@@ -4,6 +4,8 @@
 
 ### Improvement
 
+- Add `i128` and `u128` as coordinate type (Credit to @Geemili)
+
 ### Bug Fix
 
 - Date coordinate is working for a long time span now
