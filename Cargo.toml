@@ -7,7 +7,7 @@ license = "MIT"
 description = "Plot Drawing Library in Pure Rust for both native and WASM applications"
 repository = "https://github.com/38/plotters"
 keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
-categories = ["wasm", "visualization"]
+categories = ["visualization", "wasm"]
 readme = "README.md"
 exclude = ["doc-template/*"]
 
