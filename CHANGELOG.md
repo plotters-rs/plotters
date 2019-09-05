@@ -1,5 +1,13 @@
 # Changelog
 
+## Plotters latest (?)
+
+### Improvement
+
+### Bug Fix
+
+- Date coordinate is working for a long time span now
+
 ## Plotters 0.2.3 (2019-08-19)
 
 ### Improvement
