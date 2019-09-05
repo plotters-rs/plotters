@@ -50,6 +50,15 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
             return ret;
         }
 
+        let week_per_point = ((total_weeks as f64) / (max_points as f64)).ceil() as usize;
+
+        for idx in 0..=(total_weeks as usize / week_per_point) {
+            ret.push(self.0.clone() + Duration::weeks((idx * week_per_point) as i64));
+        }
+
+        /* TODO: Think about if we need a monthly resolution? Since length of a month isn't always
+         * the same, so this is a little bit tricky */
+
         ret
     }
 }
