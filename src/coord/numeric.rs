@@ -81,7 +81,7 @@ macro_rules! gen_key_points_comp {
                     a - (a / b).ceil() * b
                 }
             }
-            
+
             // At this point we need to make sure that the loop invariant:
             // The scale must yield number of points than reqested
             if 1 + ((range.1 - range.0) / scale).floor() as usize > max_points {
