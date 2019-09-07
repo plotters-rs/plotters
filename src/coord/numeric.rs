@@ -247,6 +247,12 @@ mod test {
 
         assert!(kp.len() > 0);
         assert!(kp.len() <= 28);
+
+        let kp = compute_f64_key_points((-1.2, 1.2), 1);
+        assert!(kp.len() == 1);
+        
+        let kp = compute_f64_key_points((-1.2, 1.2), 0);
+        assert!(kp.len() == 0);
     }
 
     #[test]
