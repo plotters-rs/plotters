@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest (?)
+
+### Bug Fix
+
+- Key points algorithm for numeric coordinate might not respect the constraint
+
 ## Plotters 0.2.4 (2019-09-05)
 
 ### Improvement

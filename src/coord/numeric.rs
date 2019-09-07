@@ -67,6 +67,10 @@ macro_rules! make_numeric_coord {
 macro_rules! gen_key_points_comp {
     (float, $name:ident, $type:ty) => {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
+            if max_points == 0 {
+                return vec![];
+            }
+
             let range = (range.0 as f64, range.1 as f64);
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
             let mut digits = -(range.1 - range.0).log(10.0).floor() as i32 + 1;
@@ -77,6 +81,13 @@ macro_rules! gen_key_points_comp {
                     a - (a / b).ceil() * b
                 }
             }
+            
+            // At this point we need to make sure that the loop invariant:
+            // The scale must yield number of points than reqested
+            if 1 + ((range.1 - range.0) / scale).floor() as usize > max_points {
+                scale *= 10.0;
+            }
+
             'outer: loop {
                 let old_scale = scale;
                 for nxt in [2.0, 5.0, 10.0].iter() {
