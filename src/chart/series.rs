@@ -29,7 +29,7 @@ impl SeriesLabelPosition {
                 }
                 UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32,
                 Coordinate(x, _) => *x,
-            },
+            } - 5,
             match self {
                 UpperLeft | UpperMiddle | UpperRight => 0,
                 MiddleLeft | MiddleMiddle | MiddleRight => {
@@ -37,7 +37,7 @@ impl SeriesLabelPosition {
                 }
                 LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32,
                 Coordinate(_, y) => *y,
-            },
+            } - 5,
         )
     }
 }
