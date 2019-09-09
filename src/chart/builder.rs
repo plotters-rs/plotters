@@ -114,8 +114,8 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
         Ok(ChartContext {
-            x_label_area,
-            y_label_area,
+            x_label_area: [None, x_label_area],
+            y_label_area: [y_label_area, None],
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
                 x_spec,
                 y_spec,
