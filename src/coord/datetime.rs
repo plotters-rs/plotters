@@ -67,4 +67,3 @@ impl<Z: TimeZone> super::AsRangedCoord for Range<Date<Z>> {
     type CoordDescType = RangedDate<Z>;
     type Value = Date<Z>;
 }
-

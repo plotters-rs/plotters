@@ -162,24 +162,15 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(&mut self.series_anno[idx])
     }
 
-    // TODO: Remove the hardcoded size
-    #[allow(clippy::too_many_arguments)]
-    pub(super) fn draw_mesh<FmtLabel>(
+    /// The actual function that draws the mesh lines.
+    /// It also returns the label that suppose to be there.
+    fn draw_mesh_lines<FmtLabel>(
         &mut self,
         (r, c): (usize, usize),
+        (x_mesh, y_mesh): (bool, bool),
         mesh_line_style: &ShapeStyle,
-        label_style: &TextStyle,
         mut fmt_label: FmtLabel,
-        x_mesh: bool,
-        y_mesh: bool,
-        x_label_offset: i32,
-        x_axis: bool,
-        y_axis: bool,
-        axis_style: &ShapeStyle,
-        axis_desc_style: &TextStyle,
-        x_desc: Option<String>,
-        y_desc: Option<String>,
-    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    ) -> Result<(Vec<(i32, String)>, Vec<(i32, String)>), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
     {
@@ -211,80 +202,143 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             r,
             c,
         )?;
+        Ok((x_labels, y_labels))
+    }
+
+    fn draw_axis_and_labels(
+        &self,
+        area: Option<&DrawingArea<DB, Shift>>,
+        axis_style: Option<&ShapeStyle>,
+        labels: &[(i32, String)],
+        label_style: &TextStyle,
+        label_offset: i32,
+        orientation: (i16, i16),
+        axis_desc: Option<(&str, &TextStyle)>,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+        let area = if let Some(target) = area {
+            target
+        } else {
+            return Ok(());
+        };
 
         let (x0, y0) = self.drawing_area.get_base_pixel();
 
-        if let Some(ref xl) = self.x_label_area {
-            let (tw, th) = xl.dim_in_pixel();
-            if x_axis {
-                xl.draw(&Path::new(vec![(0, 0), (tw as i32, 0)], axis_style.clone()))?;
-            }
-            for (p, t) in x_labels {
-                let (w, _) = label_style.font.box_size(&t).unwrap_or((0, 0));
+        /* TODO: make this configure adjustable */
+        let knob_size = 5;
+        let label_dist = 10;
 
-                if p - x0 + x_label_offset > 0 && p - x0 + x_label_offset + w as i32 / 2 < tw as i32
-                {
-                    if x_axis {
-                        xl.draw(&Path::new(
-                            vec![(p - x0, 0), (p - x0, 5)],
-                            axis_style.clone(),
-                        ))?;
-                    }
-                    xl.draw_text(
-                        &t,
-                        label_style,
-                        (p - x0 - w as i32 / 2 + x_label_offset, 10),
-                    )?;
+        let (tw, th) = area.dim_in_pixel();
+        if let Some(style) = axis_style {
+            let x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
+            let y0 = if orientation.1 > 0 { 0 } else { th as i32 };
+            let x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
+            let y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+            area.draw(&Path::new(vec![(x0, y0), (x1, y1)], style.clone()))?;
+        }
+
+        for (p, t) in labels {
+            let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
+
+            let (cx, cy) = match orientation {
+                (dx, dy) if dx > 0 && dy == 0 => (label_dist + w as i32 / 2, *p - y0),
+                (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32 / 2, *p - y0),
+                (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32 / 2),
+                (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - w as i32 / 2),
+                _ => panic!("Bug: Invlid orientation specification"),
+            };
+
+            let should_draw = if orientation.0 == 0 {
+                cx + label_offset >= 0 && cx + label_offset + w as i32 / 2 <= tw as i32
+            } else {
+                cy + label_offset >= 0 && cy + label_offset + h as i32 / 2 <= th as i32
+            };
+
+            if should_draw {
+                area.draw_text(&t, label_style, (cx - w as i32 / 2, cy - h as i32 / 2))?;
+                if let Some(style) = axis_style {
+                    let (kx0, ky0, kx1, ky1) = match orientation {
+                        (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, knob_size, *p - y0),
+                        (dx, dy) if dx < 0 && dy == 0 => {
+                            (tw as i32 - knob_size, *p - y0, tw as i32, *p - y0)
+                        }
+                        (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, knob_size),
+                        (dx, dy) if dx == 0 && dy < 0 => {
+                            (*p - x0, th as i32 - knob_size, *p - x0, th as i32)
+                        }
+                        _ => panic!("Bug: Invlid orientation specification"),
+                    };
+                    let line = Path::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
+                    area.draw(&line)?;
                 }
-            }
-
-            if let Some(ref text) = x_desc {
-                let (w, h) = label_style.font.box_size(text).unwrap_or((0, 0));
-
-                let left = (tw - w) / 2;
-                let top = th - h;
-
-                xl.draw_text(&text, axis_desc_style, (left as i32, top as i32))?;
             }
         }
 
-        if let Some(ref yl) = self.y_label_area {
-            let (tw, th) = yl.dim_in_pixel();
-            if y_axis {
-                yl.draw(&Path::new(
-                    vec![(tw as i32, 0), (tw as i32, th as i32)],
-                    axis_style.clone(),
-                ))?;
-            }
-            for (p, t) in y_labels {
-                let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
-                if p - y0 >= 0 && p - y0 - h as i32 / 2 <= th as i32 {
-                    yl.draw_text(
-                        &t,
-                        label_style,
-                        (tw as i32 - w as i32 - 10, p - y0 - h as i32 / 2),
-                    )?;
-                    if y_axis {
-                        yl.draw(&Path::new(
-                            vec![(tw as i32 - 5, p - y0), (tw as i32, p - y0)],
-                            axis_style.clone(),
-                        ))?;
-                    }
-                }
-            }
+        if let Some((text, style)) = axis_desc {
+            let actual_style = if orientation.0 == 0 {
+                style.clone()
+            } else {
+                style.transform(FontTransform::Rotate270)
+            };
 
-            if let Some(ref text) = y_desc {
-                let (w, _) = label_style.font.box_size(text).unwrap_or((0, 0));
+            let (w, h) = actual_style.font.box_size(text).unwrap_or((0, 0));
 
-                let top = (th - w) / 2;
+            let (x0, y0) = match orientation {
+                (dx, dy) if dx > 0 && dy == 0 => (tw - w, (th - h) / 2),
+                (dx, dy) if dx < 0 && dy == 0 => (0, (th - h) / 2),
+                (dx, dy) if dx == 0 && dy > 0 => ((tw - w) / 2, th - h),
+                (dx, dy) if dx == 0 && dy < 0 => ((tw - w) / 2, 0),
+                _ => panic!("Bug: Invlid orientation specification"),
+            };
 
-                yl.draw_text(
-                    &text,
-                    &axis_desc_style.transform(FontTransform::Rotate270),
-                    (0, top as i32),
-                )?;
-            }
+            area.draw_text(&text, &actual_style, (x0 as i32, y0 as i32))?;
         }
+
+        Ok(())
+    }
+
+    // TODO: Remove the hardcoded size
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn draw_mesh<FmtLabel>(
+        &mut self,
+        (r, c): (usize, usize),
+        mesh_line_style: &ShapeStyle,
+        label_style: &TextStyle,
+        fmt_label: FmtLabel,
+        x_mesh: bool,
+        y_mesh: bool,
+        x_label_offset: i32,
+        x_axis: bool,
+        y_axis: bool,
+        axis_style: &ShapeStyle,
+        axis_desc_style: &TextStyle,
+        x_desc: Option<String>,
+        y_desc: Option<String>,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
+    {
+        let (x_labels, y_labels) =
+            self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
+
+        self.draw_axis_and_labels(
+            self.x_label_area.as_ref(),
+            if x_axis { Some(axis_style) } else { None },
+            &x_labels[..],
+            label_style,
+            x_label_offset,
+            (0, 1),
+            x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+        )?;
+
+        self.draw_axis_and_labels(
+            self.y_label_area.as_ref(),
+            if y_axis { Some(axis_style) } else { None },
+            &y_labels[..],
+            label_style,
+            0,
+            (-1, 0),
+            y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+        )?;
 
         Ok(())
     }
