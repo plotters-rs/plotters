@@ -2,6 +2,10 @@
 
 ## Plotters development (?)
 
+### Improvement 
+
+- Allowing axis be placed on top or right by setting `right_y_label_area` and `top_x_label_area`
+
 ## Plotters 0.2.5 (2019-09-07)
 
 ### Bug Fix
