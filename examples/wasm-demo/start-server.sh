@@ -15,7 +15,7 @@ if [ "${CONFIG}" = "release" ]
 then
 	cargo build --target=wasm32-unknown-unknown --release
 else
-	cargo build --target=wasm32-unknown-unknown --release
+	cargo build --target=wasm32-unknown-unknown
 fi
 
 wasm-bindgen --out-dir www/pkg   --target web target/wasm32-unknown-unknown/${CONFIG}/wasm_demo.wasm
