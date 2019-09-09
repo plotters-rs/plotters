@@ -62,8 +62,8 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
 /// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
 /// context.
 pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
-    pub(super) x_label_area: [Option<DrawingArea<DB, Shift>>;2],
-    pub(super) y_label_area: [Option<DrawingArea<DB, Shift>>;2],
+    pub(super) x_label_area: [Option<DrawingArea<DB, Shift>>; 2],
+    pub(super) y_label_area: [Option<DrawingArea<DB, Shift>>; 2],
     pub(super) drawing_area: DrawingArea<DB, CT>,
     pub(super) series_anno: Vec<SeriesAnno<'a, DB>>,
 }
@@ -330,7 +330,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 (0, -1 + idx as i16 * 2),
                 x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
             )?;
-            
+
             self.draw_axis_and_labels(
                 self.y_label_area[idx].as_ref(),
                 if y_axis { Some(axis_style) } else { None },

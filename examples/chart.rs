@@ -15,6 +15,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cc = ChartBuilder::on(&upper)
         .x_label_area_size(50)
         .y_label_area_size(60)
+        .top_x_label_area_size(50)
+        .right_y_label_area_size(40)
         .caption("Sine and Cosine", ("Arial", 40).into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 

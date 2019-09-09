@@ -7,8 +7,7 @@ use crate::style::TextStyle;
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
-    x_label_size: u32,
-    y_label_size: u32,
+    label_area_size: [u32; 4], // [upper, lower, left, right]
     root_area: &'a DrawingArea<DB, Shift>,
     title: Option<(String, TextStyle<'b>)>,
     margin: u32,
@@ -20,8 +19,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// - Returns: The chart builder object
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
         Self {
-            x_label_size: 0,
-            y_label_size: 0,
+            label_area_size: [0; 4],
             root_area: root,
             title: None,
             margin: 0,
@@ -39,14 +37,28 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn x_label_area_size(&mut self, size: u32) -> &mut Self {
-        self.x_label_size = size;
+        self.label_area_size[1] = size;
         self
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn y_label_area_size(&mut self, size: u32) -> &mut Self {
-        self.y_label_size = size;
+        self.label_area_size[2] = size;
+        self
+    }
+
+    /// Set the size of X label area
+    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
+    pub fn top_x_label_area_size(&mut self, size: u32) -> &mut Self {
+        self.label_area_size[0] = size;
+        self
+    }
+
+    /// Set the size of the Y label area
+    /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
+    pub fn right_y_label_area_size(&mut self, size: u32) -> &mut Self {
+        self.label_area_size[3] = size;
         self
     }
 
@@ -77,8 +89,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         ChartContext<'a, DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
-        let mut x_label_area = None;
-        let mut y_label_area = None;
+        let mut label_areas = [None, None, None, None];
 
         let mut drawing_area = DrawingArea::clone(self.root_area);
 
@@ -91,31 +102,50 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             drawing_area = drawing_area.titled(title, style.clone())?;
         }
 
-        if self.x_label_size > 0 {
-            let (_, h) = drawing_area.dim_in_pixel();
-            let (upper, bottom) =
-                drawing_area.split_vertically(h as i32 - self.x_label_size as i32);
-            drawing_area = upper;
-            x_label_area = Some(bottom);
+        let (w, h) = drawing_area.dim_in_pixel();
+
+        let mut actual_drawing_area_pos = [0, h as i32, 0, w as i32];
+
+        for (idx, (dx, dy)) in (0..4).map(|idx| (idx, [(0, -1), (0, 1), (-1, 0), (1, 0)][idx])) {
+            let size = self.label_area_size[idx] as i32;
+
+            let split_point = if dx + dy < 0 { size } else { -size };
+
+            actual_drawing_area_pos[idx] += split_point;
         }
 
-        if self.y_label_size > 0 {
-            let (left, right) = drawing_area.split_horizentally(self.y_label_size as i32);
-            drawing_area = right;
-            y_label_area = Some(left);
+        let mut splitted: Vec<_> = drawing_area
+            .split_by_breakpoints(
+                &actual_drawing_area_pos[2..4],
+                &actual_drawing_area_pos[0..2],
+            )
+            .into_iter()
+            .map(|x| Some(x))
+            .collect();
 
-            if let Some(xl) = x_label_area {
-                let (_, right) = xl.split_horizentally(self.y_label_size as i32);
-                x_label_area = Some(right);
+        for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
+            let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
+            if h > 0 && w > 0 {
+                std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
             }
         }
+
+        std::mem::swap(&mut drawing_area, splitted[4].as_mut().unwrap());
 
         let mut pixel_range = drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
+        let mut x_label_area = [None, None];
+        let mut y_label_area = [None, None];
+
+        std::mem::swap(&mut x_label_area[0], &mut label_areas[0]);
+        std::mem::swap(&mut x_label_area[1], &mut label_areas[1]);
+        std::mem::swap(&mut y_label_area[0], &mut label_areas[2]);
+        std::mem::swap(&mut y_label_area[1], &mut label_areas[3]);
+
         Ok(ChartContext {
-            x_label_area: [None, x_label_area],
-            y_label_area: [y_label_area, None],
+            x_label_area: x_label_area,
+            y_label_area: y_label_area,
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
                 x_spec,
                 y_spec,
