@@ -320,25 +320,27 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
 
-        self.draw_axis_and_labels(
-            self.x_label_area[1].as_ref(),
-            if x_axis { Some(axis_style) } else { None },
-            &x_labels[..],
-            label_style,
-            x_label_offset,
-            (0, 1),
-            x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-        )?;
-
-        self.draw_axis_and_labels(
-            self.y_label_area[0].as_ref(),
-            if y_axis { Some(axis_style) } else { None },
-            &y_labels[..],
-            label_style,
-            0,
-            (-1, 0),
-            y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-        )?;
+        for idx in 0..2 {
+            self.draw_axis_and_labels(
+                self.x_label_area[idx].as_ref(),
+                if x_axis { Some(axis_style) } else { None },
+                &x_labels[..],
+                label_style,
+                x_label_offset,
+                (0, -1 + idx as i16 * 2),
+                x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+            )?;
+            
+            self.draw_axis_and_labels(
+                self.y_label_area[idx].as_ref(),
+                if y_axis { Some(axis_style) } else { None },
+                &y_labels[..],
+                label_style,
+                0,
+                (-1 + idx as i16 * 2, 0),
+                y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+            )?;
+        }
 
         Ok(())
     }
