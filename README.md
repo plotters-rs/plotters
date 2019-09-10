@@ -53,6 +53,10 @@ including bitmap, vector graph, piston window and WebAssembly.
     <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/two-scales.rs">
+    <img src="https://plotters-rs.github.io/plotters-doc-data/two-scales.png" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
