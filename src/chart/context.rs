@@ -345,3 +345,41 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 }
+
+/// The chart context that has two coordinate system attached
+pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {
+    pub(super) primiary: ChartContext<'a, DB, CT1>,
+    pub(super) secondary: ChartContext<'a, DB, CT2>,
+}
+
+impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    DualCoordChartContext<'a, DB, CT1, CT2>
+{
+    pub(super) fn new(mut primiary: ChartContext<'a, DB, CT1>, secondary_coord: CT2) -> Self {
+        let secondary_drawing_area = primiary
+            .drawing_area
+            .strip_coord_spec()
+            .apply_coord_spec(secondary_coord);
+        let mut secondary_x_label_area = [None, None];
+        let mut secondary_y_label_area = [None, None];
+
+        std::mem::swap(
+            &mut primiary.x_label_area[0],
+            &mut secondary_x_label_area[0],
+        );
+        std::mem::swap(
+            &mut primiary.y_label_area[0],
+            &mut secondary_y_label_area[1],
+        );
+
+        Self {
+            primiary,
+            secondary: ChartContext {
+                x_label_area: secondary_x_label_area,
+                y_label_area: secondary_y_label_area,
+                drawing_area: secondary_drawing_area,
+                series_anno: vec![],
+            },
+        }
+    }
+}

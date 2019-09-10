@@ -25,6 +25,7 @@ where
     pub(super) line_style_2: Option<ShapeStyle>,
     pub(super) axis_style: Option<ShapeStyle>,
     pub(super) label_style: Option<TextStyle<'b>>,
+    // TODO: Think about how to reuse the code for dual-axis charts
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
