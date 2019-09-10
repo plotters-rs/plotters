@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use super::context::ChartContext;
@@ -5,6 +6,27 @@ use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{Color, FontDesc, RGBColor, ShapeStyle, TextStyle};
+
+pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
+    style: MeshStyle<'a, 'b, X, Y, DB>,
+}
+
+impl<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> SecondaryMeshStyle<'a, 'b, X, Y, DB>
+where
+    X::ValueType: Debug,
+    Y::ValueType: Debug,
+{
+    pub(super) fn new(target: &'b mut ChartContext<'a, DB, RangedCoord<X, Y>>) -> Self {
+        let mut style = target.configure_mesh();
+        style.draw_x_mesh = false;
+        style.draw_y_mesh = false;
+        Self { style }
+    }
+
+    pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+        self.style.draw()
+    }
+}
 
 /// The struct that is used for tracking the configuration of a mesh of any chart
 pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB>
@@ -25,7 +47,6 @@ where
     pub(super) line_style_2: Option<ShapeStyle>,
     pub(super) axis_style: Option<ShapeStyle>,
     pub(super) label_style: Option<TextStyle<'b>>,
-    // TODO: Think about how to reuse the code for dual-axis charts
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,

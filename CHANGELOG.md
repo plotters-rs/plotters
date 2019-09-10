@@ -2,9 +2,10 @@
 
 ## Plotters development (?)
 
-### Improvement 
+### Added
 
 - Allowing axis be placed on top or right by setting `right_y_label_area` and `top_x_label_area`
+- Dual-coord system chart support: Now we are able to attach a secondary coord system to the chart using `ChartContext::set_secondary_coord`. And `draw_secondary_axes` to configure the style of secondary axes. Use `draw_secondary axis` to draw series under the secondary coordinate system.
 
 ## Plotters 0.2.5 (2019-09-07)
 

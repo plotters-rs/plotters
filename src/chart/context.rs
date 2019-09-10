@@ -3,10 +3,13 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 
+use super::dual_coord::DualCoordChartContext;
 use super::mesh::MeshStyle;
 use super::series::SeriesLabelStyle;
 
-use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift};
+use crate::coord::{
+    AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
+};
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection};
@@ -140,6 +143,28 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         self.drawing_area.map_coordinate(coord)
     }
 
+    pub(super) fn draw_series_impl<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        E: Drawable<DB>,
+        R: Borrow<E>,
+        S: IntoIterator<Item = R>,
+    {
+        for element in series {
+            self.drawing_area.draw(element.borrow())?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn alloc_series_anno(&mut self) -> &mut SeriesAnno<'a, DB> {
+        let idx = self.series_anno.len();
+        self.series_anno.push(SeriesAnno::new());
+        &mut self.series_anno[idx]
+    }
+
     /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
     pub fn draw_series<E, R, S>(
         &mut self,
@@ -151,15 +176,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         R: Borrow<E>,
         S: IntoIterator<Item = R>,
     {
-        for element in series {
-            self.drawing_area.draw(element.borrow())?;
-        }
-
-        let idx = self.series_anno.len();
-
-        self.series_anno.push(SeriesAnno::new());
-
-        Ok(&mut self.series_anno[idx])
+        self.draw_series_impl(series)?;
+        Ok(self.alloc_series_anno())
     }
 
     /// The actual function that draws the mesh lines.
@@ -344,42 +362,21 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
         Ok(())
     }
-}
 
-/// The chart context that has two coordinate system attached
-pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {
-    pub(super) primiary: ChartContext<'a, DB, CT1>,
-    pub(super) secondary: ChartContext<'a, DB, CT2>,
-}
+    /// Attach a secondary coord to the chart
+    pub fn set_secondary_coord<SX: AsRangedCoord, SY: AsRangedCoord>(
+        self,
+        x_coord: SX,
+        y_coord: SY,
+    ) -> DualCoordChartContext<
+        'a,
+        DB,
+        RangedCoord<X, Y>,
+        RangedCoord<SX::CoordDescType, SY::CoordDescType>,
+    > {
+        let mut pixel_range = self.drawing_area.get_pixel_range();
+        pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
-    DualCoordChartContext<'a, DB, CT1, CT2>
-{
-    pub(super) fn new(mut primiary: ChartContext<'a, DB, CT1>, secondary_coord: CT2) -> Self {
-        let secondary_drawing_area = primiary
-            .drawing_area
-            .strip_coord_spec()
-            .apply_coord_spec(secondary_coord);
-        let mut secondary_x_label_area = [None, None];
-        let mut secondary_y_label_area = [None, None];
-
-        std::mem::swap(
-            &mut primiary.x_label_area[0],
-            &mut secondary_x_label_area[0],
-        );
-        std::mem::swap(
-            &mut primiary.y_label_area[0],
-            &mut secondary_y_label_area[1],
-        );
-
-        Self {
-            primiary,
-            secondary: ChartContext {
-                x_label_area: secondary_x_label_area,
-                y_label_area: secondary_y_label_area,
-                drawing_area: secondary_drawing_area,
-                series_anno: vec![],
-            },
-        }
+        DualCoordChartContext::new(self, RangedCoord::new(x_coord, y_coord, pixel_range))
     }
 }
