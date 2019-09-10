@@ -54,7 +54,7 @@ including bitmap, vector graph, piston window and WebAssembly.
 </a>
 
 <a href="https://github.com/38/plotters/blob/master/examples/two-scales.rs">
-    <img src="https://plotters-rs.github.io/plotters-doc-data/two-scales.png" class="galleryItem" width=200px></img>
+    <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png" class="galleryItem" width=200px></img>
 </a>
 
 

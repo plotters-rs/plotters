@@ -102,8 +102,8 @@ including bitmap, vector graph, piston window and WebAssembly.
 </div>
 
 <div class="galleryItem">
-    <a href="https://plotters-rs.github.io/plotters-doc-data/two-scales.png">
-        <img src="https://plotters-rs.github.io/plotters-doc-data/two-scales.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/twoscale.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
         Dual Y-Axis Example
