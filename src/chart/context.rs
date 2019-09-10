@@ -86,6 +86,7 @@ impl<
         MeshStyle {
             axis_style: None,
             x_label_offset: 0,
+            y_label_offset: 0,
             draw_x_mesh: true,
             draw_y_mesh: true,
             draw_x_axis: true,
@@ -325,6 +326,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         x_mesh: bool,
         y_mesh: bool,
         x_label_offset: i32,
+        y_label_offset: i32,
         x_axis: bool,
         y_axis: bool,
         axis_style: &ShapeStyle,
@@ -354,7 +356,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 if y_axis { Some(axis_style) } else { None },
                 &y_labels[..],
                 label_style,
-                0,
+                y_label_offset,
                 (-1 + idx as i16 * 2, 0),
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
             )?;

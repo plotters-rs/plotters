@@ -1,3 +1,4 @@
+/// The dual coordinate system support
 use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
@@ -5,8 +6,9 @@ use std::ops::{Deref, DerefMut};
 use super::context::{ChartContext, SeriesAnno};
 use super::mesh::SecondaryMeshStyle;
 
-use crate::coord::{CoordTranslate, Ranged, RangedCoord};
-use crate::drawing::backend::DrawingBackend;
+use crate::coord::{CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate};
+use crate::drawing::backend::{BackendCoord, DrawingBackend};
+use crate::drawing::DrawingArea;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{Drawable, PointCollection};
 
@@ -46,6 +48,41 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
             },
         }
     }
+
+    /// Get a reference to the drawing area that uses the secondary coordinate system
+    pub fn secondary_plotting_area(&self) -> &DrawingArea<DB, CT2> {
+        &self.secondary.drawing_area
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
+    DualCoordChartContext<'a, DB, CT1, CT2>
+{
+    /// Convert the chart context into the secondary coodindate translation function
+    pub fn into_secondary_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT2::From> {
+        let coord_spec = self.secondary.drawing_area.into_coord_spec();
+        move |coord| coord_spec.reverse_translate(coord)
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT1: ReverseCoordTranslate, CT2: ReverseCoordTranslate>
+    DualCoordChartContext<'a, DB, CT1, CT2>
+{
+    /// Convert the chart context into a pair of closures that maps the pixel coordinate into the
+    /// logical coordinate for both primiary coordinate system and secondary coordinate system.
+    pub fn into_coord_trans_pair(
+        self,
+    ) -> (
+        impl Fn(BackendCoord) -> Option<CT1::From>,
+        impl Fn(BackendCoord) -> Option<CT2::From>,
+    ) {
+        let coord_spec_1 = self.primiary.drawing_area.into_coord_spec();
+        let coord_spec_2 = self.secondary.drawing_area.into_coord_spec();
+        (
+            move |coord| coord_spec_1.reverse_translate(coord),
+            move |coord| coord_spec_2.reverse_translate(coord),
+        )
+    }
 }
 
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, SX: Ranged, SY: Ranged>
@@ -54,6 +91,7 @@ where
     SX::ValueType: Debug,
     SY::ValueType: Debug,
 {
+    /// Start configure the style for the secondary axes
     pub fn configure_secondary_axes<'b>(&'b mut self) -> SecondaryMeshStyle<'a, 'b, SX, SY, DB> {
         SecondaryMeshStyle::new(&mut self.secondary)
     }
@@ -67,6 +105,9 @@ where
     SX::ValueType: Debug,
     SY::ValueType: Debug,
 {
+    /// Draw a series use the secondary coordinate system
+    /// - `series`: The series to draw
+    /// - `Returns` the series annotation object or error code
     pub fn draw_secondary_series<E, R, S>(
         &mut self,
         series: S,

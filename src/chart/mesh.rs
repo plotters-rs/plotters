@@ -7,6 +7,7 @@ use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{Color, FontDesc, RGBColor, ShapeStyle, TextStyle};
 
+/// The style used to describe the mesh for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
     style: MeshStyle<'a, 'b, X, Y, DB>,
 }
@@ -23,6 +24,79 @@ where
         Self { style }
     }
 
+    /// Set the style definition for the axis
+    /// - `style`: The style for the axis
+    pub fn axis_style<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
+        self.style.axis_style(style);
+        self
+    }
+
+    /// The offset of x labels. This is used when we want to place the label in the middle of
+    /// the grid. This is useful if we are drawing a histogram
+    /// - `value`: The offset in pixel
+    pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
+        self.style.x_label_offset(value);
+        self
+    }
+
+    /// The offset of y labels. This is used when we want to place the label in the middle of
+    /// the grid. This is useful if we are drawing a histogram
+    /// - `value`: The offset in pixel
+    pub fn y_label_offset(&mut self, value: i32) -> &mut Self {
+        self.style.y_label_offset(value);
+        self
+    }
+
+    /// Set how many labels for the X axis at most
+    /// - `value`: The maximum desired number of labels in the X axis
+    pub fn x_labels(&mut self, value: usize) -> &mut Self {
+        self.style.x_labels(value);
+        self
+    }
+
+    /// Set how many label for the Y axis at most
+    /// - `value`: The maximum desired number of labels in the Y axis
+    pub fn y_labels(&mut self, value: usize) -> &mut Self {
+        self.style.y_labels(value);
+        self
+    }
+
+    /// Set the formatter function for the X label text
+    /// - `fmt`: The formatter function
+    pub fn x_label_formatter(&mut self, fmt: &'b dyn Fn(&X::ValueType) -> String) -> &mut Self {
+        self.style.x_label_formatter(fmt);
+        self
+    }
+
+    /// Set the formatter function for the Y label text
+    /// - `fmt`: The formatter function
+    pub fn y_label_formatter(&mut self, fmt: &'b dyn Fn(&Y::ValueType) -> String) -> &mut Self {
+        self.style.y_label_formatter(fmt);
+        self
+    }
+
+    /// Set the axis description's style. If not given, use label style instead.
+    /// - `style`: The text style that would be applied to descriptions
+    pub fn axis_desc_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
+        self.style.axis_desc_style(style);
+        self
+    }
+
+    /// Set the X axis's description
+    /// - `desc`: The description of the X axis
+    pub fn x_desc<T: Into<String>>(&mut self, desc: T) -> &mut Self {
+        self.style.x_desc(desc);
+        self
+    }
+
+    /// Set the Y axis's description
+    /// - `desc`: The description of the Y axis
+    pub fn y_desc<T: Into<String>>(&mut self, desc: T) -> &mut Self {
+        self.style.y_desc(desc);
+        self
+    }
+
+    /// Draw the axes for the secondary coordinate system
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         self.style.draw()
     }
@@ -38,6 +112,7 @@ where
     pub(super) draw_x_axis: bool,
     pub(super) draw_y_axis: bool,
     pub(super) x_label_offset: i32,
+    pub(super) y_label_offset: i32,
     pub(super) n_x_labels: usize,
     pub(super) n_y_labels: usize,
     pub(super) axis_desc_style: Option<TextStyle<'b>>,
@@ -64,6 +139,14 @@ where
     /// - `value`: The offset in pixel
     pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
         self.x_label_offset = value;
+        self
+    }
+
+    /// The offset of y labels. This is used when we want to place the label in the middle of
+    /// the grid. This is useful if we are drawing a histogram
+    /// - `value`: The offset in pixel
+    pub fn y_label_offset(&mut self, value: i32) -> &mut Self {
+        self.y_label_offset = value;
         self
     }
 
@@ -209,6 +292,7 @@ where
             self.draw_x_mesh,
             self.draw_y_mesh,
             self.x_label_offset,
+            self.y_label_offset,
             false,
             false,
             &axis_style,
@@ -228,6 +312,7 @@ where
             self.draw_x_mesh,
             self.draw_y_mesh,
             self.x_label_offset,
+            self.y_label_offset,
             self.draw_x_axis,
             self.draw_y_axis,
             &axis_style,
