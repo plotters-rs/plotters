@@ -111,6 +111,16 @@ including bitmap, vector graph, piston window and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/matshow.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/matshow.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        The matplotlib Matshow Example
+        <a href="https://github.com/38/plotters/blob/master/examples/matshow.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

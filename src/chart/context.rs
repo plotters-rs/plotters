@@ -267,13 +267,25 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             };
 
             let should_draw = if orientation.0 == 0 {
-                cx + label_offset >= 0 && cx + label_offset + w as i32 / 2 <= tw as i32
+                cx >= 0 && cx + label_offset + w as i32 / 2 <= tw as i32
             } else {
-                cy + label_offset >= 0 && cy + label_offset + h as i32 / 2 <= th as i32
+                cy >= 0 && cy + label_offset + h as i32 / 2 <= th as i32
             };
 
             if should_draw {
-                area.draw_text(&t, label_style, (cx - w as i32 / 2, cy - h as i32 / 2))?;
+                if orientation.0 == 0 {
+                    area.draw_text(
+                        &t,
+                        label_style,
+                        (cx - w as i32 / 2 + label_offset, cy - h as i32 / 2),
+                    )?;
+                } else {
+                    area.draw_text(
+                        &t,
+                        label_style,
+                        (cx - w as i32 / 2, cy - h as i32 / 2 + label_offset),
+                    )?;
+                }
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = match orientation {
                         (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, knob_size, *p - y0),
