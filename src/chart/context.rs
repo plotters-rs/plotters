@@ -298,7 +298,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             } else {
                 if orientation.0 == -1 {
                     style.transform(FontTransform::Rotate270)
-                } else  {
+                } else {
                     style.transform(FontTransform::Rotate90)
                 }
             };
