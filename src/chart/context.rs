@@ -296,7 +296,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             let actual_style = if orientation.0 == 0 {
                 style.clone()
             } else {
-                style.transform(FontTransform::Rotate270)
+                if orientation.0 == -1 {
+                    style.transform(FontTransform::Rotate270)
+                } else  {
+                    style.transform(FontTransform::Rotate90)
+                }
             };
 
             let (w, h) = actual_style.font.box_size(text).unwrap_or((0, 0));

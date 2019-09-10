@@ -137,7 +137,8 @@ impl<'a> FontDesc<'a> {
     /// Get the size of the text if rendered in this font
     pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
         let ((min_x, min_y), (max_x, max_y)) = self.layout_box(text)?;
-        Ok(((max_x - min_x) as u32, (max_y - min_y) as u32))
+        let (w, h) = self.get_transform().transform(max_x - min_x, max_y - min_y);
+        Ok((w.abs() as u32, h.abs() as u32))
     }
 
     /// Actually draws a font with a drawing function
