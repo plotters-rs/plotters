@@ -1,7 +1,8 @@
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/twoscale.png", (1024, 768)).into_drawing_area();
+    let root =
+        BitMapBackend::new("plotters-doc-data/twoscale.png", (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)

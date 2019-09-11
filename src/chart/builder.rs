@@ -70,7 +70,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
-    /// Set a label area size 
+    /// Set a label area size
     /// - `pos`: THe position where the label area locted
     /// - `size`: The size of the label area size
     pub fn set_label_area_size(&mut self, pos: LabelAreaPosition, size: u32) -> &mut Self {

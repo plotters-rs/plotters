@@ -20,6 +20,8 @@ including bitmap, vector graph, piston window and WebAssembly.
 
 ## Gallery
 
+To view the source code for each example, please click on the example image.
+
 <a href="https://github.com/38/plotters/blob/master/examples/chart.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/sample.png" class="galleryItem" width=200px></img>
 </a>
@@ -59,6 +61,10 @@ including bitmap, vector graph, piston window and WebAssembly.
 
 <a href="https://github.com/38/plotters/blob/master/examples/matshow.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/matshow.png" class="galleryItem" width=200px></img>
+</a>
+
+<a href="https://github.com/38/plotters/blob/master/examples/sierpinski.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/sierpinski.png", class="galleryItem" with=200px></img>
 </a>
 
 

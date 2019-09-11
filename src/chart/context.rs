@@ -254,10 +254,17 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             let y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
             area.draw(&Path::new(vec![(x0, y0), (x1, y1)], style.clone()))?;
         }
-        
+
         let right_most = if orientation.0 > 0 && orientation.1 == 0 {
-            labels.iter().map(|(_, t)| label_style.font.box_size(t).unwrap_or((0, 0)).0).max().unwrap_or(0) as i32 + label_dist as i32
-        } else { 0 };
+            labels
+                .iter()
+                .map(|(_, t)| label_style.font.box_size(t).unwrap_or((0, 0)).0)
+                .max()
+                .unwrap_or(0) as i32
+                + label_dist as i32
+        } else {
+            0
+        };
 
         for (p, t) in labels {
             let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
@@ -278,17 +285,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
             if should_draw {
                 if orientation.0 == 0 {
-                    area.draw_text(
-                        &t,
-                        label_style,
-                        (cx - w as i32 / 2 + label_offset, cy),
-                    )?;
+                    area.draw_text(&t, label_style, (cx - w as i32 / 2 + label_offset, cy))?;
                 } else {
-                    area.draw_text(
-                        &t,
-                        label_style,
-                        (cx, cy - h as i32 / 2 + label_offset),
-                    )?;
+                    area.draw_text(&t, label_style, (cx, cy - h as i32 / 2 + label_offset))?;
                 }
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = match orientation {
