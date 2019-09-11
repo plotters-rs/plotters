@@ -5,6 +5,14 @@ use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::TextStyle;
 
+/// The enum used to specify the position of label area
+pub enum LabelAreaPosition {
+    Top = 0,
+    Bottom = 1,
+    Left = 2,
+    Right = 3,
+}
+
 /// The helper object to create a chart context, which is used for the high-level figure drawing
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
@@ -48,17 +56,25 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
-    /// Set the size of X label area
+    /// Set the size of X label area on the top of the chart
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn top_x_label_area_size(&mut self, size: u32) -> &mut Self {
         self.label_area_size[0] = size;
         self
     }
 
-    /// Set the size of the Y label area
+    /// Set the size of the Y label area on the right side
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn right_y_label_area_size(&mut self, size: u32) -> &mut Self {
         self.label_area_size[3] = size;
+        self
+    }
+
+    /// Set a label area size 
+    /// - `pos`: THe position where the label area locted
+    /// - `size`: The size of the label area size
+    pub fn set_label_area_size(&mut self, pos: LabelAreaPosition, size: u32) -> &mut Self {
+        self.label_area_size[pos as usize] = size;
         self
     }
 

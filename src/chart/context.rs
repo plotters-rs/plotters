@@ -244,7 +244,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
         /* TODO: make this configure adjustable */
         let knob_size = 5;
-        let label_dist = 10;
+        let label_dist = if orientation.1 == 0 { 10 } else { 0 };
 
         let (tw, th) = area.dim_in_pixel();
         if let Some(style) = axis_style {
