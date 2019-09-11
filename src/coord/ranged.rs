@@ -143,6 +143,9 @@ where
 {
     /// Get the smallest value that is larger than the `this` value
     fn next_value(this: &Self::ValueType) -> Self::ValueType;
+
+    /// Get the largest value that is smaller than `this` value
+    fn previous_value(this: &Self::ValueType) -> Self::ValueType;
 }
 
 /// The trait for the type that can be converted into a ranged coordinate axis
@@ -158,4 +161,66 @@ where
 {
     type CoordDescType = T;
     type Value = T::ValueType;
+}
+
+pub struct CentricDescreteRange<D: DescreteRanged>(D)
+where
+    <D as Ranged>::ValueType: Eq;
+
+pub trait IntoCentric: AsRangedCoord
+where
+    Self::CoordDescType: DescreteRanged,
+    <Self::CoordDescType as Ranged>::ValueType: Eq,
+{
+    fn into_centric(self) -> CentricDescreteRange<Self::CoordDescType> {
+        CentricDescreteRange(self.into())
+    }
+}
+
+impl<T: AsRangedCoord> IntoCentric for T
+where
+    T::CoordDescType: DescreteRanged,
+    <Self::CoordDescType as Ranged>::ValueType: Eq,
+{
+}
+
+impl<D: DescreteRanged> Ranged for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    type ValueType = <D as Ranged>::ValueType;
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        let prev = <D as DescreteRanged>::previous_value(&value);
+        (self.0.map(&prev, limit) + self.0.map(value, limit)) / 2
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        self.0.key_points(max_points)
+    }
+
+    fn range(&self) -> Range<Self::ValueType> {
+        self.0.range()
+    }
+}
+
+impl<D: DescreteRanged> DescreteRanged for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    fn next_value(this: &Self::ValueType) -> Self::ValueType {
+        <D as DescreteRanged>::next_value(this)
+    }
+
+    fn previous_value(this: &Self::ValueType) -> Self::ValueType {
+        <D as DescreteRanged>::previous_value(this)
+    }
+}
+
+impl<D: DescreteRanged> AsRangedCoord for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    type CoordDescType = Self;
+    type Value = <Self as Ranged>::ValueType;
 }

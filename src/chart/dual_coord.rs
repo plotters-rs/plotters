@@ -53,6 +53,10 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     pub fn secondary_plotting_area(&self) -> &DrawingArea<DB, CT2> {
         &self.secondary.drawing_area
     }
+
+    pub fn borrow_secondary(&self) -> &ChartContext<'a, DB, CT2> {
+        &self.secondary
+    }
 }
 
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
