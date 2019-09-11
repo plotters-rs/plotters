@@ -254,15 +254,19 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             let y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
             area.draw(&Path::new(vec![(x0, y0), (x1, y1)], style.clone()))?;
         }
+        
+        let right_most = if orientation.0 > 0 && orientation.1 == 0 {
+            labels.iter().map(|(_, t)| label_style.font.box_size(t).unwrap_or((0, 0)).0).max().unwrap_or(0) as i32 + label_dist as i32
+        } else { 0 };
 
         for (p, t) in labels {
             let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
 
             let (cx, cy) = match orientation {
-                (dx, dy) if dx > 0 && dy == 0 => (label_dist + w as i32 / 2, *p - y0),
-                (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32 / 2, *p - y0),
-                (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32 / 2),
-                (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - w as i32 / 2),
+                (dx, dy) if dx > 0 && dy == 0 => (right_most - w as i32, *p - y0),
+                (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32, *p - y0),
+                (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32),
+                (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - h as i32),
                 _ => panic!("Bug: Invlid orientation specification"),
             };
 
@@ -277,13 +281,13 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                     area.draw_text(
                         &t,
                         label_style,
-                        (cx - w as i32 / 2 + label_offset, cy - h as i32 / 2),
+                        (cx - w as i32 / 2 + label_offset, cy),
                     )?;
                 } else {
                     area.draw_text(
                         &t,
                         label_style,
-                        (cx - w as i32 / 2, cy - h as i32 / 2 + label_offset),
+                        (cx, cy - h as i32 / 2 + label_offset),
                     )?;
                 }
                 if let Some(style) = axis_style {
