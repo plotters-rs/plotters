@@ -9,6 +9,7 @@
 - Add support for `y_label_offset`. Previously only X axis label supports offset attribute. 
 - New label area size API `set_label_area_size` can be used for all 4 label area
 - Added new error bar element
+- New axis specification type `PartialAxis` which allows the partially rendered axis. For example, we can define the chart's axis range as `0..1`, but only `0.3..0.7` is rendered on axis. This can be done by `(0.0..1.0).partial_axis(0.3..0.7)`
 
 ### Improvement
 

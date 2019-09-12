@@ -34,7 +34,8 @@ pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
 };
 pub use ranged::{
-    AsRangedCoord, DescreteRanged, IntoCentric, MeshLine, Ranged, RangedCoord, ReversableRanged,
+    AsRangedCoord, DescreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
+    ReversableRanged,
 };
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
