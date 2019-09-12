@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use plotters::prelude::*;
 
 use rand::distributions::Distribution;
