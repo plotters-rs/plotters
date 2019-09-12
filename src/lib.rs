@@ -141,6 +141,16 @@ including bitmap, vector graph, piston window and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/errorbar.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
@@ -557,8 +567,8 @@ pub mod prelude {
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, MultiLineText, Path,
-        Pixel, Rectangle, Text,
+        CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
+        MultiLineText, Path, Pixel, Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]

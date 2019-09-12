@@ -284,11 +284,14 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             };
 
             if should_draw {
-                if orientation.0 == 0 {
-                    area.draw_text(&t, label_style, (cx - w as i32 / 2 + label_offset, cy))?;
+                let (text_x, text_y) = if orientation.0 == 0 {
+                    (cx - w as i32 / 2 + label_offset, cy)
                 } else {
-                    area.draw_text(&t, label_style, (cx, cy - h as i32 / 2 + label_offset))?;
-                }
+                    (cx, cy - h as i32 / 2 + label_offset)
+                };
+
+                area.draw_text(&t, label_style, (text_x, text_y))?;
+
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = match orientation {
                         (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, knob_size, *p - y0),
@@ -334,7 +337,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 
-    // TODO: Remove the hardcoded size
     #[allow(clippy::too_many_arguments)]
     pub(super) fn draw_mesh<FmtLabel>(
         &mut self,

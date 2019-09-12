@@ -39,3 +39,4 @@ piston = ["piston_window"]
 
 [dev-dependencies]
 rand = "^0.6.5"
+itertools = "^0.8.0"

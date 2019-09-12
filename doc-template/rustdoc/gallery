@@ -116,3 +116,13 @@
         <a href="https://github.com/38/plotters/blob/master/examples/nomal-dist2.rs">[code]</a>
     </div>
 </div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/errorbar.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">[code]</a>
+    </div>
+</div>

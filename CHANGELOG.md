@@ -8,6 +8,11 @@
 - Dual-coord system chart support: Now we are able to attach a secondary coord system to the chart using `ChartContext::set_secondary_coord`. And `draw_secondary_axes` to configure the style of secondary axes. Use `draw_secondary axis` to draw series under the secondary coordinate system.
 - Add support for `y_label_offset`. Previously only X axis label supports offset attribute. 
 - New label area size API `set_label_area_size` can be used for all 4 label area
+- Added new error bar element
+
+### Improvement
+
+- More examples are included
 
 ## Plotters 0.2.5 (2019-09-07)
 
