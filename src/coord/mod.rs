@@ -38,6 +38,9 @@ pub use ranged::{
     ReversableRanged,
 };
 
+#[cfg(feature = "make_partial_axis")]
+pub use ranged::make_partial_axis;
+
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
 /// The trait that translates some customized object to the backend coordinate

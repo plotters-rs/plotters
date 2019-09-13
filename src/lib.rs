@@ -558,6 +558,9 @@ pub mod prelude {
     #[cfg(feature = "chrono")]
     pub use crate::coord::{RangedDate, RangedDateTime};
 
+    #[cfg(feature = "make_partial_axis")]
+    pub use crate::coord::make_partial_axis;
+
     pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
     pub use crate::style::{

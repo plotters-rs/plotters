@@ -200,13 +200,11 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
     }
 
     pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
-        self.coord
-            .get_x_axis_pixel_range((0, self.rect.x1 - self.rect.x0))
+        self.coord.get_x_axis_pixel_range()
     }
 
     pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
-        self.coord
-            .get_y_axis_pixel_range((0, self.rect.y1 - self.rect.y0))
+        self.coord.get_y_axis_pixel_range()
     }
 }
 

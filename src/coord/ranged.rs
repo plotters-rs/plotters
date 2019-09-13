@@ -98,12 +98,12 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
         self.logic_y.range()
     }
 
-    pub fn get_x_axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
-        self.logic_x.axis_pixel_range(limit)
+    pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_x.axis_pixel_range(self.back_x)
     }
 
-    pub fn get_y_axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
-        self.logic_y.axis_pixel_range(limit)
+    pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_y.axis_pixel_range(self.back_y)
     }
 }
 
@@ -297,4 +297,28 @@ where
 {
     type CoordDescType = Self;
     type Value = <Self as Ranged>::ValueType;
+}
+
+#[cfg(feature = "make_partial_axis")]
+pub fn make_partial_axis<T>(
+    axis_range: Range<T>,
+    part: Range<f64>,
+) -> Option<PartialAxis<<Range<T> as AsRangedCoord>::CoordDescType>>
+where
+    Range<T>: AsRangedCoord,
+    T: num_traits::NumCast + Clone,
+{
+    let left: f64 = num_traits::cast(axis_range.start.clone())?;
+    let right: f64 = num_traits::cast(axis_range.end.clone())?;
+
+    let full_range_size = (right - left) / (part.end - part.start);
+
+    let full_left = left - full_range_size * part.start;
+    let full_right = right + full_range_size * (1.0 - part.end);
+
+    let full_range: Range<T> = num_traits::cast(full_left)?..num_traits::cast(full_right)?;
+
+    let axis_range: <Range<T> as AsRangedCoord>::CoordDescType = axis_range.into();
+
+    Some(PartialAxis(full_range.into(), axis_range.range()))
 }

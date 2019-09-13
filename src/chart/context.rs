@@ -248,11 +248,19 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
         let (tw, th) = area.dim_in_pixel();
 
-        let axis_range = if orientation.0 == 0 {
+        let mut axis_range = if orientation.0 == 0 {
             self.drawing_area.get_x_axis_pixel_range()
         } else {
             self.drawing_area.get_y_axis_pixel_range()
         };
+
+        if orientation.0 == 0 {
+            axis_range.start -= x0;
+            axis_range.end -= x0;
+        } else {
+            axis_range.start -= y0;
+            axis_range.end -= y0;
+        }
 
         if let Some(style) = axis_style {
             let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
@@ -284,7 +292,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         for (p, t) in labels {
             let rp = if orientation.0 == 0 { *p - x0 } else { *p - y0 };
 
-            if rp < axis_range.start || axis_range.end < rp {
+            if rp < axis_range.start.min(axis_range.end)
+                || axis_range.end.max(axis_range.start) < rp
+            {
                 continue;
             }
 
