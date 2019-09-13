@@ -169,6 +169,9 @@ pub use composable::{ComposedElement, EmptyElement};
 mod candlestick;
 pub use candlestick::CandleStick;
 
+mod errorbar;
+pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
+
 /// A type which is logically a collection of points, under any given coordinate system
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator

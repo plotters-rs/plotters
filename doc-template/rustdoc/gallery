@@ -102,7 +102,27 @@
         <img src="https://plotters-rs.github.io/plotters-doc-data/sierpinski.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-		The matplotlib Matshow Example
+		The Sierpinski Carpet
         <a href="https://github.com/38/plotters/blob/master/examples/sierpinski.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/nomal-dist2.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/errorbar.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">[code]</a>
     </div>
 </div>

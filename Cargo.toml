@@ -30,12 +30,15 @@ js-sys= "0.3.4"
 wasm-bindgen = "0.2.43"
 
 [features]
-default = ["bitmap", "svg", "chrono", "palette_ext"]
+default = ["bitmap", "svg", "chrono", "palette_ext", "make_partial_axis"]
 palette_ext = ["palette", "num-traits"]
 bitmap = ["image"]
 datetime = ["chrono"]
 evcxr = ["svg"]
 piston = ["piston_window"]
+make_partial_axis = ["num-traits"]
+
 
 [dev-dependencies]
 rand = "^0.6.5"
+itertools = "^0.8.0"

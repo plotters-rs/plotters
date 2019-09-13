@@ -21,11 +21,13 @@ pub fn sierpinski_carpet(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
-        BitMapBackend::new("plotters-doc-data/sierpinski.png", (768, 818)).into_drawing_area();
+        BitMapBackend::new("plotters-doc-data/sierpinski.png", (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 
-    let root = root.titled("Sierpinski Carpet Demo", ("Arial", 60))?;
+    let root = root
+        .titled("Sierpinski Carpet Demo", ("Arial", 60))?
+        .shrink(((1024 - 700) / 2, 0), (700, 700));
 
     sierpinski_carpet(5, &root)
 }

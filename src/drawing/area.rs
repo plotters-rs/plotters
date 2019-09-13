@@ -198,6 +198,14 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>
     pub fn get_y_range(&self) -> Range<Y::ValueType> {
         self.coord.get_y_range()
     }
+
+    pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
+        self.coord.get_x_axis_pixel_range()
+    }
+
+    pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
+        self.coord.get_y_axis_pixel_range()
+    }
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {

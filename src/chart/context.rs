@@ -244,14 +244,37 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
         /* TODO: make this configure adjustable */
         let knob_size = 5;
-        let label_dist = if orientation.1 == 0 { 10 } else { 0 };
+        let label_dist = if orientation.1 > 0 { 0 } else { 10 };
 
         let (tw, th) = area.dim_in_pixel();
+
+        let mut axis_range = if orientation.0 == 0 {
+            self.drawing_area.get_x_axis_pixel_range()
+        } else {
+            self.drawing_area.get_y_axis_pixel_range()
+        };
+
+        if orientation.0 == 0 {
+            axis_range.start -= x0;
+            axis_range.end -= x0;
+        } else {
+            axis_range.start -= y0;
+            axis_range.end -= y0;
+        }
+
         if let Some(style) = axis_style {
-            let x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
-            let y0 = if orientation.1 > 0 { 0 } else { th as i32 };
-            let x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
-            let y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
+            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 };
+            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
+            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+
+            if orientation.0 == 0 {
+                x0 = axis_range.start;
+                x1 = axis_range.end;
+            } else {
+                y0 = axis_range.start;
+                y1 = axis_range.end;
+            }
             area.draw(&Path::new(vec![(x0, y0), (x1, y1)], style.clone()))?;
         }
 
@@ -267,6 +290,14 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         };
 
         for (p, t) in labels {
+            let rp = if orientation.0 == 0 { *p - x0 } else { *p - y0 };
+
+            if rp < axis_range.start.min(axis_range.end)
+                || axis_range.end.max(axis_range.start) < rp
+            {
+                continue;
+            }
+
             let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
 
             let (cx, cy) = match orientation {
@@ -284,11 +315,14 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             };
 
             if should_draw {
-                if orientation.0 == 0 {
-                    area.draw_text(&t, label_style, (cx - w as i32 / 2 + label_offset, cy))?;
+                let (text_x, text_y) = if orientation.0 == 0 {
+                    (cx - w as i32 / 2 + label_offset, cy)
                 } else {
-                    area.draw_text(&t, label_style, (cx, cy - h as i32 / 2 + label_offset))?;
-                }
+                    (cx, cy - h as i32 / 2 + label_offset)
+                };
+
+                area.draw_text(&t, label_style, (text_x, text_y))?;
+
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = match orientation {
                         (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, knob_size, *p - y0),
@@ -334,7 +368,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 
-    // TODO: Remove the hardcoded size
     #[allow(clippy::too_many_arguments)]
     pub(super) fn draw_mesh<FmtLabel>(
         &mut self,

@@ -8,6 +8,9 @@ macro_rules! impl_descrete_trait {
             fn next_value(this: &Self::ValueType) -> Self::ValueType {
                 return *this + 1;
             }
+            fn previous_value(this: &Self::ValueType) -> Self::ValueType {
+                return *this - 1;
+            }
         }
     };
 }

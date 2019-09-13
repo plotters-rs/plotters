@@ -18,6 +18,11 @@ pub trait Ranged {
 
     /// Get the range of this value
     fn range(&self) -> Range<Self::ValueType>;
+
+    /// This function provides the on-axis part of its range
+    fn axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
+        limit.0..limit.1
+    }
 }
 
 /// The trait indicates the ranged value can be map reversely, which means
@@ -92,6 +97,14 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
     pub fn get_y_range(&self) -> Range<Y::ValueType> {
         self.logic_y.range()
     }
+
+    pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_x.axis_pixel_range(self.back_x)
+    }
+
+    pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_y.axis_pixel_range(self.back_y)
+    }
 }
 
 impl<X: Ranged, Y: Ranged> CoordTranslate for RangedCoord<X, Y> {
@@ -143,6 +156,9 @@ where
 {
     /// Get the smallest value that is larger than the `this` value
     fn next_value(this: &Self::ValueType) -> Self::ValueType;
+
+    /// Get the largest value that is smaller than `this` value
+    fn previous_value(this: &Self::ValueType) -> Self::ValueType;
 }
 
 /// The trait for the type that can be converted into a ranged coordinate axis
@@ -158,4 +174,151 @@ where
 {
     type CoordDescType = T;
     type Value = T::ValueType;
+}
+
+pub struct CentricDescreteRange<D: DescreteRanged>(D)
+where
+    <D as Ranged>::ValueType: Eq;
+
+pub trait IntoCentric: AsRangedCoord
+where
+    Self::CoordDescType: DescreteRanged,
+    <Self::CoordDescType as Ranged>::ValueType: Eq,
+{
+    fn into_centric(self) -> CentricDescreteRange<Self::CoordDescType> {
+        CentricDescreteRange(self.into())
+    }
+}
+
+impl<T: AsRangedCoord> IntoCentric for T
+where
+    T::CoordDescType: DescreteRanged,
+    <Self::CoordDescType as Ranged>::ValueType: Eq,
+{
+}
+
+impl<D: DescreteRanged> Ranged for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    type ValueType = <D as Ranged>::ValueType;
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        let prev = <D as DescreteRanged>::previous_value(&value);
+        (self.0.map(&prev, limit) + self.0.map(value, limit)) / 2
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        self.0.key_points(max_points)
+    }
+
+    fn range(&self) -> Range<Self::ValueType> {
+        self.0.range()
+    }
+}
+
+impl<D: DescreteRanged> DescreteRanged for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    fn next_value(this: &Self::ValueType) -> Self::ValueType {
+        <D as DescreteRanged>::next_value(this)
+    }
+
+    fn previous_value(this: &Self::ValueType) -> Self::ValueType {
+        <D as DescreteRanged>::previous_value(this)
+    }
+}
+
+impl<D: DescreteRanged> AsRangedCoord for CentricDescreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    type CoordDescType = Self;
+    type Value = <Self as Ranged>::ValueType;
+}
+
+pub struct PartialAxis<R: Ranged>(R, Range<R::ValueType>);
+
+pub trait IntoPartialAxis: AsRangedCoord {
+    fn partial_axis(
+        self,
+        axis_range: Range<<Self::CoordDescType as Ranged>::ValueType>,
+    ) -> PartialAxis<Self::CoordDescType> {
+        PartialAxis(self.into(), axis_range)
+    }
+}
+
+impl<R: AsRangedCoord> IntoPartialAxis for R {}
+
+impl<R: Ranged> Ranged for PartialAxis<R>
+where
+    R::ValueType: Clone,
+{
+    type ValueType = R::ValueType;
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        self.0.map(value, limit)
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        self.0.key_points(max_points)
+    }
+
+    fn range(&self) -> Range<Self::ValueType> {
+        self.0.range()
+    }
+
+    fn axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
+        let left = self.map(&self.1.start, limit);
+        let right = self.map(&self.1.end, limit);
+
+        left.min(right)..left.max(right)
+    }
+}
+
+impl<R: DescreteRanged> DescreteRanged for PartialAxis<R>
+where
+    R: Ranged,
+    <R as Ranged>::ValueType: Eq + Clone,
+{
+    fn next_value(this: &Self::ValueType) -> Self::ValueType {
+        <R as DescreteRanged>::next_value(this)
+    }
+
+    fn previous_value(this: &Self::ValueType) -> Self::ValueType {
+        <R as DescreteRanged>::previous_value(this)
+    }
+}
+
+impl<R: Ranged> AsRangedCoord for PartialAxis<R>
+where
+    <R as Ranged>::ValueType: Clone,
+{
+    type CoordDescType = Self;
+    type Value = <Self as Ranged>::ValueType;
+}
+
+#[cfg(feature = "make_partial_axis")]
+pub fn make_partial_axis<T>(
+    axis_range: Range<T>,
+    part: Range<f64>,
+) -> Option<PartialAxis<<Range<T> as AsRangedCoord>::CoordDescType>>
+where
+    Range<T>: AsRangedCoord,
+    T: num_traits::NumCast + Clone,
+{
+    let left: f64 = num_traits::cast(axis_range.start.clone())?;
+    let right: f64 = num_traits::cast(axis_range.end.clone())?;
+
+    let full_range_size = (right - left) / (part.end - part.start);
+
+    let full_left = left - full_range_size * part.start;
+    let full_right = right + full_range_size * (1.0 - part.end);
+
+    let full_range: Range<T> = num_traits::cast(full_left)?..num_traits::cast(full_right)?;
+
+    let axis_range: <Range<T> as AsRangedCoord>::CoordDescType = axis_range.into();
+
+    Some(PartialAxis(full_range.into(), axis_range.range()))
 }

@@ -33,7 +33,13 @@ pub use datetime::{RangedDate, RangedDateTime};
 pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
 };
-pub use ranged::{AsRangedCoord, DescreteRanged, MeshLine, Ranged, RangedCoord, ReversableRanged};
+pub use ranged::{
+    AsRangedCoord, DescreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
+    ReversableRanged,
+};
+
+#[cfg(feature = "make_partial_axis")]
+pub use ranged::make_partial_axis;
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 

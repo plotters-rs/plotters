@@ -126,8 +126,28 @@ including bitmap, vector graph, piston window and WebAssembly.
         <img src="https://plotters-rs.github.io/plotters-doc-data/sierpinski.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        The matplotlib Matshow Example
+        The Sierpinski Carpet
         <a href="https://github.com/38/plotters/blob/master/examples/sierpinski.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/nomal-dist2.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/errorbar.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        The 1D Gussian Distribution
+        <a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">[code]</a>
     </div>
 </div>
 
@@ -528,14 +548,18 @@ pub use palette;
 
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
-    pub use crate::chart::{ChartBuilder, ChartContext, SeriesLabelPosition};
+    pub use crate::chart::{ChartBuilder, ChartContext, LabelAreaPosition, SeriesLabelPosition};
     pub use crate::coord::{
-        CoordTranslate, LogCoord, LogRange, LogScalable, Ranged, RangedCoord, RangedCoordf32,
-        RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
+        CoordTranslate, IntoCentric, IntoPartialAxis, LogCoord, LogRange, LogScalable, Ranged,
+        RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64,
+        RangedCoordu32, RangedCoordu64,
     };
 
     #[cfg(feature = "chrono")]
     pub use crate::coord::{RangedDate, RangedDateTime};
+
+    #[cfg(feature = "make_partial_axis")]
+    pub use crate::coord::make_partial_axis;
 
     pub use crate::drawing::*;
     pub use crate::series::{Histogram, LineSeries, PointSeries};
@@ -546,8 +570,8 @@ pub mod prelude {
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, DynElement, EmptyElement, IntoDynElement, MultiLineText, Path,
-        Pixel, Rectangle, Text,
+        CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
+        MultiLineText, Path, Pixel, Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]

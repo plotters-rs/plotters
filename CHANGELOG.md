@@ -7,7 +7,13 @@
 - Allowing axis be placed on top or right by setting `right_y_label_area` and `top_x_label_area`
 - Dual-coord system chart support: Now we are able to attach a secondary coord system to the chart using `ChartContext::set_secondary_coord`. And `draw_secondary_axes` to configure the style of secondary axes. Use `draw_secondary axis` to draw series under the secondary coordinate system.
 - Add support for `y_label_offset`. Previously only X axis label supports offset attribute. 
-- New label area size API `set_label_area_size` can be used for all 4 label area.
+- New label area size API `set_label_area_size` can be used for all 4 label area
+- Added new error bar element
+- New axis specification type `PartialAxis` which allows the partially rendered axis. For example, we can define the chart's axis range as `0..1`, but only `0.3..0.7` is rendered on axis. This can be done by `(0.0..1.0).partial_axis(0.3..0.7)`
+
+### Improvement
+
+- More examples are included
 
 ## Plotters 0.2.5 (2019-09-07)
 
