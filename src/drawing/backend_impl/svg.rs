@@ -34,7 +34,7 @@ pub struct SVGBackend<'a> {
 }
 
 impl<'a> SVGBackend<'a> {
-    fn update_document<F: FnOnce(Document) -> Document>(&mut self, op: F) {
+    pub fn update_document<F: FnOnce(Document) -> Document>(&mut self, op: F) {
         let mut temp = None;
         std::mem::swap(&mut temp, &mut self.document);
         self.document = Some(op(temp.unwrap()));
