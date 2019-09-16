@@ -75,6 +75,10 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/slc-temp.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/slc-temp.png" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

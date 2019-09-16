@@ -12,7 +12,7 @@ readme = "README.md"
 exclude = ["doc-template/*"]
 
 [dependencies]
-chrono = { version = "0.4.6", optional = true }
+chrono = { version = "0.4.9", optional = true }
 svg = { version = "0.5.12", optional = true }
 num-traits = { version = "^0.2", optional = true }
 palette = { version = "^0.4", default-features = false, optional = true }
