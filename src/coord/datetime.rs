@@ -2,13 +2,10 @@
 use chrono::{Date, DateTime, Datelike, Duration, TimeZone};
 use std::ops::Range;
 
-use super::{AsRangedCoord, Ranged};
+use super::{AsRangedCoord, DescreteRanged, Ranged};
 
 /// The ranged coordinate for date
 pub struct RangedDate<Z: TimeZone>(Date<Z>, Date<Z>);
-
-/// The ranged coordinate for the date and time
-pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
 
 impl<Z: TimeZone> From<Range<Date<Z>>> for RangedDate<Z> {
     fn from(range: Range<Date<Z>>) -> Self {
@@ -57,6 +54,16 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
         }
 
         ret
+    }
+}
+
+impl<Z: TimeZone> DescreteRanged for RangedDate<Z> {
+    fn next_value(this: &Date<Z>) -> Date<Z> {
+        this.clone() + Duration::days(1)
+    }
+
+    fn previous_value(this: &Date<Z>) -> Date<Z> {
+        this.clone() - Duration::days(1)
     }
 }
 
@@ -171,6 +178,30 @@ impl<Z: TimeZone> Ranged for Monthly<Z> {
     }
 }
 
+impl<Z: TimeZone> DescreteRanged for Monthly<Z> {
+    fn next_value(this: &Date<Z>) -> Date<Z> {
+        let mut year = this.year();
+        let mut month = this.month();
+        month += 1;
+        if month == 13 {
+            month = 1;
+            year += 1;
+        }
+        this.timezone().ymd(year, month, this.day())
+    }
+
+    fn previous_value(this: &Date<Z>) -> Date<Z> {
+        let mut year = this.year();
+        let mut month = this.month();
+        month -= 1;
+        if month == 0 {
+            month = 12;
+            year -= 1;
+        }
+        this.timezone().ymd(year, month, this.day())
+    }
+}
+
 /// Indicate the coord has a yearly resolution
 pub struct Yearly<Z: TimeZone>(Range<Date<Z>>);
 
@@ -257,6 +288,18 @@ impl<Z: TimeZone> Ranged for Yearly<Z> {
     }
 }
 
+impl<Z: TimeZone> DescreteRanged for Yearly<Z> {
+    fn next_value(this: &Date<Z>) -> Date<Z> {
+        this.timezone()
+            .ymd(this.year() + 1, this.month(), this.day())
+    }
+
+    fn previous_value(this: &Date<Z>) -> Date<Z> {
+        this.timezone()
+            .ymd(this.year() - 1, this.month(), this.day())
+    }
+}
+
 /// The trait that converts a normal date coord into a yearly one
 pub trait IntoMonthly<Z: TimeZone> {
     fn monthly(self) -> Monthly<Z>;
@@ -278,3 +321,6 @@ impl<Z: TimeZone> IntoYearly<Z> for Range<Date<Z>> {
         Yearly(self)
     }
 }
+
+/// The ranged coordinate for the date and time
+pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
