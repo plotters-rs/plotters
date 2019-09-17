@@ -16,6 +16,7 @@ use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection
 use crate::style::{FontTransform, ShapeStyle, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
+#[allow(clippy::type_complexity)]
 pub struct SeriesAnno<'a, DB: DrawingBackend> {
     label: Option<String>,
     draw_func: Option<Box<dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord> + 'a>>,
@@ -183,6 +184,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
     /// The actual function that draws the mesh lines.
     /// It also returns the label that suppose to be there.
+    #[allow(clippy::type_complexity)]
     fn draw_mesh_lines<FmtLabel>(
         &mut self,
         (r, c): (usize, usize),
@@ -224,6 +226,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok((x_labels, y_labels))
     }
 
+    // TODO: consider make this function less complicated
+    #[allow(clippy::cognitive_complexity)]
+    #[allow(clippy::too_many_arguments)]
     fn draw_axis_and_labels(
         &self,
         area: Option<&DrawingArea<DB, Shift>>,
@@ -344,12 +349,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         if let Some((text, style)) = axis_desc {
             let actual_style = if orientation.0 == 0 {
                 style.clone()
+            } else if orientation.0 == -1 {
+                style.transform(FontTransform::Rotate270)
             } else {
-                if orientation.0 == -1 {
-                    style.transform(FontTransform::Rotate270)
-                } else {
-                    style.transform(FontTransform::Rotate90)
-                }
+                style.transform(FontTransform::Rotate90)
             };
 
             let (w, h) = actual_style.font.box_size(text).unwrap_or((0, 0));
@@ -418,6 +421,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
     }
 
     /// Attach a secondary coord to the chart
+    #[allow(clippy::type_complexity)]
     pub fn set_secondary_coord<SX: AsRangedCoord, SY: AsRangedCoord>(
         self,
         x_coord: SX,

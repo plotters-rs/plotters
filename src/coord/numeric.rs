@@ -236,11 +236,6 @@ impl_ranged_type_trait!(u64, RangedCoordu64);
 impl_ranged_type_trait!(i128, RangedCoordi128);
 impl_ranged_type_trait!(u128, RangedCoordu128);
 
-/*
-pub fn keypoints_i64(range:(i64,i64), n:usize) -> Vec<i64> {
-    compute_i64_key_points(range,n)
-}*/
-
 #[cfg(test)]
 mod test {
     use super::*;

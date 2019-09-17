@@ -127,7 +127,7 @@ impl<Z: TimeZone> Ranged for Monthly<Z> {
 
                 if start_month >= 13 {
                     start_year += start_month / 12;
-                    start_month = start_month % 12;
+                    start_month %= 12;
                 }
             }
 

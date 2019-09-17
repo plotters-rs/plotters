@@ -5,7 +5,8 @@ use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::TextStyle;
 
-/// The enum used to specify the position of label area
+/// The enum used to specify the position of label area.
+/// This is used when we configure the label area size with the API `set_label_area_size`
 pub enum LabelAreaPosition {
     Top = 0,
     Bottom = 1,
@@ -13,12 +14,14 @@ pub enum LabelAreaPosition {
     Right = 3,
 }
 
-/// The helper object to create a chart context, which is used for the high-level figure drawing
+/// The helper object to create a chart context, which is used for the high-level figure drawing.
+/// With the hlep of this object, we can convert a basic drawing area into a chart context, which
+/// allows the high-level chartting API beening used on the drawing area.
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
     root_area: &'a DrawingArea<DB, Shift>,
     title: Option<(String, TextStyle<'b>)>,
-    margin: u32,
+    margin: [u32; 4],
 }
 
 impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
@@ -30,15 +33,42 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             label_area_size: [0; 4],
             root_area: root,
             title: None,
-            margin: 0,
+            margin: [0; 4],
         }
     }
 
-    /// Set the margin size of the chart
-    /// - `size`: The size of the chart margin. If the chart builder is titled, we don't apply any
-    /// margin
+    /// Set the margin size of the chart (applied for top, bottom, left and right at the same time)
+    /// - `size`: The size of the chart margin.
     pub fn margin(&mut self, size: u32) -> &mut Self {
-        self.margin = size;
+        self.margin = [size, size, size, size];
+        self
+    }
+
+    /// Set the top margin of current chart
+    /// - `size`: The size of the top margin.
+    pub fn margin_top(&mut self, size: u32) -> &mut Self {
+        self.margin[0] = size;
+        self
+    }
+
+    /// Set the bottom margin of current chart
+    /// - `size`: The size of the bottom margin.
+    pub fn margin_bottom(&mut self, size: u32) -> &mut Self {
+        self.margin[1] = size;
+        self
+    }
+
+    /// Set the left margin of current chart
+    /// - `size`: The size of the left margin.
+    pub fn margin_left(&mut self, size: u32) -> &mut Self {
+        self.margin[2] = size;
+        self
+    }
+
+    /// Set the right margin of current chart
+    /// - `size`: The size of the right margin.
+    pub fn margin_right(&mut self, size: u32) -> &mut Self {
+        self.margin[3] = size;
         self
     }
 
@@ -109,9 +139,13 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
         let mut drawing_area = DrawingArea::clone(self.root_area);
 
-        if self.margin > 0 {
-            let s = self.margin as i32;
-            drawing_area = drawing_area.margin(s, s, s, s);
+        if *self.margin.iter().max().unwrap_or(&0) > 0 {
+            drawing_area = drawing_area.margin(
+                self.margin[0] as i32,
+                self.margin[1] as i32,
+                self.margin[2] as i32,
+                self.margin[3] as i32,
+            );
         }
 
         if let Some((ref title, ref style)) = self.title {
@@ -136,7 +170,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
                 &actual_drawing_area_pos[0..2],
             )
             .into_iter()
-            .map(|x| Some(x))
+            .map(Some)
             .collect();
 
         for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
@@ -160,8 +194,8 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         std::mem::swap(&mut y_label_area[1], &mut label_areas[3]);
 
         Ok(ChartContext {
-            x_label_area: x_label_area,
-            y_label_area: y_label_area,
+            x_label_area,
+            y_label_area,
             drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
                 x_spec,
                 y_spec,

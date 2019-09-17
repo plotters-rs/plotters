@@ -38,6 +38,7 @@ where
     A: AddAssign<A> + Default,
     Tag: HistogramType,
 {
+    #[allow(clippy::redundant_closure)]
     fn empty() -> Self {
         Self {
             style: GREEN.filled(),
@@ -92,6 +93,7 @@ where
     /// - `style`: The style of bars
     ///
     /// Returns the newly created histogram series
+    #[allow(clippy::redundant_closure)]
     pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (BR::ValueType, A)>>(
         iter: I,
         margin: u32,

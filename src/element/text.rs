@@ -122,18 +122,18 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     mut func: F,
 ) {
     for line in text.lines() {
-        if max_width == 0 || line.len() == 0 {
+        if max_width == 0 || line.is_empty() {
             func(line);
         } else {
             let mut remaining = &line[0..];
 
-            while remaining.len() > 0 {
+            while remaining.is_empty() {
                 let mut width = 0;
                 let mut left = 0;
                 while left < remaining.len() {
                     let char_width = {
                         let ((x0, _), (x1, _)) = font
-                            .layout_box(&remaining[left..(left + 1)])
+                            .layout_box(&remaining[left..=left])
                             .unwrap_or(((0, 0), (0, 0)));
                         x1 - x0
                     };
