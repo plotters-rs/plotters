@@ -1,7 +1,7 @@
 use plotters::coord::IntoMonthly;
 use plotters::prelude::*;
 
-use chrono::{Date, Datelike, TimeZone, Utc};
+use chrono::{Datelike, TimeZone, Utc};
 
 use std::error::Error;
 

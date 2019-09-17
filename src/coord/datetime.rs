@@ -174,6 +174,11 @@ impl<Z: TimeZone> Ranged for Monthly<Z> {
 /// Indicate the coord has a yearly resolution
 pub struct Yearly<Z: TimeZone>(Range<Date<Z>>);
 
+impl<Z: TimeZone> AsRangedCoord for Yearly<Z> {
+    type CoordDescType = Yearly<Z>;
+    type Value = Date<Z>;
+}
+
 fn generate_yearly_keypoints<Z: TimeZone>(
     max_points: usize,
     mut start_year: i32,
@@ -209,6 +214,47 @@ fn generate_yearly_keypoints<Z: TimeZone>(
     }
 
     ret
+}
+
+impl<Z: TimeZone> Ranged for Yearly<Z> {
+    type ValueType = Date<Z>;
+
+    fn range(&self) -> Range<Date<Z>> {
+        self.0.start.clone()..self.0.end.clone()
+    }
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        let total_days = (self.0.end.clone() - self.0.start.clone()).num_days() as f64;
+        let value_days = (value.clone() - self.0.start.clone()).num_days() as f64;
+
+        (f64::from(limit.1 - limit.0) * value_days / total_days) as i32 + limit.0
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        let mut start_year = self.0.start.year();
+        let mut start_month = self.0.start.month();
+        let start_day = self.0.start.day();
+
+        let end_year = self.0.end.year();
+        let end_month = self.0.end.month();
+
+        if start_day != 1 {
+            start_month += 1;
+            if start_month == 13 {
+                start_month = 1;
+                start_year += 1;
+            }
+        }
+
+        generate_yearly_keypoints(
+            max_points,
+            start_year,
+            start_month,
+            end_year,
+            end_month,
+            self.0.start.timezone(),
+        )
+    }
 }
 
 /// The trait that converts a normal date coord into a yearly one
