@@ -20,7 +20,7 @@ impl HistogramType for Horizental {}
 pub struct Histogram<BR, A, Tag = Vertical>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
 {
@@ -34,7 +34,7 @@ where
 impl<BR, A, Tag> Histogram<BR, A, Tag>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
 {
@@ -82,7 +82,7 @@ where
 impl<BR, A> Histogram<BR, A, Vertical>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     /// Create a new histogram series.
@@ -123,7 +123,7 @@ where
 impl<BR, A> Histogram<BR, A, Horizental>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     pub fn horizental<ACoord, DB: DrawingBackend>(
@@ -139,7 +139,7 @@ where
 impl<BR, A> Iterator for Histogram<BR, A, Vertical>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     type Item = Rectangle<(BR::ValueType, A)>;
@@ -157,7 +157,7 @@ where
 impl<BR, A> Iterator for Histogram<BR, A, Horizental>
 where
     BR: DescreteRanged,
-    BR::ValueType: Eq + Hash + Default,
+    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     type Item = Rectangle<(A, BR::ValueType)>;
