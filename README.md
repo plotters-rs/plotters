@@ -1,4 +1,4 @@
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -16,7 +16,8 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
-- You can try Plotters with Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 
 ## Gallery
 
@@ -97,6 +98,7 @@ To view the source code for each example, please click on the example image.
   * [Misc](#misc)
     + [Development Version](#development-version)
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
+  * [FAQ List](#faq-list)
 
 ## Quick Start
 
@@ -437,3 +439,11 @@ plotters = { git = "https://github.com/38/plotters.git", default_features = fals
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
 This behaviour can also be turned off by setting `default_features = false`.
 
+
+## FAQ List
+
+* Why does the WASM example work on my machine ?
+
+The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
+which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
+parameter list  to build it. 
