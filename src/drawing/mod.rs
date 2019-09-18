@@ -17,6 +17,7 @@ Currently we have two backend implemented:
 */
 mod area;
 mod backend_impl;
+mod rasterizer;
 
 pub mod backend;
 
