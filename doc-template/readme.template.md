@@ -244,6 +244,6 @@ $$style$$
 
 * Why does the WASM example work on my machine ?
 
-The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
-which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
-parameter list  to build it. 
+	The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
+	which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
+	parameter list  to build it. 
