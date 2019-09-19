@@ -10,10 +10,12 @@
   So iterator combinator such as `map`, `zip`, etc can also be used.
 */
 
+mod area_series;
 mod histogram;
 mod line_series;
 mod point_series;
 
+pub use area_series::AreaSeries;
 pub use histogram::Histogram;
 pub use line_series::LineSeries;
 pub use point_series::PointSeries;

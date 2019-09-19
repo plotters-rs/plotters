@@ -170,6 +170,8 @@ gen_key_points_comp!(integer, compute_i64_key_points, i64);
 gen_key_points_comp!(integer, compute_u64_key_points, u64);
 gen_key_points_comp!(integer, compute_i128_key_points, i128);
 gen_key_points_comp!(integer, compute_u128_key_points, u128);
+gen_key_points_comp!(integer, compute_isize_key_points, isize);
+gen_key_points_comp!(integer, compute_usize_key_points, usize);
 
 make_numeric_coord!(
     f32,
@@ -219,6 +221,18 @@ make_numeric_coord!(
     compute_i128_key_points,
     "The ranged coordinate for type i128"
 );
+make_numeric_coord!(
+    usize,
+    RangedCoordusize,
+    compute_usize_key_points,
+    "The ranged coordinate for type usize"
+);
+make_numeric_coord!(
+    isize,
+    RangedCoordisize,
+    compute_isize_key_points,
+    "The ranged coordinate for type isize"
+);
 
 impl_descrete_trait!(RangedCoordu32);
 impl_descrete_trait!(RangedCoordi32);
@@ -226,15 +240,19 @@ impl_descrete_trait!(RangedCoordu64);
 impl_descrete_trait!(RangedCoordi64);
 impl_descrete_trait!(RangedCoordu128);
 impl_descrete_trait!(RangedCoordi128);
+impl_descrete_trait!(RangedCoordusize);
+impl_descrete_trait!(RangedCoordisize);
 
 impl_ranged_type_trait!(f32, RangedCoordf32);
 impl_ranged_type_trait!(f64, RangedCoordf64);
 impl_ranged_type_trait!(i32, RangedCoordi32);
-impl_ranged_type_trait!(i64, RangedCoordi64);
 impl_ranged_type_trait!(u32, RangedCoordu32);
+impl_ranged_type_trait!(i64, RangedCoordi64);
 impl_ranged_type_trait!(u64, RangedCoordu64);
 impl_ranged_type_trait!(i128, RangedCoordi128);
 impl_ranged_type_trait!(u128, RangedCoordu128);
+impl_ranged_type_trait!(isize, RangedCoordisize);
+impl_ranged_type_trait!(usize, RangedCoordusize);
 
 #[cfg(test)]
 mod test {

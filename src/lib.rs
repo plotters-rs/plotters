@@ -162,6 +162,16 @@ including bitmap, vector graph, piston window and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/area-chart.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/area-chart.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Monthly Time Coordinate
+        <a href="https://github.com/38/plotters/blob/master/examples/area-chart.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
@@ -582,7 +592,7 @@ pub mod prelude {
     pub use crate::coord::make_partial_axis;
 
     pub use crate::drawing::*;
-    pub use crate::series::{Histogram, LineSeries, PointSeries};
+    pub use crate::series::{AreaSeries, Histogram, LineSeries, PointSeries};
     pub use crate::style::{
         Color, FontDesc, FontTransform, HSLColor, IntoFont, Palette, Palette100, Palette99,
         Palette9999, PaletteColor, RGBColor, ShapeStyle, SimpleColor, TextStyle,
