@@ -14,6 +14,10 @@ pub(crate) fn draw_circle<B: DrawingBackend, S: BackendStyle>(
         return Ok(());
     }
 
+    if !fill && style.stroke_width() != 1 {
+        // FIXME: We are currently ignore the stroke width for circles
+    }
+
     let min = (f64::from(radius) * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
     let max = (f64::from(radius) * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
 
@@ -42,9 +46,9 @@ pub(crate) fn draw_circle<B: DrawingBackend, S: BackendStyle>(
         let bottom = center.1 + lx.floor() as i32;
 
         if fill {
-            b.draw_line((left, y), (right, y), style)?;
-            b.draw_line((x, top), (x, up), style)?;
-            b.draw_line((x, down), (x, bottom), style)?;
+            b.draw_line((left, y), (right, y), &style.as_color())?;
+            b.draw_line((x, top), (x, up), &style.as_color())?;
+            b.draw_line((x, down), (x, bottom), &style.as_color())?;
         } else {
             b.draw_pixel((left, y), &style.as_color().mix(1.0 - v))?;
             b.draw_pixel((right, y), &style.as_color().mix(1.0 - v))?;

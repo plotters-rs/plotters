@@ -76,7 +76,7 @@ impl ShapeStyle {
     pub fn stroke_width(&self, width: u32) -> Self {
         Self {
             color: self.color.to_rgba(),
-            filled: true,
+            filled: self.filled,
             stroke_width: width,
         }
     }
