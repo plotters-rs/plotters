@@ -252,3 +252,39 @@ fn test_circle_element() {
     da.draw(&Circle::new((150, 151), 20, &BLUE))
         .expect("Drawing Failure");
 }
+
+/// An element of a filled polygon
+pub struct Polygon<Coord> {
+    points: Vec<Coord>,
+    style: ShapeStyle,
+}
+impl<Coord> Polygon<Coord> {
+    /// Create a new polygon
+    /// - `points`: The iterator of the points
+    /// - `style`: The shape style
+    /// - returns the created element
+    pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle>>(points: P, style: S) -> Self {
+        Self {
+            points: points.into(),
+            style: style.into(),
+        }
+    }
+}
+
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Polygon<Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = &'a [Coord];
+    fn point_iter(self) -> &'a [Coord] {
+        &self.points
+    }
+}
+
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Polygon<Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        backend.fill_polygon(points, &self.style.color)
+    }
+}

@@ -139,6 +139,16 @@ pub trait DrawingBackend: Sized {
         super::rasterizer::draw_circle(self, center, radius, style, fill)
     }
 
+    fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
+        &mut self,
+        vert: I,
+        style: &S,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let vert_buf: Vec<_> = vert.into_iter().collect();
+
+        super::rasterizer::fill_polygon(self, &vert_buf[..], style)
+    }
+
     /// Draw a text on the drawing backend
     /// - `text`: The text to draw
     /// - `font`: The description of the font
