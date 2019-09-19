@@ -2,7 +2,7 @@
 The SVG image drawing backend
 */
 
-use svg::node::element::{Circle, Line, Polyline, Rectangle, Text};
+use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
@@ -169,6 +169,28 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("fill", "none")
             .set("opacity", make_svg_opacity(&style.as_color()))
             .set("stroke", make_svg_color(&style.as_color()))
+            .set(
+                "points",
+                path.into_iter().fold(String::new(), |mut s, (x, y)| {
+                    s.push_str(&format!("{},{} ", x, y));
+                    s
+                }),
+            );
+        self.update_document(|d| d.add(node));
+        Ok(())
+    }
+
+    fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
+        &mut self,
+        path: I,
+        style: &S,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+        let node = Polygon::new()
+            .set("opacity", make_svg_opacity(&style.as_color()))
+            .set("fill", make_svg_color(&style.as_color()))
             .set(
                 "points",
                 path.into_iter().fold(String::new(), |mut s, (x, y)| {

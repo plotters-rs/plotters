@@ -591,7 +591,7 @@ pub mod prelude {
 
     pub use crate::element::{
         CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
-        MultiLineText, Path, Pixel, Rectangle, Text,
+        MultiLineText, Path, Pixel, Polygon, Rectangle, Text,
     };
 
     #[allow(type_alias_bounds)]
