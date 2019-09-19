@@ -600,8 +600,8 @@ pub mod prelude {
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement, TriangleMarker,
-        MultiLineText, Path, Pixel, Polygon, Rectangle, Text,
+        CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
+        MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
     #[allow(type_alias_bounds)]
