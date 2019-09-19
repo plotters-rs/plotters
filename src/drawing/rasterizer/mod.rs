@@ -9,3 +9,5 @@ pub(super) use circle::draw_circle;
 
 mod polygon;
 pub(super) use polygon::fill_polygon;
+
+pub(super) mod path;

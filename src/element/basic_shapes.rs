@@ -90,7 +90,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
         points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        backend.draw_path(points, &self.style.color)
+        backend.draw_path(points, &self.style)
     }
 }
 
@@ -227,7 +227,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_circle((x, y), self.size, &self.style.color, self.style.filled);
+            return backend.draw_circle((x, y), self.size, &self.style, self.style.filled);
         }
         Ok(())
     }

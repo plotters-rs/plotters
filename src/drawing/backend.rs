@@ -1,4 +1,4 @@
-use crate::style::{Color, FontDesc, FontError, RGBAColor};
+use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle};
 use std::error::Error;
 
 /// A coordiante in the image
@@ -31,13 +31,25 @@ pub trait BackendStyle {
 
     /// Convert the style into the underlying color
     fn as_color(&self) -> RGBAColor;
+
     // TODO: In the future we should support stroke width, line shape, etc....
+    fn stroke_width(&self) -> u32 { 1 }
 }
 
 impl<T: Color> BackendStyle for T {
     type ColorType = T;
     fn as_color(&self) -> RGBAColor {
         self.to_rgba()
+    }
+}
+
+impl BackendStyle for ShapeStyle {
+    type ColorType = RGBAColor;
+    fn as_color(&self) -> RGBAColor {
+        self.color.clone()
+    }
+    fn stroke_width(&self) -> u32 {
+        self.stroke_width
     }
 }
 
@@ -114,12 +126,18 @@ pub trait DrawingBackend: Sized {
             return Ok(());
         }
 
-        let mut begin: Option<BackendCoord> = None;
-        for end in path.into_iter() {
-            if let Some(begin) = begin {
-                self.draw_line(begin, end, style)?;
+        if style.stroke_width() == 1 {
+            let mut begin: Option<BackendCoord> = None;
+            for end in path.into_iter() {
+                if let Some(begin) = begin {
+                    self.draw_line(begin, end, style)?;
+                }
+                begin = Some(end);
             }
-            begin = Some(end);
+        } else {
+            let p:Vec<_> = path.into_iter().collect();
+            let v = super::rasterizer::path::polygonize(&p[..], style.stroke_width());
+            return self.fill_polygon(v, &style.as_color());
         }
         Ok(())
     }

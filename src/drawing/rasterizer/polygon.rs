@@ -203,7 +203,7 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                             back.draw_line(
                                 (sweep_line, from.ceil() as i32),
                                 (sweep_line, to.floor() as i32),
-                                style,
+                                &style.as_color(),
                             )?;
                             back.draw_pixel(
                                 (sweep_line, from.floor() as i32),
@@ -217,7 +217,7 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                             back.draw_line(
                                 (from.ceil() as i32, sweep_line),
                                 (to.floor() as i32, sweep_line),
-                                style,
+                                &style.as_color(),
                             )?;
                             back.draw_pixel(
                                 (from.floor() as i32, sweep_line),

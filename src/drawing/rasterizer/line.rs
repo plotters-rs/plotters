@@ -13,6 +13,32 @@ pub(crate) fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         return Ok(());
     }
 
+    if style.stroke_width() != 1 {
+        // If the line is wider than 1px, then we need to make it a polygon
+        let v = ((to.0 - from.0) as i64, (to.1 - from.1) as i64);
+        let l = ((v.0 * v.0 + v.1 * v.1) as f64).sqrt();
+
+        if l < 1e-5 {
+            return Ok(());
+        }
+
+        let v = (v.0 as f64 / l, v.1 as f64 / l);
+
+        let r = style.stroke_width() as f64 / 2.0;
+        let mut trans = [(v.1 * r, -v.0 * r), (-v.1 * r, v.0 * r)];
+        let mut vertices = vec![];
+
+        for point in [from, to].iter() {
+            for t in trans.iter() {
+                vertices.push(((point.0 as f64 + t.0) as i32, (point.1 as f64 + t.1) as i32))
+            }
+
+            trans.swap(0, 1);
+        }
+
+        return back.fill_polygon(vertices, &style.as_color());
+    }
+
     if from.0 == to.0 {
         if from.1 > to.1 {
             std::mem::swap(&mut from, &mut to);

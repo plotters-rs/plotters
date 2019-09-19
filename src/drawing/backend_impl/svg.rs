@@ -120,7 +120,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("x2", to.0)
             .set("y2", to.1)
             .set("opacity", make_svg_opacity(&style.as_color()))
-            .set("stroke", make_svg_color(&style.as_color()));
+            .set("stroke", make_svg_color(&style.as_color()))
+            .set("stroke-width", style.stroke_width());
         self.update_document(|d| d.add(node));
         Ok(())
     }
@@ -169,6 +170,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("fill", "none")
             .set("opacity", make_svg_opacity(&style.as_color()))
             .set("stroke", make_svg_color(&style.as_color()))
+            .set("stroke-width", style.stroke_width())
             .set(
                 "points",
                 path.into_iter().fold(String::new(), |mut s, (x, y)| {
