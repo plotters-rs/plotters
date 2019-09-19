@@ -11,6 +11,7 @@
 - Added new error bar element
 - New axis specification type `PartialAxis` which allows the partially rendered axis. For example, we can define the chart's axis range as `0..1`, but only `0.3..0.7` is rendered on axis. This can be done by `(0.0..1.0).partial_axis(0.3..0.7)`
 - Drawing backend now support fill polygon and introduce polygon element
+- Area Chart Support
 
 ### Improvement
 
