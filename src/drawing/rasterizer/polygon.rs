@@ -120,7 +120,7 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
             let mut new_vec = vec![];
 
             for mut e in active_edge {
-                if e.master_pos > 1 {
+                if e.master_pos > 1 || (e.master_pos > 0 && sweep_line == high) {
                     e.master_pos -= 1;
                     e.slave_pos += e.slave_step;
                     new_vec.push(e);
