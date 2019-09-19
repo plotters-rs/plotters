@@ -34,16 +34,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .disable_y_mesh()
         .draw()?;
 
-    chart.draw_series(AreaSeries::new(
-        (0..).zip(data.iter()).map(|(x, y)| (x, *y)),
-        0.0,
-        &RED.mix(0.2),
-    ))?;
-
-    chart.draw_series(LineSeries::new(
-        (0..).zip(data.iter()).map(|(x, y)| (x, *y)),
-        &RED,
-    ))?;
+    chart.draw_series(
+        AreaSeries::new(
+            (0..).zip(data.iter()).map(|(x, y)| (x, *y)),
+            0.0,
+            &RED.mix(0.2),
+        )
+        .border_style(&RED),
+    )?;
 
     Ok(())
 }

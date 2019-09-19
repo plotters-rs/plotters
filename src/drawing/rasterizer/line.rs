@@ -13,6 +13,26 @@ pub(crate) fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         return Ok(());
     }
 
+    if from.0 == to.0 {
+        if from.1 > to.1 {
+            std::mem::swap(&mut from, &mut to);
+        }
+        for y in from.1..=to.1 {
+            back.draw_pixel((from.0, y), &style.as_color())?;
+        }
+        return Ok(());
+    }
+
+    if from.1 == to.1 {
+        if from.0 > to.0 {
+            std::mem::swap(&mut from, &mut to);
+        }
+        for x in from.0..=to.0 {
+            back.draw_pixel((x, from.1), &style.as_color())?;
+        }
+        return Ok(());
+    }
+
     let steep = (from.0 - to.0).abs() < (from.1 - to.1).abs();
 
     if steep {
