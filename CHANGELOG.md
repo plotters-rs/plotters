@@ -18,6 +18,7 @@
 - More examples are included
 - Date coordinate now support using monthly or yearly axis. This is usefuly when plotting some data in monthly or yearly basis.
 - Make margin on different side of a chart can be configured seperately.
+- Better test coverage
 
 ## Plotters 0.2.5 (2019-09-07)
 

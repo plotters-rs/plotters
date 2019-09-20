@@ -51,7 +51,7 @@ impl Rect {
     fn split_evenly<'a>(&'a self, (row, col): (usize, usize)) -> impl Iterator<Item = Rect> + 'a {
         fn compute_evenly_split(from: i32, to: i32, n: usize, idx: usize) -> i32 {
             let size = (to - from) as usize;
-            from + idx as i32 * (size / n) as i32 + if size % n < idx { 1 } else { 0 }
+            from + idx as i32 * (size / n) as i32 + idx.min(size % n) as i32
         }
         (0..row)
             .map(move |x| repeat(x).zip(0..col))
@@ -482,5 +482,159 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn into_coord_spec(self) -> CT {
         self.coord
+    }
+}
+
+#[cfg(test)]
+mod drawing_area_tests {
+    use crate::{prelude::*, create_mocked_drawing_area};
+    #[test]
+    fn test_filling() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, WHITE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (0,0));
+                assert_eq!(d, (1024, 768));
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
+        });
+
+        drawing_area.fill(&WHITE).expect("Drawing Failure");
+    }
+
+    #[test]
+    fn test_split_evenly() {
+        let colors = vec![&RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED];
+        let drawing_area = create_mocked_drawing_area(902, 900, |m| {
+            for col in 0..3 {
+                for row in 0..3 {
+                    let colors = colors.clone();
+                    m.check_draw_rect(move |c, _, f, u, d| {
+                        assert_eq!(c, colors[col * 3 + row].to_rgba());
+                        assert_eq!(f, true);
+                        assert_eq!(u, (300 * row as i32 + 2.min(row) as i32, 300* col as i32));
+                        assert_eq!(d, (300 + 300 * row as i32 + 2.min(row + 1) as i32, 300 + 300 * col as i32));
+                    });
+                }
+            }
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 9);
+                assert_eq!(b.draw_count, 9);
+            });
+        });
+
+        drawing_area.split_evenly((3,3)).iter_mut().zip(colors.iter()).for_each(|(d, c)| {
+            d.fill(*c).expect("Drawing Failure");
+        });
+    }
+
+    #[test]
+    fn test_split_horizentally() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, RED.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (0, 0));
+                assert_eq!(d, (345, 768));
+            });
+
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, BLUE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (345, 0));
+                assert_eq!(d, (1024, 768));
+            });
+            
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 2);
+                assert_eq!(b.draw_count, 2);
+            });
+        });
+
+        let (left, right) = drawing_area.split_horizentally(345);
+        left.fill(&RED).expect("Drawing Error");
+        right.fill(&BLUE).expect("Drawing Error");
+    }
+    
+    #[test]
+    fn test_split_vertically() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, RED.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (0, 0));
+                assert_eq!(d, (1024, 345));
+            });
+
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, BLUE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (0, 345));
+                assert_eq!(d, (1024, 768));
+            });
+            
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 2);
+                assert_eq!(b.draw_count, 2);
+            });
+        });
+
+        let (left, right) = drawing_area.split_vertically(345);
+        left.fill(&RED).expect("Drawing Error");
+        right.fill(&BLUE).expect("Drawing Error");
+    }
+    
+    #[test]
+    fn test_split_grid() {
+        let colors = vec![&RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED];
+        let breaks:[i32;5] = [100, 200, 300, 400, 500];
+
+        for nxb in 0..=5 {
+            for nyb in 0..=5 {
+                let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+
+                    for row in 0..=nyb {
+                        for col in 0..=nxb {
+                            let get_bp = |full, limit, id| {
+                                (if id == 0 {
+                                    0
+                                } else if id > limit {
+                                    full
+                                } else {
+                                    breaks[id as usize - 1]
+                                }) as i32 
+                            };
+
+                            let expected_u = (get_bp(1024, nxb, col), get_bp(768, nyb, row));
+                            let expected_d = (get_bp(1024, nxb, col + 1), get_bp(768, nyb, row + 1));
+                            let expected_color = colors[(row * (nxb + 1) + col) as usize % colors.len()];
+
+                            m.check_draw_rect(move |c, _, f, u, d| {
+                                assert_eq!(c, expected_color.to_rgba());
+                                assert_eq!(f, true);
+                                assert_eq!(u, expected_u);
+                                assert_eq!(d, expected_d);
+                            });
+                        }
+                    }
+                    
+                    m.drop_check(move |b| {
+                        assert_eq!(b.num_draw_rect_call, ((nxb + 1) * (nyb + 1)) as u32);
+                        assert_eq!(b.draw_count, ((nyb + 1) * (nxb + 1)) as u32);
+                    });
+                });
+
+                let result = drawing_area.split_by_breakpoints(&breaks[0..nxb as usize], &breaks[0..nyb as usize]);
+                for i in 0..result.len() {
+                    result[i].fill(colors[i % colors.len()]).expect("Drawing Error");
+                }
+            }
+        }
+
     }
 }
