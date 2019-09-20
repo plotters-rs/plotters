@@ -87,7 +87,7 @@ impl<'a, T: Color> From<&'a T> for ShapeStyle {
         ShapeStyle {
             color: f.to_rgba(),
             filled: false,
-            stroke_width: 1
+            stroke_width: 1,
         }
     }
 }

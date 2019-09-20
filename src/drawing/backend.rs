@@ -33,7 +33,9 @@ pub trait BackendStyle {
     fn as_color(&self) -> RGBAColor;
 
     // TODO: In the future we should support stroke width, line shape, etc....
-    fn stroke_width(&self) -> u32 { 1 }
+    fn stroke_width(&self) -> u32 {
+        1
+    }
 }
 
 impl<T: Color> BackendStyle for T {
@@ -135,7 +137,7 @@ pub trait DrawingBackend: Sized {
                 begin = Some(end);
             }
         } else {
-            let p:Vec<_> = path.into_iter().collect();
+            let p: Vec<_> = path.into_iter().collect();
             let v = super::rasterizer::path::polygonize(&p[..], style.stroke_width());
             return self.fill_polygon(v, &style.as_color());
         }
