@@ -683,4 +683,26 @@ mod drawing_area_tests {
             .fill(&WHITE)
             .unwrap();
     }
+
+    #[test]
+    fn test_margin() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, WHITE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u, (3, 1));
+                assert_eq!(d, (1024 - 4, 768 - 2));
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
+        });
+
+        drawing_area
+            .margin(1, 2, 3, 4)
+            .fill(&WHITE)
+            .expect("Drawing Failure");
+    }
 }
