@@ -487,14 +487,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
 #[cfg(test)]
 mod drawing_area_tests {
-    use crate::{prelude::*, create_mocked_drawing_area};
+    use crate::{create_mocked_drawing_area, prelude::*};
     #[test]
     fn test_filling() {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, WHITE.to_rgba());
                 assert_eq!(f, true);
-                assert_eq!(u, (0,0));
+                assert_eq!(u, (0, 0));
                 assert_eq!(d, (1024, 768));
             });
 
@@ -509,7 +509,9 @@ mod drawing_area_tests {
 
     #[test]
     fn test_split_evenly() {
-        let colors = vec![&RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED];
+        let colors = vec![
+            &RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED,
+        ];
         let drawing_area = create_mocked_drawing_area(902, 900, |m| {
             for col in 0..3 {
                 for row in 0..3 {
@@ -517,8 +519,14 @@ mod drawing_area_tests {
                     m.check_draw_rect(move |c, _, f, u, d| {
                         assert_eq!(c, colors[col * 3 + row].to_rgba());
                         assert_eq!(f, true);
-                        assert_eq!(u, (300 * row as i32 + 2.min(row) as i32, 300* col as i32));
-                        assert_eq!(d, (300 + 300 * row as i32 + 2.min(row + 1) as i32, 300 + 300 * col as i32));
+                        assert_eq!(u, (300 * row as i32 + 2.min(row) as i32, 300 * col as i32));
+                        assert_eq!(
+                            d,
+                            (
+                                300 + 300 * row as i32 + 2.min(row + 1) as i32,
+                                300 + 300 * col as i32
+                            )
+                        );
                     });
                 }
             }
@@ -528,9 +536,13 @@ mod drawing_area_tests {
             });
         });
 
-        drawing_area.split_evenly((3,3)).iter_mut().zip(colors.iter()).for_each(|(d, c)| {
-            d.fill(*c).expect("Drawing Failure");
-        });
+        drawing_area
+            .split_evenly((3, 3))
+            .iter_mut()
+            .zip(colors.iter())
+            .for_each(|(d, c)| {
+                d.fill(*c).expect("Drawing Failure");
+            });
     }
 
     #[test]
@@ -549,7 +561,7 @@ mod drawing_area_tests {
                 assert_eq!(u, (345, 0));
                 assert_eq!(d, (1024, 768));
             });
-            
+
             m.drop_check(|b| {
                 assert_eq!(b.num_draw_rect_call, 2);
                 assert_eq!(b.draw_count, 2);
@@ -560,7 +572,7 @@ mod drawing_area_tests {
         left.fill(&RED).expect("Drawing Error");
         right.fill(&BLUE).expect("Drawing Error");
     }
-    
+
     #[test]
     fn test_split_vertically() {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
@@ -577,7 +589,7 @@ mod drawing_area_tests {
                 assert_eq!(u, (0, 345));
                 assert_eq!(d, (1024, 768));
             });
-            
+
             m.drop_check(|b| {
                 assert_eq!(b.num_draw_rect_call, 2);
                 assert_eq!(b.draw_count, 2);
@@ -588,16 +600,17 @@ mod drawing_area_tests {
         left.fill(&RED).expect("Drawing Error");
         right.fill(&BLUE).expect("Drawing Error");
     }
-    
+
     #[test]
     fn test_split_grid() {
-        let colors = vec![&RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED];
-        let breaks:[i32;5] = [100, 200, 300, 400, 500];
+        let colors = vec![
+            &RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED,
+        ];
+        let breaks: [i32; 5] = [100, 200, 300, 400, 500];
 
         for nxb in 0..=5 {
             for nyb in 0..=5 {
                 let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
-
                     for row in 0..=nyb {
                         for col in 0..=nxb {
                             let get_bp = |full, limit, id| {
@@ -607,12 +620,14 @@ mod drawing_area_tests {
                                     full
                                 } else {
                                     breaks[id as usize - 1]
-                                }) as i32 
+                                }) as i32
                             };
 
                             let expected_u = (get_bp(1024, nxb, col), get_bp(768, nyb, row));
-                            let expected_d = (get_bp(1024, nxb, col + 1), get_bp(768, nyb, row + 1));
-                            let expected_color = colors[(row * (nxb + 1) + col) as usize % colors.len()];
+                            let expected_d =
+                                (get_bp(1024, nxb, col + 1), get_bp(768, nyb, row + 1));
+                            let expected_color =
+                                colors[(row * (nxb + 1) + col) as usize % colors.len()];
 
                             m.check_draw_rect(move |c, _, f, u, d| {
                                 assert_eq!(c, expected_color.to_rgba());
@@ -622,19 +637,50 @@ mod drawing_area_tests {
                             });
                         }
                     }
-                    
+
                     m.drop_check(move |b| {
                         assert_eq!(b.num_draw_rect_call, ((nxb + 1) * (nyb + 1)) as u32);
                         assert_eq!(b.draw_count, ((nyb + 1) * (nxb + 1)) as u32);
                     });
                 });
 
-                let result = drawing_area.split_by_breakpoints(&breaks[0..nxb as usize], &breaks[0..nyb as usize]);
+                let result = drawing_area
+                    .split_by_breakpoints(&breaks[0..nxb as usize], &breaks[0..nyb as usize]);
                 for i in 0..result.len() {
-                    result[i].fill(colors[i % colors.len()]).expect("Drawing Error");
+                    result[i]
+                        .fill(colors[i % colors.len()])
+                        .expect("Drawing Error");
                 }
             }
         }
+    }
+    #[test]
+    fn test_titled() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
+            m.check_draw_text(|c, font, size, _pos, text| {
+                assert_eq!(c, BLACK.to_rgba());
+                assert_eq!(font, "Arial");
+                assert_eq!(size, 30.0);
+                assert_eq!("This is the title", text);
+            });
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, WHITE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!(u.0, 0);
+                assert!(u.1 > 0);
+                assert_eq!(d, (1024, 768));
+            });
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_text_call, 1);
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 2);
+            });
+        });
 
+        drawing_area
+            .titled("This is the title", ("Arial", 30))
+            .unwrap()
+            .fill(&WHITE)
+            .unwrap();
     }
 }

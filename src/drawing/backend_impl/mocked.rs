@@ -70,7 +70,14 @@ impl MockedBackend {
 
     def_set_checker_func!(check_draw_pixel, RGBAColor, BackendCoord);
     def_set_checker_func!(check_draw_line, RGBAColor, u32, BackendCoord, BackendCoord);
-    def_set_checker_func!(check_draw_rect, RGBAColor, u32, bool, BackendCoord, BackendCoord);
+    def_set_checker_func!(
+        check_draw_rect,
+        RGBAColor,
+        u32,
+        bool,
+        BackendCoord,
+        BackendCoord
+    );
     def_set_checker_func!(check_draw_path, RGBAColor, u32, Vec<BackendCoord>);
     def_set_checker_func!(check_draw_circle, RGBAColor, u32, bool, BackendCoord, u32);
     def_set_checker_func!(check_draw_text, RGBAColor, &str, f64, BackendCoord, &str);
@@ -129,7 +136,7 @@ impl DrawingBackend for MockedBackend {
         }
         Ok(())
     }
-    
+
     fn draw_line<S: BackendStyle>(
         &mut self,
         from: BackendCoord,

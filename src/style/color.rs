@@ -34,7 +34,7 @@ pub trait Color {
     }
 
     /// Make a shape style with stroke width from a color
-    fn stroke_width(&self, width: u32) -> ShapeStyle 
+    fn stroke_width(&self, width: u32) -> ShapeStyle
     where
         Self: Sized,
     {

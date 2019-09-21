@@ -109,8 +109,11 @@ fn test_path_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], Into::<ShapeStyle>::into(&BLUE).stroke_width(5)))
-        .expect("Drawing Failure");
+    da.draw(&Path::new(
+        vec![(100, 101), (105, 107), (150, 157)],
+        Into::<ShapeStyle>::into(&BLUE).stroke_width(5),
+    ))
+    .expect("Drawing Failure");
 }
 
 /// A rectangle element
@@ -189,8 +192,11 @@ fn test_rect_element() {
                 assert_eq!(b.draw_count, 1);
             });
         });
-        da.draw(&Rectangle::new([(100, 101), (105, 107)], BLUE.stroke_width(5)))
-            .expect("Drawing Failure");
+        da.draw(&Rectangle::new(
+            [(100, 101), (105, 107)],
+            BLUE.stroke_width(5),
+        ))
+        .expect("Drawing Failure");
     }
 
     {
@@ -308,7 +314,6 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Polygon<Coord> {
         backend.fill_polygon(points, &self.style.color)
     }
 }
-
 
 #[cfg(test)]
 #[test]
