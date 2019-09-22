@@ -199,6 +199,12 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                         let from = a.get_slave_pos();
                         let to = b.get_slave_pos();
 
+                        if a.get_master_pos() == 0 && b.get_master_pos() == 0 && to - from > 1.0 {
+                            first = None;
+                            second = None;
+                            continue;
+                        }
+
                         if horizental_sweep {
                             back.draw_line(
                                 (sweep_line, from.ceil() as i32),

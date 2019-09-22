@@ -60,3 +60,7 @@ To view the source code for each example, please click on the example image.
 <a href="https://github.com/38/plotters/blob/master/examples/area-chart.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/area-chart.png" class="galleryItem" width=200px></img>
 </a>
+
+<a href="https://github.com/38/plotters/blob/master/examples/snowflake.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/snowflake.png" class="galleryItem" width=200px></img>
+</a>
