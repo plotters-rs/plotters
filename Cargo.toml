@@ -16,13 +16,19 @@ chrono = { version = "0.4.9", optional = true }
 svg = { version = "0.5.12", optional = true }
 num-traits = { version = "^0.2", optional = true }
 palette = { version = "^0.4", default-features = false, optional = true }
+gif = { version = "^0.10.3", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = "0.7.6"
 font-loader = "0.8.0"
 lazy_static = "^1.2"
 piston_window = {version = "0.96.0", optional = true}
-image = {version = "0.21.2", optional = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
+version = "0.21.2"
+optional = true
+default_features = false
+features = ["jpeg", "png_codec", "bmp"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { version = "0.3.4", features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d'] }
@@ -30,7 +36,7 @@ js-sys= "0.3.4"
 wasm-bindgen = "0.2.43"
 
 [features]
-default = ["bitmap", "svg", "chrono", "palette_ext", "make_partial_axis"]
+default = ["bitmap", "svg", "chrono", "palette_ext", "make_partial_axis", "gif"]
 palette_ext = ["palette", "num-traits"]
 bitmap = ["image"]
 datetime = ["chrono"]
