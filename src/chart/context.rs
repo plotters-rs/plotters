@@ -286,7 +286,12 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let right_most = if orientation.0 > 0 && orientation.1 == 0 {
             labels
                 .iter()
-                .map(|(_, t)| label_style.font.box_size(t).unwrap_or((0, 0)).0)
+                .map(|(_, t)| {
+                    self.drawing_area
+                        .estimate_text_size(t, &label_style.font)
+                        .unwrap_or((0, 0))
+                        .0
+                })
                 .max()
                 .unwrap_or(0) as i32
                 + label_dist as i32
@@ -303,7 +308,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 continue;
             }
 
-            let (w, h) = label_style.font.box_size(&t).unwrap_or((0, 0));
+            let (w, h) = self
+                .drawing_area
+                .estimate_text_size(&t, &label_style.font)
+                .unwrap_or((0, 0));
 
             let (cx, cy) = match orientation {
                 (dx, dy) if dx > 0 && dy == 0 => (right_most - w as i32, *p - y0),
@@ -355,7 +363,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 style.transform(FontTransform::Rotate90)
             };
 
-            let (w, h) = actual_style.font.box_size(text).unwrap_or((0, 0));
+            let (w, h) = self
+                .drawing_area
+                .estimate_text_size(text, &actual_style.font)
+                .unwrap_or((0, 0));
 
             let (x0, y0) = match orientation {
                 (dx, dy) if dx > 0 && dy == 0 => (tw - w, (th - h) / 2),

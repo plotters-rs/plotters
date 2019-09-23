@@ -90,9 +90,9 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
         let (mut mx, mut my) = (0, 0);
 
         for ((x, y), t) in self.layout_lines((0, 0)).zip(self.lines.iter()) {
-            let ((x0, y0), (x1, y1)) = self.style.font.layout_box(t.borrow())?;
-            mx = mx.max(x + x1 - x0);
-            my = my.max(y + y1 - y0);
+            let (dx, dy) = self.style.font.box_size(t.borrow())?;
+            mx = mx.max(x + dx as i32);
+            my = my.max(y + dy as i32);
         }
 
         Ok((mx, my))
@@ -131,12 +131,8 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
                 let mut width = 0;
                 let mut left = 0;
                 while left < remaining.len() {
-                    let char_width = {
-                        let ((x0, _), (x1, _)) = font
-                            .layout_box(&remaining[left..=left])
-                            .unwrap_or(((0, 0), (0, 0)));
-                        x1 - x0
-                    };
+                    let char_width =
+                        font.box_size(&remaining[left..=left]).unwrap_or((0, 0)).0 as i32;
 
                     width += char_width;
 
@@ -164,8 +160,8 @@ impl<'a, T: Borrow<str>> MultiLineText<'a, BackendCoord, T> {
     pub fn compute_line_layout(&self) -> FontResult<Vec<LayoutBox>> {
         let mut ret = vec![];
         for ((x, y), t) in self.layout_lines(self.coord).zip(self.lines.iter()) {
-            let ((x0, y0), (x1, y1)) = self.style.font.layout_box(t.borrow())?;
-            ret.push(((x, y), (x + x1 - x0, y + y1 - y0)));
+            let (dx, dy) = self.style.font.box_size(t.borrow())?;
+            ret.push(((x, y), (x + dx as i32, y + dy as i32)));
         }
         Ok(ret)
     }

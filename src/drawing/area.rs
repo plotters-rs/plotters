@@ -2,7 +2,7 @@
 use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
-use crate::style::{Color, TextStyle};
+use crate::style::{Color, FontDesc, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -308,6 +308,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     /// Map coordinate to the backend coordinate
     pub fn map_coordinate(&self, coord: &CT::From) -> BackendCoord {
         self.coord.translate(coord)
+    }
+
+    pub fn estimate_text_size(
+        &self,
+        text: &str,
+        font: &FontDesc,
+    ) -> Result<(u32, u32), DrawingAreaError<DB>> {
+        self.backend_ops(move |b| b.estimate_text_size(text, font))
     }
 }
 
