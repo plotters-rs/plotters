@@ -87,14 +87,27 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    /// Create a new bitmap backend that generate GIF animation
+    ///
+    /// When this is used, the bitmap backend acts similar to a realtime rendering backend.
+    /// When the program finished drawing one frame, use `present` function to flush the frame
+    /// into the GIF file.
+    ///
+    /// - `path`: The path to the GIF file to create
+    /// - `dimension`: The size of the GIF image
+    /// - `speed`: The amount of time for each frame to display
     #[cfg(feature = "gif")]
     pub fn gif<T: AsRef<Path>>(
         path: T,
         dimension: (u32, u32),
-        speed: u32,
+        frame_delay: u32,
     ) -> Result<Self, ImageError> {
         Ok(Self {
-            target: Target::Gif(Box::new(gif_support::GifFile::new(path, dimension, speed)?)),
+            target: Target::Gif(Box::new(gif_support::GifFile::new(
+                path,
+                dimension,
+                frame_delay,
+            )?)),
             img: RgbImage::new(dimension.0, dimension.1),
             saved: false,
         })
