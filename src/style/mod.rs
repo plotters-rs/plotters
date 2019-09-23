@@ -60,6 +60,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
 pub struct ShapeStyle {
     pub color: RGBAColor,
     pub filled: bool,
+    pub stroke_width: u32,
 }
 
 impl ShapeStyle {
@@ -68,6 +69,15 @@ impl ShapeStyle {
         Self {
             color: self.color.to_rgba(),
             filled: true,
+            stroke_width: self.stroke_width,
+        }
+    }
+
+    pub fn stroke_width(&self, width: u32) -> Self {
+        Self {
+            color: self.color.to_rgba(),
+            filled: self.filled,
+            stroke_width: width,
         }
     }
 }
@@ -77,6 +87,7 @@ impl<'a, T: Color> From<&'a T> for ShapeStyle {
         ShapeStyle {
             color: f.to_rgba(),
             filled: false,
+            stroke_width: 1,
         }
     }
 }

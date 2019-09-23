@@ -134,7 +134,9 @@ impl<'a> FontDesc<'a> {
         }
     }
 
-    /// Get the size of the text if rendered in this font
+    /// Get the size of the text if rendered in this font.
+    /// This is similar to `layout_box` function, but it apply the font transformation
+    /// and estimate the overall size of the font
     pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
         let ((min_x, min_y), (max_x, max_y)) = self.layout_box(text)?;
         let (w, h) = self.get_transform().transform(max_x - min_x, max_y - min_y);

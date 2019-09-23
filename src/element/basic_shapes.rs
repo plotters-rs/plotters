@@ -90,7 +90,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
         points: I,
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        backend.draw_path(points, &self.style.color)
+        backend.draw_path(points, &self.style)
     }
 }
 
@@ -99,8 +99,9 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
 fn test_path_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
-        m.check_draw_path(|c, path| {
+        m.check_draw_path(|c, s, path| {
             assert_eq!(c, BLUE.to_rgba());
+            assert_eq!(s, 5);
             assert_eq!(path, vec![(100, 101), (105, 107), (150, 157)]);
         });
         m.drop_check(|b| {
@@ -108,8 +109,11 @@ fn test_path_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Path::new(vec![(100, 101), (105, 107), (150, 157)], &BLUE))
-        .expect("Drawing Failure");
+    da.draw(&Path::new(
+        vec![(100, 101), (105, 107), (150, 157)],
+        Into::<ShapeStyle>::into(&BLUE).stroke_width(5),
+    ))
+    .expect("Drawing Failure");
 }
 
 /// A rectangle element
@@ -164,7 +168,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Rectangle<Coord> {
                 b.1 -= self.margin.1 as i32;
                 a.0 += self.margin.2 as i32;
                 b.0 -= self.margin.3 as i32;
-                backend.draw_rect(a, b, &self.style.color, self.style.filled)
+                backend.draw_rect(a, b, &self.style, self.style.filled)
             }
             _ => Ok(()),
         }
@@ -175,19 +179,41 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Rectangle<Coord> {
 #[test]
 fn test_rect_element() {
     use crate::prelude::*;
-    let da = crate::create_mocked_drawing_area(300, 300, |m| {
-        m.check_draw_rect(|c, f, u, d| {
-            assert_eq!(c, BLUE.to_rgba());
-            assert_eq!(f, false);
-            assert_eq!([u, d], [(100, 101), (105, 107)]);
+    {
+        let da = crate::create_mocked_drawing_area(300, 300, |m| {
+            m.check_draw_rect(|c, s, f, u, d| {
+                assert_eq!(c, BLUE.to_rgba());
+                assert_eq!(f, false);
+                assert_eq!(s, 5);
+                assert_eq!([u, d], [(100, 101), (105, 107)]);
+            });
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
         });
-        m.drop_check(|b| {
-            assert_eq!(b.num_draw_rect_call, 1);
-            assert_eq!(b.draw_count, 1);
-        });
-    });
-    da.draw(&Rectangle::new([(100, 101), (105, 107)], &BLUE))
+        da.draw(&Rectangle::new(
+            [(100, 101), (105, 107)],
+            BLUE.stroke_width(5),
+        ))
         .expect("Drawing Failure");
+    }
+
+    {
+        let da = crate::create_mocked_drawing_area(300, 300, |m| {
+            m.check_draw_rect(|c, _, f, u, d| {
+                assert_eq!(c, BLUE.to_rgba());
+                assert_eq!(f, true);
+                assert_eq!([u, d], [(100, 101), (105, 107)]);
+            });
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
+        });
+        da.draw(&Rectangle::new([(100, 101), (105, 107)], BLUE.filled()))
+            .expect("Drawing Failure");
+    }
 }
 
 /// A circle element
@@ -227,7 +253,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
         backend: &mut DB,
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_circle((x, y), self.size, &self.style.color, self.style.filled);
+            return backend.draw_circle((x, y), self.size, &self.style, self.style.filled);
         }
         Ok(())
     }
@@ -238,7 +264,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
 fn test_circle_element() {
     use crate::prelude::*;
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
-        m.check_draw_circle(|c, f, s, r| {
+        m.check_draw_circle(|c, _, f, s, r| {
             assert_eq!(c, BLUE.to_rgba());
             assert_eq!(f, false);
             assert_eq!(s, (150, 151));
@@ -250,5 +276,64 @@ fn test_circle_element() {
         });
     });
     da.draw(&Circle::new((150, 151), 20, &BLUE))
+        .expect("Drawing Failure");
+}
+
+/// An element of a filled polygon
+pub struct Polygon<Coord> {
+    points: Vec<Coord>,
+    style: ShapeStyle,
+}
+impl<Coord> Polygon<Coord> {
+    /// Create a new polygon
+    /// - `points`: The iterator of the points
+    /// - `style`: The shape style
+    /// - returns the created element
+    pub fn new<P: Into<Vec<Coord>>, S: Into<ShapeStyle>>(points: P, style: S) -> Self {
+        Self {
+            points: points.into(),
+            style: style.into(),
+        }
+    }
+}
+
+impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Polygon<Coord> {
+    type Borrow = &'a Coord;
+    type IntoIter = &'a [Coord];
+    fn point_iter(self) -> &'a [Coord] {
+        &self.points
+    }
+}
+
+impl<Coord, DB: DrawingBackend> Drawable<DB> for Polygon<Coord> {
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        points: I,
+        backend: &mut DB,
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        backend.fill_polygon(points, &self.style.color)
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_polygon_element() {
+    use crate::prelude::*;
+    let points = vec![(100, 100), (50, 500), (300, 400), (200, 300), (550, 200)];
+    let expected_points = points.clone();
+
+    let da = crate::create_mocked_drawing_area(800, 800, |m| {
+        m.check_fill_polygon(move |c, p| {
+            assert_eq!(c, BLUE.to_rgba());
+            assert_eq!(expected_points.len(), p.len());
+            assert_eq!(expected_points, p);
+        });
+        m.drop_check(|b| {
+            assert_eq!(b.num_fill_polygon_call, 1);
+            assert_eq!(b.draw_count, 1);
+        });
+    });
+
+    da.draw(&Polygon::new(points.clone(), &BLUE))
         .expect("Drawing Failure");
 }

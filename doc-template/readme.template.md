@@ -1,4 +1,4 @@
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀 
+# Plotters - Rust Drawing Library for Visualization  🦀📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -16,7 +16,8 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
 including bitmap, vector graph, piston window and WebAssembly. 
 
-- You can try Plotters with Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 
 ## Gallery
 
@@ -238,3 +239,18 @@ The library also allows consumers to make use of the [`Palette`](https://crates.
 This behaviour can also be turned off by setting `default_features = false`.
 
 $$style$$
+
+## FAQ List
+
+* Why does the WASM example break on my machine ?
+
+	The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
+	which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
+	parameter list  to build it. 
+
+* How to draw text/circle/point/rectangle/... on the top of chart ?
+	
+	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
+	you have the freedom to draw anything you want on the drawing area.
+	Use `DrawingArea::draw` to draw any element on the drawing area. 
+

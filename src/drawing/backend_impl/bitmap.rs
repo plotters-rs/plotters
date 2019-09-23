@@ -4,9 +4,67 @@ use image::{ImageError, Rgb, RgbImage};
 
 use std::path::Path;
 
+#[cfg(feature = "gif")]
+mod gif_support {
+    use super::*;
+    use gif::{Encoder as GifEncoder, Frame as GifFrame, Repeat, SetParameter};
+    use std::fs::File;
+
+    pub(super) struct GifFile {
+        encoder: GifEncoder<File>,
+        height: u32,
+        width: u32,
+        delay: u32,
+    }
+
+    impl GifFile {
+        pub(super) fn new<T: AsRef<Path>>(
+            path: T,
+            dim: (u32, u32),
+            delay: u32,
+        ) -> Result<Self, ImageError> {
+            let mut encoder = GifEncoder::new(
+                File::create(path.as_ref()).map_err(|x| ImageError::IoError(x))?,
+                dim.0 as u16,
+                dim.1 as u16,
+                &[],
+            )?;
+
+            encoder.set(Repeat::Infinite)?;
+
+            Ok(Self {
+                encoder,
+                width: dim.0,
+                height: dim.1,
+                delay: (delay + 5) / 10,
+            })
+        }
+
+        pub(super) fn flush_frame(&mut self, img: &mut RgbImage) -> Result<(), ImageError> {
+            let mut new_img = RgbImage::new(self.width, self.height);
+            std::mem::swap(&mut new_img, img);
+
+            let mut frame = GifFrame::from_rgb_speed(
+                self.width as u16,
+                self.height as u16,
+                &new_img.into_raw(),
+                10,
+            );
+
+            frame.delay = self.delay as u16;
+
+            self.encoder.write_frame(&frame)?;
+
+            Ok(())
+        }
+    }
+}
+
 enum Target<'a> {
     File(&'a Path),
     Buffer(&'a mut Vec<u8>),
+    #[cfg(feature = "gif")]
+    Gif(Box<gif_support::GifFile>),
 }
 
 /// The backend that drawing a bitmap
@@ -29,6 +87,32 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    /// Create a new bitmap backend that generate GIF animation
+    ///
+    /// When this is used, the bitmap backend acts similar to a realtime rendering backend.
+    /// When the program finished drawing one frame, use `present` function to flush the frame
+    /// into the GIF file.
+    ///
+    /// - `path`: The path to the GIF file to create
+    /// - `dimension`: The size of the GIF image
+    /// - `speed`: The amount of time for each frame to display
+    #[cfg(feature = "gif")]
+    pub fn gif<T: AsRef<Path>>(
+        path: T,
+        dimension: (u32, u32),
+        frame_delay: u32,
+    ) -> Result<Self, ImageError> {
+        Ok(Self {
+            target: Target::Gif(Box::new(gif_support::GifFile::new(
+                path,
+                dimension,
+                frame_delay,
+            )?)),
+            img: RgbImage::new(dimension.0, dimension.1),
+            saved: false,
+        })
+    }
+
     /// Create a new bitmap backend which only lives in-memory
     pub fn with_buffer(buf: &'a mut Vec<u8>, dimension: (u32, u32)) -> Self {
         Self {
@@ -47,6 +131,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+        self.saved = false;
         Ok(())
     }
 
@@ -64,6 +149,14 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 std::mem::swap(&mut actual_img, &mut self.img);
                 target.clear();
                 target.append(&mut actual_img.into_raw());
+                Ok(())
+            }
+            #[cfg(feature = "gif")]
+            Target::Gif(target) => {
+                target
+                    .flush_frame(&mut self.img)
+                    .map_err(DrawingErrorKind::DrawingError)?;
+                self.saved = true;
                 Ok(())
             }
         }

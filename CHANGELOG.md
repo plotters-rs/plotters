@@ -1,6 +1,16 @@
 # Changelog
 
-## Plotters development (?)
+## Plotter latest (?)
+
+### Added
+
+- GIF Support, now bitmap backend is able to render gif animation
+
+### Bug Fix
+
+- Fixed several polygon filling bugs.
+
+## Plotters 0.2.6 (2019-09-19)
 
 ### Added
 
@@ -10,10 +20,15 @@
 - New label area size API `set_label_area_size` can be used for all 4 label area
 - Added new error bar element
 - New axis specification type `PartialAxis` which allows the partially rendered axis. For example, we can define the chart's axis range as `0..1`, but only `0.3..0.7` is rendered on axis. This can be done by `(0.0..1.0).partial_axis(0.3..0.7)`
+- Drawing backend now support fill polygon and introduce polygon element
+- Area Chart Support
 
 ### Improvement
 
 - More examples are included
+- Date coordinate now support using monthly or yearly axis. This is usefuly when plotting some data in monthly or yearly basis.
+- Make margin on different side of a chart can be configured seperately.
+- Better test coverage
 
 ## Plotters 0.2.5 (2019-09-07)
 

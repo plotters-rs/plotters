@@ -1,4 +1,4 @@
-use crate::style::{Color, FontDesc, FontError, RGBAColor};
+use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle};
 use std::error::Error;
 
 /// A coordiante in the image
@@ -31,13 +31,27 @@ pub trait BackendStyle {
 
     /// Convert the style into the underlying color
     fn as_color(&self) -> RGBAColor;
+
     // TODO: In the future we should support stroke width, line shape, etc....
+    fn stroke_width(&self) -> u32 {
+        1
+    }
 }
 
 impl<T: Color> BackendStyle for T {
     type ColorType = T;
     fn as_color(&self) -> RGBAColor {
         self.to_rgba()
+    }
+}
+
+impl BackendStyle for ShapeStyle {
+    type ColorType = RGBAColor;
+    fn as_color(&self) -> RGBAColor {
+        self.color.clone()
+    }
+    fn stroke_width(&self) -> u32 {
+        self.stroke_width
     }
 }
 
@@ -48,7 +62,7 @@ impl<T: Color> BackendStyle for T {
 ///  If the drawing backend supports vector graphics, the other drawing APIs should be
 ///  overrided by the backend specific implementation. Otherwise, the default implementation
 ///  will use the pixel-based approach to draw other types of low-level shapes.
-pub trait DrawingBackend {
+pub trait DrawingBackend: Sized {
     /// The error type reported by the backend
     type ErrorType: Error + Send + Sync;
 
@@ -80,47 +94,11 @@ pub trait DrawingBackend {
     /// - `style`: The style of the line
     fn draw_line<S: BackendStyle>(
         &mut self,
-        mut from: BackendCoord,
-        mut to: BackendCoord,
+        from: BackendCoord,
+        to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
-            return Ok(());
-        }
-
-        let steep = (from.0 - to.0).abs() < (from.1 - to.1).abs();
-
-        if steep {
-            from = (from.1, from.0);
-            to = (to.1, to.0);
-        }
-
-        let (from, to) = if from.0 > to.0 {
-            (to, from)
-        } else {
-            (from, to)
-        };
-
-        let grad = f64::from(to.1 - from.1) / f64::from(to.0 - from.0);
-
-        let mut put_pixel = |(x, y): BackendCoord, b: f64| {
-            if steep {
-                self.draw_pixel((y, x), &style.as_color().mix(b))
-            } else {
-                self.draw_pixel((x, y), &style.as_color().mix(b))
-            }
-        };
-
-        let mut y = f64::from(from.1);
-
-        for x in from.0..=to.0 {
-            put_pixel((x, y as i32), 1.0 + y.floor() - y)?;
-            put_pixel((x, y as i32 + 1), y - y.floor())?;
-
-            y += grad;
-        }
-
-        Ok(())
+        super::rasterizer::draw_line(self, from, to, style)
     }
 
     /// Draw a rectangle on the drawing backend
@@ -135,53 +113,7 @@ pub trait DrawingBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
-            return Ok(());
-        }
-        let (upper_left, bottom_right) = (
-            (
-                upper_left.0.min(bottom_right.0),
-                upper_left.1.min(bottom_right.1),
-            ),
-            (
-                upper_left.0.max(bottom_right.0),
-                upper_left.1.max(bottom_right.1),
-            ),
-        );
-
-        if fill {
-            if bottom_right.0 - upper_left.0 < bottom_right.1 - upper_left.1 {
-                for x in upper_left.0..=bottom_right.0 {
-                    self.draw_line((x, upper_left.1), (x, bottom_right.1), style)?;
-                }
-            } else {
-                for y in upper_left.1..=bottom_right.1 {
-                    self.draw_line((upper_left.0, y), (bottom_right.0, y), style)?;
-                }
-            }
-        } else {
-            self.draw_line(
-                (upper_left.0, upper_left.1),
-                (upper_left.0, bottom_right.1),
-                style,
-            )?;
-            self.draw_line(
-                (upper_left.0, upper_left.1),
-                (bottom_right.0, upper_left.1),
-                style,
-            )?;
-            self.draw_line(
-                (bottom_right.0, bottom_right.1),
-                (upper_left.0, bottom_right.1),
-                style,
-            )?;
-            self.draw_line(
-                (bottom_right.0, bottom_right.1),
-                (bottom_right.0, upper_left.1),
-                style,
-            )?;
-        }
-        Ok(())
+        super::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
     /// Draw a path on the drawing backend
@@ -196,12 +128,18 @@ pub trait DrawingBackend {
             return Ok(());
         }
 
-        let mut begin: Option<BackendCoord> = None;
-        for end in path.into_iter() {
-            if let Some(begin) = begin {
-                self.draw_line(begin, end, style)?;
+        if style.stroke_width() == 1 {
+            let mut begin: Option<BackendCoord> = None;
+            for end in path.into_iter() {
+                if let Some(begin) = begin {
+                    self.draw_line(begin, end, style)?;
+                }
+                begin = Some(end);
             }
-            begin = Some(end);
+        } else {
+            let p: Vec<_> = path.into_iter().collect();
+            let v = super::rasterizer::path::polygonize(&p[..], style.stroke_width());
+            return self.fill_polygon(v, &style.as_color());
         }
         Ok(())
     }
@@ -218,56 +156,17 @@ pub trait DrawingBackend {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
-            return Ok(());
-        }
+        super::rasterizer::draw_circle(self, center, radius, style, fill)
+    }
 
-        let min = (f64::from(radius) * (1.0 - (2f64).sqrt() / 2.0)).ceil() as i32;
-        let max = (f64::from(radius) * (1.0 + (2f64).sqrt() / 2.0)).floor() as i32;
+    fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
+        &mut self,
+        vert: I,
+        style: &S,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let vert_buf: Vec<_> = vert.into_iter().collect();
 
-        let range = min..=max;
-
-        let (up, down) = (
-            range.start() + center.1 - radius as i32,
-            range.end() + center.1 - radius as i32,
-        );
-
-        for dy in range {
-            let dy = dy - radius as i32;
-            let y = center.1 + dy;
-
-            let lx = (f64::from(radius) * f64::from(radius)
-                - (f64::from(dy) * f64::from(dy)).max(1e-5))
-            .sqrt();
-
-            let left = center.0 - lx.floor() as i32;
-            let right = center.0 + lx.floor() as i32;
-
-            let v = lx - lx.floor();
-
-            let x = center.0 + dy;
-            let top = center.1 - lx.floor() as i32;
-            let bottom = center.1 + lx.floor() as i32;
-
-            if fill {
-                self.draw_line((left, y), (right, y), style)?;
-                self.draw_line((x, top), (x, up), style)?;
-                self.draw_line((x, down), (x, bottom), style)?;
-            } else {
-                self.draw_pixel((left, y), &style.as_color().mix(1.0 - v))?;
-                self.draw_pixel((right, y), &style.as_color().mix(1.0 - v))?;
-
-                self.draw_pixel((x, top), &style.as_color().mix(1.0 - v))?;
-                self.draw_pixel((x, bottom), &style.as_color().mix(1.0 - v))?;
-            }
-
-            self.draw_pixel((left - 1, y), &style.as_color().mix(v))?;
-            self.draw_pixel((right + 1, y), &style.as_color().mix(v))?;
-            self.draw_pixel((x, top - 1), &style.as_color().mix(v))?;
-            self.draw_pixel((x, bottom + 1), &style.as_color().mix(v))?;
-        }
-
-        Ok(())
+        super::rasterizer::fill_polygon(self, &vert_buf[..], style)
     }
 
     /// Draw a text on the drawing backend
@@ -292,5 +191,23 @@ pub trait DrawingBackend {
             Ok(drawing_result) => drawing_result,
             Err(font_error) => Err(DrawingErrorKind::FontError(font_error)),
         }
+    }
+
+    /// Estimate the size of the text if rendered on this backend.
+    /// This is important because some of the backend may not have font ability.
+    /// Thus this allows those backend reports proper value rather than ask the
+    /// font rasterizer for that.
+    ///
+    /// - `text`: The text to estimate
+    /// - `font`: The font to estimate
+    /// - *Returns* The estimated text size
+    fn estimate_text_size<'a>(
+        &self,
+        text: &str,
+        font: &FontDesc<'a>,
+    ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
+        Ok(font
+            .box_size(text)
+            .map_err(|e| DrawingErrorKind::FontError(e))?)
     }
 }

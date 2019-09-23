@@ -1,6 +1,6 @@
 /*!
 
-# Plotters - Rust Drawing Library for Visualization  🦀 📈🚀
+# Plotters - Rust Drawing Library for Visualization  🦀📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -18,7 +18,8 @@
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends,
 including bitmap, vector graph, piston window and WebAssembly.
 
-- You can try Plotters with Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 
 ## Gallery
 
@@ -151,6 +152,47 @@ including bitmap, vector graph, piston window and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/slc-temp.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/slc-temp.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Monthly Time Coordinate
+        <a href="https://github.com/38/plotters/blob/master/examples/slc-temp.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/area-chart.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/area-chart.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Monthly Time Coordinate
+        <a href="https://github.com/38/plotters/blob/master/examples/area-chart.rs">[code]</a>
+    </div>
+</div>
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/snowflake.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/snowflake.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Koch Snowflake
+        <a href="https://github.com/38/plotters/blob/master/examples/snowflake.rs">[code]</a>
+    </div>
+</div>
+
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/animation.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/animation.gif" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Koch Snowflake Animation
+        <a href="https://github.com/38/plotters/blob/master/examples/animation.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
@@ -169,13 +211,14 @@ including bitmap, vector graph, piston window and WebAssembly.
   * [Misc](#misc)
     + [Development Version](#development-version)
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
+  * [FAQ List](#faq-list)
 
 ## Quick Start
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^0.2.5"
+plotters = "^0.2.6"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
@@ -528,6 +571,21 @@ This behaviour can also be turned off by setting `default_features = false`.
     }
 </style>
 
+
+## FAQ List
+
+* Why does the WASM example break on my machine ?
+
+    The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
+    which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
+    parameter list  to build it.
+
+* How to draw text/circle/point/rectangle/... on the top of chart ?
+
+    As you may realized, Plotters is a drawing library rather than a traditional data plotting library,
+    you have the freedom to draw anything you want on the drawing area.
+    Use `DrawingArea::draw` to draw any element on the drawing area.
+
 */
 pub mod chart;
 pub mod coord;
@@ -562,7 +620,7 @@ pub mod prelude {
     pub use crate::coord::make_partial_axis;
 
     pub use crate::drawing::*;
-    pub use crate::series::{Histogram, LineSeries, PointSeries};
+    pub use crate::series::{AreaSeries, Histogram, LineSeries, PointSeries};
     pub use crate::style::{
         Color, FontDesc, FontTransform, HSLColor, IntoFont, Palette, Palette100, Palette99,
         Palette9999, PaletteColor, RGBColor, ShapeStyle, SimpleColor, TextStyle,
@@ -571,7 +629,7 @@ pub mod prelude {
 
     pub use crate::element::{
         CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
-        MultiLineText, Path, Pixel, Rectangle, Text,
+        MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
     #[allow(type_alias_bounds)]

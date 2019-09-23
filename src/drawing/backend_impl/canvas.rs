@@ -161,6 +161,29 @@ impl DrawingBackend for CanvasBackend {
         Ok(())
     }
 
+    fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
+        &mut self,
+        path: I,
+        style: &S,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        if style.as_color().alpha() == 0.0 {
+            return Ok(());
+        }
+        let mut path = path.into_iter();
+        self.context.begin_path();
+        if let Some(start) = path.next() {
+            self.context
+                .set_fill_style(&make_canvas_color(style.as_color()));
+            self.context.move_to(f64::from(start.0), f64::from(start.1));
+            for next in path {
+                self.context.line_to(f64::from(next.0), f64::from(next.1));
+            }
+            self.context.close_path();
+        }
+        self.context.fill();
+        Ok(())
+    }
+
     fn draw_circle<S: BackendStyle>(
         &mut self,
         center: BackendCoord,
