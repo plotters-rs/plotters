@@ -1,5 +1,15 @@
 # Changelog
 
+## Plotter latest (?)
+
+### Added
+
+- GIF Support, now bitmap backend is able to render gif animation
+
+### Bug Fix
+
+- Fixed several polygon filling bugs.
+
 ## Plotters 0.2.6 (2019-09-19)
 
 ### Added

@@ -1,12 +1,53 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
-use image::{ImageError, Rgb, RgbImage};
+use image::{gif, ImageError, Rgb, RgbImage};
 
+use std::fs::File;
 use std::path::Path;
+
+struct GifFile {
+    encoder: gif::Encoder<File>,
+    height: u32,
+    width: u32,
+    delay: u32,
+}
+
+impl GifFile {
+    fn new<T: AsRef<Path>>(path: T, dim: (u32, u32), delay: u32) -> Result<Self, ImageError> {
+        let encoder =
+            gif::Encoder::new(File::create(path.as_ref()).map_err(|x| ImageError::IoError(x))?);
+
+        Ok(Self {
+            encoder,
+            width: dim.0,
+            height: dim.1,
+            delay: (delay + 5) / 10,
+        })
+    }
+
+    fn flush_frame(&mut self, img: &mut RgbImage) -> Result<(), ImageError> {
+        let mut new_img = RgbImage::new(self.width, self.height);
+        std::mem::swap(&mut new_img, img);
+
+        let mut frame = gif::Frame::from_rgb_speed(
+            self.width as u16,
+            self.height as u16,
+            &new_img.into_raw(),
+            10,
+        );
+
+        frame.delay = self.delay as u16;
+
+        self.encoder.encode(&frame)?;
+
+        Ok(())
+    }
+}
 
 enum Target<'a> {
     File(&'a Path),
     Buffer(&'a mut Vec<u8>),
+    Gif(Box<GifFile>),
 }
 
 /// The backend that drawing a bitmap
@@ -29,6 +70,18 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    pub fn gif<T: AsRef<Path>>(
+        path: T,
+        dimension: (u32, u32),
+        speed: u32,
+    ) -> Result<Self, ImageError> {
+        Ok(Self {
+            target: Target::Gif(Box::new(GifFile::new(path, dimension, speed)?)),
+            img: RgbImage::new(dimension.0, dimension.1),
+            saved: false,
+        })
+    }
+
     /// Create a new bitmap backend which only lives in-memory
     pub fn with_buffer(buf: &'a mut Vec<u8>, dimension: (u32, u32)) -> Self {
         Self {
@@ -47,6 +100,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+        self.saved = false;
         Ok(())
     }
 
@@ -64,6 +118,13 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 std::mem::swap(&mut actual_img, &mut self.img);
                 target.clear();
                 target.append(&mut actual_img.into_raw());
+                Ok(())
+            }
+            Target::Gif(target) => {
+                target
+                    .flush_frame(&mut self.img)
+                    .map_err(DrawingErrorKind::DrawingError)?;
+                self.saved = true;
                 Ok(())
             }
         }
