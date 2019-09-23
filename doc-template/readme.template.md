@@ -242,8 +242,15 @@ $$style$$
 
 ## FAQ List
 
-* Why does the WASM example work on my machine ?
+* Why does the WASM example break on my machine ?
 
 	The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
 	which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
 	parameter list  to build it. 
+
+* How to draw text/circle/point/rectangle/... on the top of chart ?
+	
+	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
+	you have the freedom to draw anything you want on the drawing area.
+	Use `DrawingArea::draw` to draw any element on the drawing area. 
+
