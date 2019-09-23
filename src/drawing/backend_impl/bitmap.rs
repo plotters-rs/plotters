@@ -1,53 +1,70 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
-use image::{gif, ImageError, Rgb, RgbImage};
+use image::{ImageError, Rgb, RgbImage};
 
-use std::fs::File;
 use std::path::Path;
 
-struct GifFile {
-    encoder: gif::Encoder<File>,
-    height: u32,
-    width: u32,
-    delay: u32,
-}
+#[cfg(feature = "gif")]
+mod gif_support {
+    use super::*;
+    use gif::{Encoder as GifEncoder, Frame as GifFrame, Repeat, SetParameter};
+    use std::fs::File;
 
-impl GifFile {
-    fn new<T: AsRef<Path>>(path: T, dim: (u32, u32), delay: u32) -> Result<Self, ImageError> {
-        let encoder =
-            gif::Encoder::new(File::create(path.as_ref()).map_err(|x| ImageError::IoError(x))?);
-
-        Ok(Self {
-            encoder,
-            width: dim.0,
-            height: dim.1,
-            delay: (delay + 5) / 10,
-        })
+    pub(super) struct GifFile {
+        encoder: GifEncoder<File>,
+        height: u32,
+        width: u32,
+        delay: u32,
     }
 
-    fn flush_frame(&mut self, img: &mut RgbImage) -> Result<(), ImageError> {
-        let mut new_img = RgbImage::new(self.width, self.height);
-        std::mem::swap(&mut new_img, img);
+    impl GifFile {
+        pub(super) fn new<T: AsRef<Path>>(
+            path: T,
+            dim: (u32, u32),
+            delay: u32,
+        ) -> Result<Self, ImageError> {
+            let mut encoder = GifEncoder::new(
+                File::create(path.as_ref()).map_err(|x| ImageError::IoError(x))?,
+                dim.0 as u16,
+                dim.1 as u16,
+                &[],
+            )?;
 
-        let mut frame = gif::Frame::from_rgb_speed(
-            self.width as u16,
-            self.height as u16,
-            &new_img.into_raw(),
-            10,
-        );
+            encoder.set(Repeat::Infinite)?;
 
-        frame.delay = self.delay as u16;
+            Ok(Self {
+                encoder,
+                width: dim.0,
+                height: dim.1,
+                delay: (delay + 5) / 10,
+            })
+        }
 
-        self.encoder.encode(&frame)?;
+        pub(super) fn flush_frame(&mut self, img: &mut RgbImage) -> Result<(), ImageError> {
+            let mut new_img = RgbImage::new(self.width, self.height);
+            std::mem::swap(&mut new_img, img);
 
-        Ok(())
+            let mut frame = GifFrame::from_rgb_speed(
+                self.width as u16,
+                self.height as u16,
+                &new_img.into_raw(),
+                10,
+            );
+
+            frame.delay = self.delay as u16;
+
+            self.encoder.write_frame(&frame)?;
+
+            Ok(())
+        }
     }
 }
 
 enum Target<'a> {
     File(&'a Path),
     Buffer(&'a mut Vec<u8>),
-    Gif(Box<GifFile>),
+    #[cfg(feature = "gif")]
+    Gif(Box<gif_support::GifFile>),
 }
 
 /// The backend that drawing a bitmap
@@ -70,13 +87,14 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    #[cfg(feature = "gif")]
     pub fn gif<T: AsRef<Path>>(
         path: T,
         dimension: (u32, u32),
         speed: u32,
     ) -> Result<Self, ImageError> {
         Ok(Self {
-            target: Target::Gif(Box::new(GifFile::new(path, dimension, speed)?)),
+            target: Target::Gif(Box::new(gif_support::GifFile::new(path, dimension, speed)?)),
             img: RgbImage::new(dimension.0, dimension.1),
             saved: false,
         })
@@ -120,6 +138,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 target.append(&mut actual_img.into_raw());
                 Ok(())
             }
+            #[cfg(feature = "gif")]
             Target::Gif(target) => {
                 target
                     .flush_frame(&mut self.img)
