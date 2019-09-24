@@ -238,6 +238,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         label_offset: i32,
         orientation: (i16, i16),
         axis_desc: Option<(&str, &TextStyle)>,
+        tick_size: i32,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let area = if let Some(target) = area {
             target
@@ -248,7 +249,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x0, y0) = self.drawing_area.get_base_pixel();
 
         /* TODO: make this configure adjustable */
-        let knob_size = 5;
         let label_dist = if orientation.1 > 0 { 0 } else { 10 };
 
         let (tw, th) = area.dim_in_pixel();
@@ -338,13 +338,13 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = match orientation {
-                        (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, knob_size, *p - y0),
+                        (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
                         (dx, dy) if dx < 0 && dy == 0 => {
-                            (tw as i32 - knob_size, *p - y0, tw as i32, *p - y0)
+                            (tw as i32 - tick_size, *p - y0, tw as i32, *p - y0)
                         }
-                        (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, knob_size),
+                        (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
                         (dx, dy) if dx == 0 && dy < 0 => {
-                            (*p - x0, th as i32 - knob_size, *p - x0, th as i32)
+                            (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
                         }
                         _ => panic!("Bug: Invlid orientation specification"),
                     };
@@ -415,6 +415,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 x_label_offset,
                 (0, -1 + idx as i16 * 2),
                 x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+                5,
             )?;
 
             self.draw_axis_and_labels(
@@ -425,6 +426,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 y_label_offset,
                 (-1 + idx as i16 * 2, 0),
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+                5,
             )?;
         }
 
