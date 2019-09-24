@@ -243,7 +243,7 @@ This behaviour can also be turned off by setting `default_features = false`.
 This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate. 
 
 | Name    |  Description | Addional Dependency |Default?|
-|---------|--------------|----------|
+|---------|--------------|--------|------------|
 | bitmap  | Enable `BitMapBackend` Support| image | Yes |
 | svg     | Enable `SVGBackend` Support | svg | Yes |
 | datetime| Enable Date and Time Coordinate Support| chrono | Yes |
