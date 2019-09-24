@@ -242,15 +242,16 @@ This behaviour can also be turned off by setting `default_features = false`.
 
 This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate. 
 
-| Name    |  Description |  Default?|
+| Name    |  Description | Addional Dependency |Default?|
 |---------|--------------|----------|
-| bitmap  | Enable `BitMapBackend` Support| Yes |
-| svg     | Enable `SVGBackend` Support | Yes |
-| datetime| Enable Date and Time Coordinate Support| Yes |
-| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | Yes |
-| piston | Enable `PistonWindowBackend` | No |
-| palette\_ext | Use crate `palette` for color expression | Yes |
-| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | No |
+| bitmap  | Enable `BitMapBackend` Support| image | Yes |
+| svg     | Enable `SVGBackend` Support | svg | Yes |
+| datetime| Enable Date and Time Coordinate Support| chrono | Yes |
+| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
+| piston | Enable `PistonWindowBackend` | piston\_window | No |
+| palette\_ext | Use crate `palette` for color expression| palette | Yes |
+| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | None | No |
+| make\_partial\_axis | Support for API `make_partial_axis`, which allows confguring partial axis from visible protion. | num-trait| Yes |
 
 ## FAQ List
 
