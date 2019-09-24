@@ -252,8 +252,6 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 | palette\_ext | Use crate `palette` for color expression | Yes |
 | evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | No |
 
-$$style$$
-
 ## FAQ List
 
 * Why does the WASM example break on my machine ?
@@ -267,4 +265,6 @@ $$style$$
 	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
 	you have the freedom to draw anything you want on the drawing area.
 	Use `DrawingArea::draw` to draw any element on the drawing area. 
+
+$$style$$
 

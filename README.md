@@ -110,6 +110,7 @@ To view the source code for each example, please click on the example image.
   * [Misc](#misc)
     + [Development Version](#development-version)
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
+  [](#)
   * [FAQ List](#faq-list)
 
 ## Quick Start
@@ -451,6 +452,19 @@ plotters = { git = "https://github.com/38/plotters.git", default_features = fals
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
 This behaviour can also be turned off by setting `default_features = false`.
 
+#### List of Features
+
+This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate. 
+
+| Name    |  Description |  Default?|
+|---------|--------------|----------|
+| bitmap  | Enable `BitMapBackend` Support| Yes |
+| svg     | Enable `SVGBackend` Support | Yes |
+| datetime| Enable Date and Time Coordinate Support| Yes |
+| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | Yes |
+| piston | Enable `PistonWindowBackend` | No |
+| palette\_ext | Use crate `palette` for color expression | Yes |
+| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | No |
 
 ## FAQ List
 
@@ -465,4 +479,5 @@ This behaviour can also be turned off by setting `default_features = false`.
 	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
 	you have the freedom to draw anything you want on the drawing area.
 	Use `DrawingArea::draw` to draw any element on the drawing area. 
+
 
