@@ -238,6 +238,28 @@ plotters = { git = "https://github.com/38/plotters.git", default_features = fals
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
 This behaviour can also be turned off by setting `default_features = false`.
 
+#### List of Features
+
+This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate. 
+
++---------+--------------+----------+
+| Name    |  Description |  Default?|
++---------+--------------+----------+
+| bitmap  | Enable `BitMapBackend` Support| Yes |
++---------+-------------------------------+-----+
+| svg     | Enable `SVGBackend` Support | Yes |
++---------+-----------------------------+-----+
+| datetime| Enable Date and Time Coordinate Support| Yes |
++---------+----------------------------------------+-----+
+| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | Yes |
++-----------------------+------------------+------------+
+| piston | Enable `PistonWindowBackend` | No |
++--------+------------------------------+---+
+| palette\_ext | Use crate `palette` for color expression | Yes |
++--------------+-----------------------------+------------------+
+| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | No |
++----------------------+---------------------+----------------+
+
 $$style$$
 
 ## FAQ List
