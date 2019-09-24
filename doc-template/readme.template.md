@@ -238,7 +238,20 @@ plotters = { git = "https://github.com/38/plotters.git", default_features = fals
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
 This behaviour can also be turned off by setting `default_features = false`.
 
-$$style$$
+### List of Features
+
+This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate. 
+
+| Name    |  Description | Addional Dependency |Default?|
+|---------|--------------|--------|------------|
+| bitmap  | Enable `BitMapBackend` Support| image | Yes |
+| svg     | Enable `SVGBackend` Support | svg | Yes |
+| datetime| Enable Date and Time Coordinate Support| chrono | Yes |
+| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
+| piston | Enable `PistonWindowBackend` | piston\_window | No |
+| palette\_ext | Use crate `palette` for color expression| palette | Yes |
+| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | None | No |
+| make\_partial\_axis | Support for API `make_partial_axis`, which allows confguring partial axis from visible protion. | num-trait| Yes |
 
 ## FAQ List
 
@@ -253,4 +266,6 @@ $$style$$
 	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
 	you have the freedom to draw anything you want on the drawing area.
 	Use `DrawingArea::draw` to draw any element on the drawing area. 
+
+$$style$$
 

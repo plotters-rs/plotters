@@ -36,9 +36,10 @@ js-sys= "0.3.4"
 wasm-bindgen = "0.2.43"
 
 [features]
-default = ["bitmap", "svg", "chrono", "palette_ext", "make_partial_axis", "gif"]
+default = ["bitmap", "svg", "chrono", "palette_ext", "make_partial_axis", "gif_backend"]
 palette_ext = ["palette", "num-traits"]
 bitmap = ["image"]
+gif_backend = ["bitmap", "gif"]
 datetime = ["chrono"]
 evcxr = ["svg"]
 piston = ["piston_window"]
