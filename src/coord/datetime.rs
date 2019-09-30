@@ -1,5 +1,5 @@
 /// The datetime coordinates
-use chrono::{Date, DateTime, Datelike, Duration, TimeZone, Timelike};
+use chrono::{Date, DateTime, Datelike, Duration, NaiveTime, TimeZone, Timelike};
 use std::ops::Range;
 
 use super::{AsRangedCoord, DescreteRanged, Ranged};
@@ -402,3 +402,126 @@ impl<T: TimeValue> IntoYearly<T> for Range<T> {
 
 /// The ranged coordinate for the date and time
 pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
+
+impl<Z: TimeZone> AsRangedCoord for Range<DateTime<Z>> {
+    type CoordDescType = RangedDateTime<Z>;
+    type Value = Date<Z>;
+}
+
+impl<Z: TimeZone> From<Range<DateTime<Z>>> for RangedDateTime<Z> {
+    fn from(range: Range<DateTime<Z>>) -> Self {
+        Self(range.start, range.end)
+    }
+}
+
+impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
+    type ValueType = DateTime<Z>;
+
+    fn range(&self) -> Range<DateTime<Z>> {
+        self.0.clone()..self.1.clone()
+    }
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        TimeValue::map_coord(value, &self.0, &self.1, limit)
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        let total_span = self.1.clone() - self.0.clone();
+
+        if let Some(total_ns) = total_span.num_nanoseconds() {
+            let min_ns_per_point = total_ns as f64 / max_points as f64;
+            if min_ns_per_point < 24.0 * 60.0 * 60.0 * 1_000_000_000.0 {
+                let mut actual_ns_per_point: u64 = {
+                    let mut res = 1;
+                    while res as f64 * 10.0 <= min_ns_per_point {
+                        res *= 10;
+                    }
+                    res
+                };
+
+                fn deterime_actual_ns_per_point(
+                    total_ns: u64,
+                    mut actual_ns_per_point: u64,
+                    units: &[u64],
+                    base: u64,
+                    max_points: usize,
+                ) -> u64 {
+                    let mut unit_per_point_idx = 0;
+                    while total_ns / actual_ns_per_point
+                        > max_points as u64 * units[unit_per_point_idx]
+                    {
+                        unit_per_point_idx += 1;
+                        if unit_per_point_idx == units.len() {
+                            unit_per_point_idx = 0;
+                            actual_ns_per_point *= base;
+                        }
+                    }
+                    units[unit_per_point_idx] * actual_ns_per_point
+                }
+
+                // If the actual timespan is smaller than 1s
+                actual_ns_per_point = if actual_ns_per_point < 1_000_000_000 {
+                    deterime_actual_ns_per_point(
+                        total_ns as u64,
+                        actual_ns_per_point,
+                        &[1, 2, 5],
+                        10,
+                        max_points,
+                    )
+                } else if actual_ns_per_point < 3600_000_000_000 {
+                    deterime_actual_ns_per_point(
+                        total_ns as u64,
+                        1_000_000_000,
+                        &[1, 2, 5, 10, 15, 20, 30],
+                        60,
+                        max_points,
+                    )
+                } else {
+                    deterime_actual_ns_per_point(
+                        total_ns as u64,
+                        actual_ns_per_point,
+                        &[1, 2, 4, 8, 12],
+                        24,
+                        max_points,
+                    )
+                };
+
+                let start_time_ns = self.0.time().num_seconds_from_midnight() as u64
+                    * 1_000_000_000
+                    + self.0.time().nanosecond() as u64;
+
+                let mut start_time = self
+                    .0
+                    .date_ceil()
+                    .and_time(
+                        NaiveTime::from_hms(0, 0, 0)
+                            + Duration::nanoseconds(if start_time_ns % actual_ns_per_point > 0 {
+                                start_time_ns
+                                    + (actual_ns_per_point - start_time_ns % actual_ns_per_point)
+                            } else {
+                                start_time_ns
+                            } as i64),
+                    )
+                    .unwrap();
+
+                let mut ret = vec![];
+
+                while start_time < self.1 {
+                    ret.push(start_time.clone());
+                    start_time = start_time + Duration::nanoseconds(actual_ns_per_point as i64);
+                }
+
+                return ret;
+            }
+        }
+
+        // Otherwise, it actually behaves like a date
+        let date_range = RangedDate(self.0.date_ceil(), self.1.date_floor());
+
+        date_range
+            .key_points(max_points)
+            .into_iter()
+            .map(|x| x.and_hms(0, 0, 0))
+            .collect()
+    }
+}
