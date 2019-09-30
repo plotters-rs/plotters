@@ -479,7 +479,7 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
                 } else {
                     deterime_actual_ns_per_point(
                         total_ns as u64,
-                        actual_ns_per_point,
+                        3600_000_000_000,
                         &[1, 2, 4, 8, 12],
                         24,
                         max_points,
