@@ -9,6 +9,7 @@
 ### Bug Fix
 
 - Fixed several polygon filling bugs.
+- Completely DateTime coordinate system support
 
 ## Plotters 0.2.6 (2019-09-19)
 
