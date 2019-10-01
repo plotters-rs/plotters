@@ -24,7 +24,7 @@ mod gif_support {
             delay: u32,
         ) -> Result<Self, ImageError> {
             let mut encoder = GifEncoder::new(
-                File::create(path.as_ref()).map_err(|x| ImageError::IoError(x))?,
+                File::create(path.as_ref()).map_err(ImageError::IoError)?,
                 dim.0 as u16,
                 dim.1 as u16,
                 &[],
