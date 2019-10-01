@@ -84,11 +84,11 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for TriangleMarker<Coord> {
         if let Some((x, y)) = points.next() {
             let points = [-90, -210, -330]
                 .iter()
-                .map(|deg| *deg as f64 * std::f64::consts::PI / 180.0)
+                .map(|deg| f64::from(*deg) * std::f64::consts::PI / 180.0)
                 .map(|rad| {
                     (
-                        (rad.cos() * self.size as f64 + x as f64).ceil() as i32,
-                        (rad.sin() * self.size as f64 + y as f64).ceil() as i32,
+                        (rad.cos() * f64::from(self.size) + f64::from(x)).ceil() as i32,
+                        (rad.sin() * f64::from(self.size) + f64::from(y)).ceil() as i32,
                     )
                 });
             backend.fill_polygon(points, &self.style.color)?;

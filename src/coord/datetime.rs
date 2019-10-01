@@ -432,9 +432,9 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
             if let Some(actual_ns_per_point) =
                 compute_period_per_point(total_ns as u64, max_points, true)
             {
-                let start_time_ns = self.0.time().num_seconds_from_midnight() as u64
+                let start_time_ns = u64::from(self.0.time().num_seconds_from_midnight())
                     * 1_000_000_000
-                    + self.0.time().nanosecond() as u64;
+                    + u64::from(self.0.time().nanosecond());
 
                 let mut start_time = self
                     .0
@@ -489,17 +489,17 @@ impl Ranged for RangedDuration {
     type ValueType = Duration;
 
     fn range(&self) -> Range<Duration> {
-        self.0.clone()..self.1.clone()
+        self.0..self.1
     }
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        let total_span = self.1.clone() - self.0.clone();
-        let value_span = value.clone() - self.0.clone();
+        let total_span = self.1 - self.0;
+        let value_span = *value - self.0;
 
         if let Some(total_ns) = total_span.num_nanoseconds() {
             if let Some(value_ns) = value_span.num_nanoseconds() {
                 return limit.0
-                    + ((limit.1 - limit.0) as f64 * value_ns as f64 / total_ns as f64 + 1e-10)
+                    + (f64::from(limit.1 - limit.0) * value_ns as f64 / total_ns as f64 + 1e-10)
                         as i32;
             }
             return limit.1;
@@ -509,11 +509,11 @@ impl Ranged for RangedDuration {
         let value_days = value_span.num_days();
 
         limit.0
-            + ((limit.1 - limit.0) as f64 * value_days as f64 / total_days as f64 + 1e-10) as i32
+            + (f64::from(limit.1 - limit.0) * value_days as f64 / total_days as f64 + 1e-10) as i32
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
-        let total_span = self.1.clone() - self.0.clone();
+        let total_span = self.1 - self.0;
 
         if let Some(total_ns) = total_span.num_nanoseconds() {
             if let Some(period) = compute_period_per_point(total_ns as u64, max_points, false) {
@@ -523,7 +523,7 @@ impl Ranged for RangedDuration {
                     if start_ns > 0 {
                         start_ns += period as i64 - (start_ns % period as i64);
                     } else {
-                        start_ns -= (start_ns % period as i64);
+                        start_ns -= start_ns % period as i64;
                     }
                 }
 
@@ -531,7 +531,7 @@ impl Ranged for RangedDuration {
                 let mut ret = vec![];
 
                 while current < self.1 {
-                    ret.push(current.clone());
+                    ret.push(current);
                     current = current + Duration::nanoseconds(period as i64);
                 }
 
@@ -544,39 +544,41 @@ impl Ranged for RangedDuration {
 
         let mut days_per_tick = 1;
         let mut idx = 0;
-        const MULTIPLER: &'static [i32] = &[1, 2, 5];
+        const MULTIPLER: &[i32] = &[1, 2, 5];
 
-        while (end_days - begin_days) / (days_per_tick * MULTIPLER[idx]) as i64 > max_points as i64
+        while (end_days - begin_days) / i64::from(days_per_tick * MULTIPLER[idx])
+            > max_points as i64
         {
             idx += 1;
             if idx == MULTIPLER.len() {
                 idx = 0;
-                days_per_tick = days_per_tick * 10;
+                days_per_tick *= 10;
             }
         }
 
-        days_per_tick = days_per_tick * MULTIPLER[idx];
+        days_per_tick *= MULTIPLER[idx];
 
         let mut ret = vec![];
 
         let mut current = Duration::days(
             self.0.num_days()
-                + if Duration::days(self.0.num_days()) != self.0.clone() {
+                + if Duration::days(self.0.num_days()) != self.0 {
                     1
                 } else {
                     0
                 },
         );
 
-        while &current < &self.1 {
-            ret.push(current.clone());
-            current = current + Duration::days(days_per_tick as i64);
+        while current < self.1 {
+            ret.push(current);
+            current = current + Duration::days(i64::from(days_per_tick));
         }
 
         ret
     }
 }
 
+#[allow(clippy::inconsistent_digit_grouping)]
 fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
     let min_ns_per_point = total_ns as f64 / max_points as f64;
     let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);

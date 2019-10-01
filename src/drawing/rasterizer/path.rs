@@ -1,7 +1,7 @@
 use crate::drawing::backend::BackendCoord;
 
 fn get_dir_vector(from: BackendCoord, to: BackendCoord, flag: bool) -> ((f64, f64), (f64, f64)) {
-    let v = ((to.0 - from.0) as i64, (to.1 - from.1) as i64);
+    let v = (i64::from(to.0 - from.0), i64::from(to.1 - from.1));
     let l = ((v.0 * v.0 + v.1 * v.1) as f64).sqrt();
 
     let v = (v.0 as f64 / l, v.1 as f64 / l);
@@ -18,12 +18,12 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64) -> BackendCoord {
     let (b_t, b_n) = get_dir_vector(triple[2], triple[1], true);
 
     let a_p = (
-        triple[1].0 as f64 + d * a_n.0,
-        triple[1].1 as f64 + d * a_n.1,
+        f64::from(triple[1].0) + d * a_n.0,
+        f64::from(triple[1].1) + d * a_n.1,
     );
     let b_p = (
-        triple[1].0 as f64 + d * b_n.0,
-        triple[1].1 as f64 + d * b_n.1,
+        f64::from(triple[1].0) + d * b_n.0,
+        f64::from(triple[1].1) + d * b_n.1,
     );
 
     // u * a_t + a_p = v * b_t + b_p
@@ -68,8 +68,8 @@ fn traverse_vertices<'a>(
     let (_, n) = get_dir_vector(*a, *b, false);
 
     op((
-        (a.0 as f64 + n.0 * width as f64 / 2.0).round() as i32,
-        (a.1 as f64 + n.1 * width as f64 / 2.0).round() as i32,
+        (f64::from(a.0) + n.0 * f64::from(width) / 2.0).round() as i32,
+        (f64::from(a.1) + n.1 * f64::from(width) / 2.0).round() as i32,
     ));
 
     let mut recent = [(0, 0), *a, *b];
@@ -81,7 +81,7 @@ fn traverse_vertices<'a>(
         recent.swap(0, 1);
         recent.swap(1, 2);
         recent[2] = *p;
-        op(compute_polygon_vertex(&recent, width as f64 / 2.0));
+        op(compute_polygon_vertex(&recent, f64::from(width) / 2.0));
     }
 
     let b = recent[1];
@@ -90,8 +90,8 @@ fn traverse_vertices<'a>(
     let (_, n) = get_dir_vector(a, b, true);
 
     op((
-        (a.0 as f64 + n.0 * width as f64 / 2.0).round() as i32,
-        (a.1 as f64 + n.1 * width as f64 / 2.0).round() as i32,
+        (f64::from(a.0) + n.0 * f64::from(width) / 2.0).round() as i32,
+        (f64::from(a.1) + n.1 * f64::from(width) / 2.0).round() as i32,
     ));
 }
 

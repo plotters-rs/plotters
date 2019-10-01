@@ -206,8 +206,6 @@ pub trait DrawingBackend: Sized {
         text: &str,
         font: &FontDesc<'a>,
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
-        Ok(font
-            .box_size(text)
-            .map_err(|e| DrawingErrorKind::FontError(e))?)
+        Ok(font.box_size(text).map_err(DrawingErrorKind::FontError)?)
     }
 }
