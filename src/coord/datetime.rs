@@ -429,70 +429,18 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
         let total_span = self.1.clone() - self.0.clone();
 
         if let Some(total_ns) = total_span.num_nanoseconds() {
-            let min_ns_per_point = total_ns as f64 / max_points as f64;
-            if min_ns_per_point < 24.0 * 60.0 * 60.0 * 1_000_000_000.0 {
-                let mut actual_ns_per_point: u64 = {
-                    let mut res = 1;
-                    while res as f64 * 10.0 <= min_ns_per_point {
-                        res *= 10;
-                    }
-                    res
-                };
-
-                fn deterime_actual_ns_per_point(
-                    total_ns: u64,
-                    mut actual_ns_per_point: u64,
-                    units: &[u64],
-                    base: u64,
-                    max_points: usize,
-                ) -> u64 {
-                    let mut unit_per_point_idx = 0;
-                    while total_ns / actual_ns_per_point
-                        > max_points as u64 * units[unit_per_point_idx]
-                    {
-                        unit_per_point_idx += 1;
-                        if unit_per_point_idx == units.len() {
-                            unit_per_point_idx = 0;
-                            actual_ns_per_point *= base;
-                        }
-                    }
-                    units[unit_per_point_idx] * actual_ns_per_point
-                }
-
-                // If the actual timespan is smaller than 1s
-                actual_ns_per_point = if actual_ns_per_point < 1_000_000_000 {
-                    deterime_actual_ns_per_point(
-                        total_ns as u64,
-                        actual_ns_per_point,
-                        &[1, 2, 5],
-                        10,
-                        max_points,
-                    )
-                } else if actual_ns_per_point < 3600_000_000_000 {
-                    deterime_actual_ns_per_point(
-                        total_ns as u64,
-                        1_000_000_000,
-                        &[1, 2, 5, 10, 15, 20, 30],
-                        60,
-                        max_points,
-                    )
-                } else {
-                    deterime_actual_ns_per_point(
-                        total_ns as u64,
-                        actual_ns_per_point,
-                        &[1, 2, 4, 8, 12],
-                        24,
-                        max_points,
-                    )
-                };
-
+            if let Some(actual_ns_per_point) =
+                compute_ns_per_point(total_ns as u64, max_points, true)
+            {
                 let start_time_ns = self.0.time().num_seconds_from_midnight() as u64
                     * 1_000_000_000
                     + self.0.time().nanosecond() as u64;
 
+                println!("{:?}", self.0.date_ceil());
+
                 let mut start_time = self
                     .0
-                    .date_ceil()
+                    .date_floor()
                     .and_time(
                         NaiveTime::from_hms(0, 0, 0)
                             + Duration::nanoseconds(if start_time_ns % actual_ns_per_point > 0 {
@@ -523,5 +471,74 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
             .into_iter()
             .map(|x| x.and_hms(0, 0, 0))
             .collect()
+    }
+}
+
+fn deterime_actual_ns_per_point(
+    total_ns: u64,
+    mut actual_ns_per_point: u64,
+    units: &[u64],
+    base: u64,
+    max_points: usize,
+) -> u64 {
+    let mut unit_per_point_idx = 0;
+    while total_ns / actual_ns_per_point > max_points as u64 * units[unit_per_point_idx] {
+        unit_per_point_idx += 1;
+        if unit_per_point_idx == units.len() {
+            unit_per_point_idx = 0;
+            actual_ns_per_point *= base;
+        }
+    }
+    units[unit_per_point_idx] * actual_ns_per_point
+}
+
+fn compute_ns_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
+    let min_ns_per_point = total_ns as f64 / max_points as f64;
+    let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);
+
+    if actual_ns_per_point < 1_000_000_000 {
+        Some(deterime_actual_ns_per_point(
+            total_ns as u64,
+            actual_ns_per_point,
+            &[1, 2, 5],
+            10,
+            max_points,
+        ))
+    } else if actual_ns_per_point < 3600_000_000_000 {
+        Some(deterime_actual_ns_per_point(
+            total_ns as u64,
+            1_000_000_000,
+            &[1, 2, 5, 10, 15, 20, 30],
+            60,
+            max_points,
+        ))
+    } else if actual_ns_per_point < 3600_000_000_000 * 24 {
+        Some(deterime_actual_ns_per_point(
+            total_ns as u64,
+            3600_000_000_000,
+            &[1, 2, 4, 8, 12],
+            24,
+            max_points,
+        ))
+    } else if !sub_daily {
+        if actual_ns_per_point < 3600_000_000_000 * 24 * 10 {
+            Some(deterime_actual_ns_per_point(
+                total_ns as u64,
+                3600_000_000_000 * 24,
+                &[1, 2, 5, 7],
+                10,
+                max_points,
+            ))
+        } else {
+            Some(deterime_actual_ns_per_point(
+                total_ns as u64,
+                3600_000_000_000 * 24 * 10,
+                &[1, 2, 5],
+                10,
+                max_points,
+            ))
+        }
+    } else {
+        None
     }
 }
