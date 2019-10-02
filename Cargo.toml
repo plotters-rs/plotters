@@ -49,3 +49,4 @@ make_partial_axis = ["num-traits"]
 [dev-dependencies]
 rand = "^0.7.2"
 itertools = "^0.8.0"
+rand_distr = "0.2.2"

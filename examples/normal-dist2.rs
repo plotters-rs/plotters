@@ -1,14 +1,15 @@
 use plotters::prelude::*;
 
-use rand::distributions::Distribution;
-use rand::distributions::Normal;
 use rand::thread_rng;
+use rand_distr::{Distribution, Normal};
+
+use num_traits::sign::Signed;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sd = 0.60;
 
     let random_points: Vec<f64> = {
-        let norm_dist = Normal::new(0.0, sd);
+        let norm_dist = Normal::new(0.0, sd).unwrap();
         let mut x_rand = thread_rng();
         let x_iter = norm_dist.sample_iter(&mut x_rand);
         x_iter.take(5000).filter(|x| x.abs() <= 4.0).collect()
