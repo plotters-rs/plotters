@@ -472,6 +472,7 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
     }
 }
 
+/// The coordinate that for duration of time
 pub struct RangedDuration(Duration, Duration);
 
 impl AsRangedCoord for Range<Duration> {
