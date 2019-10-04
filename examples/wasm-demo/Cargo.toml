@@ -11,6 +11,7 @@ crate-type=['cdylib']
 plotters = {path = "../.."}
 wasm-bindgen = "0.2.43"
 wee_alloc = "*"
+web-sys = { version = "0.3.4", features = ['HtmlCanvasElement'] }
 
 [profile.release]
 lto = true

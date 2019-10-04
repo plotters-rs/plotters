@@ -39,15 +39,26 @@ impl From<JsValue> for DrawingErrorKind<CanvasError> {
 impl std::error::Error for CanvasError {}
 
 impl CanvasBackend {
-    /// Create a new drawing backend backed with an HTML5 canvas object
+    fn init_backend(canvas: HtmlCanvasElement) -> Option<Self> {
+        let context: CanvasRenderingContext2d = canvas.get_context("2d").ok()??.dyn_into().ok()?;
+        Some(CanvasBackend { canvas, context })
+    }
+
+    /// Create a new drawing backend backed with an HTML5 canvas object with given Id
     /// - `elem_id` The element id for the canvas
     /// - Return either some drawing backend has been created, or none in error case
     pub fn new(elem_id: &str) -> Option<Self> {
         let document = window()?.document()?;
         let canvas = document.get_element_by_id(elem_id)?;
         let canvas: HtmlCanvasElement = canvas.dyn_into().ok()?;
-        let context: CanvasRenderingContext2d = canvas.get_context("2d").ok()??.dyn_into().ok()?;
-        Some(CanvasBackend { canvas, context })
+        Self::init_backend(canvas)
+    }
+
+    /// Create a new drawing backend backend with a HTML5 canvas object passed in
+    /// - `canvas` The object we want to use as backend
+    /// - Return either the drawing backend or None for error
+    pub fn with_canvas_object(canvas: HtmlCanvasElement) -> Option<Self> {
+        Self::init_backend(canvas)
     }
 }
 

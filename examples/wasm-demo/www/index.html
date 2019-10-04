@@ -60,7 +60,14 @@
 							var pow = Number(sel.selectedOptions[0].value);
 							map_coord = wasm.draw_func("canvas", pow);
 						} else {
-							map_coord = wasm.draw_mandelbrot("canvas");
+							// Actually, you can directly use the #canvas element, 
+							// This is just a illustration for how we can do double buffering
+							// with plotters
+							var buffer = document.createElement("canvas");
+							buffer.height = 400;
+							buffer.width = 600;
+							map_coord = wasm.draw_mandelbrot(buffer);
+							document.getElementById("canvas").getContext("2d").drawImage(buffer, 0, 0);
 						}
 						var end = performance.now();
 						stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";
