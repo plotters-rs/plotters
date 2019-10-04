@@ -200,8 +200,8 @@ pub fn draw_piston_window<F: FnOnce(PistonBackend) -> Result<(), Box<dyn std::er
         window.draw_2d(&event, |c, g, _| match event {
             Event::Loop(Loop::Render(arg)) => {
                 draw(PistonBackend::new(
-                    (arg.draw_width, arg.draw_height),
-                    arg.width / arg.draw_width as f64,
+                    (arg.draw_size[0], arg.draw_size[1]),
+                    arg.window_size[0] / arg.draw_size[0] as f64,
                     c,
                     g,
                 ))

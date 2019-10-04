@@ -179,26 +179,16 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let rgb = color.rgb();
 
         if alpha >= 1.0 {
-            self.img.put_pixel(
-                point.0 as u32,
-                point.1 as u32,
-                Rgb {
-                    data: [rgb.0, rgb.1, rgb.2],
-                },
-            );
+            self.img
+                .put_pixel(point.0 as u32, point.1 as u32, Rgb([rgb.0, rgb.1, rgb.2]));
         } else {
             let pixel = self.img.get_pixel_mut(point.0 as u32, point.1 as u32);
 
             let new_color = [rgb.0, rgb.1, rgb.2];
 
-            pixel
-                .data
-                .iter_mut()
-                .zip(&new_color)
-                .for_each(|(old, new)| {
-                    *old = (f64::from(*old) * (1.0 - alpha) + f64::from(*new) * alpha).min(255.0)
-                        as u8;
-                });
+            pixel.0.iter_mut().zip(&new_color).for_each(|(old, new)| {
+                *old = (f64::from(*old) * (1.0 - alpha) + f64::from(*new) * alpha).min(255.0) as u8;
+            });
         }
         Ok(())
     }
