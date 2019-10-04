@@ -2,7 +2,7 @@
 use chrono::{Date, DateTime, Datelike, Duration, NaiveTime, TimeZone, Timelike};
 use std::ops::Range;
 
-use super::{AsRangedCoord, DescreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged};
 
 /// The trait that describe some time value
 pub trait TimeValue: Eq {
@@ -133,7 +133,7 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
     }
 }
 
-impl<Z: TimeZone> DescreteRanged for RangedDate<Z> {
+impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
     fn next_value(this: &Date<Z>) -> Date<Z> {
         this.clone() + Duration::days(1)
     }
@@ -258,7 +258,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DescreteRanged for Monthly<T> {
+impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
     fn next_value(this: &T) -> T {
         let mut year = this.date_ceil().year();
         let mut month = this.date_ceil().month();
@@ -368,7 +368,7 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DescreteRanged for Yearly<T> {
+impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
     fn next_value(this: &T) -> T {
         T::earliest_after_date(this.timezone().ymd(this.date_floor().year() + 1, 1, 1))
     }

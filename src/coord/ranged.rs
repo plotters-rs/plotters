@@ -148,8 +148,8 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
     }
 }
 
-/// The trait indicates the coordinate is descrete, so that we can draw histogram on it
-pub trait DescreteRanged
+/// The trait indicates the coordinate is discrete, so that we can draw histogram on it
+pub trait DiscreteRanged
 where
     Self: Ranged,
     Self::ValueType: Eq,
@@ -176,35 +176,35 @@ where
     type Value = T::ValueType;
 }
 
-pub struct CentricDescreteRange<D: DescreteRanged>(D)
+pub struct CentricDiscreteRange<D: DiscreteRanged>(D)
 where
     <D as Ranged>::ValueType: Eq;
 
 pub trait IntoCentric: AsRangedCoord
 where
-    Self::CoordDescType: DescreteRanged,
+    Self::CoordDescType: DiscreteRanged,
     <Self::CoordDescType as Ranged>::ValueType: Eq,
 {
-    fn into_centric(self) -> CentricDescreteRange<Self::CoordDescType> {
-        CentricDescreteRange(self.into())
+    fn into_centric(self) -> CentricDiscreteRange<Self::CoordDescType> {
+        CentricDiscreteRange(self.into())
     }
 }
 
 impl<T: AsRangedCoord> IntoCentric for T
 where
-    T::CoordDescType: DescreteRanged,
+    T::CoordDescType: DiscreteRanged,
     <Self::CoordDescType as Ranged>::ValueType: Eq,
 {
 }
 
-impl<D: DescreteRanged> Ranged for CentricDescreteRange<D>
+impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D>
 where
     <D as Ranged>::ValueType: Eq,
 {
     type ValueType = <D as Ranged>::ValueType;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        let prev = <D as DescreteRanged>::previous_value(&value);
+        let prev = <D as DiscreteRanged>::previous_value(&value);
         (self.0.map(&prev, limit) + self.0.map(value, limit)) / 2
     }
 
@@ -217,20 +217,20 @@ where
     }
 }
 
-impl<D: DescreteRanged> DescreteRanged for CentricDescreteRange<D>
+impl<D: DiscreteRanged> DiscreteRanged for CentricDiscreteRange<D>
 where
     <D as Ranged>::ValueType: Eq,
 {
     fn next_value(this: &Self::ValueType) -> Self::ValueType {
-        <D as DescreteRanged>::next_value(this)
+        <D as DiscreteRanged>::next_value(this)
     }
 
     fn previous_value(this: &Self::ValueType) -> Self::ValueType {
-        <D as DescreteRanged>::previous_value(this)
+        <D as DiscreteRanged>::previous_value(this)
     }
 }
 
-impl<D: DescreteRanged> AsRangedCoord for CentricDescreteRange<D>
+impl<D: DiscreteRanged> AsRangedCoord for CentricDiscreteRange<D>
 where
     <D as Ranged>::ValueType: Eq,
 {
@@ -277,17 +277,17 @@ where
     }
 }
 
-impl<R: DescreteRanged> DescreteRanged for PartialAxis<R>
+impl<R: DiscreteRanged> DiscreteRanged for PartialAxis<R>
 where
     R: Ranged,
     <R as Ranged>::ValueType: Eq + Clone,
 {
     fn next_value(this: &Self::ValueType) -> Self::ValueType {
-        <R as DescreteRanged>::next_value(this)
+        <R as DiscreteRanged>::next_value(this)
     }
 
     fn previous_value(this: &Self::ValueType) -> Self::ValueType {
-        <R as DescreteRanged>::previous_value(this)
+        <R as DiscreteRanged>::previous_value(this)
     }
 }
 
