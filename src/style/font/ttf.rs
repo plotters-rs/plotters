@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::i32;
 use std::marker::PhantomPinned;
 use std::pin::Pin;
-use std::rc::Rc;
 use std::slice::from_raw_parts;
+use std::sync::Arc;
 use std::sync::Mutex;
 
 use rusttype::{point, Error, Font, Scale};
@@ -20,7 +20,7 @@ type FontResult<T> = Result<T, FontError>;
 pub enum FontError {
     LockError,
     NoSuchFont,
-    FontLoadError(Rc<Error>),
+    FontLoadError(Arc<Error>),
 }
 
 impl std::fmt::Display for FontError {
@@ -89,7 +89,7 @@ fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
                 .build();
             if let Some((data, _)) = system_fonts::get(&query) {
                 let font =
-                    OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Rc::new(e)))?;
+                    OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
                 cache.insert(face.to_string(), font);
             } else {
                 return Err(FontError::NoSuchFont);
