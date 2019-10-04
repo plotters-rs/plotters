@@ -6,8 +6,9 @@ pub type BackendCoord = (i32, i32);
 
 /// The error produced by a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Error + Send + Sync> 
-    where FontError: Send + Sync 
+pub enum DrawingErrorKind<E: Error + Send + Sync>
+where
+    FontError: Send + Sync,
 {
     /// A drawing backend error
     DrawingError(E),
