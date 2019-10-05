@@ -6,7 +6,7 @@
 
 - `FontError` from rusttype isn't `Sync` and `Send`. We don't have trait bound to ensure this.  (Thanks to @dalance)
 
-## Plotters latest (2019-10-1)
+## Plotters 0.2.7 (2019-10-1)
 
 ### Added
 
