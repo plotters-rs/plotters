@@ -887,4 +887,53 @@ mod test {
         assert!(max == min);
         assert_eq!(max, 2);
     }
+
+    #[test]
+    fn test_duration_long_range() {
+        let coord: RangedDuration = (Duration::days(-1000000)..Duration::days(1000000)).into();
+
+        assert_eq!(coord.map(&Duration::days(-1000000), (0, 100)), 0);
+        assert_eq!(coord.map(&Duration::days(1000000), (0, 100)), 100);
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert!(max % (24 * 3600 * 10000) == 0);
+    }
+
+    #[test]
+    fn test_duration_daily_range() {
+        let coord: RangedDuration = (Duration::days(0)..Duration::hours(25)).into();
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 3600 * 2);
+    }
 }
