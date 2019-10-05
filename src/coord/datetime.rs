@@ -648,3 +648,244 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         None
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use chrono::{TimeZone, Utc};
+
+    #[test]
+    fn test_date_range_long() {
+        let range = Utc.ymd(1000, 1, 1)..Utc.ymd(2999, 1, 1);
+
+        let ranged_coord = Into::<RangedDate<_>>::into(range);
+
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
+
+        let kps = ranged_coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max % 7, 0);
+    }
+
+    #[test]
+    fn test_date_range_short() {
+        let range = Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 1, 21);
+        let ranged_coord = Into::<RangedDate<_>>::into(range);
+
+        let kps = ranged_coord.key_points(4);
+
+        assert_eq!(kps.len(), 3);
+
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max, 7);
+
+        let kps = ranged_coord.key_points(30);
+        assert_eq!(kps.len(), 21);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max, 1);
+    }
+
+    #[test]
+    fn test_yearly_date_range() {
+        let range = Utc.ymd(1000, 8, 5)..Utc.ymd(2999, 1, 1);
+        let ranged_coord = range.yearly();
+
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
+
+        let kps = ranged_coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert!(max != min);
+
+        assert!(kps.into_iter().all(|x| x.month() == 9 && x.day() == 1));
+
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
+        let ranged_coord = range.yearly();
+        let kps = ranged_coord.key_points(23);
+        assert!(kps.len() == 1);
+    }
+
+    #[test]
+    fn test_monthly_date_range() {
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
+        let ranged_coord = range.monthly();
+
+        let kps = ranged_coord.key_points(5);
+
+        assert!(kps.len() <= 5);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert!(max != min);
+
+        assert!(kps.iter().all(|x| x.day() == 1));
+        assert!(kps.into_iter().any(|x| x.month() != 9));
+    }
+
+    #[test]
+    fn test_datetime_long_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(1000, 1, 1).and_hms(0, 0, 0)..Utc.ymd(3000, 1, 1).and_hms(0, 0, 0)).into();
+
+        assert_eq!(
+            coord.map(&Utc.ymd(1000, 1, 1).and_hms(0, 0, 0), (0, 100)),
+            0
+        );
+        assert_eq!(
+            coord.map(&Utc.ymd(3000, 1, 1).and_hms(0, 0, 0), (0, 100)),
+            100
+        );
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert!(max % (24 * 3600 * 7) == 0);
+    }
+
+    #[test]
+    fn test_datetime_medium_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 11).and_hms(0, 0, 0)).into();
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 12 * 3600);
+    }
+
+    #[test]
+    fn test_datetime_short_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 2).and_hms(0, 0, 0)).into();
+
+        let kps = coord.key_points(50);
+
+        assert!(kps.len() <= 50);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 1800);
+    }
+
+    #[test]
+    fn test_datetime_nano_range() {
+        let start = Utc.ymd(2019, 1, 1).and_hms(0, 0, 0);
+        let end = start.clone() + Duration::nanoseconds(100);
+        let coord: RangedDateTime<_> = (start..end).into();
+
+        let kps = coord.key_points(50);
+
+        assert!(kps.len() <= 50);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_nanoseconds().unwrap())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_nanoseconds().unwrap())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 2);
+    }
+}
