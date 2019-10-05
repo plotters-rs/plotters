@@ -145,7 +145,10 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 Ok(())
             }
             Target::Buffer(target) => {
-                let mut actual_img = RgbImage::new(1, 1);
+                if self.img.dimensions() == (0, 0) {
+                    return Ok(());
+                }
+                let mut actual_img = RgbImage::new(0, 0);
                 std::mem::swap(&mut actual_img, &mut self.img);
                 target.clear();
                 target.append(&mut actual_img.into_raw());
@@ -200,4 +203,31 @@ impl Drop for BitMapBackend<'_> {
             self.present().expect("Unable to save the bitmap");
         }
     }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_backend() {
+    use crate::prelude::*;
+    let mut buffer = vec![];
+
+    {
+        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+
+        let area = back.into_drawing_area();
+        area.fill(&WHITE);
+        area.draw(&Path::new(vec![(0, 0), (10, 10)], RED.filled()));
+        area.present();
+    }
+
+    for i in 0..10 {
+        assert_eq!(buffer[i * 33], 255);
+        assert_eq!(buffer[i * 33 + 1], 0);
+        assert_eq!(buffer[i * 33 + 2], 0);
+        buffer[i * 33] = 255;
+        buffer[i * 33 + 1] = 255;
+        buffer[i * 33 + 2] = 255;
+    }
+
+    assert!(buffer.into_iter().all(|x| x == 255));
 }
