@@ -9,10 +9,12 @@ On the top of drawing backend, one or more drawing area can be defined and diffe
 system can be applied to the drawing areas. And the drawing area implement the high-level drawing
 interface, which draws an element.
 
-Currently we have two backend implemented:
+Currently we have following backend implemented:
 
 - `BitMapBackend`: The backend that creates bitmap, this is based on `image` crate
 - `SVGBackend`: The backend that creates SVG image, based on `svg` crate.
+- `PistonBackend`: The backend that uses Piston Window for realtime rendering. Disabled by default, use feature `piston` to turn on.
+- `CanvasBackend`: The backend that operates HTML5 Canvas, this is availible when `Plotters` is targeting WASM.
 
 */
 mod area;

@@ -2,7 +2,7 @@
 use chrono::{Date, DateTime, Datelike, Duration, NaiveTime, TimeZone, Timelike};
 use std::ops::Range;
 
-use super::{AsRangedCoord, DescreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged};
 
 /// The trait that describe some time value
 pub trait TimeValue: Eq {
@@ -133,7 +133,7 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
     }
 }
 
-impl<Z: TimeZone> DescreteRanged for RangedDate<Z> {
+impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
     fn next_value(this: &Date<Z>) -> Date<Z> {
         this.clone() + Duration::days(1)
     }
@@ -258,7 +258,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DescreteRanged for Monthly<T> {
+impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
     fn next_value(this: &T) -> T {
         let mut year = this.date_ceil().year();
         let mut month = this.date_ceil().month();
@@ -368,7 +368,7 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DescreteRanged for Yearly<T> {
+impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
     fn next_value(this: &T) -> T {
         T::earliest_after_date(this.timezone().ymd(this.date_floor().year() + 1, 1, 1))
     }
@@ -430,13 +430,11 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
 
         if let Some(total_ns) = total_span.num_nanoseconds() {
             if let Some(actual_ns_per_point) =
-                compute_ns_per_point(total_ns as u64, max_points, true)
+                compute_period_per_point(total_ns as u64, max_points, true)
             {
-                let start_time_ns = self.0.time().num_seconds_from_midnight() as u64
+                let start_time_ns = u64::from(self.0.time().num_seconds_from_midnight())
                     * 1_000_000_000
-                    + self.0.time().nanosecond() as u64;
-
-                println!("{:?}", self.0.date_ceil());
+                    + u64::from(self.0.time().nanosecond());
 
                 let mut start_time = self
                     .0
@@ -474,27 +472,135 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
     }
 }
 
-fn deterime_actual_ns_per_point(
-    total_ns: u64,
-    mut actual_ns_per_point: u64,
-    units: &[u64],
-    base: u64,
-    max_points: usize,
-) -> u64 {
-    let mut unit_per_point_idx = 0;
-    while total_ns / actual_ns_per_point > max_points as u64 * units[unit_per_point_idx] {
-        unit_per_point_idx += 1;
-        if unit_per_point_idx == units.len() {
-            unit_per_point_idx = 0;
-            actual_ns_per_point *= base;
-        }
-    }
-    units[unit_per_point_idx] * actual_ns_per_point
+/// The coordinate that for duration of time
+pub struct RangedDuration(Duration, Duration);
+
+impl AsRangedCoord for Range<Duration> {
+    type CoordDescType = RangedDuration;
+    type Value = Duration;
 }
 
-fn compute_ns_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
+impl From<Range<Duration>> for RangedDuration {
+    fn from(range: Range<Duration>) -> Self {
+        Self(range.start, range.end)
+    }
+}
+
+impl Ranged for RangedDuration {
+    type ValueType = Duration;
+
+    fn range(&self) -> Range<Duration> {
+        self.0..self.1
+    }
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        let total_span = self.1 - self.0;
+        let value_span = *value - self.0;
+
+        if let Some(total_ns) = total_span.num_nanoseconds() {
+            if let Some(value_ns) = value_span.num_nanoseconds() {
+                return limit.0
+                    + (f64::from(limit.1 - limit.0) * value_ns as f64 / total_ns as f64 + 1e-10)
+                        as i32;
+            }
+            return limit.1;
+        }
+
+        let total_days = total_span.num_days();
+        let value_days = value_span.num_days();
+
+        limit.0
+            + (f64::from(limit.1 - limit.0) * value_days as f64 / total_days as f64 + 1e-10) as i32
+    }
+
+    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        let total_span = self.1 - self.0;
+
+        if let Some(total_ns) = total_span.num_nanoseconds() {
+            if let Some(period) = compute_period_per_point(total_ns as u64, max_points, false) {
+                let mut start_ns = self.0.num_nanoseconds().unwrap();
+
+                if start_ns as u64 % period > 0 {
+                    if start_ns > 0 {
+                        start_ns += period as i64 - (start_ns % period as i64);
+                    } else {
+                        start_ns -= start_ns % period as i64;
+                    }
+                }
+
+                let mut current = Duration::nanoseconds(start_ns);
+                let mut ret = vec![];
+
+                while current < self.1 {
+                    ret.push(current);
+                    current = current + Duration::nanoseconds(period as i64);
+                }
+
+                return ret;
+            }
+        }
+
+        let begin_days = self.0.num_days();
+        let end_days = self.1.num_days();
+
+        let mut days_per_tick = 1;
+        let mut idx = 0;
+        const MULTIPLER: &[i32] = &[1, 2, 5];
+
+        while (end_days - begin_days) / i64::from(days_per_tick * MULTIPLER[idx])
+            > max_points as i64
+        {
+            idx += 1;
+            if idx == MULTIPLER.len() {
+                idx = 0;
+                days_per_tick *= 10;
+            }
+        }
+
+        days_per_tick *= MULTIPLER[idx];
+
+        let mut ret = vec![];
+
+        let mut current = Duration::days(
+            self.0.num_days()
+                + if Duration::days(self.0.num_days()) != self.0 {
+                    1
+                } else {
+                    0
+                },
+        );
+
+        while current < self.1 {
+            ret.push(current);
+            current = current + Duration::days(i64::from(days_per_tick));
+        }
+
+        ret
+    }
+}
+
+#[allow(clippy::inconsistent_digit_grouping)]
+fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
     let min_ns_per_point = total_ns as f64 / max_points as f64;
     let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);
+
+    fn deterime_actual_ns_per_point(
+        total_ns: u64,
+        mut actual_ns_per_point: u64,
+        units: &[u64],
+        base: u64,
+        max_points: usize,
+    ) -> u64 {
+        let mut unit_per_point_idx = 0;
+        while total_ns / actual_ns_per_point > max_points as u64 * units[unit_per_point_idx] {
+            unit_per_point_idx += 1;
+            if unit_per_point_idx == units.len() {
+                unit_per_point_idx = 0;
+                actual_ns_per_point *= base;
+            }
+        }
+        units[unit_per_point_idx] * actual_ns_per_point
+    }
 
     if actual_ns_per_point < 1_000_000_000 {
         Some(deterime_actual_ns_per_point(
@@ -540,5 +646,245 @@ fn compute_ns_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Op
         }
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use chrono::{TimeZone, Utc};
+
+    #[test]
+    fn test_date_range_long() {
+        let range = Utc.ymd(1000, 1, 1)..Utc.ymd(2999, 1, 1);
+
+        let ranged_coord = Into::<RangedDate<_>>::into(range);
+
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
+
+        let kps = ranged_coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max % 7, 0);
+    }
+
+    #[test]
+    fn test_date_range_short() {
+        let range = Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 1, 21);
+        let ranged_coord = Into::<RangedDate<_>>::into(range);
+
+        let kps = ranged_coord.key_points(4);
+
+        assert_eq!(kps.len(), 3);
+
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max, 7);
+
+        let kps = ranged_coord.key_points(30);
+        assert_eq!(kps.len(), 21);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert_eq!(max, min);
+        assert_eq!(max, 1);
+    }
+
+    #[test]
+    fn test_yearly_date_range() {
+        let range = Utc.ymd(1000, 8, 5)..Utc.ymd(2999, 1, 1);
+        let ranged_coord = range.yearly();
+
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
+
+        let kps = ranged_coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_days())
+            .min()
+            .unwrap();
+        assert!(max != min);
+
+        assert!(kps.into_iter().all(|x| x.month() == 9 && x.day() == 1));
+
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
+        let ranged_coord = range.yearly();
+        let kps = ranged_coord.key_points(23);
+        assert!(kps.len() == 1);
+    }
+
+    #[test]
+    fn test_monthly_date_range() {
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 9, 1);
+        let ranged_coord = range.monthly();
+
+        let kps = ranged_coord.key_points(15);
+
+        assert!(kps.len() <= 15);
+        assert!(kps.iter().all(|x| x.day() == 1));
+        assert!(kps.into_iter().any(|x| x.month() != 9));
+
+        let kps = ranged_coord.key_points(5);
+        assert!(kps.len() <= 5);
+        assert!(kps.iter().all(|x| x.day() == 1));
+        let kps: Vec<_> = kps.into_iter().map(|x| x.month()).collect();
+        assert_eq!(kps, vec![9, 12, 3, 6, 9]);
+
+        // TODO: Investigate why max_point = 1 breaks the contract
+        let kps = ranged_coord.key_points(3);
+        assert!(kps.len() == 3);
+        assert!(kps.iter().all(|x| x.day() == 1));
+        let kps: Vec<_> = kps.into_iter().map(|x| x.month()).collect();
+        assert_eq!(kps, vec![9, 3, 9]);
+    }
+
+    #[test]
+    fn test_datetime_long_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(1000, 1, 1).and_hms(0, 0, 0)..Utc.ymd(3000, 1, 1).and_hms(0, 0, 0)).into();
+
+        assert_eq!(
+            coord.map(&Utc.ymd(1000, 1, 1).and_hms(0, 0, 0), (0, 100)),
+            0
+        );
+        assert_eq!(
+            coord.map(&Utc.ymd(3000, 1, 1).and_hms(0, 0, 0), (0, 100)),
+            100
+        );
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert!(max % (24 * 3600 * 7) == 0);
+    }
+
+    #[test]
+    fn test_datetime_medium_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 11).and_hms(0, 0, 0)).into();
+
+        let kps = coord.key_points(23);
+
+        assert!(kps.len() <= 23);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 12 * 3600);
+    }
+
+    #[test]
+    fn test_datetime_short_range() {
+        let coord: RangedDateTime<_> =
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 2).and_hms(0, 0, 0)).into();
+
+        let kps = coord.key_points(50);
+
+        assert!(kps.len() <= 50);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_seconds())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 1800);
+    }
+
+    #[test]
+    fn test_datetime_nano_range() {
+        let start = Utc.ymd(2019, 1, 1).and_hms(0, 0, 0);
+        let end = start.clone() + Duration::nanoseconds(100);
+        let coord: RangedDateTime<_> = (start..end).into();
+
+        let kps = coord.key_points(50);
+
+        assert!(kps.len() <= 50);
+        let max = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_nanoseconds().unwrap())
+            .max()
+            .unwrap();
+        let min = kps
+            .iter()
+            .zip(kps.iter().skip(1))
+            .map(|(p, n)| (*n - *p).num_nanoseconds().unwrap())
+            .min()
+            .unwrap();
+        assert!(max == min);
+        assert_eq!(max, 2);
     }
 }

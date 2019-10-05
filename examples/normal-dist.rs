@@ -1,8 +1,7 @@
 use plotters::prelude::*;
 
-use rand::distributions::Distribution;
-use rand::distributions::Normal;
 use rand::thread_rng;
+use rand_distr::{Distribution, Normal};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
@@ -13,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sd = 0.13;
 
     let random_points: Vec<(f64, f64)> = {
-        let norm_dist = Normal::new(0.5, sd);
+        let norm_dist = Normal::new(0.5, sd).unwrap();
         let (mut x_rand, mut y_rand) = (thread_rng(), thread_rng());
         let x_iter = norm_dist.sample_iter(&mut x_rand);
         let y_iter = norm_dist.sample_iter(&mut y_rand);

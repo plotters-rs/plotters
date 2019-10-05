@@ -1,7 +1,7 @@
 #[cfg(feature = "svg")]
 mod svg;
 #[cfg(feature = "svg")]
-pub use self::svg::SVGBackend;
+pub use self::svg::{svg_types, SVGBackend};
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 mod bitmap;

@@ -1,10 +1,10 @@
 use std::ops::Range;
 
-use super::{AsRangedCoord, DescreteRanged, Ranged, ReversableRanged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged, ReversableRanged};
 
-macro_rules! impl_descrete_trait {
+macro_rules! impl_discrete_trait {
     ($name:ident) => {
-        impl DescreteRanged for $name {
+        impl DiscreteRanged for $name {
             fn next_value(this: &Self::ValueType) -> Self::ValueType {
                 return *this + 1;
             }
@@ -234,14 +234,14 @@ make_numeric_coord!(
     "The ranged coordinate for type isize"
 );
 
-impl_descrete_trait!(RangedCoordu32);
-impl_descrete_trait!(RangedCoordi32);
-impl_descrete_trait!(RangedCoordu64);
-impl_descrete_trait!(RangedCoordi64);
-impl_descrete_trait!(RangedCoordu128);
-impl_descrete_trait!(RangedCoordi128);
-impl_descrete_trait!(RangedCoordusize);
-impl_descrete_trait!(RangedCoordisize);
+impl_discrete_trait!(RangedCoordu32);
+impl_discrete_trait!(RangedCoordi32);
+impl_discrete_trait!(RangedCoordu64);
+impl_discrete_trait!(RangedCoordi64);
+impl_discrete_trait!(RangedCoordu128);
+impl_discrete_trait!(RangedCoordi128);
+impl_discrete_trait!(RangedCoordusize);
+impl_discrete_trait!(RangedCoordisize);
 
 impl_ranged_type_trait!(f32, RangedCoordf32);
 impl_ranged_type_trait!(f64, RangedCoordf64);

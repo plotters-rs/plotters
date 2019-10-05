@@ -6,7 +6,10 @@ pub type BackendCoord = (i32, i32);
 
 /// The error produced by a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Error + Send + Sync> {
+pub enum DrawingErrorKind<E: Error + Send + Sync>
+where
+    FontError: Send + Sync,
+{
     /// A drawing backend error
     DrawingError(E),
     /// A font rendering error
@@ -206,8 +209,6 @@ pub trait DrawingBackend: Sized {
         text: &str,
         font: &FontDesc<'a>,
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
-        Ok(font
-            .box_size(text)
-            .map_err(|e| DrawingErrorKind::FontError(e))?)
+        Ok(font.box_size(text).map_err(DrawingErrorKind::FontError)?)
     }
 }

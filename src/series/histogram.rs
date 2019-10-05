@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::ops::AddAssign;
 
 use crate::chart::ChartContext;
-use crate::coord::{DescreteRanged, Ranged, RangedCoord};
+use crate::coord::{DiscreteRanged, Ranged, RangedCoord};
 use crate::drawing::DrawingBackend;
 use crate::element::Rectangle;
 use crate::style::{Color, ShapeStyle, GREEN};
@@ -19,7 +19,7 @@ impl HistogramType for Horizental {}
 /// The series that aggregate data into a histogram
 pub struct Histogram<BR, A, Tag = Vertical>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
@@ -33,7 +33,7 @@ where
 
 impl<BR, A, Tag> Histogram<BR, A, Tag>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
@@ -82,7 +82,7 @@ where
 
 impl<BR, A> Histogram<BR, A, Vertical>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
@@ -124,7 +124,7 @@ where
 
 impl<BR, A> Histogram<BR, A, Horizental>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
@@ -140,7 +140,7 @@ where
 
 impl<BR, A> Iterator for Histogram<BR, A, Vertical>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
@@ -158,7 +158,7 @@ where
 
 impl<BR, A> Iterator for Histogram<BR, A, Horizental>
 where
-    BR: DescreteRanged,
+    BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {

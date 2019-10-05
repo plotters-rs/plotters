@@ -1,6 +1,7 @@
 use plotters::prelude::*;
 use std::ops::Range;
 use wasm_bindgen::prelude::*;
+use web_sys::HtmlCanvasElement;
 
 fn mandelbrot_set(
     real: Range<f64>,
@@ -28,9 +29,9 @@ fn mandelbrot_set(
 }
 
 fn draw_mandelbrot_impl(
-    element: &str,
+    element: HtmlCanvasElement,
 ) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
-    let backend = CanvasBackend::new(element).unwrap();
+    let backend = CanvasBackend::with_canvas_object(element).unwrap();
 
     let root = backend.into_drawing_area();
     root.fill(&WHITE)?;
@@ -66,6 +67,6 @@ fn draw_mandelbrot_impl(
 }
 
 #[wasm_bindgen]
-pub fn draw_mandelbrot(element: &str) -> JsValue {
+pub fn draw_mandelbrot(element: HtmlCanvasElement) -> JsValue {
     crate::make_coord_mapping_closure(draw_mandelbrot_impl(element).ok())
 }

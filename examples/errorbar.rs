@@ -1,10 +1,11 @@
 use plotters::prelude::*;
 
-use rand::distributions::Distribution;
-use rand::distributions::Normal;
 use rand::thread_rng;
+use rand_distr::{Distribution, Normal};
 
 use itertools::Itertools;
+
+use num_traits::sign::Signed;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = generate_random_data();
@@ -52,7 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn generate_random_data() -> Vec<(f64, f64)> {
-    let norm_dist = Normal::new(0.0, 1.0);
+    let norm_dist = Normal::new(0.0, 1.0).unwrap();
     let mut x_rand = thread_rng();
     let x_iter = norm_dist.sample_iter(&mut x_rand);
     x_iter

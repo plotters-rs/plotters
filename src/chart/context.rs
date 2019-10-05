@@ -451,3 +451,53 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         DualCoordChartContext::new(self, RangedCoord::new(x_coord, y_coord, pixel_range))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_chart_context() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+
+        drawing_area.fill(&WHITE).expect("Fill");
+
+        let mut chart = ChartBuilder::on(&drawing_area)
+            .caption("Test Title", ("Arial", 10))
+            .x_label_area_size(20)
+            .y_label_area_size(20)
+            .set_label_area_size(LabelAreaPosition::Top, 20)
+            .set_label_area_size(LabelAreaPosition::Right, 20)
+            .build_ranged(0..10, 0..10)
+            .expect("Create chart")
+            .set_secondary_coord(0.0..1.0, 0.0..1.0);
+
+        chart
+            .configure_mesh()
+            .x_desc("X")
+            .y_desc("Y")
+            .draw()
+            .expect("Draw mesh");
+        chart
+            .configure_secondary_axes()
+            .x_desc("X")
+            .y_desc("Y")
+            .draw()
+            .expect("Draw Secondary axes");
+
+        chart
+            .draw_series(std::iter::once(Circle::new((5, 5), 5, &RED)))
+            .expect("Drawing error");
+        chart
+            .draw_secondary_series(std::iter::once(Circle::new((0.3, 0.8), 5, &GREEN)))
+            .expect("Drawing error")
+            .label("Test label")
+            .legend(|(x, y)| Rectangle::new([(x - 10, y - 5), (x, y + 5)], &GREEN));
+
+        chart
+            .configure_series_labels()
+            .position(SeriesLabelPosition::UpperMiddle)
+            .draw()
+            .expect("Drawing error");
+    }
+}

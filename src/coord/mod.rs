@@ -29,12 +29,12 @@ mod numeric;
 mod ranged;
 
 #[cfg(feature = "chrono")]
-pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime};
+pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
 pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
 };
 pub use ranged::{
-    AsRangedCoord, DescreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
+    AsRangedCoord, DiscreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
     ReversableRanged,
 };
 

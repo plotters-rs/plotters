@@ -44,9 +44,9 @@ impl Edge {
     }
 
     fn get_slave_pos(&self) -> f64 {
-        self.slave_begin as f64
-            + ((self.slave_end - self.slave_begin) as i64 * self.epoch as i64) as f64
-                / self.total_epoch as f64
+        f64::from(self.slave_begin)
+            + (i64::from(self.slave_end - self.slave_begin) * i64::from(self.epoch)) as f64
+                / f64::from(self.total_epoch)
     }
 }
 
@@ -114,15 +114,13 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
             }
         });
 
-        for ref mut edge in edges.iter_mut() {
+        for edge in &mut edges.iter_mut() {
             if horizental_sweep {
                 if (edge.0).0 > (edge.1).0 {
                     std::mem::swap(&mut edge.0, &mut edge.1);
                 }
-            } else {
-                if (edge.0).1 > (edge.1).1 {
-                    std::mem::swap(&mut edge.0, &mut edge.1);
-                }
+            } else if (edge.0).1 > (edge.1).1 {
+                std::mem::swap(&mut edge.0, &mut edge.1);
             }
         }
 
@@ -175,11 +173,11 @@ pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
             let mut first = None;
             let mut second = None;
 
-            for idx in 0..active_edge.len() {
+            for edge in active_edge.iter() {
                 if first.is_none() {
-                    first = Some(active_edge[idx].clone())
+                    first = Some(edge.clone())
                 } else if second.is_none() {
-                    second = Some(active_edge[idx].clone())
+                    second = Some(edge.clone())
                 }
 
                 if let Some(a) = first.clone() {
