@@ -490,6 +490,14 @@ mod test {
             .expect("Drawing error");
         chart
             .draw_secondary_series(std::iter::once(Circle::new((0.3, 0.8), 5, &GREEN)))
+            .expect("Drawing error")
+            .label("Test label")
+            .legend(|(x, y)| Rectangle::new([(x - 10, y - 5), (x, y + 5)], &GREEN));
+
+        chart
+            .configure_series_labels()
+            .position(SeriesLabelPosition::UpperMiddle)
+            .draw()
             .expect("Drawing error");
     }
 }

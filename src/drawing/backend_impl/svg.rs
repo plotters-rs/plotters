@@ -1,6 +1,7 @@
 /*!
 The SVG image drawing backend
 */
+pub use svg as svg_types;
 
 use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
