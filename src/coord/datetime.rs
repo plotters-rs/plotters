@@ -759,28 +759,27 @@ mod test {
 
     #[test]
     fn test_monthly_date_range() {
-        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 9, 1);
         let ranged_coord = range.monthly();
 
-        let kps = ranged_coord.key_points(5);
+        let kps = ranged_coord.key_points(15);
 
-        assert!(kps.len() <= 5);
-        let max = kps
-            .iter()
-            .zip(kps.iter().skip(1))
-            .map(|(p, n)| (*n - *p).num_days())
-            .max()
-            .unwrap();
-        let min = kps
-            .iter()
-            .zip(kps.iter().skip(1))
-            .map(|(p, n)| (*n - *p).num_days())
-            .min()
-            .unwrap();
-        assert!(max != min);
-
+        assert!(kps.len() <= 15);
         assert!(kps.iter().all(|x| x.day() == 1));
         assert!(kps.into_iter().any(|x| x.month() != 9));
+
+        let kps = ranged_coord.key_points(5);
+        assert!(kps.len() <= 5);
+        assert!(kps.iter().all(|x| x.day() == 1));
+        let kps: Vec<_> = kps.into_iter().map(|x| x.month()).collect();
+        assert_eq!(kps, vec![9, 12, 3, 6, 9]);
+
+        // TODO: Investigate why max_point = 1 breaks the contract
+        let kps = ranged_coord.key_points(3);
+        assert!(kps.len() == 3);
+        assert!(kps.iter().all(|x| x.day() == 1));
+        let kps: Vec<_> = kps.into_iter().map(|x| x.month()).collect();
+        assert_eq!(kps, vec![9, 3, 9]);
     }
 
     #[test]
