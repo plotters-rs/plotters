@@ -2,6 +2,10 @@
 
 ## Plotters latest (?)
 
+### Added
+
+- Cairo backend, which supports using Plotters draw a GTK surface.
+
 ### Bug Fix
 
 - `FontError` from rusttype isn't `Sync` and `Send`. We don't have trait bound to ensure this.  (Thanks to @dalance)
