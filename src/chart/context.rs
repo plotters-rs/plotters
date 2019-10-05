@@ -458,7 +458,7 @@ mod test {
 
     #[test]
     fn test_chart_context() {
-        let drawing_area = create_mocked_drawing_area(200, 200, |m| {});
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
 
         let mut chart = ChartBuilder::on(&drawing_area)
             .caption("Test Title", ("Arial", 10))
