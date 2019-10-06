@@ -135,7 +135,7 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
         self.call_cairo(|c| {
             c.rectangle(
                 f64::from(upper_left.0),
-                f64::from(upper_left.0),
+                f64::from(upper_left.1),
                 f64::from(bottom_right.0 - upper_left.0),
                 f64::from(bottom_right.1 - upper_left.1),
             )
@@ -244,8 +244,9 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
         } / 180.0
             * std::f64::consts::PI;
 
+        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+
         if degree != 0.0 {
-            let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
             self.call_cairo(|c| c.save())?;
             let offset = font.get_transform().offset(layout);
             self.call_cairo(|c| c.translate(f64::from(x + offset.0), f64::from(y + offset.1)))?;
@@ -257,9 +258,10 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
         self.call_cairo(|c| {
             c.select_font_face(font.get_name(), FontSlant::Normal, FontWeight::Normal)
         })?;
-        self.call_cairo(|c| c.set_font_size(font.get_size()))?;
+        let actual_size = font.get_size();
+        self.call_cairo(|c| c.set_font_size(actual_size))?;
         self.set_color(&color)?;
-        self.call_cairo(|c| c.move_to(f64::from(x), f64::from(y) + font.get_size()))?;
+        self.call_cairo(|c| c.move_to(f64::from(x), f64::from(y - (layout.0).1)))?;
         self.call_cairo(|c| c.show_text(text))?;
 
         if degree != 0.0 {
