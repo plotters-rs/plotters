@@ -5,6 +5,7 @@
 ### Added
 
 - Cairo backend, which supports using Plotters draw a GTK surface.
+- Allow secondary axis to be configured with different label style.
 
 ### Bug Fix
 
