@@ -6,6 +6,7 @@
 
 - Cairo backend, which supports using Plotters draw a GTK surface.
 - Allow secondary axis to be configured with different label style.
+- Relative Sizing, now font and size can use relative scale: `(10).percent\_height()` means we want the size is 10% of parent's height. 
 
 ### Bug Fix
 

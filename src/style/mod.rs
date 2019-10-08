@@ -14,10 +14,7 @@ mod palette_ext;
 pub use self::palette::*;
 pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor, SimpleColor};
 pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
-pub use font::{
-    FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox, RelativeFont,
-    RelativeFontDesc,
-};
+pub use font::{FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox};
 pub use size::{AsRelativeHeight, AsRelativeWidth, RelativeSize, SizeDesc};
 
 /// Style of a text
@@ -25,6 +22,28 @@ pub use size::{AsRelativeHeight, AsRelativeWidth, RelativeSize, SizeDesc};
 pub struct TextStyle<'a> {
     pub font: FontDesc<'a>,
     pub color: RGBAColor,
+}
+
+pub trait IntoTextStyle<'a> {
+    fn into_text_style<P: size::HasDimension>(self, parent: &P) -> TextStyle<'a>;
+}
+
+impl<'a> IntoTextStyle<'a> for FontDesc<'a> {
+    fn into_text_style<P: size::HasDimension>(self, _: &P) -> TextStyle<'a> {
+        self.into()
+    }
+}
+
+impl<'a> IntoTextStyle<'a> for TextStyle<'a> {
+    fn into_text_style<P: size::HasDimension>(self, _: &P) -> TextStyle<'a> {
+        self
+    }
+}
+
+impl<'a, T: SizeDesc> IntoTextStyle<'a> for (&'a str, T) {
+    fn into_text_style<P: size::HasDimension>(self, parent: &P) -> TextStyle<'a> {
+        (self.0, self.1.in_pixels(parent)).into()
+    }
 }
 
 impl<'a> TextStyle<'a> {

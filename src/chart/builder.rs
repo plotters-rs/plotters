@@ -3,7 +3,7 @@ use super::context::ChartContext;
 use crate::coord::{AsRangedCoord, RangedCoord, Shift};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::style::TextStyle;
+use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
 /// The enum used to specify the position of label area.
 /// This is used when we configure the label area size with the API `set_label_area_size`
@@ -39,63 +39,72 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
     /// Set the margin size of the chart (applied for top, bottom, left and right at the same time)
     /// - `size`: The size of the chart margin.
-    pub fn margin(&mut self, size: u32) -> &mut Self {
+    pub fn margin<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin = [size, size, size, size];
         self
     }
 
     /// Set the top margin of current chart
     /// - `size`: The size of the top margin.
-    pub fn margin_top(&mut self, size: u32) -> &mut Self {
+    pub fn margin_top<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[0] = size;
         self
     }
 
     /// Set the bottom margin of current chart
     /// - `size`: The size of the bottom margin.
-    pub fn margin_bottom(&mut self, size: u32) -> &mut Self {
+    pub fn margin_bottom<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[1] = size;
         self
     }
 
     /// Set the left margin of current chart
     /// - `size`: The size of the left margin.
-    pub fn margin_left(&mut self, size: u32) -> &mut Self {
+    pub fn margin_left<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[2] = size;
         self
     }
 
     /// Set the right margin of current chart
     /// - `size`: The size of the right margin.
-    pub fn margin_right(&mut self, size: u32) -> &mut Self {
+    pub fn margin_right<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[3] = size;
         self
     }
 
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
-    pub fn x_label_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[1] = size;
         self
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
-    pub fn y_label_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[2] = size;
         self
     }
 
     /// Set the size of X label area on the top of the chart
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
-    pub fn top_x_label_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn top_x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[0] = size;
         self
     }
 
     /// Set the size of the Y label area on the right side
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
-    pub fn right_y_label_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn right_y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[3] = size;
         self
     }
@@ -103,7 +112,12 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// Set a label area size
     /// - `pos`: THe position where the label area locted
     /// - `size`: The size of the label area size
-    pub fn set_label_area_size(&mut self, pos: LabelAreaPosition, size: u32) -> &mut Self {
+    pub fn set_label_area_size<S: SizeDesc>(
+        &mut self,
+        pos: LabelAreaPosition,
+        size: S,
+    ) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[pos as usize] = size;
         self
     }
@@ -112,12 +126,15 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// - `caption`: The caption of the chart
     /// - `style`: The text style
     /// - Note: If the caption is set, the margin option will be ignored
-    pub fn caption<S: AsRef<str>, Style: Into<TextStyle<'b>>>(
+    pub fn caption<S: AsRef<str>, Style: IntoTextStyle<'b>>(
         &mut self,
         caption: S,
         style: Style,
     ) -> &mut Self {
-        self.title = Some((caption.as_ref().to_string(), style.into()));
+        self.title = Some((
+            caption.as_ref().to_string(),
+            style.into_text_style(self.root_area),
+        ));
         self
     }
 

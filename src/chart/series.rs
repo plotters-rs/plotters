@@ -3,7 +3,7 @@ use crate::coord::CoordTranslate;
 use crate::drawing::backend::{BackendCoord, DrawingErrorKind};
 use crate::drawing::{DrawingAreaErrorKind, DrawingBackend};
 use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
-use crate::style::{IntoFont, ShapeStyle, TextStyle, TRANSPARENT};
+use crate::style::{IntoFont, IntoTextStyle, ShapeStyle, SizeDesc, TextStyle, TRANSPARENT};
 
 pub enum SeriesLabelPosition {
     UpperLeft,
@@ -73,14 +73,19 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         self
     }
 
-    pub fn margin(&mut self, value: u32) -> &mut Self {
-        self.margin = value;
+    pub fn margin<S: SizeDesc>(&mut self, value: S) -> &mut Self {
+        self.margin = value
+            .in_pixels(&self.target.plotting_area().dim_in_pixel())
+            .max(0) as u32;
         self
     }
 
     /// Set the size of legend area
     /// `size` - The size of legend area in pixel
-    pub fn legend_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn legend_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size
+            .in_pixels(&self.target.plotting_area().dim_in_pixel())
+            .max(0) as u32;
         self.legend_area_size = size;
         self
     }
@@ -101,8 +106,8 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
 
     /// Set the series label font
     /// `font` - The font
-    pub fn label_font<F: Into<TextStyle<'b>>>(&mut self, font: F) -> &mut Self {
-        self.label_font = Some(font.into());
+    pub fn label_font<F: IntoTextStyle<'b>>(&mut self, font: F) -> &mut Self {
+        self.label_font = Some(font.into_text_style(&self.target.plotting_area().dim_in_pixel()));
         self
     }
 

@@ -85,6 +85,7 @@ impl<
     /// the function `MeshStyle::draw`
     pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
         MeshStyle {
+            parent_size: self.drawing_area.dim_in_pixel(),
             axis_style: None,
             x_label_offset: 0,
             y_label_offset: 0,
