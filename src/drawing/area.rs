@@ -2,7 +2,7 @@
 use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
-use crate::style::{Color, FontDesc, TextStyle};
+use crate::style::{Color, FontDesc, SizeDesc, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -64,11 +64,15 @@ impl Rect {
             })
     }
 
-    fn split_grid(&self, x_breaks: &[i32], y_breaks: &[i32]) -> impl Iterator<Item = Rect> {
+    fn split_grid(
+        &self,
+        x_breaks: impl Iterator<Item = i32>,
+        y_breaks: impl Iterator<Item = i32>,
+    ) -> impl Iterator<Item = Rect> {
         let mut xs = vec![self.x0, self.x1];
         let mut ys = vec![self.y0, self.y1];
-        xs.extend(x_breaks.iter().map(|v| v + self.x0));
-        ys.extend(y_breaks.iter().map(|v| v + self.y0));
+        xs.extend(x_breaks.map(|v| v + self.x0));
+        ys.extend(y_breaks.map(|v| v + self.y0));
 
         xs.sort();
         ys.sort();
@@ -335,16 +339,18 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Shrink the region, note all the locaitions are in guest coordinate
-    pub fn shrink(
+    pub fn shrink<A:SizeDesc, B:SizeDesc, C:SizeDesc, D:SizeDesc>(
         mut self,
-        left_upper: (u32, u32),
-        dimension: (u32, u32),
+        left_upper: (A, B),
+        dimension: (C, D),
     ) -> DrawingArea<DB, Shift> {
-        self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0 as i32);
-        self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1 as i32);
+        let left_upper = (left_upper.0.in_pixels(&self), left_upper.1.in_pixels(&self));
+        let dimension = (dimension.0.in_pixels(&self), dimension.1.in_pixels(&self));
+        self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0);
+        self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1);
 
-        self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0 as i32);
-        self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1 as i32);
+        self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0);
+        self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1);
 
         self.coord = Shift((self.rect.x0, self.rect.y0));
 
@@ -361,7 +367,17 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Create a margin for the given drawing area and returns the new drawing area
-    pub fn margin(&self, top: i32, bottom: i32, left: i32, right: i32) -> DrawingArea<DB, Shift> {
+    pub fn margin<ST: SizeDesc, SB: SizeDesc, SL: SizeDesc, SR: SizeDesc>(
+        &self,
+        top: ST,
+        bottom: SB,
+        left: SL,
+        right: SR,
+    ) -> DrawingArea<DB, Shift> {
+        let left = left.in_pixels(self);
+        let right = right.in_pixels(self);
+        let top = top.in_pixels(self);
+        let bottom = bottom.in_pixels(self);
         DrawingArea {
             rect: Rect {
                 x0: self.rect.x0 + left,
@@ -375,7 +391,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Split the drawing area vertically
-    pub fn split_vertically(&self, y: i32) -> (Self, Self) {
+    pub fn split_vertically<S: SizeDesc>(&self, y: S) -> (Self, Self) {
+        let y = y.in_pixels(self);
         let split_point = [y + self.rect.y0];
         let mut ret = self.rect.split(split_point.iter(), true).map(|rect| Self {
             rect: rect.clone(),
@@ -387,7 +404,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Split the drawing area horizentally
-    pub fn split_horizentally(&self, x: i32) -> (Self, Self) {
+    pub fn split_horizentally<S: SizeDesc>(&self, x: S) -> (Self, Self) {
+        let x = x.in_pixels(self);
         let split_point = [x + self.rect.x0];
         let mut ret = self.rect.split(split_point.iter(), false).map(|rect| Self {
             rect: rect.clone(),
@@ -411,13 +429,21 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Split the drawing area into a grid with specified breakpoints on both X axis and Y axis
-    pub fn split_by_breakpoints<XS: AsRef<[i32]>, YS: AsRef<[i32]>>(
+    pub fn split_by_breakpoints<
+        XSize: SizeDesc,
+        YSize: SizeDesc,
+        XS: AsRef<[XSize]>,
+        YS: AsRef<[YSize]>,
+    >(
         &self,
         xs: XS,
         ys: YS,
     ) -> Vec<Self> {
         self.rect
-            .split_grid(xs.as_ref(), ys.as_ref())
+            .split_grid(
+                xs.as_ref().iter().map(|x| x.in_pixels(self)),
+                ys.as_ref().iter().map(|x| x.in_pixels(self)),
+            )
             .map(|rect| Self {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),

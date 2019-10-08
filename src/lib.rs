@@ -642,8 +642,9 @@ pub mod prelude {
     pub use crate::drawing::*;
     pub use crate::series::{AreaSeries, Histogram, LineSeries, PointSeries};
     pub use crate::style::{
-        Color, FontDesc, FontTransform, HSLColor, IntoFont, Palette, Palette100, Palette99,
-        Palette9999, PaletteColor, RGBColor, ShapeStyle, SimpleColor, TextStyle,
+        AsRelativeHeight, AsRelativeWidth, Color, FontDesc, FontTransform, HSLColor, IntoFont,
+        Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle,
+        SimpleColor, TextStyle,
     };
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 

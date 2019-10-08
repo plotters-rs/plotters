@@ -5,6 +5,7 @@ mod color;
 pub mod colors;
 mod font;
 mod palette;
+mod size;
 
 #[cfg(feature = "palette_ext")]
 mod palette_ext;
@@ -14,6 +15,7 @@ pub use self::palette::*;
 pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor, SimpleColor};
 pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 pub use font::{FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox};
+pub use size::{AsRelativeHeight, AsRelativeWidth, RelativeSize, SizeDesc};
 
 /// Style of a text
 #[derive(Clone)]
