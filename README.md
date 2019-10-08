@@ -1,4 +1,4 @@
-# Plotters - Rust Drawing Library for Visualization  🦀📈🚀 
+# Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀 
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -18,7 +18,7 @@
 </a>
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends, 
-including bitmap, vector graph, piston window and WebAssembly. 
+including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 
 
 - To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
