@@ -250,7 +250,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x0, y0) = self.drawing_area.get_base_pixel();
 
         /* TODO: make this configure adjustable */
-        let label_dist = if orientation.1 > 0 { 0 } else { 10 };
+        let label_dist = if orientation.1 > 0 { 0 } else { tick_size * 2 };
 
         let (tw, th) = area.dim_in_pixel();
 

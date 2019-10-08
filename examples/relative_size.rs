@@ -40,5 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     draw_chart(&upper)?;
     draw_chart(&lower)?;
 
+    draw_chart(&root.shrink((200, 200), (150, 100)))?;
+
     Ok(())
 }
