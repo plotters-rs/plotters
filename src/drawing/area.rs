@@ -339,7 +339,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Shrink the region, note all the locaitions are in guest coordinate
-    pub fn shrink<A:SizeDesc, B:SizeDesc, C:SizeDesc, D:SizeDesc>(
+    pub fn shrink<A: SizeDesc, B: SizeDesc, C: SizeDesc, D: SizeDesc>(
         mut self,
         left_upper: (A, B),
         dimension: (C, D),

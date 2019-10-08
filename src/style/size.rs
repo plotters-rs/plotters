@@ -19,6 +19,12 @@ impl<D: DrawingBackend, C: CoordTranslate> HasDimension for DrawingArea<D, C> {
     }
 }
 
+impl HasDimension for (u32, u32) {
+    fn dim(&self) -> (u32, u32) {
+        *self
+    }
+}
+
 /// The trait that describes a size
 pub trait SizeDesc {
     fn in_pixels<T: HasDimension>(&self, parent: &T) -> i32;

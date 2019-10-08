@@ -1,5 +1,5 @@
 use super::{FontData, FontDataInternal};
-use crate::style::{Color, LayoutBox, TextStyle};
+use crate::style::{Color, LayoutBox, SizeDesc, TextStyle};
 
 use std::convert::From;
 
@@ -37,6 +37,50 @@ impl FontTransform {
             FontTransform::Rotate90 => (-y, x),
             FontTransform::Rotate180 => (-x, -y),
             FontTransform::Rotate270 => (y, -x),
+        }
+    }
+}
+
+pub trait RelativeFontDesc<'a>: 'a {
+    fn into_absolute_font(self, parent_size: (u32, u32)) -> FontDesc<'a>;
+}
+
+impl<'a> RelativeFontDesc<'a> for FontDesc<'a> {
+    fn into_absolute_font(self, _: (u32, u32)) -> FontDesc<'a> {
+        self
+    }
+}
+
+pub struct RelativeFont<'a, S: SizeDesc> {
+    size: S,
+    name: &'a str,
+    transform: FontTransform,
+}
+
+impl<'a, S: SizeDesc + Clone> RelativeFont<'a, S> {
+    /// Set the font transformation
+    pub fn transform(&self, trans: FontTransform) -> Self {
+        Self {
+            size: self.size.clone(),
+            name: self.name,
+            transform: trans,
+        }
+    }
+}
+
+impl<'a, T: SizeDesc + 'a> RelativeFontDesc<'a> for RelativeFont<'a, T> {
+    fn into_absolute_font(self, dim: (u32, u32)) -> FontDesc<'a> {
+        let size = self.size.in_pixels(&dim);
+        FontDesc::new(self.name, size as f64).transform(self.transform)
+    }
+}
+
+impl<'a, T: SizeDesc> From<(&'a str, T)> for RelativeFont<'a, T> {
+    fn from((typeface, size): (&'a str, T)) -> Self {
+        RelativeFont {
+            size,
+            name: typeface,
+            transform: FontTransform::None,
         }
     }
 }
