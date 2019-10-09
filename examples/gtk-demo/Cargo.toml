@@ -1,0 +1,13 @@
+[package]
+name = "gtk-demo"
+version = "0.1.0"
+authors = ["Hao Hou <haohou302@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+plotters = {path = "../..", features = ["cairo"]}
+cairo-rs = "0.7.1"
+gtk = "0.7.0"
+gio = "0.7.0"

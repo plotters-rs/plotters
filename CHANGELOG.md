@@ -2,11 +2,16 @@
 
 ## Plotters latest (?)
 
+### Added
+
+- Cairo backend, which supports using Plotters draw a GTK surface.
+- Allow secondary axis to be configured with different label style.
+
 ### Bug Fix
 
 - `FontError` from rusttype isn't `Sync` and `Send`. We don't have trait bound to ensure this.  (Thanks to @dalance)
 
-## Plotters latest (2019-10-1)
+## Plotters 0.2.7 (2019-10-1)
 
 ### Added
 

@@ -7,3 +7,4 @@ backup/*
 **/target
 examples/wasm-demo/www/pkg
 examples/.ipynb_checkpoints/
+tarpaulin-report.html

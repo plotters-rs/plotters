@@ -100,6 +100,12 @@ where
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         self.style.draw()
     }
+
+    /// Set the label style for the secondary axis
+    pub fn label_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
+        self.style.label_style(style);
+        self
+    }
 }
 
 /// The struct that is used for tracking the configuration of a mesh of any chart

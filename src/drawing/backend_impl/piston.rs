@@ -3,6 +3,7 @@ use piston_window::ellipse::circle;
 use piston_window::{circle_arc, ellipse, line, rectangle, Event, Loop};
 use piston_window::{G2d, PistonWindow};
 
+use super::DummyBackendError;
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
 
@@ -33,17 +34,6 @@ fn make_point_pair(a: BackendCoord, b: BackendCoord, scale: f64) -> [f64; 4] {
     ]
 }
 
-#[derive(Debug)]
-pub struct DummyError;
-
-impl std::fmt::Display for DummyError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(fmt, "{:?}", self)
-    }
-}
-
-impl std::error::Error for DummyError {}
-
 impl<'a, 'b> PistonBackend<'a, 'b> {
     fn new(size: (u32, u32), scale: f64, context: Context, graphics: &'b mut G2d<'a>) -> Self {
         Self {
@@ -56,17 +46,17 @@ impl<'a, 'b> PistonBackend<'a, 'b> {
 }
 
 impl<'a, 'b> DrawingBackend for PistonBackend<'a, 'b> {
-    type ErrorType = DummyError;
+    type ErrorType = DummyBackendError;
 
     fn get_size(&self) -> (u32, u32) {
         self.size
     }
 
-    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<DummyError>> {
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<DummyBackendError>> {
         Ok(())
     }
 
-    fn present(&mut self) -> Result<(), DrawingErrorKind<DummyError>> {
+    fn present(&mut self) -> Result<(), DrawingErrorKind<DummyBackendError>> {
         Ok(())
     }
 

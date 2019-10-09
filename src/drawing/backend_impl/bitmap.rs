@@ -215,9 +215,10 @@ fn test_bitmap_backend() {
         let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
 
         let area = back.into_drawing_area();
-        area.fill(&WHITE);
-        area.draw(&Path::new(vec![(0, 0), (10, 10)], RED.filled()));
-        area.present();
+        area.fill(&WHITE).unwrap();
+        area.draw(&Path::new(vec![(0, 0), (10, 10)], RED.filled()))
+            .unwrap();
+        area.present().unwrap();
     }
 
     for i in 0..10 {
