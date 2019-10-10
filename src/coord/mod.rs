@@ -79,7 +79,7 @@ impl ReverseCoordTranslate for Shift {
     }
 }
 
-/// We can compose an abitray transformation with a shift
+/// We can compose an arbitrary transformation with a shift
 pub struct ShiftAndTrans<T: CoordTranslate>(Shift, T);
 
 impl<T: CoordTranslate> CoordTranslate for ShiftAndTrans<T> {

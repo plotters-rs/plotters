@@ -21,7 +21,7 @@ struct Rect {
 }
 
 impl Rect {
-    /// Split the rectangle into a few smaller rectnagles
+    /// Split the rectangle into a few smaller rectangles
     fn split<'a, BPI: IntoIterator<Item = &'a i32> + 'a>(
         &'a self,
         break_points: BPI,
@@ -106,6 +106,7 @@ pub struct DrawingArea<DB: DrawingBackend, CT: CoordTranslate> {
     backend: Rc<RefCell<DB>>,
     rect: Rect,
     coord: CT,
+    inset: bool,
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, CT> {
@@ -114,6 +115,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
             backend: self.copy_backend_ref(),
             rect: self.rect.clone(),
             coord: self.coord.clone(),
+            inset: self.inset,
         }
     }
 }
@@ -220,6 +222,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             rect: self.rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0, self.rect.y0)),
+            inset: self.inset,
         }
     }
 
@@ -331,6 +334,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend,
             coord: Shift((0, 0)),
+            inset: false,
         }
     }
 
@@ -357,6 +361,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: self.rect.clone(),
             backend: self.copy_backend_ref(),
             coord: coord_spec,
+            inset: self.inset,
         }
     }
 
@@ -371,6 +376,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0 + left, self.rect.y0 + top)),
+            inset: self.inset,
         }
     }
 
@@ -381,6 +387,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((rect.x0, rect.y0)),
+            inset: self.inset,
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
@@ -393,6 +400,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((rect.x0, rect.y0)),
+            inset: self.inset,
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
@@ -406,6 +414,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),
                 coord: Shift((rect.x0, rect.y0)),
+                inset: self.inset,
             })
             .collect()
     }
@@ -422,6 +431,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),
                 coord: Shift((rect.x0, rect.y0)),
+                inset: self.inset,
             })
             .collect()
     }
@@ -466,9 +476,49 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0, self.rect.y0 + 10 + text_h as i32)),
+            inset: self.inset,
         })
     }
 
+    /// Alter area bounds
+    pub fn alter_diff(self, diff_tl: (i32,i32), diff_rb: (i32,i32)) -> Self {
+        Self {
+            backend: self.backend,
+            rect: Rect{
+                x0: self.rect.x0 + diff_tl.0,
+                y0: self.rect.y0 + diff_tl.1,
+                x1: self.rect.x1 + diff_rb.0,
+                y1: self.rect.y1 + diff_rb.1,
+            },
+            coord: self.coord,
+            inset: self.inset,
+        }
+    }
+    /// Update area bounds
+    pub fn alter_new(self, tl: (Option<i32>,Option<i32>), rb: (Option<i32>,Option<i32>)) -> Self {
+        Self {
+            backend: self.backend,
+            rect: Rect{
+                x0: tl.0.unwrap_or(self.rect.x0),
+                y0: tl.1.unwrap_or(self.rect.y0),
+                x1: rb.0.unwrap_or(self.rect.x1),
+                y1: rb.1.unwrap_or(self.rect.y1),
+            },
+            coord: self.coord,
+            inset: self.inset,
+        }
+    }
+    /// Make area inset
+    pub fn make_inset(self) -> Self {
+        Self {
+            backend: self.backend,
+            rect: self.rect,
+            coord: self.coord,
+            inset: true,
+        }
+    }
+    /// Get area's inset value
+    pub fn is_inset(&self) -> bool { self.inset }
     /// Draw text on the drawing area
     pub fn draw_text(
         &self,
