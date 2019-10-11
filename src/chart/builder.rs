@@ -19,6 +19,7 @@ pub enum LabelAreaPosition {
 /// allows the high-level chartting API beening used on the drawing area.
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
+    overlap_plotting_area: [bool; 4],
     root_area: &'a DrawingArea<DB, Shift>,
     title: Option<(String, TextStyle<'b>)>,
     margin: [u32; 4],
@@ -34,6 +35,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             root_area: root,
             title: None,
             margin: [0; 4],
+            overlap_plotting_area: [false; 4],
         }
     }
 
@@ -74,6 +76,27 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     pub fn margin_right<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[3] = size;
+        self
+    }
+
+    pub fn set_label_area_overlap(&mut self, pos: LabelAreaPosition) -> &mut Self {
+        self.overlap_plotting_area[pos as usize] = true;
+        self
+    }
+
+    /// Set all the label area size with the same value
+    pub fn set_all_label_area_size(&mut self, size: u32) -> &mut Self {
+        self.label_area_size[0] = size;
+        self.label_area_size[1] = size;
+        self.label_area_size[2] = size;
+        self.label_area_size[3] = size;
+        self
+    }
+
+    /// Set the most commonly used label area size to the same value
+    pub fn set_left_and_bottom_label_area_size(&mut self, size: u32) -> &mut Self {
+        self.label_area_size[1] = size;
+        self.label_area_size[2] = size;
         self
     }
 
@@ -173,7 +196,13 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
         let mut actual_drawing_area_pos = [0, h as i32, 0, w as i32];
 
-        for (idx, (dx, dy)) in (0..4).map(|idx| (idx, [(0, -1), (0, 1), (-1, 0), (1, 0)][idx])) {
+        const DIR: [(i16, i16); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
+
+        for (idx, (dx, dy)) in (0..4).map(|idx| (idx, DIR[idx])) {
+            if self.overlap_plotting_area[idx] {
+                continue;
+            }
+
             let size = self.label_area_size[idx] as i32;
 
             let split_point = if dx + dy < 0 { size } else { -size };
@@ -190,14 +219,37 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             .map(Some)
             .collect();
 
+        std::mem::swap(&mut drawing_area, splitted[4].as_mut().unwrap());
+
         for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
-            let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
-            if h > 0 && w > 0 {
-                std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
+            if !self.overlap_plotting_area[dst_idx] {
+                let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
+                if h > 0 && w > 0 {
+                    std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
+                }
+            } else if self.label_area_size[dst_idx] != 0 {
+                let size = self.label_area_size[dst_idx] as i32;
+                let (dw, dh) = drawing_area.dim_in_pixel();
+                let x0 = if DIR[dst_idx].0 > 0 {
+                    dw as i32 - size
+                } else {
+                    0
+                };
+                let y0 = if DIR[dst_idx].1 > 0 {
+                    dh as i32 - size
+                } else {
+                    0
+                };
+                let x1 = if DIR[dst_idx].0 >= 0 { dw as i32 } else { size };
+                let y1 = if DIR[dst_idx].1 >= 0 { dh as i32 } else { size };
+
+                label_areas[dst_idx] = Some(
+                    drawing_area
+                        .clone()
+                        .shrink((x0, y0), ((x1 - x0), (y1 - y0))),
+                );
             }
         }
-
-        std::mem::swap(&mut drawing_area, splitted[4].as_mut().unwrap());
 
         let mut pixel_range = drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
