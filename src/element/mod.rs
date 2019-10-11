@@ -41,7 +41,8 @@
         fn draw<I:Iterator<Item = BackendCoord>>(
             &self,
             mut pos: I,
-            backend: &mut DB
+            backend: &mut DB,
+            _: (u32, u32),
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
             backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &RED.to_rgba(), false)?;
@@ -192,6 +193,7 @@ pub trait Drawable<DB: DrawingBackend> {
         &self,
         pos: I,
         backend: &mut DB,
+        parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
@@ -203,6 +205,7 @@ where
         &self,
         points: &mut dyn Iterator<Item = BackendCoord>,
         backend: &mut DB,
+        parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
 }
 
@@ -211,8 +214,9 @@ impl<'a, DB: DrawingBackend, T: Drawable<DB> + 'a> DynDrawable<'a, DB> for T {
         &self,
         points: &mut dyn Iterator<Item = BackendCoord>,
         backend: &mut DB,
+        parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        T::draw(self, points, backend)
+        T::draw(self, points, backend, parent_dim)
     }
 }
 
@@ -241,8 +245,9 @@ impl<'a, DB: DrawingBackend + 'a, Coord: Clone> Drawable<DB> for DynElement<'a, 
         &self,
         mut pos: I,
         backend: &mut DB,
+        parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        self.drawable.draw_dyn(&mut pos, backend)
+        self.drawable.draw_dyn(&mut pos, backend, parent_dim)
     }
 }
 

@@ -30,6 +30,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Pixel<Coord> {
         &self,
         mut points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
             return backend.draw_pixel((x, y), &self.style.color);
@@ -89,6 +90,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
         &self,
         points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         backend.draw_path(points, &self.style)
     }
@@ -160,6 +162,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Rectangle<Coord> {
         &self,
         mut points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         match (points.next(), points.next()) {
             (Some(a), Some(b)) => {
@@ -251,6 +254,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
         &self,
         mut points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
             return backend.draw_circle((x, y), self.size, &self.style, self.style.filled);
@@ -310,6 +314,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Polygon<Coord> {
         &self,
         points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         backend.fill_polygon(points, &self.style.color)
     }

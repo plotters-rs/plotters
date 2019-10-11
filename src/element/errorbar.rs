@@ -112,6 +112,7 @@ impl<K, V, O: ErrorBarOrient<K, V>, DB: DrawingBackend> Drawable<DB> for ErrorBa
         &self,
         points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let points: Vec<_> = points.take(3).collect();
 

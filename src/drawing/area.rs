@@ -306,7 +306,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             let b = p.borrow();
             self.rect.truncate(self.coord.translate(b))
         });
-        self.backend_ops(move |b| element.draw(backend_coords, b))
+        self.backend_ops(move |b| element.draw(backend_coords, b, self.dim_in_pixel()))
     }
 
     /// Map coordinate to the backend coordinate

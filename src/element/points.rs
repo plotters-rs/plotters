@@ -38,6 +38,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Cross<Coord> {
         &self,
         mut points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
             let size = self.size as i32;
@@ -80,6 +81,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for TriangleMarker<Coord> {
         &self,
         mut points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
             let points = [-90, -210, -330]
