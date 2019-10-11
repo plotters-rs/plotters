@@ -242,7 +242,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
     /// Compute the relative size based on the drawing area's width
     pub fn relative_to_width(&self, p: f64) -> f64 {
-        f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.min(1.0).max(0.0))
+        f64::from((self.rect.x1 - self.rect.x0).max(0)) * (p.min(1.0).max(0.0))
     }
 
     /// Get the pixel range of this area
@@ -738,5 +738,105 @@ mod drawing_area_tests {
             .margin(1, 2, 3, 4)
             .fill(&WHITE)
             .expect("Drawing Failure");
+    }
+
+    #[test]
+    fn test_ranges() {
+        let drawing_area =
+            create_mocked_drawing_area(1024, 768, |_m| {}).apply_coord_spec(RangedCoord::<
+                RangedCoordi32,
+                RangedCoordu32,
+            >::new(
+                -100..100,
+                0..200,
+                (0..1024, 0..768),
+            ));
+
+        let x_range = drawing_area.get_x_range();
+        assert_eq!(x_range, -100..100);
+
+        let y_range = drawing_area.get_y_range();
+        assert_eq!(y_range, 0..200);
+    }
+
+    #[test]
+    fn test_relative_size() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |_m| {});
+
+        assert_eq!(102.4, drawing_area.relative_to_width(0.1));
+        assert_eq!(384.0, drawing_area.relative_to_height(0.5));
+
+        assert_eq!(1024.0, drawing_area.relative_to_width(1.3));
+        assert_eq!(768.0, drawing_area.relative_to_height(1.5));
+
+        assert_eq!(0.0, drawing_area.relative_to_width(-0.2));
+        assert_eq!(0.0, drawing_area.relative_to_height(-0.5));
+    }
+
+    #[test]
+    fn test_relative_split() {
+        let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
+            let mut counter = 0;
+            m.check_draw_rect(move |c, _, f, u, d| {
+                assert_eq!(f, true);
+
+                match counter {
+                    0 => {
+                        assert_eq!(c, RED.to_rgba());
+                        assert_eq!(u, (0, 0));
+                        assert_eq!(d, (300, 600));
+                    }
+                    1 => {
+                        assert_eq!(c, BLUE.to_rgba());
+                        assert_eq!(u, (300, 0));
+                        assert_eq!(d, (1000, 600));
+                    }
+                    2 => {
+                        assert_eq!(c, GREEN.to_rgba());
+                        assert_eq!(u, (0, 600));
+                        assert_eq!(d, (300, 1200));
+                    }
+                    3 => {
+                        assert_eq!(c, WHITE.to_rgba());
+                        assert_eq!(u, (300, 600));
+                        assert_eq!(d, (1000, 1200));
+                    }
+                    _ => panic!("Too many draw rect"),
+                }
+
+                counter += 1;
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 4);
+                assert_eq!(b.draw_count, 4);
+            });
+        });
+
+        let splited =
+            drawing_area.split_by_breakpoints([(30).percent_width()], [(50).percent_height()]);
+
+        splited[0].fill(&RED).unwrap();
+        splited[1].fill(&BLUE).unwrap();
+        splited[2].fill(&GREEN).unwrap();
+        splited[3].fill(&WHITE).unwrap();
+    }
+
+    #[test]
+    fn test_relative_shrink() {
+        let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
+            m.check_draw_rect(move |_, _, _, u, d| {
+                assert_eq!((100, 100), u);
+                assert_eq!((300, 700), d);
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
+        })
+        .shrink(((10).percent_width(), 100), (200, (50).percent_height()));
+
+        drawing_area.fill(&RED).unwrap();
     }
 }
