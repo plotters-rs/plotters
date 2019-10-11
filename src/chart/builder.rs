@@ -205,3 +205,71 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         })
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+    #[test]
+    fn test_label_area_size() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart
+            .x_label_area_size(10)
+            .y_label_area_size(20)
+            .top_x_label_area_size(30)
+            .right_y_label_area_size(40);
+        assert_eq!(chart.label_area_size[1], 10);
+        assert_eq!(chart.label_area_size[2], 20);
+        assert_eq!(chart.label_area_size[0], 30);
+        assert_eq!(chart.label_area_size[3], 40);
+
+        chart.set_label_area_size(LabelAreaPosition::Left, 100);
+        chart.set_label_area_size(LabelAreaPosition::Right, 200);
+        chart.set_label_area_size(LabelAreaPosition::Top, 300);
+        chart.set_label_area_size(LabelAreaPosition::Bottom, 400);
+
+        assert_eq!(chart.label_area_size[0], 300);
+        assert_eq!(chart.label_area_size[1], 400);
+        assert_eq!(chart.label_area_size[2], 100);
+        assert_eq!(chart.label_area_size[3], 200);
+    }
+
+    #[test]
+    fn test_margin_configure() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart.margin(5);
+        assert_eq!(chart.margin[0], 5);
+        assert_eq!(chart.margin[1], 5);
+        assert_eq!(chart.margin[2], 5);
+        assert_eq!(chart.margin[3], 5);
+
+        chart.margin_top(10);
+        chart.margin_bottom(11);
+        chart.margin_left(12);
+        chart.margin_right(13);
+        assert_eq!(chart.margin[0], 10);
+        assert_eq!(chart.margin[1], 11);
+        assert_eq!(chart.margin[2], 12);
+        assert_eq!(chart.margin[3], 13);
+    }
+
+    #[test]
+    fn test_caption() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart.caption("This is a test case", ("Arial", 10));
+
+        assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "Arial");
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
+        assert_eq!(
+            chart.title.as_ref().unwrap().1.color.to_rgba(),
+            BLACK.to_rgba()
+        );
+    }
+}
