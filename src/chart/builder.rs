@@ -181,7 +181,15 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         for (idx, (dx, dy)) in (0..4).map(|idx| (idx, [(0, -1), (0, 1), (-1, 0), (1, 0)][idx])) {
             //let size = if self.label_area_size[idx] <= 0 { 0 } else { self.label_area_size[idx] };
             let size = self.label_area_size[idx];
-            let split_point = if !self.label_area_inset[idx] { if dx + dy < 0 { size } else { -size } } else { 0 };
+            let split_point = if !self.label_area_inset[idx] {
+                if dx + dy < 0 {
+                    size
+                } else {
+                    -size
+                }
+            } else {
+                0
+            };
             actual_drawing_area_pos[idx] += split_point;
         }
 
@@ -201,16 +209,28 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             }
         }
 
-        for (id, (_, size)) in self.label_area_inset.iter().zip(self.label_area_size.iter()).enumerate().filter(|(_,(inset, size))| **inset && **size != 0) {
+        for (id, (_, size)) in self
+            .label_area_inset
+            .iter()
+            .zip(self.label_area_size.iter())
+            .enumerate()
+            .filter(|(_, (inset, size))| **inset && **size != 0)
+        {
             let area = splitted[4].as_ref().unwrap();
             let (w, h) = area.dim_in_pixel();
             let mut new_area = match id {
-                0 => area.clone().alter_new((None,None),(None,Some(*size))),
-                2 => area.clone().alter_new((None,None),(Some(*size),None)),
-                1 => area.clone().alter_new((None,Some(h as i32 - *size)),(None,Some(h as i32 - *size))),
-                3 => area.clone().alter_new((Some(w as i32 - *size),None),(None,None)),
+                0 => area.clone().alter_new((None, None), (None, Some(*size))),
+                2 => area.clone().alter_new((None, None), (Some(*size), None)),
+                1 => area.clone().alter_new(
+                    (None, Some(h as i32 - *size)),
+                    (None, Some(h as i32 - *size)),
+                ),
+                3 => area
+                    .clone()
+                    .alter_new((Some(w as i32 - *size), None), (None, None)),
                 _ => unreachable!(),
-            }.make_inset();
+            }
+            .make_inset();
             std::mem::swap(&mut label_areas[id], &mut Some(new_area));
         }
 

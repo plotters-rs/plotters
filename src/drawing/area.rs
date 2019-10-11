@@ -481,10 +481,10 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Alter area bounds
-    pub fn alter_diff(self, diff_tl: (i32,i32), diff_rb: (i32,i32)) -> Self {
+    pub fn alter_diff(self, diff_tl: (i32, i32), diff_rb: (i32, i32)) -> Self {
         Self {
             backend: self.backend,
-            rect: Rect{
+            rect: Rect {
                 x0: self.rect.x0 + diff_tl.0,
                 y0: self.rect.y0 + diff_tl.1,
                 x1: self.rect.x1 + diff_rb.0,
@@ -495,10 +495,10 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         }
     }
     /// Update area bounds
-    pub fn alter_new(self, tl: (Option<i32>,Option<i32>), rb: (Option<i32>,Option<i32>)) -> Self {
+    pub fn alter_new(self, tl: (Option<i32>, Option<i32>), rb: (Option<i32>, Option<i32>)) -> Self {
         Self {
             backend: self.backend,
-            rect: Rect{
+            rect: Rect {
                 x0: tl.0.unwrap_or(self.rect.x0),
                 y0: tl.1.unwrap_or(self.rect.y0),
                 x1: rb.0.unwrap_or(self.rect.x1),
@@ -518,7 +518,9 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         }
     }
     /// Get area's inset value
-    pub fn is_inset(&self) -> bool { self.inset }
+    pub fn is_inset(&self) -> bool {
+        self.inset
+    }
     /// Draw text on the drawing area
     pub fn draw_text(
         &self,
