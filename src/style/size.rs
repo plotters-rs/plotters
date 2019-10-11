@@ -41,6 +41,24 @@ pub enum RelativeSize {
     Width(f64),
 }
 
+impl RelativeSize {
+    pub fn min(self, min_sz: i32) -> RelativeSizeWithBound {
+        RelativeSizeWithBound {
+            size: self,
+            min: Some(min_sz),
+            max: None,
+        }
+    }
+
+    pub fn max(self, max_sz: i32) -> RelativeSizeWithBound {
+        RelativeSizeWithBound {
+            size: self,
+            max: Some(max_sz),
+            min: None,
+        }
+    }
+}
+
 impl SizeDesc for RelativeSize {
     fn in_pixels<D: HasDimension>(&self, parent: &D) -> i32 {
         let (w, h) = parent.dim();
@@ -66,3 +84,30 @@ pub trait AsRelativeHeight: Into<f64> {
 
 impl<T: Into<f64>> AsRelativeWidth for T {}
 impl<T: Into<f64>> AsRelativeHeight for T {}
+
+pub struct RelativeSizeWithBound {
+    size: RelativeSize,
+    min: Option<i32>,
+    max: Option<i32>,
+}
+
+impl RelativeSizeWithBound {
+    pub fn min(mut self, min_sz: i32) -> RelativeSizeWithBound {
+        self.min = Some(min_sz);
+        self
+    }
+
+    pub fn max(mut self, max_sz: i32) -> RelativeSizeWithBound {
+        self.max = Some(max_sz);
+        self
+    }
+}
+
+impl SizeDesc for RelativeSizeWithBound {
+    fn in_pixels<D: HasDimension>(&self, parent: &D) -> i32 {
+        let size = self.size.in_pixels(parent);
+        let size_lower_capped = self.min.map_or(size, |x| x.max(size));
+        let size_upper_capped = self.max.map_or(size_lower_capped, |x| x.min(size));
+        size_upper_capped
+    }
+}
