@@ -78,7 +78,7 @@ pub trait AsRelativeWidth: Into<f64> {
 
 pub trait AsRelativeHeight: Into<f64> {
     fn percent_height(self) -> RelativeSize {
-        RelativeSize::Width(self.into() / 100.0)
+        RelativeSize::Height(self.into() / 100.0)
     }
 }
 
@@ -109,5 +109,25 @@ impl SizeDesc for RelativeSizeWithBound {
         let size_lower_capped = self.min.map_or(size, |x| x.max(size));
         let size_upper_capped = self.max.map_or(size_lower_capped, |x| x.min(size));
         size_upper_capped
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_relative_size() {
+        let size = (10).percent_height();
+        assert_eq!(size.in_pixels(&(100, 200)), 20);
+
+        let size = (10).percent_width();
+        assert_eq!(size.in_pixels(&(100, 200)), 10);
+
+        let size = (-10).percent_width();
+        assert_eq!(size.in_pixels(&(100, 200)), -10);
+
+        let size = (10).percent_width().min(30);
+        assert_eq!(size.in_pixels(&(100, 200)), 30);
+        assert_eq!(size.in_pixels(&(400, 200)), 40);
     }
 }
