@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Instatll Tarpaulin
-      run: cargo install tarpaulin
+      run: cargo install cargo-tarpaulin
     - name: Test Coverage 
       run: | 
         export CODECOV_TOKEN="8622abe0-9579-4cea-93d3-9707969ef6c2"
