@@ -14,5 +14,5 @@ jobs:
     - name: Test Coverage 
       run: | 
         export CODECOV_TOKEN="8622abe0-9579-4cea-93d3-9707969ef6c2"
-        cargo tarpaulin --out Xml
+        cargo tarpaulin --out Xml -v
         bash <(curl -s https://codecov.io/bash)
