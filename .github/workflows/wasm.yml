@@ -1,0 +1,16 @@
+name: WASM Target
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install WASM tool chain
+      run: rustup target add wasm32-unknown-unknown
+    - name: Check WASM Target Compiles
+      run: cargo build --verbose --target=wasm32-unknown-unknown
+    
