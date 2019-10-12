@@ -141,7 +141,7 @@ pub trait DrawingBackend: Sized {
             }
         } else {
             let p: Vec<_> = path.into_iter().collect();
-            let v = super::rasterizer::path::polygonize(&p[..], style.stroke_width());
+            let v = super::rasterizer::polygonize(&p[..], style.stroke_width());
             return self.fill_polygon(v, &style.as_color());
         }
         Ok(())

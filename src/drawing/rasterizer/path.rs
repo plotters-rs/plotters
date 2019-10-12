@@ -95,7 +95,7 @@ fn traverse_vertices<'a>(
     ));
 }
 
-pub(crate) fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCoord> {
+pub fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCoord> {
     if vertices.len() < 2 {
         return vec![];
     }

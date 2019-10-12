@@ -3,7 +3,7 @@ use crate::drawing::DrawingBackend;
 
 use crate::style::Color;
 
-pub(crate) fn draw_circle<B: DrawingBackend, S: BackendStyle>(
+pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
     b: &mut B,
     center: BackendCoord,
     radius: u32,

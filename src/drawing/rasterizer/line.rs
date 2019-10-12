@@ -3,7 +3,7 @@ use crate::drawing::DrawingBackend;
 
 use crate::style::Color;
 
-pub(crate) fn draw_line<DB: DrawingBackend, S: BackendStyle>(
+pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     back: &mut DB,
     mut from: BackendCoord,
     mut to: BackendCoord,

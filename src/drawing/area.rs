@@ -453,6 +453,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Draw a title of the drawing area and return the remaining drawing area
+    /// TODO: Think about how to make this resizable
     pub fn titled<'a, S: Into<TextStyle<'a>>>(
         &self,
         text: &str,
@@ -460,25 +461,21 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     ) -> Result<Self, DrawingAreaError<DB>> {
         let style = style.into();
 
-        let (text_w, text_h) = match style.font.box_size(text) {
-            Ok(what) => what,
-            Err(what) => {
-                return Err(DrawingAreaErrorKind::BackendError(
-                    DrawingErrorKind::FontError(what),
-                ));
-            }
-        };
-        let padding = if self.rect.x1 - self.rect.x0 > text_w as i32 {
+        let (text_w, text_h) = self.estimate_text_size(text, &style.font)?;
+
+        let x_padding = if self.rect.x1 - self.rect.x0 > text_w as i32 {
             (self.rect.x1 - self.rect.x0 - text_w as i32) / 2
         } else {
             0
         };
 
+        let y_padding = (text_h / 2).min(5) as i32;
+
         self.backend_ops(|b| {
             b.draw_text(
                 text,
                 &style.font,
-                (self.rect.x0 + padding, self.rect.y0 + 5),
+                (self.rect.x0 + x_padding, self.rect.y0 + y_padding),
                 &style.color,
             )
         })?;
@@ -486,12 +483,12 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         Ok(Self {
             rect: Rect {
                 x0: self.rect.x0,
-                y0: self.rect.y0 + 10 + text_h as i32,
+                y0: self.rect.y0 + y_padding * 2 + text_h as i32,
                 x1: self.rect.x1,
                 y1: self.rect.y1,
             },
             backend: self.copy_backend_ref(),
-            coord: Shift((self.rect.x0, self.rect.y0 + 10 + text_h as i32)),
+            coord: Shift((self.rect.x0, self.rect.y0 + y_padding * 2 + text_h as i32)),
         })
     }
 

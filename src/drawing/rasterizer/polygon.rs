@@ -72,7 +72,7 @@ impl Ord for Edge {
     }
 }
 
-pub(crate) fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
+pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
     back: &mut DB,
     vertices: &[BackendCoord],
     style: &S,

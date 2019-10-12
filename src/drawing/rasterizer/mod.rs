@@ -1,13 +1,14 @@
 mod line;
-pub(super) use line::draw_line;
+pub use line::draw_line;
 
 mod rect;
-pub(super) use rect::draw_rect;
+pub use rect::draw_rect;
 
 mod circle;
-pub(super) use circle::draw_circle;
+pub use circle::draw_circle;
 
 mod polygon;
-pub(super) use polygon::fill_polygon;
+pub use polygon::fill_polygon;
 
-pub(super) mod path;
+mod path;
+pub use path::polygonize;

@@ -3,7 +3,7 @@ use crate::drawing::DrawingBackend;
 
 use crate::style::Color;
 
-pub(crate) fn draw_rect<B: DrawingBackend, S: BackendStyle>(
+pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
     b: &mut B,
     upper_left: BackendCoord,
     bottom_right: BackendCoord,
