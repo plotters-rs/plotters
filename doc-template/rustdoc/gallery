@@ -159,11 +159,22 @@
 
 
 <div class="galleryItem">
-    <a href="https://plotters-rs.github.io/plotters-doc-data/animation.png">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/animation.gif">
         <img src="https://plotters-rs.github.io/plotters-doc-data/animation.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
 		Koch Snowflake Animation
         <a href="https://github.com/38/plotters/blob/master/examples/animation.rs">[code]</a>
+    </div>
+</div>
+
+
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/console.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/console.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+		Drawing on a Console
+        <a href="https://github.com/38/plotters/blob/master/examples/console.rs">[code]</a>
     </div>
 </div>

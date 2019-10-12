@@ -12,7 +12,6 @@
 <a href="https://travis-ci.org/38/plotters">
 	<img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
 </a>
-
 <a href="https://codecov.io/gh/38/plotters">
   <img src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
 </a>
@@ -22,6 +21,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 
 - To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
+- Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/relative_size.rs) for how to plotting on Console with a customized backend.
 
 ## Gallery
 
@@ -94,6 +94,14 @@ To view the source code for each example, please click on the example image.
 
 <a href="https://github.com/38/plotters/blob/master/examples/animation.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/animation.gif" class="galleryItem" width=200px></img>
+</a>
+
+<a href="https://github.com/38/plotters/blob/master/examples/console.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/console-example.png" class="galleryItem" width=200px></img>
+</a>
+
+<a href="https://github.com/38/plotters/blob/master/examples/console.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/console.png" class="galleryItem" width=200px></img>
 </a>
 
 
