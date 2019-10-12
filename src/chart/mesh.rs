@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
+use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
 use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
@@ -146,6 +147,29 @@ where
     Y: Ranged,
     DB: DrawingBackend,
 {
+    /// Set all the tick mark to the same size
+    /// `value`: The new size
+    pub fn set_all_tick_mark_size<S: SizeDesc>(&mut self, value: S) -> &mut Self {
+        let size = value.in_pixels(&self.parent_size);
+        self.x_tick_size = [size, size];
+        self.y_tick_size = [size, size];
+        self
+    }
+
+    pub fn set_tick_mark_size<S: SizeDesc>(
+        &mut self,
+        pos: LabelAreaPosition,
+        value: S,
+    ) -> &mut Self {
+        *match pos {
+            LabelAreaPosition::Top => &mut self.x_tick_size[0],
+            LabelAreaPosition::Bottom => &mut self.x_tick_size[1],
+            LabelAreaPosition::Left => &mut self.y_tick_size[0],
+            LabelAreaPosition::Right => &mut self.y_tick_size[1],
+        } = value.in_pixels(&self.parent_size);
+        self
+    }
+
     /// The offset of x labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel

@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (drawing_area, idx) in drawing_areas.iter().zip(1..) {
         let mut cc = ChartBuilder::on(&drawing_area)
             .x_label_area_size(50)
-            .y_label_area_size(60)
+            .y_label_area_size(30)
             .margin_right(20)
             .caption(format!("y = x^{}", 1 + 2 * idx), ("Arial", 40).into_font())
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
