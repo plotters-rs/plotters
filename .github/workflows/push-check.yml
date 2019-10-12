@@ -14,6 +14,6 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Check WASM Target Compiles
-      run: cargo build --verbose --target=wasm32-unknown-unknown
+      run: rustup target add wasm32-unknown-unknown && cargo build --verbose --target=wasm32-unknown-unknown
     
       
