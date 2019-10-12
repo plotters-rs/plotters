@@ -136,6 +136,8 @@ where
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
     pub(super) _pahtom_data: PhantomData<(X, Y)>,
+    pub(super) x_tick_size: [i32; 2],
+    pub(super) y_tick_size: [i32; 2],
 }
 
 impl<'a, 'b, X, Y, DB> MeshStyle<'a, 'b, X, Y, DB>
@@ -312,6 +314,8 @@ where
             &axis_desc_style,
             self.x_desc.clone(),
             self.y_desc.clone(),
+            self.x_tick_size,
+            self.y_tick_size,
         )?;
 
         target.draw_mesh(
@@ -332,6 +336,8 @@ where
             &axis_desc_style,
             None,
             None,
+            self.x_tick_size,
+            self.y_tick_size,
         )
     }
 }

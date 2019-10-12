@@ -81,9 +81,43 @@ impl<
         Y: Ranged<ValueType = YT>,
     > ChartContext<'a, DB, RangedCoord<X, Y>>
 {
+    fn is_overlapping_drawing_area(&self, area: Option<&DrawingArea<DB, Shift>>) -> bool {
+        let area = if area.is_none() {
+            return false;
+        } else {
+            area.unwrap()
+        };
+
+        let (x0, y0) = area.get_base_pixel();
+        let (w, h) = area.dim_in_pixel();
+        let (x1, y1) = (x0 + w as i32, y0 + h as i32);
+        let (dx0, dy0) = self.drawing_area.get_base_pixel();
+        let (w, h) = self.drawing_area.dim_in_pixel();
+        let (dx1, dy1) = (dx0 + w as i32, dy0 + h as i32);
+
+        let (ox0, ox1) = (x0.max(dx0), x1.min(dx1));
+        let (oy0, oy1) = (y0.max(dy0), y1.min(dy1));
+
+        ox1 > ox0 && oy1 > oy0
+    }
+
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
     /// the function `MeshStyle::draw`
     pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
+        let base_tick_size = (5u32).percent().max(5).in_pixels(&self.drawing_area);
+
+        let mut x_tick_size = [base_tick_size, base_tick_size];
+        let mut y_tick_size = [base_tick_size, base_tick_size];
+
+        for idx in 0..2 {
+            if self.is_overlapping_drawing_area(self.x_label_area[idx].as_ref()) {
+                x_tick_size[idx] = -x_tick_size[idx];
+            }
+            if self.is_overlapping_drawing_area(self.y_label_area[idx].as_ref()) {
+                y_tick_size[idx] = -y_tick_size[idx];
+            }
+        }
+
         MeshStyle {
             parent_size: self.drawing_area.dim_in_pixel(),
             axis_style: None,
@@ -105,6 +139,8 @@ impl<
             x_desc: None,
             y_desc: None,
             axis_desc_style: None,
+            x_tick_size,
+            y_tick_size,
         }
     }
 }
@@ -492,6 +528,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         axis_desc_style: &TextStyle,
         x_desc: Option<String>,
         y_desc: Option<String>,
+        x_tick_size: [i32; 2],
+        y_tick_size: [i32; 2],
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
@@ -499,8 +537,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
 
-        let tick_size = (5u32).percent().max(5);
-        let tick_size = tick_size.in_pixels(&self.drawing_area);
+        //let tick_size = (5u32).percent().max(5);
+        //let tick_size = tick_size.in_pixels(&self.drawing_area);
 
         for idx in 0..2 {
             self.draw_axis_and_labels(
@@ -511,7 +549,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 x_label_offset,
                 (0, -1 + idx as i16 * 2),
                 x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                tick_size,
+                x_tick_size[idx],
             )?;
 
             self.draw_axis_and_labels(
@@ -522,7 +560,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 y_label_offset,
                 (-1 + idx as i16 * 2, 0),
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                tick_size,
+                y_tick_size[idx],
             )?;
         }
 

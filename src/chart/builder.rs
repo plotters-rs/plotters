@@ -7,6 +7,7 @@ use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
 /// The enum used to specify the position of label area.
 /// This is used when we configure the label area size with the API `set_label_area_size`
+#[derive(Copy, Clone)]
 pub enum LabelAreaPosition {
     Top = 0,
     Bottom = 1,
@@ -79,59 +80,44 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
-    /// Make the axis overlap with the plotting area
-    pub fn set_label_area_overlap(&mut self, pos: LabelAreaPosition) -> &mut Self {
-        self.overlap_plotting_area[pos as usize] = true;
-        self
-    }
-
     /// Set all the label area size with the same value
     pub fn set_all_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[0] = size;
-        self.label_area_size[1] = size;
-        self.label_area_size[2] = size;
-        self.label_area_size[3] = size;
-        self
+        let size = size.in_pixels(self.root_area);
+        self.set_label_area_size(LabelAreaPosition::Top, size)
+            .set_label_area_size(LabelAreaPosition::Bottom, size)
+            .set_label_area_size(LabelAreaPosition::Left, size)
+            .set_label_area_size(LabelAreaPosition::Right, size)
     }
 
     /// Set the most commonly used label area size to the same value
-    pub fn set_left_and_bottom_label_area_size(&mut self, size: u32) -> &mut Self {
-        self.label_area_size[1] = size;
-        self.label_area_size[2] = size;
-        self
+    pub fn set_left_and_bottom_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area);
+        self.set_label_area_size(LabelAreaPosition::Left, size)
+            .set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[1] = size;
-        self
+        self.set_label_area_size(LabelAreaPosition::Left, size)
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[2] = size;
-        self
+        self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set the size of X label area on the top of the chart
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn top_x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[0] = size;
-        self
+        self.set_label_area_size(LabelAreaPosition::Top, size)
     }
 
     /// Set the size of the Y label area on the right side
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn right_y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[3] = size;
-        self
+        self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set a label area size
@@ -142,8 +128,9 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         pos: LabelAreaPosition,
         size: S,
     ) -> &mut Self {
-        let size = size.in_pixels(self.root_area).max(0) as u32;
-        self.label_area_size[pos as usize] = size;
+        let size = size.in_pixels(self.root_area);
+        self.label_area_size[pos as usize] = size.abs() as u32;
+        self.overlap_plotting_area[pos as usize] = size < 0;
         self
     }
 
