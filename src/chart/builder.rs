@@ -99,13 +99,13 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// Set the size of X label area
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
     pub fn x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        self.set_label_area_size(LabelAreaPosition::Left, size)
+        self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        self.set_label_area_size(LabelAreaPosition::Bottom, size)
+        self.set_label_area_size(LabelAreaPosition::Left, size)
     }
 
     /// Set the size of X label area on the top of the chart
@@ -117,7 +117,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// Set the size of the Y label area on the right side
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
     pub fn right_y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
-        self.set_label_area_size(LabelAreaPosition::Bottom, size)
+        self.set_label_area_size(LabelAreaPosition::Right, size)
     }
 
     /// Set a label area size
