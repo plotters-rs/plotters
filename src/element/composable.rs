@@ -48,6 +48,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for EmptyElement<Coord, DB> {
         &self,
         _pos: I,
         _backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         Ok(())
     }
@@ -79,6 +80,7 @@ where
         &self,
         mut pos: I,
         backend: &mut DB,
+        ps: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x0, y0)) = pos.next() {
             self.inner.draw(
@@ -87,6 +89,7 @@ where
                     (p.0 + x0, p.1 + y0)
                 }),
                 backend,
+                ps,
             )?;
         }
         Ok(())
@@ -147,6 +150,7 @@ where
         &self,
         mut pos: I,
         backend: &mut DB,
+        ps: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x0, y0)) = pos.next() {
             self.first.draw(
@@ -155,6 +159,7 @@ where
                     (p.0 + x0, p.1 + y0)
                 }),
                 backend,
+                ps,
             )?;
             self.second.draw(
                 self.second.point_iter().into_iter().map(|p| {
@@ -162,6 +167,7 @@ where
                     (p.0 + x0, p.1 + y0)
                 }),
                 backend,
+                ps,
             )?;
         }
         Ok(())

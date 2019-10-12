@@ -2,7 +2,7 @@
 use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
-use crate::style::{Color, FontDesc, TextStyle};
+use crate::style::{Color, FontDesc, SizeDesc, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -64,11 +64,15 @@ impl Rect {
             })
     }
 
-    fn split_grid(&self, x_breaks: &[i32], y_breaks: &[i32]) -> impl Iterator<Item = Rect> {
+    fn split_grid(
+        &self,
+        x_breaks: impl Iterator<Item = i32>,
+        y_breaks: impl Iterator<Item = i32>,
+    ) -> impl Iterator<Item = Rect> {
         let mut xs = vec![self.x0, self.x1];
         let mut ys = vec![self.y0, self.y1];
-        xs.extend(x_breaks.iter().map(|v| v + self.x0));
-        ys.extend(y_breaks.iter().map(|v| v + self.y0));
+        xs.extend(x_breaks.map(|v| v + self.x0));
+        ys.extend(y_breaks.map(|v| v + self.y0));
 
         xs.sort();
         ys.sort();
@@ -106,7 +110,6 @@ pub struct DrawingArea<DB: DrawingBackend, CT: CoordTranslate> {
     backend: Rc<RefCell<DB>>,
     rect: Rect,
     coord: CT,
-    inset: bool,
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, CT> {
@@ -115,7 +118,6 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
             backend: self.copy_backend_ref(),
             rect: self.rect.clone(),
             coord: self.coord.clone(),
-            inset: self.inset,
         }
     }
 }
@@ -222,7 +224,6 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             rect: self.rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0, self.rect.y0)),
-            inset: self.inset,
         }
     }
 
@@ -241,7 +242,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
     /// Compute the relative size based on the drawing area's width
     pub fn relative_to_width(&self, p: f64) -> f64 {
-        f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.min(1.0).max(0.0))
+        f64::from((self.rect.x1 - self.rect.x0).max(0)) * (p.min(1.0).max(0.0))
     }
 
     /// Get the pixel range of this area
@@ -305,7 +306,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             let b = p.borrow();
             self.rect.truncate(self.coord.translate(b))
         });
-        self.backend_ops(move |b| element.draw(backend_coords, b))
+        self.backend_ops(move |b| element.draw(backend_coords, b, self.dim_in_pixel()))
     }
 
     /// Map coordinate to the backend coordinate
@@ -334,21 +335,22 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend,
             coord: Shift((0, 0)),
-            inset: false,
         }
     }
 
     /// Shrink the region, note all the locaitions are in guest coordinate
-    pub fn shrink(
+    pub fn shrink<A: SizeDesc, B: SizeDesc, C: SizeDesc, D: SizeDesc>(
         mut self,
-        left_upper: (u32, u32),
-        dimension: (u32, u32),
+        left_upper: (A, B),
+        dimension: (C, D),
     ) -> DrawingArea<DB, Shift> {
-        self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0 as i32);
-        self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1 as i32);
+        let left_upper = (left_upper.0.in_pixels(&self), left_upper.1.in_pixels(&self));
+        let dimension = (dimension.0.in_pixels(&self), dimension.1.in_pixels(&self));
+        self.rect.x0 = self.rect.x1.min(self.rect.x0 + left_upper.0);
+        self.rect.y0 = self.rect.y1.min(self.rect.y0 + left_upper.1);
 
-        self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0 as i32);
-        self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1 as i32);
+        self.rect.x1 = self.rect.x0.max(self.rect.x0 + dimension.0);
+        self.rect.y1 = self.rect.y0.max(self.rect.y0 + dimension.1);
 
         self.coord = Shift((self.rect.x0, self.rect.y0));
 
@@ -361,12 +363,21 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: self.rect.clone(),
             backend: self.copy_backend_ref(),
             coord: coord_spec,
-            inset: self.inset,
         }
     }
 
     /// Create a margin for the given drawing area and returns the new drawing area
-    pub fn margin(&self, top: i32, bottom: i32, left: i32, right: i32) -> DrawingArea<DB, Shift> {
+    pub fn margin<ST: SizeDesc, SB: SizeDesc, SL: SizeDesc, SR: SizeDesc>(
+        &self,
+        top: ST,
+        bottom: SB,
+        left: SL,
+        right: SR,
+    ) -> DrawingArea<DB, Shift> {
+        let left = left.in_pixels(self);
+        let right = right.in_pixels(self);
+        let top = top.in_pixels(self);
+        let bottom = bottom.in_pixels(self);
         DrawingArea {
             rect: Rect {
                 x0: self.rect.x0 + left,
@@ -376,31 +387,30 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0 + left, self.rect.y0 + top)),
-            inset: self.inset,
         }
     }
 
     /// Split the drawing area vertically
-    pub fn split_vertically(&self, y: i32) -> (Self, Self) {
+    pub fn split_vertically<S: SizeDesc>(&self, y: S) -> (Self, Self) {
+        let y = y.in_pixels(self);
         let split_point = [y + self.rect.y0];
         let mut ret = self.rect.split(split_point.iter(), true).map(|rect| Self {
             rect: rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((rect.x0, rect.y0)),
-            inset: self.inset,
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
     }
 
     /// Split the drawing area horizentally
-    pub fn split_horizentally(&self, x: i32) -> (Self, Self) {
+    pub fn split_horizentally<S: SizeDesc>(&self, x: S) -> (Self, Self) {
+        let x = x.in_pixels(self);
         let split_point = [x + self.rect.x0];
         let mut ret = self.rect.split(split_point.iter(), false).map(|rect| Self {
             rect: rect.clone(),
             backend: self.copy_backend_ref(),
             coord: Shift((rect.x0, rect.y0)),
-            inset: self.inset,
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
@@ -414,24 +424,30 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),
                 coord: Shift((rect.x0, rect.y0)),
-                inset: self.inset,
             })
             .collect()
     }
 
     /// Split the drawing area into a grid with specified breakpoints on both X axis and Y axis
-    pub fn split_by_breakpoints<XS: AsRef<[i32]>, YS: AsRef<[i32]>>(
+    pub fn split_by_breakpoints<
+        XSize: SizeDesc,
+        YSize: SizeDesc,
+        XS: AsRef<[XSize]>,
+        YS: AsRef<[YSize]>,
+    >(
         &self,
         xs: XS,
         ys: YS,
     ) -> Vec<Self> {
         self.rect
-            .split_grid(xs.as_ref(), ys.as_ref())
+            .split_grid(
+                xs.as_ref().iter().map(|x| x.in_pixels(self)),
+                ys.as_ref().iter().map(|x| x.in_pixels(self)),
+            )
             .map(|rect| Self {
                 rect: rect.clone(),
                 backend: self.copy_backend_ref(),
                 coord: Shift((rect.x0, rect.y0)),
-                inset: self.inset,
             })
             .collect()
     }
@@ -476,51 +492,9 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.copy_backend_ref(),
             coord: Shift((self.rect.x0, self.rect.y0 + 10 + text_h as i32)),
-            inset: self.inset,
         })
     }
 
-    /// Alter area bounds
-    pub fn alter_diff(self, diff_tl: (i32, i32), diff_rb: (i32, i32)) -> Self {
-        Self {
-            backend: self.backend,
-            rect: Rect {
-                x0: self.rect.x0 + diff_tl.0,
-                y0: self.rect.y0 + diff_tl.1,
-                x1: self.rect.x1 + diff_rb.0,
-                y1: self.rect.y1 + diff_rb.1,
-            },
-            coord: self.coord,
-            inset: self.inset,
-        }
-    }
-    /// Update area bounds
-    pub fn alter_new(self, tl: (Option<i32>, Option<i32>), rb: (Option<i32>, Option<i32>)) -> Self {
-        Self {
-            backend: self.backend,
-            rect: Rect {
-                x0: tl.0.unwrap_or(self.rect.x0),
-                y0: tl.1.unwrap_or(self.rect.y0),
-                x1: rb.0.unwrap_or(self.rect.x1),
-                y1: rb.1.unwrap_or(self.rect.y1),
-            },
-            coord: self.coord,
-            inset: self.inset,
-        }
-    }
-    /// Make area inset
-    pub fn make_inset(self) -> Self {
-        Self {
-            backend: self.backend,
-            rect: self.rect,
-            coord: self.coord,
-            inset: true,
-        }
-    }
-    /// Get area's inset value
-    pub fn is_inset(&self) -> bool {
-        self.inset
-    }
     /// Draw text on the drawing area
     pub fn draw_text(
         &self,
@@ -764,5 +738,105 @@ mod drawing_area_tests {
             .margin(1, 2, 3, 4)
             .fill(&WHITE)
             .expect("Drawing Failure");
+    }
+
+    #[test]
+    fn test_ranges() {
+        let drawing_area =
+            create_mocked_drawing_area(1024, 768, |_m| {}).apply_coord_spec(RangedCoord::<
+                RangedCoordi32,
+                RangedCoordu32,
+            >::new(
+                -100..100,
+                0..200,
+                (0..1024, 0..768),
+            ));
+
+        let x_range = drawing_area.get_x_range();
+        assert_eq!(x_range, -100..100);
+
+        let y_range = drawing_area.get_y_range();
+        assert_eq!(y_range, 0..200);
+    }
+
+    #[test]
+    fn test_relative_size() {
+        let drawing_area = create_mocked_drawing_area(1024, 768, |_m| {});
+
+        assert_eq!(102.4, drawing_area.relative_to_width(0.1));
+        assert_eq!(384.0, drawing_area.relative_to_height(0.5));
+
+        assert_eq!(1024.0, drawing_area.relative_to_width(1.3));
+        assert_eq!(768.0, drawing_area.relative_to_height(1.5));
+
+        assert_eq!(0.0, drawing_area.relative_to_width(-0.2));
+        assert_eq!(0.0, drawing_area.relative_to_height(-0.5));
+    }
+
+    #[test]
+    fn test_relative_split() {
+        let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
+            let mut counter = 0;
+            m.check_draw_rect(move |c, _, f, u, d| {
+                assert_eq!(f, true);
+
+                match counter {
+                    0 => {
+                        assert_eq!(c, RED.to_rgba());
+                        assert_eq!(u, (0, 0));
+                        assert_eq!(d, (300, 600));
+                    }
+                    1 => {
+                        assert_eq!(c, BLUE.to_rgba());
+                        assert_eq!(u, (300, 0));
+                        assert_eq!(d, (1000, 600));
+                    }
+                    2 => {
+                        assert_eq!(c, GREEN.to_rgba());
+                        assert_eq!(u, (0, 600));
+                        assert_eq!(d, (300, 1200));
+                    }
+                    3 => {
+                        assert_eq!(c, WHITE.to_rgba());
+                        assert_eq!(u, (300, 600));
+                        assert_eq!(d, (1000, 1200));
+                    }
+                    _ => panic!("Too many draw rect"),
+                }
+
+                counter += 1;
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 4);
+                assert_eq!(b.draw_count, 4);
+            });
+        });
+
+        let splited =
+            drawing_area.split_by_breakpoints([(30).percent_width()], [(50).percent_height()]);
+
+        splited[0].fill(&RED).unwrap();
+        splited[1].fill(&BLUE).unwrap();
+        splited[2].fill(&GREEN).unwrap();
+        splited[3].fill(&WHITE).unwrap();
+    }
+
+    #[test]
+    fn test_relative_shrink() {
+        let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
+            m.check_draw_rect(move |_, _, _, u, d| {
+                assert_eq!((100, 100), u);
+                assert_eq!((300, 700), d);
+            });
+
+            m.drop_check(|b| {
+                assert_eq!(b.num_draw_rect_call, 1);
+                assert_eq!(b.draw_count, 1);
+            });
+        })
+        .shrink(((10).percent_width(), 100), (200, (50).percent_height()));
+
+        drawing_area.fill(&RED).unwrap();
     }
 }

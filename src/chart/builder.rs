@@ -3,10 +3,11 @@ use super::context::ChartContext;
 use crate::coord::{AsRangedCoord, RangedCoord, Shift};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::style::TextStyle;
+use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
 /// The enum used to specify the position of label area.
 /// This is used when we configure the label area size with the API `set_label_area_size`
+#[derive(Copy, Clone)]
 pub enum LabelAreaPosition {
     Top = 0,
     Bottom = 1,
@@ -18,8 +19,8 @@ pub enum LabelAreaPosition {
 /// With the hlep of this object, we can convert a basic drawing area into a chart context, which
 /// allows the high-level chartting API beening used on the drawing area.
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
-    label_area_size: [i32; 4], // [upper, lower, left, right]
-    label_area_inset: [bool; 4],
+    label_area_size: [u32; 4], // [upper, lower, left, right]
+    overlap_plotting_area: [bool; 4],
     root_area: &'a DrawingArea<DB, Shift>,
     title: Option<(String, TextStyle<'b>)>,
     margin: [u32; 4],
@@ -32,101 +33,104 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
         Self {
             label_area_size: [0; 4],
-            label_area_inset: [false; 4],
             root_area: root,
             title: None,
             margin: [0; 4],
+            overlap_plotting_area: [false; 4],
         }
     }
 
     /// Set the margin size of the chart (applied for top, bottom, left and right at the same time)
     /// - `size`: The size of the chart margin.
-    pub fn margin(&mut self, size: u32) -> &mut Self {
+    pub fn margin<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin = [size, size, size, size];
         self
     }
 
     /// Set the top margin of current chart
     /// - `size`: The size of the top margin.
-    pub fn margin_top(&mut self, size: u32) -> &mut Self {
+    pub fn margin_top<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[0] = size;
         self
     }
 
     /// Set the bottom margin of current chart
     /// - `size`: The size of the bottom margin.
-    pub fn margin_bottom(&mut self, size: u32) -> &mut Self {
+    pub fn margin_bottom<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[1] = size;
         self
     }
 
     /// Set the left margin of current chart
     /// - `size`: The size of the left margin.
-    pub fn margin_left(&mut self, size: u32) -> &mut Self {
+    pub fn margin_left<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[2] = size;
         self
     }
 
     /// Set the right margin of current chart
     /// - `size`: The size of the right margin.
-    pub fn margin_right(&mut self, size: u32) -> &mut Self {
+    pub fn margin_right<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[3] = size;
         self
     }
 
-    /// Set the size of X label area
-    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
-    pub fn x_label_area_size(&mut self, size: i32) -> &mut Self {
-        self.label_area_size[1] = size;
-        self
+    /// Set all the label area size with the same value
+    pub fn set_all_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area);
+        self.set_label_area_size(LabelAreaPosition::Top, size)
+            .set_label_area_size(LabelAreaPosition::Bottom, size)
+            .set_label_area_size(LabelAreaPosition::Left, size)
+            .set_label_area_size(LabelAreaPosition::Right, size)
     }
 
-    pub fn inset_x_labels(&mut self) -> &mut Self {
-        self.label_area_inset[1] = true;
-        self
+    /// Set the most commonly used label area size to the same value
+    pub fn set_left_and_bottom_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area);
+        self.set_label_area_size(LabelAreaPosition::Left, size)
+            .set_label_area_size(LabelAreaPosition::Bottom, size)
+    }
+
+    /// Set the size of X label area
+    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
+    pub fn x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        self.set_label_area_size(LabelAreaPosition::Left, size)
     }
 
     /// Set the size of the Y label area
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
-    pub fn y_label_area_size(&mut self, size: i32) -> &mut Self {
-        self.label_area_size[2] = size;
-        self
-    }
-
-    pub fn inset_y_labels(&mut self) -> &mut Self {
-        self.label_area_inset[2] = true;
-        self
+    pub fn y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set the size of X label area on the top of the chart
     /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
-    pub fn top_x_label_area_size(&mut self, size: i32) -> &mut Self {
-        self.label_area_size[0] = size;
-        self
-    }
-
-    pub fn inset_top_x_labels(&mut self) -> &mut Self {
-        self.label_area_inset[0] = true;
-        self
+    pub fn top_x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        self.set_label_area_size(LabelAreaPosition::Top, size)
     }
 
     /// Set the size of the Y label area on the right side
     /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
-    pub fn right_y_label_area_size(&mut self, size: i32) -> &mut Self {
-        self.label_area_size[3] = size;
-        self
-    }
-
-    pub fn inset_right_y_labels(&mut self) -> &mut Self {
-        self.label_area_inset[3] = true;
-        self
+    pub fn right_y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
     /// Set a label area size
     /// - `pos`: THe position where the label area locted
     /// - `size`: The size of the label area size
-    pub fn set_label_area_size(&mut self, pos: LabelAreaPosition, size: i32) -> &mut Self {
-        self.label_area_size[pos as usize] = size;
+    pub fn set_label_area_size<S: SizeDesc>(
+        &mut self,
+        pos: LabelAreaPosition,
+        size: S,
+    ) -> &mut Self {
+        let size = size.in_pixels(self.root_area);
+        self.label_area_size[pos as usize] = size.abs() as u32;
+        self.overlap_plotting_area[pos as usize] = size < 0;
         self
     }
 
@@ -134,12 +138,15 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     /// - `caption`: The caption of the chart
     /// - `style`: The text style
     /// - Note: If the caption is set, the margin option will be ignored
-    pub fn caption<S: AsRef<str>, Style: Into<TextStyle<'b>>>(
+    pub fn caption<S: AsRef<str>, Style: IntoTextStyle<'b>>(
         &mut self,
         caption: S,
         style: Style,
     ) -> &mut Self {
-        self.title = Some((caption.as_ref().to_string(), style.into()));
+        self.title = Some((
+            caption.as_ref().to_string(),
+            style.into_text_style(self.root_area),
+        ));
         self
     }
 
@@ -178,18 +185,17 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
         let mut actual_drawing_area_pos = [0, h as i32, 0, w as i32];
 
-        for (idx, (dx, dy)) in (0..4).map(|idx| (idx, [(0, -1), (0, 1), (-1, 0), (1, 0)][idx])) {
-            //let size = if self.label_area_size[idx] <= 0 { 0 } else { self.label_area_size[idx] };
-            let size = self.label_area_size[idx];
-            let split_point = if !self.label_area_inset[idx] {
-                if dx + dy < 0 {
-                    size
-                } else {
-                    -size
-                }
-            } else {
-                0
-            };
+        const DIR: [(i16, i16); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
+
+        for (idx, (dx, dy)) in (0..4).map(|idx| (idx, DIR[idx])) {
+            if self.overlap_plotting_area[idx] {
+                continue;
+            }
+
+            let size = self.label_area_size[idx] as i32;
+
+            let split_point = if dx + dy < 0 { size } else { -size };
+
             actual_drawing_area_pos[idx] += split_point;
         }
 
@@ -202,39 +208,37 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             .map(Some)
             .collect();
 
+        std::mem::swap(&mut drawing_area, splitted[4].as_mut().unwrap());
+
         for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
-            let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
-            if h > 0 && w > 0 {
-                std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
+            if !self.overlap_plotting_area[dst_idx] {
+                let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
+                if h > 0 && w > 0 {
+                    std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
+                }
+            } else if self.label_area_size[dst_idx] != 0 {
+                let size = self.label_area_size[dst_idx] as i32;
+                let (dw, dh) = drawing_area.dim_in_pixel();
+                let x0 = if DIR[dst_idx].0 > 0 {
+                    dw as i32 - size
+                } else {
+                    0
+                };
+                let y0 = if DIR[dst_idx].1 > 0 {
+                    dh as i32 - size
+                } else {
+                    0
+                };
+                let x1 = if DIR[dst_idx].0 >= 0 { dw as i32 } else { size };
+                let y1 = if DIR[dst_idx].1 >= 0 { dh as i32 } else { size };
+
+                label_areas[dst_idx] = Some(
+                    drawing_area
+                        .clone()
+                        .shrink((x0, y0), ((x1 - x0), (y1 - y0))),
+                );
             }
         }
-
-        for (id, (_, size)) in self
-            .label_area_inset
-            .iter()
-            .zip(self.label_area_size.iter())
-            .enumerate()
-            .filter(|(_, (inset, size))| **inset && **size != 0)
-        {
-            let area = splitted[4].as_ref().unwrap();
-            let (w, h) = area.dim_in_pixel();
-            let mut new_area = match id {
-                0 => area.clone().alter_new((None, None), (None, Some(*size))),
-                2 => area.clone().alter_new((None, None), (Some(*size), None)),
-                1 => area.clone().alter_new(
-                    (None, Some(h as i32 - *size)),
-                    (None, Some(h as i32 - *size)),
-                ),
-                3 => area
-                    .clone()
-                    .alter_new((Some(w as i32 - *size), None), (None, None)),
-                _ => unreachable!(),
-            }
-            .make_inset();
-            std::mem::swap(&mut label_areas[id], &mut Some(new_area));
-        }
-
-        std::mem::swap(&mut drawing_area, &mut splitted[4].as_mut().unwrap());
 
         let mut pixel_range = drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
@@ -257,5 +261,73 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             )),
             series_anno: vec![],
         })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+    #[test]
+    fn test_label_area_size() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart
+            .x_label_area_size(10)
+            .y_label_area_size(20)
+            .top_x_label_area_size(30)
+            .right_y_label_area_size(40);
+        assert_eq!(chart.label_area_size[1], 10);
+        assert_eq!(chart.label_area_size[2], 20);
+        assert_eq!(chart.label_area_size[0], 30);
+        assert_eq!(chart.label_area_size[3], 40);
+
+        chart.set_label_area_size(LabelAreaPosition::Left, 100);
+        chart.set_label_area_size(LabelAreaPosition::Right, 200);
+        chart.set_label_area_size(LabelAreaPosition::Top, 300);
+        chart.set_label_area_size(LabelAreaPosition::Bottom, 400);
+
+        assert_eq!(chart.label_area_size[0], 300);
+        assert_eq!(chart.label_area_size[1], 400);
+        assert_eq!(chart.label_area_size[2], 100);
+        assert_eq!(chart.label_area_size[3], 200);
+    }
+
+    #[test]
+    fn test_margin_configure() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart.margin(5);
+        assert_eq!(chart.margin[0], 5);
+        assert_eq!(chart.margin[1], 5);
+        assert_eq!(chart.margin[2], 5);
+        assert_eq!(chart.margin[3], 5);
+
+        chart.margin_top(10);
+        chart.margin_bottom(11);
+        chart.margin_left(12);
+        chart.margin_right(13);
+        assert_eq!(chart.margin[0], 10);
+        assert_eq!(chart.margin[1], 11);
+        assert_eq!(chart.margin[2], 12);
+        assert_eq!(chart.margin[3], 13);
+    }
+
+    #[test]
+    fn test_caption() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+        let mut chart = ChartBuilder::on(&drawing_area);
+
+        chart.caption("This is a test case", ("Arial", 10));
+
+        assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "Arial");
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
+        assert_eq!(
+            chart.title.as_ref().unwrap().1.color.to_rgba(),
+            BLACK.to_rgba()
+        );
     }
 }

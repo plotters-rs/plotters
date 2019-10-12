@@ -39,10 +39,6 @@ pub trait BackendStyle {
     fn stroke_width(&self) -> u32 {
         1
     }
-
-    fn title(&self) -> &str {
-        ""
-    }
 }
 
 impl<T: Color> BackendStyle for T {
@@ -59,9 +55,6 @@ impl BackendStyle for ShapeStyle {
     }
     fn stroke_width(&self) -> u32 {
         self.stroke_width
-    }
-    fn title(&self) -> &'static str {
-        self.title
     }
 }
 

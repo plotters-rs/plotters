@@ -57,6 +57,7 @@ impl<X, Y: PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<X, Y> {
         &self,
         points: I,
         backend: &mut DB,
+        _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let mut points: Vec<_> = points.take(4).collect();
         if points.len() == 4 {

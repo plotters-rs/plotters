@@ -13,7 +13,7 @@ use crate::coord::{
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection};
-use crate::style::{FontTransform, ShapeStyle, TextStyle};
+use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 #[allow(clippy::type_complexity)]
@@ -81,10 +81,45 @@ impl<
         Y: Ranged<ValueType = YT>,
     > ChartContext<'a, DB, RangedCoord<X, Y>>
 {
+    fn is_overlapping_drawing_area(&self, area: Option<&DrawingArea<DB, Shift>>) -> bool {
+        let area = if area.is_none() {
+            return false;
+        } else {
+            area.unwrap()
+        };
+
+        let (x0, y0) = area.get_base_pixel();
+        let (w, h) = area.dim_in_pixel();
+        let (x1, y1) = (x0 + w as i32, y0 + h as i32);
+        let (dx0, dy0) = self.drawing_area.get_base_pixel();
+        let (w, h) = self.drawing_area.dim_in_pixel();
+        let (dx1, dy1) = (dx0 + w as i32, dy0 + h as i32);
+
+        let (ox0, ox1) = (x0.max(dx0), x1.min(dx1));
+        let (oy0, oy1) = (y0.max(dy0), y1.min(dy1));
+
+        ox1 > ox0 && oy1 > oy0
+    }
+
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
     /// the function `MeshStyle::draw`
     pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
+        let base_tick_size = (5u32).percent().max(5).in_pixels(&self.drawing_area);
+
+        let mut x_tick_size = [base_tick_size, base_tick_size];
+        let mut y_tick_size = [base_tick_size, base_tick_size];
+
+        for idx in 0..2 {
+            if self.is_overlapping_drawing_area(self.x_label_area[idx].as_ref()) {
+                x_tick_size[idx] = -x_tick_size[idx];
+            }
+            if self.is_overlapping_drawing_area(self.y_label_area[idx].as_ref()) {
+                y_tick_size[idx] = -y_tick_size[idx];
+            }
+        }
+
         MeshStyle {
+            parent_size: self.drawing_area.dim_in_pixel(),
             axis_style: None,
             x_label_offset: 0,
             y_label_offset: 0,
@@ -104,6 +139,8 @@ impl<
             x_desc: None,
             y_desc: None,
             axis_desc_style: None,
+            x_tick_size,
+            y_tick_size,
         }
     }
 }
@@ -226,9 +263,91 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok((x_labels, y_labels))
     }
 
+    fn draw_axis(
+        &self,
+        area: &DrawingArea<DB, Shift>,
+        axis_style: Option<&ShapeStyle>,
+        orientation: (i16, i16),
+        inward_labels: bool,
+    ) -> Result<Range<i32>, DrawingAreaErrorKind<DB::ErrorType>> {
+        let (x0, y0) = self.drawing_area.get_base_pixel();
+        let (tw, th) = area.dim_in_pixel();
+
+        let mut axis_range = if orientation.0 == 0 {
+            self.drawing_area.get_x_axis_pixel_range()
+        } else {
+            self.drawing_area.get_y_axis_pixel_range()
+        };
+
+        /* At this point, the coordinate system tells us the pxiel range
+         * after the translation.
+         * However, we need to use the logc coordinate system for drawing. */
+        if orientation.0 == 0 {
+            axis_range.start -= x0;
+            axis_range.end -= x0;
+        } else {
+            axis_range.start -= y0;
+            axis_range.end -= y0;
+        }
+
+        if let Some(axis_style) = axis_style {
+            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
+            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 };
+            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
+            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+
+            if inward_labels {
+                if orientation.0 == 0 {
+                    if y0 == 0 {
+                        y0 = th as i32;
+                        y1 = th as i32;
+                    } else {
+                        y0 = 0;
+                        y1 = 0;
+                    }
+                } else if x0 == 0 {
+                    x0 = tw as i32;
+                    x1 = tw as i32;
+                } else {
+                    x0 = 0;
+                    x1 = 0;
+                }
+            }
+
+            if orientation.0 == 0 {
+                x0 = axis_range.start;
+                x1 = axis_range.end;
+            } else {
+                y0 = axis_range.start;
+                y1 = axis_range.end;
+            }
+
+            area.draw(&Path::new(vec![(x0, y0), (x1, y1)], axis_style.clone()))?;
+        }
+
+        Ok(axis_range)
+    }
+
+    fn estimate_right_aligned_label_offset(
+        &self,
+        label_style: &TextStyle,
+        labels: &[(i32, String)],
+    ) -> i32 {
+        labels
+            .iter()
+            .map(|(_, t)| {
+                self.drawing_area
+                    .estimate_text_size(t, &label_style.font)
+                    .unwrap_or((0, 0))
+                    .0
+            })
+            .max()
+            .unwrap_or(0) as i32
+    }
+
     // TODO: consider make this function less complicated
-    #[allow(clippy::cognitive_complexity)]
     #[allow(clippy::too_many_arguments)]
+    #[allow(clippy::cognitive_complexity)]
     fn draw_axis_and_labels(
         &self,
         area: Option<&DrawingArea<DB, Shift>>,
@@ -247,81 +366,32 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         };
 
         let (x0, y0) = self.drawing_area.get_base_pixel();
-
-        /* TODO: make this configure adjustable */
-        let label_dist = if orientation.1 > 0 { 0 } else { 10 };
-
         let (tw, th) = area.dim_in_pixel();
 
-        let mut axis_range = if orientation.0 == 0 {
-            self.drawing_area.get_x_axis_pixel_range()
-        } else {
-            self.drawing_area.get_y_axis_pixel_range()
-        };
-
-        if orientation.0 == 0 {
-            axis_range.start -= x0;
-            axis_range.end -= x0;
-        } else {
-            axis_range.start -= y0;
-            axis_range.end -= y0;
-        }
-
-        if let Some(style) = axis_style {
-            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
-            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 };
-            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
-            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
-
-            if orientation.0 == 0 {
-                x0 = axis_range.start;
-                x1 = axis_range.end;
+        /* This is the minimal distance from the axis to the box of the labels */
+        let label_dist =
+            if (tick_size > 0 && orientation.1 > 0) || (tick_size < 0 && orientation.1 < 0) {
+                0
             } else {
-                y0 = axis_range.start;
-                y1 = axis_range.end;
-            }
+                tick_size.abs() * 2
+            };
 
-            if area.is_inset() {
-                // FIXME: looks like truncate func works strange with right side
-                if x0 == x1 {
-                    if x0 > 0 {
-                        x0 = 1;
-                        x1 = 1;
-                    } else {
-                        x0 = 10_000;
-                        x1 = 10_000;
-                    }
-                };
-                if y0 == y1 {
-                    if y0 > 0 {
-                        y0 = 1;
-                        y1 = 1;
-                    } else {
-                        y0 = 10_000;
-                        y1 = 10_000;
-                    }
-                };
-            }
-            area.draw(&Path::new(vec![(x0, y0), (x1, y1)], style.clone()))?;
-        }
+        /* Draw the axis and get the axis range so that we can do further label
+         * and tick mark drawing */
+        let axis_range = self.draw_axis(area, axis_style, orientation, tick_size < 0)?;
 
-        let right_most = if orientation.0 > 0 && orientation.1 == 0 {
-            labels
-                .iter()
-                .map(|(_, t)| {
-                    self.drawing_area
-                        .estimate_text_size(t, &label_style.font)
-                        .unwrap_or((0, 0))
-                        .0
-                })
-                .max()
-                .unwrap_or(0) as i32
-                + label_dist as i32
+        /* If the label area is on the right hand side, we should enable the right aligned
+         * layout, thus in this case we need to estimate the right most position when all
+         * the lables are right aligned */
+        let right_alignment = if orientation.0 > 0 && orientation.1 == 0 {
+            self.estimate_right_aligned_label_offset(label_style, labels)
         } else {
             0
         };
 
+        /* Then we need to draw the tick mark and the label */
         for (p, t) in labels {
+            /* Make sure we are actually in the visible range */
             let rp = if orientation.0 == 0 { *p - x0 } else { *p - y0 };
 
             if rp < axis_range.start.min(axis_range.end)
@@ -330,18 +400,40 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 continue;
             }
 
+            /* Then we need to emstimate the text if rendered */
             let (w, h) = self
                 .drawing_area
                 .estimate_text_size(&t, &label_style.font)
                 .unwrap_or((0, 0));
 
-            // TODO: need some adjustments here for inset labels
-            let (cx, cy) = match orientation {
-                (dx, dy) if dx > 0 && dy == 0 => (right_most - w as i32, *p - y0),
-                (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32, *p - y0),
-                (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32),
-                (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - h as i32),
-                _ => panic!("Bug: Invalid orientation specification"),
+            let (cx, cy) = if tick_size >= 0 {
+                match orientation {
+                    // Right
+                    (dx, dy) if dx > 0 && dy == 0 => {
+                        (right_alignment + label_dist - w as i32, *p - y0)
+                    }
+                    // Left
+                    (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32, *p - y0),
+                    // Bottom
+                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32),
+                    // Top
+                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - h as i32),
+                    _ => panic!("Bug: Invlid orientation specification"),
+                }
+            } else {
+                match orientation {
+                    // Right
+                    (dx, dy) if dx > 0 && dy == 0 => {
+                        (tw as i32 - right_alignment - label_dist, *p - y0)
+                    }
+                    // Left
+                    (dx, dy) if dx < 0 && dy == 0 => (label_dist, *p - y0),
+                    // Bottom
+                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, th as i32 - label_dist - h as i32),
+                    // Top
+                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, label_dist + h as i32),
+                    _ => panic!("Bug: Invlid orientation specification"),
+                }
             };
 
             let should_draw = if orientation.0 == 0 {
@@ -349,6 +441,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             } else {
                 cy >= 0 && cy + label_offset + h as i32 / 2 <= th as i32
             };
+
             if should_draw {
                 let (text_x, text_y) = if orientation.0 == 0 {
                     (cx - w as i32 / 2 + label_offset, cy)
@@ -357,42 +450,32 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 };
 
                 area.draw_text(&t, label_style, (text_x, text_y))?;
-                // TODO: need some adjustments here
+
                 if let Some(style) = axis_style {
-                    let (kx0, ky0, kx1, ky1) = match orientation {
-                        // ---
-                        (dx, dy) if dx > 0 && dy == 0 => {
-                            if area.is_inset() {
-                                (tw as i32 - tick_size, *p - y0, tw as i32, *p - y0)
-                            } else {
-                                (0, *p - y0, tick_size, *p - y0)
-                            }
-                        }
-                        // --- left labels
-                        (dx, dy) if dx < 0 && dy == 0 => {
-                            if area.is_inset() {
-                                (0, *p - y0, tick_size, *p - y0)
-                            } else {
+                    let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
+                        match orientation {
+                            (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
+                            (dx, dy) if dx < 0 && dy == 0 => {
                                 (tw as i32 - tick_size, *p - y0, tw as i32, *p - y0)
                             }
-                        }
-                        // ---
-                        (dx, dy) if dx == 0 && dy > 0 => {
-                            if area.is_inset() {
-                                (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
-                            } else {
-                                (*p - x0, 0, *p - x0, tick_size)
-                            }
-                        }
-                        // ---
-                        (dx, dy) if dx == 0 && dy < 0 => {
-                            if area.is_inset() {
-                                (*p - x0, 0, *p - x0, tick_size)
-                            } else {
+                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
+                            (dx, dy) if dx == 0 && dy < 0 => {
                                 (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
                             }
+                            _ => panic!("Bug: Invlid orientation specification"),
                         }
-                        _ => panic!("Bug: Invlid orientation specification"),
+                    } else {
+                        match orientation {
+                            (dx, dy) if dx > 0 && dy == 0 => {
+                                (tw as i32, *p - y0, tw as i32 + tick_size, *p - y0)
+                            }
+                            (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
+                            (dx, dy) if dx == 0 && dy > 0 => {
+                                (*p - x0, th as i32, *p - x0, th as i32 + tick_size)
+                            }
+                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
+                            _ => panic!("Bug: Invlid orientation specification"),
+                        }
                     };
                     let line = Path::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
                     area.draw(&line)?;
@@ -445,12 +528,17 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         axis_desc_style: &TextStyle,
         x_desc: Option<String>,
         y_desc: Option<String>,
+        x_tick_size: [i32; 2],
+        y_tick_size: [i32; 2],
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
     {
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
+
+        //let tick_size = (5u32).percent().max(5);
+        //let tick_size = tick_size.in_pixels(&self.drawing_area);
 
         for idx in 0..2 {
             self.draw_axis_and_labels(
@@ -461,7 +549,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 x_label_offset,
                 (0, -1 + idx as i16 * 2),
                 x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                5,
+                x_tick_size[idx],
             )?;
 
             self.draw_axis_and_labels(
@@ -472,7 +560,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 y_label_offset,
                 (-1 + idx as i16 * 2, 0),
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                5,
+                y_tick_size[idx],
             )?;
         }
 

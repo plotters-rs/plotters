@@ -5,7 +5,9 @@ use super::context::ChartContext;
 use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
-use crate::style::{Color, FontDesc, RGBColor, ShapeStyle, TextStyle};
+use crate::style::{
+    AsRelative, Color, FontDesc, IntoTextStyle, RGBColor, ShapeStyle, SizeDesc, TextStyle,
+};
 
 /// The style used to describe the mesh for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
@@ -34,7 +36,7 @@ where
     /// The offset of x labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel
-    pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
+    pub fn x_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.style.x_label_offset(value);
         self
     }
@@ -42,7 +44,7 @@ where
     /// The offset of y labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel
-    pub fn y_label_offset(&mut self, value: i32) -> &mut Self {
+    pub fn y_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.style.y_label_offset(value);
         self
     }
@@ -77,8 +79,9 @@ where
 
     /// Set the axis description's style. If not given, use label style instead.
     /// - `style`: The text style that would be applied to descriptions
-    pub fn axis_desc_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
-        self.style.axis_desc_style(style);
+    pub fn axis_desc_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
+        self.style
+            .axis_desc_style(style.into_text_style(&self.style.parent_size));
         self
     }
 
@@ -102,7 +105,7 @@ where
     }
 
     /// Set the label style for the secondary axis
-    pub fn label_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
+    pub fn label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
         self.style.label_style(style);
         self
     }
@@ -113,6 +116,7 @@ pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB>
 where
     DB: DrawingBackend,
 {
+    pub(super) parent_size: (u32, u32),
     pub(super) draw_x_mesh: bool,
     pub(super) draw_y_mesh: bool,
     pub(super) draw_x_axis: bool,
@@ -132,6 +136,8 @@ where
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
     pub(super) _pahtom_data: PhantomData<(X, Y)>,
+    pub(super) x_tick_size: [i32; 2],
+    pub(super) y_tick_size: [i32; 2],
 }
 
 impl<'a, 'b, X, Y, DB> MeshStyle<'a, 'b, X, Y, DB>
@@ -143,16 +149,16 @@ where
     /// The offset of x labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel
-    pub fn x_label_offset(&mut self, value: i32) -> &mut Self {
-        self.x_label_offset = value;
+    pub fn x_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
+        self.x_label_offset = value.in_pixels(&self.parent_size);
         self
     }
 
     /// The offset of y labels. This is used when we want to place the label in the middle of
     /// the grid. This is useful if we are drawing a histogram
     /// - `value`: The offset in pixel
-    pub fn y_label_offset(&mut self, value: i32) -> &mut Self {
-        self.y_label_offset = value;
+    pub fn y_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
+        self.y_label_offset = value.in_pixels(&self.parent_size);
         self
     }
 
@@ -216,8 +222,8 @@ where
 
     /// Set the style of the label text
     /// - `style`: The text style that would be applied to the labels
-    pub fn label_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
-        self.label_style = Some(style.into());
+    pub fn label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
+        self.label_style = Some(style.into_text_style(&self.parent_size));
         self
     }
 
@@ -237,8 +243,8 @@ where
 
     /// Set the axis description's style. If not given, use label style instead.
     /// - `style`: The text style that would be applied to descriptions
-    pub fn axis_desc_style<T: Into<TextStyle<'b>>>(&mut self, style: T) -> &mut Self {
-        self.axis_desc_style = Some(style.into());
+    pub fn axis_desc_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
+        self.axis_desc_style = Some(style.into_text_style(&self.parent_size));
         self
     }
 
@@ -265,7 +271,10 @@ where
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
         let default_axis_color = RGBColor(0, 0, 0);
-        let default_label_font = FontDesc::new("Arial", 12.0);
+        let default_label_font = FontDesc::new(
+            "Arial",
+            f64::from((12i32).percent().max(12).in_pixels(&self.parent_size)),
+        );
 
         let mesh_style_1 = self
             .line_style_1
@@ -305,6 +314,8 @@ where
             &axis_desc_style,
             self.x_desc.clone(),
             self.y_desc.clone(),
+            self.x_tick_size,
+            self.y_tick_size,
         )?;
 
         target.draw_mesh(
@@ -325,6 +336,8 @@ where
             &axis_desc_style,
             None,
             None,
+            self.x_tick_size,
+            self.y_tick_size,
         )
     }
 }
