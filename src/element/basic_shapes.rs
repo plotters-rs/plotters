@@ -1,6 +1,6 @@
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use crate::style::ShapeStyle;
+use crate::style::{ShapeStyle, SizeDesc};
 
 /// An element of a single pixel
 pub struct Pixel<Coord> {
@@ -220,19 +220,19 @@ fn test_rect_element() {
 }
 
 /// A circle element
-pub struct Circle<Coord> {
+pub struct Circle<Coord, Size: SizeDesc> {
     center: Coord,
-    size: u32,
+    size: Size,
     style: ShapeStyle,
 }
 
-impl<Coord> Circle<Coord> {
+impl<Coord, Size: SizeDesc> Circle<Coord, Size> {
     /// Create a new circle element
     /// - `coord` The center of the circle
     /// - `size` The radius of the circle
     /// - `style` The style of the circle
     /// - Return: The newly created circle element
-    pub fn new<S: Into<ShapeStyle>>(coord: Coord, size: u32, style: S) -> Self {
+    pub fn new<S: Into<ShapeStyle>>(coord: Coord, size: Size, style: S) -> Self {
         Self {
             center: coord,
             size,
@@ -241,7 +241,7 @@ impl<Coord> Circle<Coord> {
     }
 }
 
-impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<Coord> {
+impl<'a, Coord: 'a, Size: SizeDesc> PointCollection<'a, Coord> for &'a Circle<Coord, Size> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
@@ -249,15 +249,16 @@ impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Circle<Coord> {
     }
 }
 
-impl<Coord, DB: DrawingBackend> Drawable<DB> for Circle<Coord> {
+impl<Coord, DB: DrawingBackend, Size: SizeDesc> Drawable<DB> for Circle<Coord, Size> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         mut points: I,
         backend: &mut DB,
-        _: (u32, u32),
+        ps: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_circle((x, y), self.size, &self.style, self.style.filled);
+            let size = self.size.in_pixels(&ps).max(0) as u32;
+            return backend.draw_circle((x, y), size, &self.style, self.style.filled);
         }
         Ok(())
     }

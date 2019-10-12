@@ -112,9 +112,9 @@ impl<Coord, Size: SizeDesc> PointElement<Coord, Size> for TriangleMarker<Coord, 
     }
 }
 
-impl<Coord> PointElement<Coord, u32> for Circle<Coord> {
-    fn make_point(pos: Coord, size: u32, style: ShapeStyle) -> Self {
-        Self::new(pos, size as u32, style)
+impl<Coord, Size: SizeDesc> PointElement<Coord, Size> for Circle<Coord, Size> {
+    fn make_point(pos: Coord, size: Size, style: ShapeStyle) -> Self {
+        Self::new(pos, size, style)
     }
 }
 
