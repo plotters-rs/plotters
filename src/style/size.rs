@@ -30,9 +30,21 @@ pub trait SizeDesc {
     fn in_pixels<T: HasDimension>(&self, parent: &T) -> i32;
 }
 
-impl<T: Into<i32> + Clone> SizeDesc for T {
+/*impl<T: Into<i32> + Clone> SizeDesc for T {
     fn in_pixels<D: HasDimension>(&self, _parent: &D) -> i32 {
         self.clone().into()
+    }
+}*/
+
+impl SizeDesc for i32 {
+    fn in_pixels<D: HasDimension>(&self, _parent: &D) -> i32 {
+        *self
+    }
+}
+
+impl SizeDesc for u32 {
+    fn in_pixels<D: HasDimension>(&self, _parent: &D) -> i32 {
+        *self as i32
     }
 }
 
