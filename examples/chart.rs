@@ -6,17 +6,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root_area.fill(&WHITE)?;
 
-    let root_area = root_area
-        .titled("Image Title", ("Arial", 60).into_font())?
-        .margin(0, 0, 0, 20);
+    let root_area = root_area.titled("Image Title", ("Arial", 60).into_font())?;
 
     let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
-        .x_label_area_size(50)
-        .y_label_area_size(60)
-        .top_x_label_area_size(50)
-        .right_y_label_area_size(40)
+        .set_all_label_area_size(50)
         .caption("Sine and Cosine", ("Arial", 40).into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
@@ -76,6 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut cc = ChartBuilder::on(&drawing_area)
             .x_label_area_size(50)
             .y_label_area_size(60)
+            .margin_right(20)
             .caption(format!("y = x^{}", 1 + 2 * idx), ("Arial", 40).into_font())
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
