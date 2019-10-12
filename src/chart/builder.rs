@@ -79,13 +79,15 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
+    /// Make the axis overlap with the plotting area
     pub fn set_label_area_overlap(&mut self, pos: LabelAreaPosition) -> &mut Self {
         self.overlap_plotting_area[pos as usize] = true;
         self
     }
 
     /// Set all the label area size with the same value
-    pub fn set_all_label_area_size(&mut self, size: u32) -> &mut Self {
+    pub fn set_all_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
+        let size = size.in_pixels(self.root_area).max(0) as u32;
         self.label_area_size[0] = size;
         self.label_area_size[1] = size;
         self.label_area_size[2] = size;
