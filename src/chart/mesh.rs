@@ -110,6 +110,29 @@ where
         self.style.label_style(style);
         self
     }
+
+    /// Set all the tick mark to the same size
+    /// `value`: The new size
+    pub fn set_all_tick_mark_size<S: SizeDesc>(&mut self, value: S) -> &mut Self {
+        let size = value.in_pixels(&self.style.parent_size);
+        self.style.x_tick_size = [size, size];
+        self.style.y_tick_size = [size, size];
+        self
+    }
+
+    pub fn set_tick_mark_size<S: SizeDesc>(
+        &mut self,
+        pos: LabelAreaPosition,
+        value: S,
+    ) -> &mut Self {
+        *match pos {
+            LabelAreaPosition::Top => &mut self.style.x_tick_size[0],
+            LabelAreaPosition::Bottom => &mut self.style.x_tick_size[1],
+            LabelAreaPosition::Left => &mut self.style.y_tick_size[0],
+            LabelAreaPosition::Right => &mut self.style.y_tick_size[1],
+        } = value.in_pixels(&self.style.parent_size);
+        self
+    }
 }
 
 /// The struct that is used for tracking the configuration of a mesh of any chart
