@@ -5,7 +5,9 @@ use super::context::ChartContext;
 use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
-use crate::style::{Color, FontDesc, IntoTextStyle, RGBColor, ShapeStyle, SizeDesc, TextStyle};
+use crate::style::{
+    AsRelative, Color, FontDesc, IntoTextStyle, RGBColor, ShapeStyle, SizeDesc, TextStyle,
+};
 
 /// The style used to describe the mesh for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
@@ -267,7 +269,10 @@ where
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
         let default_axis_color = RGBColor(0, 0, 0);
-        let default_label_font = FontDesc::new("Arial", 12.0);
+        let default_label_font = FontDesc::new(
+            "Arial",
+            f64::from((12i32).percent().max(12).in_pixels(&self.parent_size)),
+        );
 
         let mesh_style_1 = self
             .line_style_1

@@ -18,5 +18,5 @@ pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor, SimpleColor}
 pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 pub use font::{FontDesc, FontError, FontResult, FontTransform, IntoFont, LayoutBox};
 pub use shape::ShapeStyle;
-pub use size::{AsRelativeHeight, AsRelativeWidth, RelativeSize, SizeDesc};
+pub use size::{AsRelative, RelativeSize, SizeDesc};
 pub use text::{IntoTextStyle, TextStyle};

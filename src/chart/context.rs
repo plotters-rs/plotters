@@ -13,7 +13,7 @@ use crate::coord::{
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection};
-use crate::style::{FontTransform, ShapeStyle, TextStyle};
+use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 #[allow(clippy::type_complexity)]
@@ -269,14 +269,12 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                         y0 = 0;
                         y1 = 0;
                     }
+                } else if x0 == 0 {
+                    x0 = tw as i32;
+                    x1 = tw as i32;
                 } else {
-                    if x0 == 0 {
-                        x0 = tw as i32;
-                        x1 = tw as i32;
-                    } else {
-                        x0 = 0;
-                        x1 = 0;
-                    }
+                    x0 = 0;
+                    x1 = 0;
                 }
             }
 
@@ -313,6 +311,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
     // TODO: consider make this function less complicated
     #[allow(clippy::too_many_arguments)]
+    #[allow(clippy::cognitive_complexity)]
     fn draw_axis_and_labels(
         &self,
         area: Option<&DrawingArea<DB, Shift>>,
@@ -500,6 +499,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
 
+        let tick_size = (5u32).percent().max(5);
+        let tick_size = tick_size.in_pixels(&self.drawing_area);
+
         for idx in 0..2 {
             self.draw_axis_and_labels(
                 self.x_label_area[idx].as_ref(),
@@ -509,7 +511,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 x_label_offset,
                 (0, -1 + idx as i16 * 2),
                 x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                5,
+                tick_size,
             )?;
 
             self.draw_axis_and_labels(
@@ -520,7 +522,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 y_label_offset,
                 (-1 + idx as i16 * 2, 0),
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                5,
+                tick_size,
             )?;
         }
 

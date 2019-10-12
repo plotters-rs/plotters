@@ -51,6 +51,7 @@ impl SizeDesc for u32 {
 pub enum RelativeSize {
     Height(f64),
     Width(f64),
+    Smaller(f64),
 }
 
 impl RelativeSize {
@@ -75,27 +76,27 @@ impl SizeDesc for RelativeSize {
     fn in_pixels<D: HasDimension>(&self, parent: &D) -> i32 {
         let (w, h) = parent.dim();
         match self {
-            RelativeSize::Width(p) => *p * w as f64,
-            RelativeSize::Height(p) => *p * h as f64,
+            RelativeSize::Width(p) => *p * f64::from(w),
+            RelativeSize::Height(p) => *p * f64::from(h),
+            RelativeSize::Smaller(p) => *p * f64::from(w.min(h)),
         }
         .round() as i32
     }
 }
 
-pub trait AsRelativeWidth: Into<f64> {
+pub trait AsRelative: Into<f64> {
     fn percent_width(self) -> RelativeSize {
         RelativeSize::Width(self.into() / 100.0)
     }
-}
-
-pub trait AsRelativeHeight: Into<f64> {
     fn percent_height(self) -> RelativeSize {
         RelativeSize::Height(self.into() / 100.0)
     }
+    fn percent(self) -> RelativeSize {
+        RelativeSize::Smaller(self.into() / 100.0)
+    }
 }
 
-impl<T: Into<f64>> AsRelativeWidth for T {}
-impl<T: Into<f64>> AsRelativeHeight for T {}
+impl<T: Into<f64>> AsRelative for T {}
 
 pub struct RelativeSizeWithBound {
     size: RelativeSize,
@@ -119,8 +120,7 @@ impl SizeDesc for RelativeSizeWithBound {
     fn in_pixels<D: HasDimension>(&self, parent: &D) -> i32 {
         let size = self.size.in_pixels(parent);
         let size_lower_capped = self.min.map_or(size, |x| x.max(size));
-        let size_upper_capped = self.max.map_or(size_lower_capped, |x| x.min(size));
-        size_upper_capped
+        self.max.map_or(size_lower_capped, |x| x.min(size))
     }
 }
 
@@ -141,5 +141,9 @@ mod test {
         let size = (10).percent_width().min(30);
         assert_eq!(size.in_pixels(&(100, 200)), 30);
         assert_eq!(size.in_pixels(&(400, 200)), 40);
+
+        let size = (10).percent();
+        assert_eq!(size.in_pixels(&(100, 200)), 10);
+        assert_eq!(size.in_pixels(&(400, 200)), 20);
     }
 }
