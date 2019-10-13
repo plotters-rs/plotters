@@ -19,8 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     cc.configure_mesh()
         .x_labels(20)
         .y_labels(10)
-        .disable_x_mesh()
-        .disable_y_mesh()
+        .disable_mesh()
         .x_label_formatter(&|v| format!("{:.1}", v))
         .y_label_formatter(&|v| format!("{:.1}", v))
         .draw()?;

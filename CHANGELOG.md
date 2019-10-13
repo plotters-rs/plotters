@@ -15,6 +15,10 @@
 
 - `FontError` from rusttype isn't `Sync` and `Send`. We don't have trait bound to ensure this.  (Thanks to @dalance)
 
+### Improvement
+
+- New convenient functions: `disable_mesh` and `disable_axes`
+
 ## Plotters 0.2.7 (2019-10-1)
 
 ### Added

@@ -233,6 +233,18 @@ where
         self
     }
 
+    /// Disable drawing all meshes
+    pub fn disable_mesh(&mut self) -> &mut Self {
+        self.disable_x_mesh()
+            .disable_y_mesh()
+    }
+
+    /// Disable drawing all axes 
+    pub fn disable_axes(&mut self) -> &mut Self {
+        self.disable_x_axis()
+            .disable_y_axis()
+    }
+
     /// Set the style definition for the axis
     /// - `style`: The style for the axis
     pub fn axis_style<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
