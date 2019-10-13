@@ -67,6 +67,15 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 </div>
 
 <div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/console-2.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/console-2.png" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Plotting the Console
+    </div>
+</div>
+
+<div class="galleryItem">
     <a href="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png">
         <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem"></img>
     </a>

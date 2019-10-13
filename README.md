@@ -43,6 +43,8 @@ To view the source code for each example, please click on the example image.
     <img src="https://plotters-rs.github.io/plotters-doc-data/0.png" class="galleryItem" width=200px></img>
 </a>
 
+<img src="https://plotters-rs.github.io/plotters-doc-data/console-2.png" class="galleryItem" width=200px></img>
+
 <a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
