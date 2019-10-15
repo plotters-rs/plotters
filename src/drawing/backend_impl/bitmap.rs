@@ -177,13 +177,8 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 self.saved = true;
                 Ok(())
             }
+            Target::Buffer(_) => Ok(()),
 
-            Target::Buffer(img) => {
-                if img.dimensions() == (0, 0) {
-                    return Ok(());
-                }
-                Ok(())
-            }
             #[cfg(feature = "gif")]
             Target::Gif(target, img) => {
                 target
