@@ -235,14 +235,12 @@ where
 
     /// Disable drawing all meshes
     pub fn disable_mesh(&mut self) -> &mut Self {
-        self.disable_x_mesh()
-            .disable_y_mesh()
+        self.disable_x_mesh().disable_y_mesh()
     }
 
-    /// Disable drawing all axes 
+    /// Disable drawing all axes
     pub fn disable_axes(&mut self) -> &mut Self {
-        self.disable_x_axis()
-            .disable_y_axis()
+        self.disable_x_axis().disable_y_axis()
     }
 
     /// Set the style definition for the axis
