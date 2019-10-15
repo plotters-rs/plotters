@@ -1,6 +1,6 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
-use image::{GenericImage, ImageBuffer, ImageError, Pixel, Rgb, RgbImage};
+use image::{ImageBuffer, ImageError, Rgb, RgbImage};
 
 use std::path::Path;
 
