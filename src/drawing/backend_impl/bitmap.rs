@@ -222,28 +222,31 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         let mut chunk_size = (x1 - x0) as usize;
         let mut num_chunks = (y1 - y0) as usize;
-        let dst_gap = sw as usize - chunk_size;
-        let src_gap = dw as usize - chunk_size;
+        let dst_gap = dw as usize - chunk_size;
+        let src_gap = sw as usize - chunk_size;
 
-        let start = 3 * (y0 as usize * dw as usize + x0 as usize);
+        let dst_start = 3 * (y0 as usize * dw as usize + x0 as usize);
 
         let mut dst = match &mut self.target {
-            Target::File(_, img) => &mut (**img)[start..],
-            Target::Buffer(img) => &mut (**img)[start..],
+            Target::File(_, img) => &mut (**img)[dst_start..],
+            Target::Buffer(img) => &mut (**img)[dst_start..],
             #[cfg(feature = "gif")]
-            Target::Gif(_, img) => &mut (**img)[start..],
+            Target::Gif(_, img) => &mut (**img)[dst_start..],
         };
 
-        let mut src = &(**src)[..];
+        let src_start = 3 * ((sh as usize + y0 as usize - y1 as usize) * sw as usize + (sw as usize + x0 as usize - x1 as usize) as usize);
+        let mut src = &(**src)[src_start..];
 
         if src_gap == 0 && dst_gap == 0 {
             chunk_size *= num_chunks;
             num_chunks = 1;
         }
-        for _ in 0..num_chunks {
+        for i in 0..num_chunks {
             dst[0..(chunk_size * 3)].copy_from_slice(&src[0..(chunk_size * 3)]);
-            dst = &mut dst[((chunk_size + dst_gap) * 3)..];
-            src = &src[((chunk_size + src_gap) * 3)..];
+            if i != num_chunks - 1 {
+                dst = &mut dst[((chunk_size + dst_gap) * 3)..];
+                src = &src[((chunk_size + src_gap) * 3)..];
+            }
         }
 
         Ok(())
