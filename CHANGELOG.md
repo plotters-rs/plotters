@@ -6,6 +6,10 @@
 
 - Avoid copying image buffer when manipulate the image. (Thanks to @ralfbiedert)
 
+### Bug Fix
+
+- Performance fix: '?' operator is very slow
+
 ## Plotters 0.2.8 (2019-10-12)
 
 ### Added
