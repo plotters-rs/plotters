@@ -47,7 +47,10 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for y in from.1..=to.1 {
-            back.draw_pixel((from.0, y), &style.as_color())?;
+            let result = back.draw_pixel((from.0, y), &style.as_color());
+            if result.is_err() {
+                return result;
+            }
         }
         return Ok(());
     }
@@ -57,7 +60,10 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for x in from.0..=to.0 {
-            back.draw_pixel((x, from.1), &style.as_color())?;
+            let result = back.draw_pixel((x, from.1), &style.as_color());
+            if result.is_err() {
+                return result;
+            }
         }
         return Ok(());
     }
