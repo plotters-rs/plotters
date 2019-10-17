@@ -219,7 +219,7 @@ pub trait DrawingBackend: Sized {
     fn blit_bitmap<'a>(
         &mut self,
         pos: BackendCoord,
-        src: &'a image::ImageBuffer<image::Rgb<u8>, &'a mut [u8]>,
+        src: &'a image::ImageBuffer<image::Rgb<u8>, &'a [u8]>,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (w, h) = self.get_size();
 

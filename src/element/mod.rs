@@ -173,6 +173,11 @@ pub use candlestick::CandleStick;
 mod errorbar;
 pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
 
+#[cfg(feature = "image")]
+mod image;
+#[cfg(feature = "image")]
+pub use self::image::BitMapElement;
+
 /// A type which is logically a collection of points, under any given coordinate system
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
