@@ -1,6 +1,6 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
-use image::{ImageBuffer, ImageError, Rgb, RgbImage};
+use image::{GenericImage, ImageBuffer, ImageError, Rgb, RgbImage};
 
 use std::path::Path;
 
@@ -201,6 +201,27 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
             #[cfg(feature = "gif")]
             Target::Gif(_, img) => draw_pixel!(img, point, color),
         }
+    }
+
+    fn blit_bitmap<'b>(
+        &mut self,
+        pos: BackendCoord,
+        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b mut [u8]>,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let (w, h) = self.get_size();
+        if pos.0 as u32 >= w || pos.0 < 0 || pos.1 as u32 >= h || pos.1 < 0 {
+            return Ok(());
+        }
+
+        if match &mut self.target {
+            Target::File(_, img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
+            Target::Buffer(img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
+            #[cfg(feature = "gif")]
+            Target::Gif(_, img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
+        } {
+            return Err(DrawingErrorKind::DrawingError(ImageError::DimensionError));
+        }
+        Ok(())
     }
 }
 
