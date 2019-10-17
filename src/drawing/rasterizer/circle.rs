@@ -46,21 +46,21 @@ pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
         let bottom = center.1 + lx.floor() as i32;
 
         if fill {
-            b.draw_line((left, y), (right, y), &style.as_color())?;
-            b.draw_line((x, top), (x, up), &style.as_color())?;
-            b.draw_line((x, down), (x, bottom), &style.as_color())?;
+            check_result!(b.draw_line((left, y), (right, y), &style.as_color()));
+            check_result!(b.draw_line((x, top), (x, up), &style.as_color()));
+            check_result!(b.draw_line((x, down), (x, bottom), &style.as_color()));
         } else {
-            b.draw_pixel((left, y), &style.as_color().mix(1.0 - v))?;
-            b.draw_pixel((right, y), &style.as_color().mix(1.0 - v))?;
+            check_result!(b.draw_pixel((left, y), &style.as_color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((right, y), &style.as_color().mix(1.0 - v)));
 
-            b.draw_pixel((x, top), &style.as_color().mix(1.0 - v))?;
-            b.draw_pixel((x, bottom), &style.as_color().mix(1.0 - v))?;
+            check_result!(b.draw_pixel((x, top), &style.as_color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((x, bottom), &style.as_color().mix(1.0 - v)));
         }
 
-        b.draw_pixel((left - 1, y), &style.as_color().mix(v))?;
-        b.draw_pixel((right + 1, y), &style.as_color().mix(v))?;
-        b.draw_pixel((x, top - 1), &style.as_color().mix(v))?;
-        b.draw_pixel((x, bottom + 1), &style.as_color().mix(v))?;
+        check_result!(b.draw_pixel((left - 1, y), &style.as_color().mix(v)));
+        check_result!(b.draw_pixel((right + 1, y), &style.as_color().mix(v)));
+        check_result!(b.draw_pixel((x, top - 1), &style.as_color().mix(v)));
+        check_result!(b.draw_pixel((x, bottom + 1), &style.as_color().mix(v)));
     }
 
     Ok(())

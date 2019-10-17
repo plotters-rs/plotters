@@ -204,33 +204,33 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                         }
 
                         if horizental_sweep {
-                            back.draw_line(
+                            check_result!(back.draw_line(
                                 (sweep_line, from.ceil() as i32),
                                 (sweep_line, to.floor() as i32),
                                 &style.as_color(),
-                            )?;
-                            back.draw_pixel(
+                            ));
+                            check_result!(back.draw_pixel(
                                 (sweep_line, from.floor() as i32),
                                 &style.as_color().mix(from.ceil() - from),
-                            )?;
-                            back.draw_pixel(
+                            ));
+                            check_result!(back.draw_pixel(
                                 (sweep_line, to.ceil() as i32),
                                 &style.as_color().mix(to - to.floor()),
-                            )?;
+                            ));
                         } else {
-                            back.draw_line(
+                            check_result!(back.draw_line(
                                 (from.ceil() as i32, sweep_line),
                                 (to.floor() as i32, sweep_line),
                                 &style.as_color(),
-                            )?;
-                            back.draw_pixel(
+                            ));
+                            check_result!(back.draw_pixel(
                                 (from.floor() as i32, sweep_line),
                                 &style.as_color().mix(from.ceil() - from),
-                            )?;
-                            back.draw_pixel(
+                            ));
+                            check_result!(back.draw_pixel(
                                 (to.ceil() as i32, sweep_line),
                                 &style.as_color().mix(to.floor() - to),
-                            )?;
+                            ));
                         }
 
                         first = None;

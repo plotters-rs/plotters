@@ -135,7 +135,10 @@ pub trait DrawingBackend: Sized {
             let mut begin: Option<BackendCoord> = None;
             for end in path.into_iter() {
                 if let Some(begin) = begin {
-                    self.draw_line(begin, end, style)?;
+                    let result = self.draw_line(begin, end, style);
+                    if result.is_err() {
+                        return result;
+                    }
                 }
                 begin = Some(end);
             }

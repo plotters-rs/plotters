@@ -27,11 +27,11 @@ pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
     if fill {
         if bottom_right.0 - upper_left.0 < bottom_right.1 - upper_left.1 {
             for x in upper_left.0..=bottom_right.0 {
-                b.draw_line((x, upper_left.1), (x, bottom_right.1), style)?;
+                check_result!(b.draw_line((x, upper_left.1), (x, bottom_right.1), style));
             }
         } else {
             for y in upper_left.1..=bottom_right.1 {
-                b.draw_line((upper_left.0, y), (bottom_right.0, y), style)?;
+                check_result!(b.draw_line((upper_left.0, y), (bottom_right.0, y), style));
             }
         }
     } else {

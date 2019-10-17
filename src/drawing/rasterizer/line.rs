@@ -47,10 +47,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for y in from.1..=to.1 {
-            let result = back.draw_pixel((from.0, y), &style.as_color());
-            if result.is_err() {
-                return result;
-            }
+            check_result!(back.draw_pixel((from.0, y), &style.as_color()));
         }
         return Ok(());
     }
@@ -60,10 +57,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for x in from.0..=to.0 {
-            let result = back.draw_pixel((x, from.1), &style.as_color());
-            if result.is_err() {
-                return result;
-            }
+            check_result!(back.draw_pixel((x, from.1), &style.as_color()));
         }
         return Ok(());
     }
@@ -94,8 +88,8 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     let mut y = f64::from(from.1);
 
     for x in from.0..=to.0 {
-        put_pixel((x, y as i32), 1.0 + y.floor() - y)?;
-        put_pixel((x, y as i32 + 1), y - y.floor())?;
+        check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
+        check_result!(put_pixel((x, y as i32 + 1), y - y.floor()));
 
         y += grad;
     }
