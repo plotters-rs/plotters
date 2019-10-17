@@ -1,6 +1,6 @@
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
-use image::{GenericImage, ImageBuffer, ImageError, Rgb, RgbImage};
+use image::{ImageBuffer, ImageError, Rgb, RgbImage};
 
 use std::path::Path;
 
@@ -208,19 +208,44 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         pos: BackendCoord,
         src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let (w, h) = self.get_size();
-        if pos.0 as u32 >= w || pos.0 < 0 || pos.1 as u32 >= h || pos.1 < 0 {
+        let (dw, dh) = self.get_size();
+        let (sw, sh) = src.dimensions();
+
+        let (x0, y0) = pos;
+        let (x1, y1) = (x0 + sw as i32, y0 + sh as i32);
+
+        let (x0, y0, x1, y1) = (x0.max(0), y0.max(0), x1.min(dw as i32), y1.min(dh as i32));
+
+        if x0 == x1 || y0 == y1 {
             return Ok(());
         }
 
-        if match &mut self.target {
-            Target::File(_, img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
-            Target::Buffer(img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
+        let mut chunk_size = (x1 - x0) as usize;
+        let mut num_chunks = (y1 - y0) as usize;
+        let dst_gap = sw as usize - chunk_size;
+        let src_gap = dw as usize - chunk_size;
+
+        let start = 3 * (y0 as usize * dw as usize + x0 as usize);
+
+        let mut dst = match &mut self.target {
+            Target::File(_, img) => &mut (**img)[start..],
+            Target::Buffer(img) => &mut (**img)[start..],
             #[cfg(feature = "gif")]
-            Target::Gif(_, img) => img.copy_from(src, pos.0 as u32, pos.1 as u32),
-        } {
-            return Err(DrawingErrorKind::DrawingError(ImageError::DimensionError));
+            Target::Gif(_, img) => &mut (**img)[start..],
+        };
+
+        let mut src = &(**src)[..];
+
+        if src_gap == 0 && dst_gap == 0 {
+            chunk_size *= num_chunks;
+            num_chunks = 1;
         }
+        for _ in 0..num_chunks {
+            dst[0..(chunk_size * 3)].copy_from_slice(&src[0..(chunk_size * 3)]);
+            dst = &mut dst[((chunk_size + dst_gap) * 3)..];
+            src = &src[((chunk_size + src_gap) * 3)..];
+        }
+
         Ok(())
     }
 }
