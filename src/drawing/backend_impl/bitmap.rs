@@ -206,7 +206,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     fn blit_bitmap<'b>(
         &mut self,
         pos: BackendCoord,
-        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b mut [u8]>,
+        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (w, h) = self.get_size();
         if pos.0 as u32 >= w || pos.0 < 0 || pos.1 as u32 >= h || pos.1 < 0 {
