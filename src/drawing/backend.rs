@@ -214,4 +214,34 @@ pub trait DrawingBackend: Sized {
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
         Ok(font.box_size(text).map_err(DrawingErrorKind::FontError)?)
     }
+
+    #[cfg(feature = "image")]
+    fn blit_bitmap<'a>(
+        &mut self,
+        pos: BackendCoord,
+        src: &'a image::ImageBuffer<image::Rgb<u8>, &'a mut [u8]>,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let (w, h) = self.get_size();
+
+        let (iw, ih) = src.dimensions();
+        for dx in 0..iw {
+            if pos.0 + dx as i32 >= w as i32 {
+                break;
+            }
+            for dy in 0..ih {
+                if pos.1 + dy as i32 >= h as i32 {
+                    break;
+                }
+                let pixel = src.get_pixel(dx, dy);
+                let color = crate::style::RGBColor(pixel.0[0], pixel.0[1], pixel.0[2]);
+                let result =
+                    self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), &color.to_rgba());
+                if result.is_err() {
+                    return result;
+                }
+            }
+        }
+
+        Ok(())
+    }
 }
