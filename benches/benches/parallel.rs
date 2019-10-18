@@ -35,7 +35,7 @@ fn draw_plot(root: &DrawingArea<BitMapBackend, Shift>, pow: f64) {
 
 fn draw_func_1x1_seq(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("draw_func_1x1_seq", |b| {
+    c.bench_function("parallel::draw_func_1x1_seq", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.fill(&WHITE).unwrap();
@@ -46,7 +46,7 @@ fn draw_func_1x1_seq(c: &mut Criterion) {
 
 fn draw_func_4x4_seq(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("draw_func_4x4_seq", |b| {
+    c.bench_function("parallel::draw_func_4x4_seq", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
@@ -57,7 +57,7 @@ fn draw_func_4x4_seq(c: &mut Criterion) {
 
 fn draw_func_4x4_parallel_and_blit(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("draw_func_4x4_parallel_and_blit", |b| {
+    c.bench_function("parallel::draw_func_4x4_parallel_and_blit", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
