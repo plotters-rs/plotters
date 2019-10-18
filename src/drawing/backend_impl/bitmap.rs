@@ -1,5 +1,6 @@
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
+
 use image::{ImageBuffer, ImageError, Rgb, RgbImage};
 
 use std::path::Path;
@@ -203,6 +204,50 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         }
     }
 
+    fn draw_rect<S: BackendStyle>(
+        &mut self,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        style: &S,
+        fill: bool,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let alpha = style.as_color().alpha();
+        let (r, g, b) = style.as_color().rgb();
+        if r == g && g == b && fill && alpha >= 1.0 {
+            let (w, h) = self.get_size();
+            let (x0, y0) = (
+                upper_left.0.min(bottom_right.0).max(0),
+                upper_left.1.min(bottom_right.1).max(0),
+            );
+            let (x1, y1) = (
+                upper_left.0.max(bottom_right.0).min(w as i32 - 1),
+                upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+            );
+
+            let dst = match &mut self.target {
+                Target::File(_, img) => &mut (**img)[..],
+                Target::Buffer(img) => &mut (**img)[..],
+                #[cfg(feature = "gif")]
+                Target::Gif(_, img) => &mut (**img)[..],
+            };
+
+            if x0 != 0 || x1 != w as i32 - 1 {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)]
+                        .iter_mut()
+                        .for_each(|e| *e = r);
+                }
+            } else {
+                dst[(3 * y0 * w as i32) as usize..(3 * (y1 + 1) * w as i32) as usize]
+                    .iter_mut()
+                    .for_each(|e| *e = r);
+            }
+            return Ok(());
+        }
+        crate::drawing::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
+    }
+
     fn blit_bitmap<'b>(
         &mut self,
         pos: BackendCoord,
@@ -234,7 +279,9 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
             Target::Gif(_, img) => &mut (**img)[dst_start..],
         };
 
-        let src_start = 3 * ((sh as usize + y0 as usize - y1 as usize) * sw as usize + (sw as usize + x0 as usize - x1 as usize) as usize);
+        let src_start = 3
+            * ((sh as usize + y0 as usize - y1 as usize) * sw as usize
+                + (sw as usize + x0 as usize - x1 as usize) as usize);
         let mut src = &(**src)[src_start..];
 
         if src_gap == 0 && dst_gap == 0 {
