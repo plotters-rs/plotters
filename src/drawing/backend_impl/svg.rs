@@ -3,7 +3,7 @@ The SVG image drawing backend
 */
 pub use svg as svg_types;
 
-use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
+use svg::node::element::{Circle, Image, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
@@ -272,6 +272,88 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             _ => node,
         }
         .add(context);
+
+        self.update_document(|d| d.add(node));
+
+        Ok(())
+    }
+
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    fn blit_bitmap<'b>(
+        &mut self,
+        pos: BackendCoord,
+        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        use image::png::PNGEncoder;
+
+        let mut data = vec![0; 0];
+        let (w, h) = src.dimensions();
+
+        {
+            let cursor = Cursor::new(&mut data);
+
+            let encoder = PNGEncoder::new(cursor);
+
+            let color = image::ColorType::RGB(8);
+
+            encoder.encode(&(**src)[..], w, h, color).map_err(|e| {
+                DrawingErrorKind::DrawingError(Error::new(
+                    std::io::ErrorKind::Other,
+                    format!("Image error: {}", e),
+                ))
+            })?;
+        }
+
+        let padding = (3 - data.len() % 3) % 3;
+        for _ in 0..padding {
+            data.push(0);
+        }
+
+        let mut rem_bits = 0;
+        let mut rem_num = 0;
+
+        fn cvt_base64(from: u8) -> char {
+            (if from < 26 {
+                b'A' + from
+            } else if from < 52 {
+                b'a' + from - 26
+            } else if from < 62 {
+                b'0' + from - 52
+            } else if from == 62 {
+                b'+'
+            } else {
+                b'/'
+            })
+            .into()
+        }
+
+        let mut buf = String::new();
+        buf.push_str("data:png;base64,");
+
+        for byte in data {
+            let value = (rem_bits << (6 - rem_num)) | (byte >> (rem_num + 2));
+            rem_bits = byte & ((1 << (2 + rem_num)) - 1);
+            rem_num += 2;
+
+            buf.push(cvt_base64(value));
+            if rem_num == 6 {
+                buf.push(cvt_base64(rem_bits));
+                rem_bits = 0;
+                rem_num = 0;
+            }
+        }
+
+        for _ in 0..padding {
+            buf.pop();
+            buf.push('=');
+        }
+
+        let node = Image::new()
+            .set("x", pos.0)
+            .set("y", pos.1)
+            .set("width", w)
+            .set("height", h)
+            .set("href", buf.as_str());
 
         self.update_document(|d| d.add(node));
 
