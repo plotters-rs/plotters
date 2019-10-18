@@ -151,6 +151,103 @@ impl<'a> BitMapBackend<'a> {
             saved: false,
         }
     }
+
+    fn get_raw_pixel_buffer(&mut self) -> &mut [u8] {
+        match &mut self.target {
+            Target::File(_, img) => &mut (**img)[..],
+            Target::Buffer(img) => &mut (**img)[..],
+            #[cfg(feature = "gif")]
+            Target::Gif(_, img) => &mut (**img)[..],
+        }
+    }
+
+    fn blend_rect_fast(
+        &mut self,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+        a: f64,
+    ) {
+        let (w, h) = self.get_size();
+        let a = a.min(1.0).max(0.0);
+        if a == 0.0 {
+            return;
+        }
+
+        let (x0, y0) = (
+            upper_left.0.min(bottom_right.0).max(0),
+            upper_left.1.min(bottom_right.1).max(0),
+        );
+        let (x1, y1) = (
+            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
+            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+        );
+
+        let dst = self.get_raw_pixel_buffer();
+
+        for y in y0..=y1 {
+            let start = (y * w as i32 + x0) as usize;
+            let mut iter =
+                dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)].iter_mut();
+            fn blend(prev: &mut u8, new: u8, a: f64) {
+                *prev = ((*prev as f64) * (1.0 - a) + a * new as f64).min(255.0) as u8;
+            }
+            for _ in 0..(x1 - x0 + 1) {
+                blend(iter.next().unwrap(), r, a);
+                blend(iter.next().unwrap(), g, a);
+                blend(iter.next().unwrap(), b, a);
+            }
+        }
+    }
+
+    fn fill_rect_fast(
+        &mut self,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    ) {
+        let (w, h) = self.get_size();
+        let (x0, y0) = (
+            upper_left.0.min(bottom_right.0).max(0),
+            upper_left.1.min(bottom_right.1).max(0),
+        );
+        let (x1, y1) = (
+            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
+            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+        );
+
+        let dst = self.get_raw_pixel_buffer();
+
+        if r == g && g == b {
+            if x0 != 0 || x1 != w as i32 - 1 {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)]
+                        .iter_mut()
+                        .for_each(|e| *e = r);
+                }
+            } else {
+                dst[(3 * y0 * w as i32) as usize..(3 * (y1 + 1) * w as i32) as usize]
+                    .iter_mut()
+                    .for_each(|e| *e = r);
+            }
+        } else {
+            for y in y0..=y1 {
+                let start = (y * w as i32 + x0) as usize;
+                let mut iter =
+                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)].iter_mut();
+                for _ in 0..(x1 - x0 + 1) {
+                    *iter.next().unwrap() = r;
+                    *iter.next().unwrap() = g;
+                    *iter.next().unwrap() = b;
+                }
+            }
+        }
+    }
 }
 
 impl<'a> DrawingBackend for BitMapBackend<'a> {
@@ -204,6 +301,27 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         }
     }
 
+    fn draw_line<S: BackendStyle>(
+        &mut self,
+        from: (i32, i32),
+        to: (i32, i32),
+        style: &S,
+    ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let alpha = style.as_color().alpha();
+        let (r, g, b) = style.as_color().rgb();
+
+        if from.0 == to.0 || from.1 == to.1 {
+            if alpha >= 1.0 {
+                self.fill_rect_fast(from, to, r, g, b);
+            } else {
+                self.blend_rect_fast(from, to, r, g, b, alpha);
+            }
+            return Ok(());
+        }
+
+        crate::drawing::rasterizer::draw_line(self, from, to, style)
+    }
+
     fn draw_rect<S: BackendStyle>(
         &mut self,
         upper_left: (i32, i32),
@@ -213,35 +331,11 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let alpha = style.as_color().alpha();
         let (r, g, b) = style.as_color().rgb();
-        if r == g && g == b && fill && alpha >= 1.0 {
-            let (w, h) = self.get_size();
-            let (x0, y0) = (
-                upper_left.0.min(bottom_right.0).max(0),
-                upper_left.1.min(bottom_right.1).max(0),
-            );
-            let (x1, y1) = (
-                upper_left.0.max(bottom_right.0).min(w as i32 - 1),
-                upper_left.1.max(bottom_right.1).min(h as i32 - 1),
-            );
-
-            let dst = match &mut self.target {
-                Target::File(_, img) => &mut (**img)[..],
-                Target::Buffer(img) => &mut (**img)[..],
-                #[cfg(feature = "gif")]
-                Target::Gif(_, img) => &mut (**img)[..],
-            };
-
-            if x0 != 0 || x1 != w as i32 - 1 {
-                for y in y0..=y1 {
-                    let start = (y * w as i32 + x0) as usize;
-                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)]
-                        .iter_mut()
-                        .for_each(|e| *e = r);
-                }
+        if fill {
+            if alpha >= 1.0 {
+                self.fill_rect_fast(upper_left, bottom_right, r, g, b);
             } else {
-                dst[(3 * y0 * w as i32) as usize..(3 * (y1 + 1) * w as i32) as usize]
-                    .iter_mut()
-                    .for_each(|e| *e = r);
+                self.blend_rect_fast(upper_left, bottom_right, r, g, b, alpha);
             }
             return Ok(());
         }
@@ -272,12 +366,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         let dst_start = 3 * (y0 as usize * dw as usize + x0 as usize);
 
-        let mut dst = match &mut self.target {
-            Target::File(_, img) => &mut (**img)[dst_start..],
-            Target::Buffer(img) => &mut (**img)[dst_start..],
-            #[cfg(feature = "gif")]
-            Target::Gif(_, img) => &mut (**img)[dst_start..],
-        };
+        let mut dst = &mut self.get_raw_pixel_buffer()[dst_start..];
 
         let src_start = 3
             * ((sh as usize + y0 as usize - y1 as usize) * sw as usize
