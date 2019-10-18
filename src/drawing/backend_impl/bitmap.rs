@@ -7,6 +7,10 @@ use std::path::Path;
 
 pub type BorrowedImage<'a> = ImageBuffer<Rgb<u8>, &'a mut [u8]>;
 
+fn blend(prev: &mut u8, new: u8, a: f64) {
+    *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
+}
+
 /// Macro implementation for drawing pixels, since a generic implementation would have been
 /// much more unwieldy.
 macro_rules! draw_pixel {
@@ -189,11 +193,8 @@ impl<'a> BitMapBackend<'a> {
 
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
-            let mut iter =
-                dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)].iter_mut();
-            fn blend(prev: &mut u8, new: u8, a: f64) {
-                *prev = ((*prev as f64) * (1.0 - a) + a * new as f64).min(255.0) as u8;
-            }
+            let count = (x1 - x0 + 1) as usize;
+            let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
             for _ in 0..(x1 - x0 + 1) {
                 blend(iter.next().unwrap(), r, a);
                 blend(iter.next().unwrap(), g, a);
@@ -223,14 +224,19 @@ impl<'a> BitMapBackend<'a> {
         let dst = self.get_raw_pixel_buffer();
 
         if r == g && g == b {
+            // If r == g == b, then we can use memset
             if x0 != 0 || x1 != w as i32 - 1 {
+                // If it's not the entire row is filled, we can only do
+                // memset per row
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
-                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)]
+                    let count = (x1 - x0 + 1) as usize;
+                    dst[(start * 3)..((start + count) * 3)]
                         .iter_mut()
                         .for_each(|e| *e = r);
                 }
             } else {
+                // If the entire memory block is going to be filled, just use single memset
                 dst[(3 * y0 * w as i32) as usize..(3 * (y1 + 1) * w as i32) as usize]
                     .iter_mut()
                     .for_each(|e| *e = r);
@@ -238,8 +244,8 @@ impl<'a> BitMapBackend<'a> {
         } else {
             for y in y0..=y1 {
                 let start = (y * w as i32 + x0) as usize;
-                let mut iter =
-                    dst[(start * 3)..((start + x1 as usize - x0 as usize + 1) * 3)].iter_mut();
+                let count = (x1 - x0 + 1) as usize;
+                let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
                 for _ in 0..(x1 - x0 + 1) {
                     *iter.next().unwrap() = r;
                     *iter.next().unwrap() = g;
@@ -368,9 +374,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         let mut dst = &mut self.get_raw_pixel_buffer()[dst_start..];
 
-        let src_start = 3
-            * ((sh as usize + y0 as usize - y1 as usize) * sw as usize
-                + (sw as usize + x0 as usize - x1 as usize) as usize);
+        let src_start = 3 * ((sh as i32 + y0 - y1) * sw as i32 + (sw as i32 + x0 - x1)) as usize;
         let mut src = &(**src)[src_start..];
 
         if src_gap == 0 && dst_gap == 0 {
