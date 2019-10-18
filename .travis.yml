@@ -13,3 +13,9 @@ os:
 script:
     - env
     - cargo test && rustup target add wasm32-unknown-unknown && cargo build --target=wasm32-unknown-unknown
+
+after_success: |
+    cargo install cargo-tarpaulin
+    export CODECOV_TOKEN="8622abe0-9579-4cea-93d3-9707969ef6c2"
+    cargo tarpaulin --out Xml
+    bash <(curl -s https://codecov.io/bash)
