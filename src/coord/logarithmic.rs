@@ -82,34 +82,35 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+        let base : f64 = 10.0;
         let tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
             .log10()
             .abs()
-            .floor() as usize;
-        let tier_2_density = if max_points < tier_1 {
-            0
+            .floor();
+        let tier_2_density = if (max_points as f64) < tier_1 {
+            0.0
         } else {
-            let density = 1 + (max_points - tier_1) / tier_1;
-            let mut exp = 1;
-            while exp * 10 <= density {
-                exp *= 10;
+            let density = 1.0 + ((max_points as f64) - tier_1) / tier_1;
+            let mut exp = 1.0;
+            while exp * base <= density {
+                exp *= base;
             }
-            exp - 1
+            exp - 1.0
         };
 
-        let mut multiplier = 10.0;
+        let mut multiplier = base;
         let mut cnt = 1;
-        while max_points < tier_1 / cnt {
-            multiplier *= 10.0;
+        while max_points < (tier_1 as usize) / cnt {
+            multiplier *= base;
             cnt += 1;
         }
 
         let mut ret = vec![];
-        let mut val = (10f64).powf(self.logic.start.as_f64().log10().ceil());
+        let mut val = base.powf(self.logic.start.as_f64().log10().ceil());
 
         while val <= self.logic.end.as_f64() {
             ret.push(V::from_f64(val));
-            for i in 1..=tier_2_density {
+            for i in 1..=tier_2_density as u32 {
                 let v = val
                     * (1.0
                         + multiplier / f64::from(tier_2_density as u32 + 1) * f64::from(i as u32));
