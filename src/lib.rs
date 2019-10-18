@@ -673,6 +673,9 @@ pub mod prelude {
         MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    pub use crate::element::BitMapElement;
+
     #[allow(type_alias_bounds)]
     /// The type used to returns a drawing operation that can be failed
     /// - `T`: The return type
