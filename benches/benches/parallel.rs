@@ -84,7 +84,7 @@ fn draw_func_2x1_parallel_and_blit(c: &mut Criterion) {
     c.bench_function("parallel::draw_func_2x1_parallel_and_blit", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
-            let areas = root.split_evenly((2,1));
+            let areas = root.split_evenly((2, 1));
             let mut elements: Vec<_> = areas
                 .iter()
                 .map(|area| area.dim_in_pixel())
@@ -116,9 +116,12 @@ fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
                 )
             };
 
-            [upper, lower]
-                .par_iter_mut()
-                .for_each(|b| draw_plot(&BitMapBackend::with_buffer(*b, (W, H / 2)).into_drawing_area(), 2.0));
+            [upper, lower].par_iter_mut().for_each(|b| {
+                draw_plot(
+                    &BitMapBackend::with_buffer(*b, (W, H / 2)).into_drawing_area(),
+                    2.0,
+                )
+            });
         })
     });
 }
@@ -128,7 +131,7 @@ fn draw_func_2x1_seq(c: &mut Criterion) {
     c.bench_function("parallel::draw_func_2x1_seq", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
-            root.split_evenly((2,1))
+            root.split_evenly((2, 1))
                 .iter_mut()
                 .for_each(|area| draw_plot(area, 2.0));
         })
@@ -138,9 +141,9 @@ fn draw_func_2x1_seq(c: &mut Criterion) {
 criterion_group! {
     name = parallel_group;
     config = Criterion::default().sample_size(10);
-    targets = 
-        draw_func_1x1_seq, 
-        draw_func_4x4_seq, 
+    targets =
+        draw_func_1x1_seq,
+        draw_func_4x4_seq,
         draw_func_4x4_parallel_and_blit,
         draw_func_2x1_parallel_and_blit,
         draw_func_2x1_inplace_parallel,
