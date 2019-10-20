@@ -107,14 +107,7 @@ fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
     let mut buffer = vec![0u8; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_2x1_inplace", |b| {
         b.iter(|| {
-            let (upper, lower) = unsafe {
-                let upper_addr = &mut buffer[0] as *mut u8;
-                let lower_addr = &mut buffer[(W * H * 3 / 2) as usize] as *mut u8;
-                (
-                    std::slice::from_raw_parts_mut(upper_addr, (W * H * 3 / 2) as usize),
-                    std::slice::from_raw_parts_mut(lower_addr, (W * H * 3 / 2) as usize),
-                )
-            };
+            let (upper, lower) = buffer.split_at_mut((W * H * 3 / 2) as usize);
 
             [upper, lower].par_iter_mut().for_each(|b| {
                 draw_plot(
