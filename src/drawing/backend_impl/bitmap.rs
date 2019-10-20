@@ -242,14 +242,35 @@ impl<'a> BitMapBackend<'a> {
                     .for_each(|e| *e = r);
             }
         } else {
-            for y in y0..=y1 {
-                let start = (y * w as i32 + x0) as usize;
-                let count = (x1 - x0 + 1) as usize;
-                let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
-                for _ in 0..(x1 - x0 + 1) {
-                    *iter.next().unwrap() = r;
-                    *iter.next().unwrap() = g;
-                    *iter.next().unwrap() = b;
+            let count = (x1 - x0 + 1) as usize;
+            if count < 8 {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
+                    for _ in 0..(x1 - x0 + 1) {
+                        *iter.next().unwrap() = r;
+                        *iter.next().unwrap() = g;
+                        *iter.next().unwrap() = b;
+                    }
+                }
+            } else {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    let start_ptr = &mut dst[start * 3] as *mut u8 as *mut (u8, u8, u8, u8, u8, u8);
+                    let slice =
+                        unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
+                    for p in slice.iter_mut() {
+                        unsafe {
+                            let ptr = p as *mut (u8, u8, u8, u8, u8, u8) as *mut u64;
+                            *ptr = std::mem::transmute([r, g, b, r, g, b, 0, 0]);
+                        }
+                    }
+
+                    for idx in (slice.len() * 2)..count {
+                        dst[start * 3 + idx * 3] = r;
+                        dst[start * 3 + idx * 3 + 1] = g;
+                        dst[start * 3 + idx * 3 + 2] = b;
+                    }
                 }
             }
         }
@@ -318,7 +339,21 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         if from.0 == to.0 || from.1 == to.1 {
             if alpha >= 1.0 {
-                self.fill_rect_fast(from, to, r, g, b);
+                if from.1 == to.1 {
+                    self.fill_rect_fast(from, to, r, g, b);
+                } else {
+                    let w = self.get_size().0 as i32;
+                    let dst = self.get_raw_pixel_buffer();
+                    let (mut y0, mut y1) = (from.1, to.1);
+                    if y0 > y1 {
+                        std::mem::swap(&mut y0, &mut y1);
+                    }
+                    for y in y0..=y1 {
+                        dst[(y * w + from.0) as usize * 3] = r;
+                        dst[(y * w + from.0) as usize * 3 + 1] = g;
+                        dst[(y * w + from.0) as usize * 3 + 2] = b;
+                    }
+                }
             } else {
                 self.blend_rect_fast(from, to, r, g, b, alpha);
             }
