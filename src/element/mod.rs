@@ -178,6 +178,9 @@ mod image;
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 pub use self::image::BitMapElement;
 
+mod dynelem;
+pub use dynelem::{DynElement, IntoDynElement};
+
 /// A type which is logically a collection of points, under any given coordinate system
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
@@ -200,87 +203,4 @@ pub trait Drawable<DB: DrawingBackend> {
         backend: &mut DB,
         parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
-}
-
-trait DynDrawable<'a, DB: DrawingBackend>
-where
-    Self: 'a,
-{
-    fn draw_dyn(
-        &self,
-        points: &mut dyn Iterator<Item = BackendCoord>,
-        backend: &mut DB,
-        parent_dim: (u32, u32),
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
-}
-
-impl<'a, DB: DrawingBackend, T: Drawable<DB> + 'a> DynDrawable<'a, DB> for T {
-    fn draw_dyn(
-        &self,
-        points: &mut dyn Iterator<Item = BackendCoord>,
-        backend: &mut DB,
-        parent_dim: (u32, u32),
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        T::draw(self, points, backend, parent_dim)
-    }
-}
-
-/// The container for a dynamically dispatched element
-pub struct DynElement<'a, DB, Coord>
-where
-    DB: DrawingBackend,
-    Coord: Clone,
-{
-    points: Vec<Coord>,
-    drawable: Box<dyn DynDrawable<'a, DB> + 'a>,
-}
-
-impl<'a, 'b: 'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
-    for &'a DynElement<'b, DB, Coord>
-{
-    type Borrow = &'a Coord;
-    type IntoIter = std::slice::Iter<'a, Coord>;
-    fn point_iter(self) -> Self::IntoIter {
-        self.points.iter()
-    }
-}
-
-impl<'a, DB: DrawingBackend + 'a, Coord: Clone> Drawable<DB> for DynElement<'a, DB, Coord> {
-    fn draw<I: Iterator<Item = BackendCoord>>(
-        &self,
-        mut pos: I,
-        backend: &mut DB,
-        parent_dim: (u32, u32),
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        self.drawable.draw_dyn(&mut pos, backend, parent_dim)
-    }
-}
-
-/// The trait that makes the conversion from the statically dispatched element
-/// to the dynamically dispatched element
-pub trait IntoDynElement<'a, DB: DrawingBackend, Coord: Clone>
-where
-    Self: 'a,
-{
-    /// Make the conversion
-    fn into_dyn(self) -> DynElement<'a, DB, Coord>;
-}
-
-impl<'b, T, DB, Coord> IntoDynElement<'b, DB, Coord> for T
-where
-    T: Drawable<DB> + 'b,
-    for<'a> &'a T: PointCollection<'a, Coord>,
-    Coord: Clone,
-    DB: DrawingBackend,
-{
-    fn into_dyn(self) -> DynElement<'b, DB, Coord> {
-        DynElement {
-            points: self
-                .point_iter()
-                .into_iter()
-                .map(|x| x.borrow().clone())
-                .collect(),
-            drawable: Box::new(self),
-        }
-    }
 }

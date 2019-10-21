@@ -96,11 +96,11 @@ fn fill_hexagon(c: &mut Criterion) {
 criterion_group! {
     name = rasterizer_group;
     config = Criterion::default();
-    targets = 
-        draw_pixel, 
-        draw_line, 
-        fill_background, 
-        fill_circle, 
-        fill_background_red, 
+    targets =
+        draw_pixel,
+        draw_line,
+        fill_background,
+        fill_circle,
+        fill_background_red,
         fill_hexagon
 }

@@ -17,7 +17,7 @@ impl<Coord> Pixel<Coord> {
     }
 }
 
-impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Pixel<Coord> {
+impl<'a, Coord> PointCollection<'a, Coord> for &'a Pixel<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
@@ -77,7 +77,7 @@ impl<Coord> Path<Coord> {
     }
 }
 
-impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Path<Coord> {
+impl<'a, Coord> PointCollection<'a, Coord> for &'a Path<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -149,7 +149,7 @@ impl<Coord> Rectangle<Coord> {
     }
 }
 
-impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Rectangle<Coord> {
+impl<'a, Coord> PointCollection<'a, Coord> for &'a Rectangle<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -241,7 +241,7 @@ impl<Coord, Size: SizeDesc> Circle<Coord, Size> {
     }
 }
 
-impl<'a, Coord: 'a, Size: SizeDesc> PointCollection<'a, Coord> for &'a Circle<Coord, Size> {
+impl<'a, Coord, Size: SizeDesc> PointCollection<'a, Coord> for &'a Circle<Coord, Size> {
     type Borrow = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> std::iter::Once<&'a Coord> {
@@ -302,7 +302,7 @@ impl<Coord> Polygon<Coord> {
     }
 }
 
-impl<'a, Coord: 'a> PointCollection<'a, Coord> for &'a Polygon<Coord> {
+impl<'a, Coord> PointCollection<'a, Coord> for &'a Polygon<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
