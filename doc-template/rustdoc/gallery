@@ -189,11 +189,11 @@
 </div>
 
 <div class="galleryItem">
-    <a href="https://plotters-rs.github.io/plotters-doc-data/bitmap-blit.png">
-        <img src="https://plotters-rs.github.io/plotters-doc-data/blitmap-blit.png" class="galleryItem"></img>
+    <a href="https://plotters-rs.github.io/plotters-doc-data/blit-bitmap.png">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/blit-bitmap.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
 		Drawing bitmap on chart
-        <a href="https://github.com/38/plotters/blob/master/examples/blitmap-blit.rs">[code]</a>
+        <a href="https://github.com/38/plotters/blob/master/examples/blit-bitmap.rs">[code]</a>
     </div>
 </div>
