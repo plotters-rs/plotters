@@ -107,14 +107,10 @@ fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
     let mut buffer = vec![0u8; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_2x1_inplace", |b| {
         b.iter(|| {
-            let (upper, lower) = buffer.split_at_mut((W * H * 3 / 2) as usize);
-
-            [upper, lower].par_iter_mut().for_each(|b| {
-                draw_plot(
-                    &BitMapBackend::with_buffer(*b, (W, H / 2)).into_drawing_area(),
-                    2.0,
-                )
-            });
+            let mut back = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            back.split(&[H / 2])
+                .into_par_iter()
+                .for_each(|b| draw_plot(&b.into_drawing_area(), 2.0));
         })
     });
 }
