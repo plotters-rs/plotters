@@ -5,10 +5,14 @@
 ### Improvement
 
 - Avoid copying image buffer when manipulate the image. (Thanks to @ralfbiedert)
+- Bitmap element which allows blit the image to another drawing area.
+- Performance improvement: now the bitmap backend is 8 times faster
+- Added benchmarks to monitor the performance change
 
 ### Bug Fix
 
 - Performance fix: '?' operator is very slow
+- Dynmaic Element lifetime bound: Fix a bug that prevents area series draws on non-static lifetime backend
 
 ## Plotters 0.2.8 (2019-10-12)
 
