@@ -72,8 +72,35 @@ fn fill_background_red(c: &mut Criterion) {
     });
 }
 
+fn fill_hexagon(c: &mut Criterion) {
+    let mut buffer = vec![0; (W * H * 3) as usize];
+
+    let mut vert = vec![];
+
+    for i in 0..6 {
+        let x = (W as f64 / 5.0 * (std::f64::consts::PI * i as f64 / 3.0).cos()).ceil() as i32
+            + W as i32 / 2;
+        let y = (W as f64 / 5.0 * (std::f64::consts::PI * i as f64 / 3.0).sin()).ceil() as i32
+            + W as i32 / 2;
+        vert.push((x, y));
+    }
+
+    c.bench_function("rasterizer::fill_hexagon", |b| {
+        b.iter(|| {
+            let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            root.fill_polygon(vert.clone(), &RED).unwrap();
+        })
+    });
+}
+
 criterion_group! {
     name = rasterizer_group;
     config = Criterion::default();
-    targets = draw_pixel, draw_line, fill_background, fill_circle, fill_background_red
+    targets = 
+        draw_pixel, 
+        draw_line, 
+        fill_background, 
+        fill_circle, 
+        fill_background_red, 
+        fill_hexagon
 }
