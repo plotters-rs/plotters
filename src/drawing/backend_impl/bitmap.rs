@@ -493,3 +493,106 @@ fn test_bitmap_backend() {
 
     assert!(buffer.into_iter().all(|x| x == 255));
 }
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_backend_fill_half() {
+    use crate::prelude::*;
+    let mut buffer = vec![0; 10 * 10 * 3];
+
+    {
+        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+
+        let area = back.into_drawing_area();
+        area.draw(&Rectangle::new([(0, 0), (5, 10)], RED.filled()))
+            .unwrap();
+        area.present().unwrap();
+    }
+    for x in 0..10 {
+        for y in 0..10 {
+            assert_eq!(
+                buffer[(y * 10 + x) as usize * 3 + 0],
+                if x <= 5 { 255 } else { 0 }
+            );
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], 0);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], 0);
+        }
+    }
+
+    let mut buffer = vec![0; 10 * 10 * 3];
+
+    {
+        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+
+        let area = back.into_drawing_area();
+        area.draw(&Rectangle::new([(0, 0), (10, 5)], RED.filled()))
+            .unwrap();
+        area.present().unwrap();
+    }
+    for x in 0..10 {
+        for y in 0..10 {
+            assert_eq!(
+                buffer[(y * 10 + x) as usize * 3 + 0],
+                if y <= 5 { 255 } else { 0 }
+            );
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], 0);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], 0);
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_backend_blend() {
+    use crate::prelude::*;
+    let mut buffer = vec![255; 10 * 10 * 3];
+
+    {
+        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+
+        let area = back.into_drawing_area();
+        area.draw(&Rectangle::new(
+            [(0, 0), (5, 10)],
+            RGBColor(0, 100, 200).mix(0.2).filled(),
+        ))
+        .unwrap();
+        area.present().unwrap();
+    }
+
+    for x in 0..10 {
+        for y in 0..10 {
+            let (r, g, b) = if x <= 5 {
+                (204, 224, 244)
+            } else {
+                (255, 255, 255)
+            };
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 0], r);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], g);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], b);
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_backend_split_and_fill() {
+    use crate::prelude::*;
+    let mut buffer = vec![255; 10 * 10 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+
+        for (sub_backend, color) in back.split(&[5]).into_iter().zip([&RED, &GREEN].iter()) {
+            sub_backend.into_drawing_area().fill(*color).unwrap();
+        }
+    }
+
+    for x in 0..10 {
+        for y in 0..10 {
+            let (r, g, b) = if y < 5 { (255, 0, 0) } else { (0, 255, 0) };
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 0], r);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], g);
+            assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], b);
+        }
+    }
+}
