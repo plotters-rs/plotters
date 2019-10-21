@@ -165,6 +165,36 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
+        let (w, h) = self.get_size();
+        let buf = self.get_raw_pixel_buffer();
+
+        let base_addr = &mut buf[0] as *mut u8;
+        let mut split_points = vec![0];
+        for size in area_size {
+            let next = split_points.last().unwrap() + size;
+            if next >= h {
+                break;
+            }
+            split_points.push(next);
+        }
+        split_points.push(h);
+
+        split_points
+            .iter()
+            .zip(split_points.iter().skip(1))
+            .map(|(begin, end)| {
+                let actual_buf = unsafe {
+                    std::slice::from_raw_parts_mut(
+                        base_addr.offset((begin * w * 3) as isize),
+                        ((end - begin) * w * 3) as usize,
+                    )
+                };
+                Self::with_buffer(actual_buf, (w, end - begin))
+            })
+            .collect()
+    }
+
     fn blend_rect_fast(
         &mut self,
         upper_left: (i32, i32),
