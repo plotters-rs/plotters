@@ -165,6 +165,8 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    /// Split a bitmap backend vertically into several sub drawing area which allows
+    /// multithreading rendering.
     pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();

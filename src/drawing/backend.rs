@@ -215,6 +215,10 @@ pub trait DrawingBackend: Sized {
         Ok(font.box_size(text).map_err(DrawingErrorKind::FontError)?)
     }
 
+    /// Blit a bitmap on to the backend.
+    ///
+    /// - `text`: pos the left upper conner of the bitmap to blit
+    /// - `src`: The source of the image
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     fn blit_bitmap<'a>(
         &mut self,
