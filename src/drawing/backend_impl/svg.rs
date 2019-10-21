@@ -3,7 +3,7 @@ The SVG image drawing backend
 */
 pub use svg as svg_types;
 
-use svg::node::element::{Circle, Image, Line, Polygon, Polyline, Rectangle, Text};
+use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
@@ -285,6 +285,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         use image::png::PNGEncoder;
+        use svg::node::element::Image;
 
         let mut data = vec![0; 0];
         let (w, h) = src.dimensions();
