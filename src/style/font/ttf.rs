@@ -1,16 +1,12 @@
 use std::collections::HashMap;
 use std::i32;
-use std::marker::PhantomPinned;
-use std::pin::Pin;
-use std::slice::from_raw_parts;
-use std::sync::Arc;
-use std::sync::Mutex;
-
-use rusttype::{point, Error, Font, Scale};
+use std::sync::{Arc, Mutex};
 
 use lazy_static::lazy_static;
+use rusttype::{point, Error, Font, Scale, SharedBytes};
 
 use font_loader::system_fonts;
+use font_loader::system_fonts::FontPropertyBuilder;
 
 use super::{FontData, FontTransform, LayoutBox};
 
@@ -35,88 +31,40 @@ impl std::fmt::Display for FontError {
 
 impl std::error::Error for FontError {}
 
-struct OwnedFont {
-    data: Vec<u8>,
-    font: Option<Font<'static>>,
-    _pinned: PhantomPinned,
-}
-
-impl OwnedFont {
-    fn new(data: Vec<u8>) -> Result<Pin<Box<Self>>, Error> {
-        let font_obj = OwnedFont {
-            data,
-            font: None,
-            _pinned: PhantomPinned,
-        };
-
-        let mut boxed_font_obj = Box::pin(font_obj);
-
-        unsafe {
-            let addr = &boxed_font_obj.data[0] as *const u8;
-            let font = Font::from_bytes(from_raw_parts(addr, boxed_font_obj.data.len()))?;
-            let mut_ref: Pin<&mut Self> = Pin::as_mut(&mut boxed_font_obj);
-            Pin::get_unchecked_mut(mut_ref).font =
-                std::mem::transmute::<_, Option<Font<'static>>>(Some(font));
-        }
-
-        Ok(boxed_font_obj)
-    }
-}
-
-impl Drop for OwnedFont {
-    fn drop(&mut self) {
-        self.font = None;
-    }
-}
-
-impl<'a> Into<&'a Font<'a>> for &'a OwnedFont {
-    fn into(self) -> &'a Font<'a> {
-        self.font.as_ref().unwrap()
-    }
-}
-
 lazy_static! {
-    static ref FONT_DATA_CACHE: Mutex<HashMap<String, Pin<Box<OwnedFont>>>> =
-        { Mutex::new(HashMap::new()) };
+    static ref CACHE: Mutex<HashMap<String, Option<SharedBytes<'static>>>> =
+        Mutex::new(HashMap::new());
 }
 
 #[allow(dead_code)]
-fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
-    match FONT_DATA_CACHE.lock().map(|mut cache| {
-        if !cache.contains_key(face) {
-            let query = system_fonts::FontPropertyBuilder::new()
-                .family(face)
-                .build();
-            if let Some((data, _)) = system_fonts::get(&query) {
-                let font =
-                    OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
-                cache.insert(face.to_string(), font);
-            } else {
-                return Err(FontError::NoSuchFont);
-            }
-        }
-        let font_ref: &'static OwnedFont =
-            unsafe { std::mem::transmute(cache.get(face).unwrap().as_ref().get_ref()) };
-        let addr = Into::<&'static Font<'static>>::into(font_ref) as *const Font<'static>;
-        Ok(unsafe { addr.as_ref().unwrap() })
-    }) {
-        Ok(what) => what,
-        Err(_) => Err(FontError::LockError),
-    }
+/// Lazily load font data. Font type doesn't own actual data, which
+/// lives in the cache.
+fn load_font_data(face: &str) -> FontResult<Font<'static>> {
+    CACHE
+        .lock()
+        .map_err(|_| FontError::LockError)?
+        .entry(face.into())
+        .or_insert_with(|| {
+            let query = FontPropertyBuilder::new().family(face).build();
+            system_fonts::get(&query).map(|(data, _)| data.into())
+        })
+        .clone()
+        .ok_or(FontError::NoSuchFont)
+        .and_then(|cached| {
+            Font::from_bytes(cached).map_err(|err| FontError::FontLoadError(Arc::new(err)))
+        })
 }
 
-/// STOP! This is generally a bad idea, because all the font we borrowed out should have a static life
-/// time, thus clear the font cache may cause problem.
+/// Remove all cached fonts data.
 #[allow(dead_code)]
-pub unsafe fn clear_font_cache() -> FontResult<()> {
-    if let Ok(mut cache) = FONT_DATA_CACHE.lock() {
-        *cache = HashMap::new();
-    }
-    Err(FontError::LockError)
+pub fn clear_font_cache() -> FontResult<()> {
+    let mut cache = CACHE.lock().map_err(|_| FontError::LockError)?;
+    cache.clear();
+    Ok(())
 }
 
 #[derive(Clone)]
-pub struct FontDataInternal(&'static Font<'static>);
+pub struct FontDataInternal(Font<'static>);
 
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
@@ -129,7 +77,7 @@ impl FontData for FontDataInternal {
         let (mut min_x, mut min_y) = (i32::MAX, i32::MAX);
         let (mut max_x, mut max_y) = (0, 0);
 
-        let font = self.0;
+        let font = &self.0;
 
         font.layout(text, scale, point(0.0, 0.0)).for_each(|g| {
             if let Some(rect) = g.pixel_bounding_box() {
@@ -159,7 +107,7 @@ impl FontData for FontDataInternal {
 
         let scale = Scale::uniform(size as f32);
         let mut result = Ok(());
-        let font = self.0;
+        let font = &self.0;
 
         let base_x = x + trans.offset(layout).0;
         let base_y = y + trans.offset(layout).1;
@@ -187,10 +135,16 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        let font1 = load_font_data("Arial")?;
-        let font2 = load_font_data("Arial")?;
+        
+        clear_font_cache()?;
 
-        assert_eq!(font1 as *const Font<'static>, font2 as *const Font<'static>);
+        assert_eq!(CACHE.lock().unwrap().len(), 0);
+
+        load_font_data("sans")?;
+        assert_eq!(CACHE.lock().unwrap().len(), 1);
+
+        load_font_data("sans")?;
+        assert_eq!(CACHE.lock().unwrap().len(), 1);
 
         return Ok(());
     }
