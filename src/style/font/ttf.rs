@@ -5,12 +5,13 @@ use std::pin::Pin;
 use std::slice::from_raw_parts;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::borrow::Cow;
 
 use rusttype::{point, Error, Font, Scale};
 
 use lazy_static::lazy_static;
 
-use font_loader::system_fonts;
+use font_loader::system_fonts::{self, FontPropertyBuilder};
 
 use super::{FontData, FontTransform, LayoutBox};
 
@@ -84,9 +85,7 @@ lazy_static! {
 fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
     match FONT_DATA_CACHE.lock().map(|mut cache| {
         if !cache.contains_key(face) {
-            let query = system_fonts::FontPropertyBuilder::new()
-                .family(face)
-                .build();
+            let query = FontPropertyBuilder::new().family(&find_typefamily(face)).build();
             if let Some((data, _)) = system_fonts::get(&query) {
                 let font =
                     OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
@@ -104,6 +103,28 @@ fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
         Err(_) => Err(FontError::LockError),
     }
 }
+
+/// Find typefamily based on requested face.
+fn find_typefamily(face: &str) -> Cow<str> {
+    let family = match face.to_lowercase().as_str() {
+        "italic" => query_typefamily(FontPropertyBuilder::new().italic()),
+        "oblique" => query_typefamily(FontPropertyBuilder::new().oblique()),
+        "bold" => query_typefamily(FontPropertyBuilder::new().bold()),
+        "monospace" => query_typefamily(FontPropertyBuilder::new().monospace()),
+        _ => None,
+    };
+    if let Some(family) = family {
+        Cow::from(family)
+    } else {
+        Cow::from(face)
+    }
+}
+
+fn query_typefamily(query: FontPropertyBuilder) -> Option<String> {
+    let mut query = query.build();
+    system_fonts::query_specific(&mut query).into_iter().next()
+}
+
 
 /// STOP! This is generally a bad idea, because all the font we borrowed out should have a static life
 /// time, thus clear the font cache may cause problem.
@@ -187,8 +208,8 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        let font1 = load_font_data("Arial")?;
-        let font2 = load_font_data("Arial")?;
+        let font1 = load_font_data("oblique")?;
+        let font2 = load_font_data("oblique")?;
 
         assert_eq!(font1 as *const Font<'static>, font2 as *const Font<'static>);
 
