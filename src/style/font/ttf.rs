@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::i32;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 use lazy_static::lazy_static;
 use rusttype::{point, Error, Font, Scale, SharedBytes};
@@ -31,33 +31,38 @@ impl std::fmt::Display for FontError {
 impl std::error::Error for FontError {}
 
 lazy_static! {
-    static ref CACHE: Mutex<HashMap<String, Option<SharedBytes<'static>>>> =
-        Mutex::new(HashMap::new());
+    static ref CACHE: RwLock<HashMap<String, FontResult<Font<'static>>>> =
+        RwLock::new(HashMap::new());
 }
 
 #[allow(dead_code)]
 /// Lazily load font data. Font type doesn't own actual data, which
 /// lives in the cache.
 fn load_font_data(face: &str) -> FontResult<Font<'static>> {
-    CACHE
-        .lock()
-        .map_err(|_| FontError::LockError)?
-        .entry(face.into())
-        .or_insert_with(|| {
-            let query = FontPropertyBuilder::new().family(face).build();
-            system_fonts::get(&query).map(|(data, _)| data.into())
-        })
-        .clone()
+    let cache = CACHE.read().unwrap();
+    if let Some(cached) = cache.get(face) {
+        return cached.clone();
+    }
+    drop(cache);
+
+    let mut cache = CACHE.write().unwrap();
+    let query = FontPropertyBuilder::new().family(face).build();
+    let result = system_fonts::get(&query)
+        .map(|(data, _)| data.into())
         .ok_or(FontError::NoSuchFont)
-        .and_then(|cached| {
-            Font::from_bytes(cached).map_err(|err| FontError::FontLoadError(Arc::new(err)))
-        })
+        .and_then(|bytes: SharedBytes| {
+            Font::from_bytes(bytes).map_err(|err| FontError::FontLoadError(Arc::new(err)))
+        });
+
+    cache.insert(face.into(), result.clone());
+
+    result
 }
 
 /// Remove all cached fonts data.
 #[allow(dead_code)]
 pub fn clear_font_cache() -> FontResult<()> {
-    let mut cache = CACHE.lock().map_err(|_| FontError::LockError)?;
+    let mut cache = CACHE.write().map_err(|_| FontError::LockError)?;
     cache.clear();
     Ok(())
 }
@@ -139,13 +144,13 @@ mod test {
     fn test_font_cache() -> FontResult<()> {
         clear_font_cache()?;
 
-        assert_eq!(CACHE.lock().unwrap().len(), 0);
+        assert_eq!(CACHE.read().unwrap().len(), 0);
 
         load_font_data("sans")?;
-        assert_eq!(CACHE.lock().unwrap().len(), 1);
+        assert_eq!(CACHE.read().unwrap().len(), 1);
 
         load_font_data("sans")?;
-        assert_eq!(CACHE.lock().unwrap().len(), 1);
+        assert_eq!(CACHE.read().unwrap().len(), 1);
 
         return Ok(());
     }
