@@ -597,7 +597,7 @@ mod test {
         drawing_area.fill(&WHITE).expect("Fill");
 
         let mut chart = ChartBuilder::on(&drawing_area)
-            .caption("Test Title", ("oblique", 10))
+            .caption("Test Title", ("sans", 10))
             .x_label_area_size(20)
             .y_label_area_size(20)
             .set_label_area_size(LabelAreaPosition::Top, 20)

@@ -5,7 +5,6 @@ use std::pin::Pin;
 use std::slice::from_raw_parts;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::borrow::Cow;
 
 use rusttype::{point, Error, Font, Scale};
 
@@ -13,7 +12,7 @@ use lazy_static::lazy_static;
 
 use font_loader::system_fonts::{self, FontPropertyBuilder};
 
-use super::{FontData, FontTransform, LayoutBox};
+use super::{FontData, FontFamily, FontTransform, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -85,7 +84,7 @@ lazy_static! {
 fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
     match FONT_DATA_CACHE.lock().map(|mut cache| {
         if !cache.contains_key(face) {
-            let query = FontPropertyBuilder::new().family(&find_typefamily(face)).build();
+            let query = FontPropertyBuilder::new().family(face).build();
             if let Some((data, _)) = system_fonts::get(&query) {
                 let font =
                     OwnedFont::new(data).map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
@@ -104,28 +103,6 @@ fn load_font_data(face: &str) -> FontResult<&'static Font<'static>> {
     }
 }
 
-/// Find typefamily based on requested face.
-fn find_typefamily(face: &str) -> Cow<str> {
-    let family = match face.to_lowercase().as_str() {
-        "italic" => query_typefamily(FontPropertyBuilder::new().italic()),
-        "oblique" => query_typefamily(FontPropertyBuilder::new().oblique()),
-        "bold" => query_typefamily(FontPropertyBuilder::new().bold()),
-        "monospace" => query_typefamily(FontPropertyBuilder::new().monospace()),
-        _ => None,
-    };
-    if let Some(family) = family {
-        Cow::from(family)
-    } else {
-        Cow::from(face)
-    }
-}
-
-fn query_typefamily(query: FontPropertyBuilder) -> Option<String> {
-    let mut query = query.build();
-    system_fonts::query_specific(&mut query).into_iter().next()
-}
-
-
 /// STOP! This is generally a bad idea, because all the font we borrowed out should have a static life
 /// time, thus clear the font cache may cause problem.
 #[allow(dead_code)]
@@ -141,9 +118,11 @@ pub struct FontDataInternal(&'static Font<'static>);
 
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
-    fn new(face: &str) -> Result<Self, FontError> {
-        Ok(FontDataInternal(load_font_data(face)?))
+
+    fn new(family: FontFamily) -> Result<Self, FontError> {
+        Ok(FontDataInternal(load_font_data(family.as_str())?))
     }
+
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let scale = Scale::uniform(size as f32);
 
@@ -167,6 +146,7 @@ impl FontData for FontDataInternal {
 
         Ok(((min_x, min_y), (max_x, max_y)))
     }
+
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
         (x, y): (i32, i32),
@@ -208,8 +188,8 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        let font1 = load_font_data("oblique")?;
-        let font2 = load_font_data("oblique")?;
+        let font1 = load_font_data("sans")?;
+        let font2 = load_font_data("sans")?;
 
         assert_eq!(font1 as *const Font<'static>, font2 as *const Font<'static>);
 
