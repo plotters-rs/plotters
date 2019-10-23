@@ -329,7 +329,7 @@ where
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
         let default_axis_color = RGBColor(0, 0, 0);
         let default_label_font = FontDesc::new(
-            "Arial",
+            "oblique",
             f64::from((12i32).percent().max(12).in_pixels(&self.parent_size)),
         );
 

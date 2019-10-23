@@ -690,7 +690,7 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_text(|c, font, size, _pos, text| {
                 assert_eq!(c, BLACK.to_rgba());
-                assert_eq!(font, "Arial");
+                assert_eq!(font, "oblique");
                 assert_eq!(size, 30.0);
                 assert_eq!("This is the title", text);
             });
@@ -709,7 +709,7 @@ mod drawing_area_tests {
         });
 
         drawing_area
-            .titled("This is the title", ("Arial", 30))
+            .titled("This is the title", ("oblique", 30))
             .unwrap()
             .fill(&WHITE)
             .unwrap();
