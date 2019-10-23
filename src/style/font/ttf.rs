@@ -7,6 +7,7 @@ use rusttype::{point, Error, Font, Scale, SharedBytes};
 
 use font_loader::system_fonts::{self, FontPropertyBuilder};
 
+
 use super::{FontData, FontFamily, FontTransform, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
@@ -109,7 +110,6 @@ impl FontData for FontDataInternal {
         trans: FontTransform,
         mut draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
-        //let ((_, b), (_, _)) = self.estimate_layout(size, text)?;
         let layout = self.estimate_layout(size, text)?;
 
         let scale = Scale::uniform(size as f32);

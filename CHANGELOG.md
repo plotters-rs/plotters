@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest (?)
+
+### Improved
+
+- Refactored and simplified TTF font cache, use RwLock instead of mutex which may benifit for parallel rendering. (Thanks to @Tatrix)
+
 ## Plotters 0.2.9 (2019-10-21)
 
 ### Improvement
