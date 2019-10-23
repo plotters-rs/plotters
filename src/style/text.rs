@@ -1,5 +1,5 @@
 use super::color::{Color, RGBAColor};
-use super::font::{FontDesc, FontTransform};
+use super::font::{FontDesc, FontFamily, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
 
@@ -26,7 +26,19 @@ impl<'a> IntoTextStyle<'a> for TextStyle<'a> {
     }
 }
 
+impl<'a> IntoTextStyle<'a> for FontFamily<'a> {
+    fn into_text_style<P: HasDimension>(self, _: &P) -> TextStyle<'a> {
+        self.into()
+    }
+}
+
 impl<'a, T: SizeDesc> IntoTextStyle<'a> for (&'a str, T) {
+    fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
+        (self.0, self.1.in_pixels(parent)).into()
+    }
+}
+
+impl<'a, T: SizeDesc> IntoTextStyle<'a> for (FontFamily<'a>, T) {
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
         (self.0, self.1.in_pixels(parent)).into()
     }

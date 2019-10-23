@@ -8,7 +8,7 @@ use rusttype::{point, Error, Font, Scale, SharedBytes};
 use font_loader::system_fonts;
 use font_loader::system_fonts::FontPropertyBuilder;
 
-use super::{FontData, FontTransform, LayoutBox};
+use super::{FontData, FontFamily, FontTransform, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -73,9 +73,11 @@ pub struct FontDataInternal(Font<'static>);
 
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
-    fn new(face: &str) -> Result<Self, FontError> {
-        Ok(FontDataInternal(load_font_data(face)?))
+
+    fn new(family: FontFamily) -> Result<Self, FontError> {
+        Ok(FontDataInternal(load_font_data(family.as_str())?))
     }
+
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let scale = Scale::uniform(size as f32);
 
@@ -99,6 +101,7 @@ impl FontData for FontDataInternal {
 
         Ok(((min_x, min_y), (max_x, max_y)))
     }
+
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
         (x, y): (i32, i32),
@@ -143,10 +146,10 @@ mod test {
 
         assert_eq!(CACHE.read().unwrap().len(), 0);
 
-        load_font_data("sans")?;
+        load_font_data("serif")?;
         assert_eq!(CACHE.read().unwrap().len(), 1);
 
-        load_font_data("sans")?;
+        load_font_data("serif")?;
         assert_eq!(CACHE.read().unwrap().len(), 1);
 
         return Ok(());

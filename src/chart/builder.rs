@@ -320,14 +320,18 @@ mod test {
         let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
         let mut chart = ChartBuilder::on(&drawing_area);
 
-        chart.caption("This is a test case", ("Arial", 10));
+
+        chart.caption("This is a test case", (FontFamily::Serif, 10));
 
         assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");
-        assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "Arial");
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
         assert_eq!(
             chart.title.as_ref().unwrap().1.color.to_rgba(),
             BLACK.to_rgba()
         );
+
+        chart.caption("This is a test case", ("serif", 10));
+        assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
     }
 }

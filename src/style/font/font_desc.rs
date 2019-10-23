@@ -45,20 +45,63 @@ impl FontTransform {
 #[derive(Clone)]
 pub struct FontDesc<'a> {
     size: f64,
-    name: &'a str,
+    family: FontFamily<'a>,
     data: FontResult<FontDataInternal>,
     transform: FontTransform,
 }
 
+/// Describes font family
+#[derive(Clone, Copy)]
+pub enum FontFamily<'a> {
+    Serif,
+    SansSerif,
+    Monospace,
+    Name(&'a str),
+}
+
+impl<'a> FontFamily<'a> {
+    pub fn as_str(&self) -> &str {
+        match self {
+            FontFamily::Serif => "serif",
+            FontFamily::SansSerif => "sans-serif",
+            FontFamily::Monospace => "monospace",
+            FontFamily::Name(face) => face,
+        }
+    }
+}
+
+impl<'a> From<&'a str> for FontFamily<'a> {
+    fn from(from: &'a str) -> FontFamily<'a> {
+        match from {
+            "serif" => FontFamily::Serif,
+            "sans-serif" => FontFamily::SansSerif,
+            "monospace" => FontFamily::Monospace,
+            _ => FontFamily::Name(from),
+        }
+    }
+}
+
 impl<'a> From<&'a str> for FontDesc<'a> {
     fn from(from: &'a str) -> FontDesc<'a> {
-        FontDesc::new(from, 1.0)
+        FontDesc::new(from.into(), 1.0)
+    }
+}
+
+impl<'a> From<FontFamily<'a>> for FontDesc<'a> {
+    fn from(family: FontFamily<'a>) -> FontDesc<'a> {
+        FontDesc::new(family, 1.0)
+    }
+}
+
+impl<'a, T: Into<f64>> From<(FontFamily<'a>, T)> for FontDesc<'a> {
+    fn from((family, size): (FontFamily<'a>, T)) -> FontDesc<'a> {
+        FontDesc::new(family, size.into())
     }
 }
 
 impl<'a, T: Into<f64>> From<(&'a str, T)> for FontDesc<'a> {
     fn from((typeface, size): (&'a str, T)) -> FontDesc<'a> {
-        FontDesc::new(typeface, size.into())
+        FontDesc::new(typeface.into(), size.into())
     }
 }
 
@@ -74,11 +117,11 @@ impl<'a, T: Into<FontDesc<'a>>> IntoFont<'a> for T {
 
 impl<'a> FontDesc<'a> {
     /// Create a new font
-    pub fn new(typeface: &'a str, size: f64) -> Self {
+    pub fn new(family: FontFamily<'a>, size: f64) -> Self {
         Self {
             size,
-            name: typeface,
-            data: FontDataInternal::new(typeface),
+            family,
+            data: FontDataInternal::new(family),
             transform: FontTransform::None,
         }
     }
@@ -87,7 +130,7 @@ impl<'a> FontDesc<'a> {
     pub fn resize(&self, size: f64) -> FontDesc<'a> {
         Self {
             size,
-            name: self.name,
+            family: self.family,
             data: self.data.clone(),
             transform: self.transform.clone(),
         }
@@ -97,7 +140,7 @@ impl<'a> FontDesc<'a> {
     pub fn transform(&self, trans: FontTransform) -> Self {
         Self {
             size: self.size,
-            name: self.name,
+            family: self.family,
             data: self.data.clone(),
             transform: trans,
         }
@@ -117,8 +160,8 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Get the name of the font
-    pub fn get_name(&self) -> &'a str {
-        self.name
+    pub fn get_name(&self) -> &str {
+        self.family.as_str()
     }
 
     /// Get the size of font
