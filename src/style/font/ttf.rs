@@ -107,7 +107,6 @@ impl FontData for FontDataInternal {
         trans: FontTransform,
         mut draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
-        //let ((_, b), (_, _)) = self.estimate_layout(size, text)?;
         let layout = self.estimate_layout(size, text)?;
 
         let scale = Scale::uniform(size as f32);
@@ -140,7 +139,6 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        
         clear_font_cache()?;
 
         assert_eq!(CACHE.read().unwrap().len(), 0);
