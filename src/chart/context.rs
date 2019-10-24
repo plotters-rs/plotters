@@ -79,6 +79,16 @@ pub struct SavedChartState<CT: CoordTranslate> {
     coord: CT,
 }
 
+impl<'a, CT: CoordTranslate + Clone> Clone for SavedChartState<CT> {
+    fn clone(&self) -> Self {
+        Self {
+            drawing_area_size: self.drawing_area_size,
+            drawing_area_pos: self.drawing_area_pos,
+            coord: self.coord.clone(),
+        }
+    }
+}
+
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>>
     for SavedChartState<CT>
 {
@@ -87,6 +97,20 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>>
             drawing_area_pos: chart.drawing_area_pos,
             drawing_area_size: chart.drawing_area.dim_in_pixel(),
             coord: chart.drawing_area.into_coord_spec(),
+        }
+    }
+}
+
+impl<'a, 'b, DB, CT> From<&ChartContext<'a, DB, CT>> for SavedChartState<CT>
+where
+    DB: DrawingBackend,
+    CT: CoordTranslate + Clone,
+{
+    fn from(chart: &ChartContext<'a, DB, CT>) -> SavedChartState<CT> {
+        SavedChartState {
+            drawing_area_pos: chart.drawing_area_pos,
+            drawing_area_size: chart.drawing_area.dim_in_pixel(),
+            coord: chart.drawing_area.borrow_coord_spec().clone(),
         }
     }
 }

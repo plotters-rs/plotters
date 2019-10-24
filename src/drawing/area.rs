@@ -514,6 +514,10 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn into_coord_spec(self) -> CT {
         self.coord
     }
+
+    pub fn borrow_coord_spec(&self) -> &CT {
+        &self.coord
+    }
 }
 
 #[cfg(test)]
