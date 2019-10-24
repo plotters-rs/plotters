@@ -146,6 +146,16 @@ impl<'a> BitMapBackend<'a> {
     }
 
     /// Create a new bitmap backend which only lives in-memory
+    ///
+    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
+    /// Output is rendered as RGB triples. ie. 
+    /// buff[0] a the red channel for pixel one
+    /// buff[1] is the green channel for pixel one
+    /// buff[2] is the blue channel for pixel one
+    /// and so on
+    ///
+    /// - `buf`: The path to the GIF file to create
+    /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], dimension: (u32, u32)) -> Self {
         Self {
             target: Target::Buffer(
@@ -163,6 +173,27 @@ impl<'a> BitMapBackend<'a> {
             #[cfg(feature = "gif")]
             Target::Gif(_, img) => &mut (**img)[..],
         }
+    }
+
+    /// Helper function to convert with_buffer output
+    ///
+    /// This is a simple helper function which converts RGB triples
+    /// to RGB 32 bit values. Useful when interoprtating with crates
+    /// which expect Vec<32> such as minifb
+    /// Example: 
+    /// ```
+    /// let disp_buff: Vec<u32> = raw_bit_buffer.chunks_exact(3).map(|rgb| rgb_from_u8_to_u32(
+    /// rgb[0],
+    /// rgb[1],
+    /// rgb[2])).collect();
+    /// ```
+    ///
+    /// - 'r': Red channel
+    /// - 'g': Green channel
+    /// - 'b': Blue channel
+    pub fn rgb_from_u8_to_u32(r: u8, g: u8, b: u8) -> u32 {
+    let (r, g, b) = (r as u32, g as u32, b as u32);
+        (r << 16) | (g << 8) | b
     }
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
