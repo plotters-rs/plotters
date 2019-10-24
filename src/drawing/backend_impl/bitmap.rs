@@ -221,6 +221,12 @@ impl<'a> BitMapBackend<'a> {
             upper_left.1.max(bottom_right.1).min(h as i32 - 1),
         );
 
+        // This may happen when the minimal value is larger than the limit.
+        // Thus we just have something that is completely out-of-range
+        if x0 > x1 || y0 > y1 {
+            return;
+        }
+
         let dst = self.get_raw_pixel_buffer();
 
         for y in y0..=y1 {
@@ -252,6 +258,12 @@ impl<'a> BitMapBackend<'a> {
             upper_left.0.max(bottom_right.0).min(w as i32 - 1),
             upper_left.1.max(bottom_right.1).min(h as i32 - 1),
         );
+
+        // This may happen when the minimal value is larger than the limit.
+        // Thus we just have something that is completely out-of-range
+        if x0 > x1 || y0 > y1 {
+            return;
+        }
 
         let dst = self.get_raw_pixel_buffer();
 
@@ -374,12 +386,24 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 if from.1 == to.1 {
                     self.fill_rect_fast(from, to, r, g, b);
                 } else {
-                    let w = self.get_size().0 as i32;
+                    let (w, h) = self.get_size();
+                    let w = w as i32;
+                    let h = h as i32;
+
+                    // Make sure we are in the range
+                    if from.0 < 0 || from.0 >= w {
+                        return Ok(());
+                    }
+
                     let dst = self.get_raw_pixel_buffer();
                     let (mut y0, mut y1) = (from.1, to.1);
                     if y0 > y1 {
                         std::mem::swap(&mut y0, &mut y1);
                     }
+                    // And check the y axis isn't out of bound
+                    y0 = y0.max(0);
+                    y1 = y1.min(h);
+                    // This is ok because once y0 > y1, there won't be any iteration anymore
                     for y in y0..=y1 {
                         dst[(y * w + from.0) as usize * 3] = r;
                         dst[(y * w + from.0) as usize * 3 + 1] = g;
@@ -595,6 +619,30 @@ fn test_bitmap_backend_split_and_fill() {
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 0], r);
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], g);
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], b);
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_draw_line_out_of_range() {
+    use crate::prelude::*;
+    let mut buffer = vec![0; 1099 * 1000 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+
+        back.draw_line((1100, 0), (1100, 999), &RED.to_rgba())
+            .unwrap();
+        back.draw_line((0, 1100), (999, 1100), &RED.to_rgba())
+            .unwrap();
+    }
+
+    for x in 0..1000 {
+        for y in 0..1000 {
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 0], 0);
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 1], 0);
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 2], 0);
         }
     }
 }

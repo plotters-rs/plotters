@@ -6,6 +6,10 @@
 
 - Refactored and simplified TTF font cache, use RwLock instead of mutex which may benifit for parallel rendering. (Thanks to @Tatrix)
 
+### Bug Fix
+
+- The fast bitmap filling algorithm may overflow the framebuffer and cuase segfault
+
 ## Plotters 0.2.9 (2019-10-21)
 
 ### Improvement
