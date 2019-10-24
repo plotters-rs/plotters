@@ -260,6 +260,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
                 pixel_range,
             )),
             series_anno: vec![],
+            drawing_area_pos: (actual_drawing_area_pos[2], actual_drawing_area_pos[0]),
         })
     }
 }

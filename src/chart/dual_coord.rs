@@ -45,6 +45,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
                 y_label_area: secondary_y_label_area,
                 drawing_area: secondary_drawing_area,
                 series_anno: vec![],
+                drawing_area_pos: (0, 0),
             },
         }
     }

@@ -70,6 +70,43 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) y_label_area: [Option<DrawingArea<DB, Shift>>; 2],
     pub(super) drawing_area: DrawingArea<DB, CT>,
     pub(super) series_anno: Vec<SeriesAnno<'a, DB>>,
+    pub(super) drawing_area_pos: (i32, i32),
+}
+
+pub struct SavedChartState<CT: CoordTranslate> {
+    drawing_area_pos: (i32, i32),
+    drawing_area_size: (u32, u32),
+    coord: CT,
+}
+
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>>
+    for SavedChartState<CT>
+{
+    fn from(chart: ChartContext<'a, DB, CT>) -> SavedChartState<CT> {
+        SavedChartState {
+            drawing_area_pos: chart.drawing_area_pos,
+            drawing_area_size: chart.drawing_area.dim_in_pixel(),
+            coord: chart.drawing_area.into_coord_spec(),
+        }
+    }
+}
+
+impl<CT: CoordTranslate> SavedChartState<CT> {
+    pub fn restore<'a, DB: DrawingBackend>(
+        self,
+        area: &DrawingArea<DB, Shift>,
+    ) -> ChartContext<'a, DB, CT> {
+        let area = area
+            .clone()
+            .shrink(self.drawing_area_pos, self.drawing_area_size);
+        ChartContext {
+            x_label_area: [None, None],
+            y_label_area: [None, None],
+            drawing_area: area.apply_coord_spec(self.coord),
+            series_anno: vec![],
+            drawing_area_pos: self.drawing_area_pos,
+        }
+    }
 }
 
 impl<
