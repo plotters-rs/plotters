@@ -27,6 +27,7 @@ macro_rules! impl_ranged_type_trait {
 macro_rules! make_numeric_coord {
     ($type:ty, $name:ident, $key_points:ident, $doc: expr) => {
         #[doc = $doc]
+        #[derive(Clone)]
         pub struct $name($type, $type);
         impl From<Range<$type>> for $name {
             fn from(range: Range<$type>) -> Self {

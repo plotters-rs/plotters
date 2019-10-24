@@ -84,6 +84,7 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
 }
 
 /// The ranged coordinate for date
+#[derive(Clone)]
 pub struct RangedDate<Z: TimeZone>(Date<Z>, Date<Z>);
 
 impl<Z: TimeZone> From<Range<Date<Z>>> for RangedDate<Z> {
@@ -149,6 +150,7 @@ impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
 }
 
 /// Indicatets the coord has a monthly resolution
+#[derive(Clone)]
 pub struct Monthly<T: TimeValue>(Range<T>);
 
 impl<T: TimeValue + Clone> AsRangedCoord for Monthly<T> {
@@ -283,6 +285,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
 }
 
 /// Indicate the coord has a yearly resolution
+#[derive(Clone)]
 pub struct Yearly<T: TimeValue>(Range<T>);
 
 impl<T: TimeValue + Clone> AsRangedCoord for Yearly<T> {
@@ -401,6 +404,7 @@ impl<T: TimeValue> IntoYearly<T> for Range<T> {
 }
 
 /// The ranged coordinate for the date and time
+#[derive(Clone)]
 pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
 
 impl<Z: TimeZone> AsRangedCoord for Range<DateTime<Z>> {
@@ -473,6 +477,7 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
 }
 
 /// The coordinate that for duration of time
+#[derive(Clone)]
 pub struct RangedDuration(Duration, Duration);
 
 impl AsRangedCoord for Range<Duration> {

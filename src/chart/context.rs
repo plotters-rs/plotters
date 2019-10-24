@@ -101,6 +101,12 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>>
     }
 }
 
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    pub fn into_saved_state(self) -> SavedChartState<CT> {
+        self.into()
+    }
+}
+
 impl<'a, 'b, DB, CT> From<&ChartContext<'a, DB, CT>> for SavedChartState<CT>
 where
     DB: DrawingBackend,
@@ -112,6 +118,12 @@ where
             drawing_area_size: chart.drawing_area.dim_in_pixel(),
             coord: chart.drawing_area.borrow_coord_spec().clone(),
         }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT: CoordTranslate + Clone> ChartContext<'a, DB, CT> {
+    pub fn to_saved_state(&self) -> SavedChartState<CT> {
+        self.into()
     }
 }
 
