@@ -636,6 +636,8 @@ fn test_draw_line_out_of_range() {
             .unwrap();
         back.draw_line((0, 1100), (999, 1100), &RED.to_rgba())
             .unwrap();
+        back.draw_rect((1100, 0), (1100, 999), &RED.to_rgba(), true)
+            .unwrap();
     }
 
     for x in 0..1000 {
