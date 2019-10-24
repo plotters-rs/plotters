@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut chart = ChartBuilder::on(&root)
         .x_label_area_size(40)
         .y_label_area_size(40)
-        .caption("MSFT Stock Price", ("Arial", 50.0).into_font())
+        .caption("MSFT Stock Price", ("serif", 50.0).into_font())
         .build_ranged(from_date..to_date, 110f32..135f32)?;
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;

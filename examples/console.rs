@@ -146,7 +146,7 @@ where
 {
     let mut chart = ChartBuilder::on(&b)
         .margin(1)
-        .caption("Sine and Cosine", ("Arial", (10).percent_height()))
+        .caption("Sine and Cosine", ("serif", (10).percent_height()))
         .set_label_area_size(LabelAreaPosition::Left, (5i32).percent_width())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())

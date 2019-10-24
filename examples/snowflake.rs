@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("Koch's Snowflake", ("Arial", 50))
+        .caption("Koch's Snowflake", ("serif", 50))
         .build_ranged(-2.0..2.0, -1.5..1.5)?;
 
     let mut snowflake_vertices = {

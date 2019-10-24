@@ -320,7 +320,6 @@ mod test {
         let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
         let mut chart = ChartBuilder::on(&drawing_area);
 
-
         chart.caption("This is a test case", (FontFamily::Serif, 10));
 
         assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");

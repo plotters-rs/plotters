@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest (?)
+
+### Improved 
+
+- Font description is greatly improved, general font family is supported: `serif`, `serif-sans`, `monospace` (Thanks to @Tatrix)
+
 ## Plotters 0.2.10 (2019-10-23)
 
 ### Improved

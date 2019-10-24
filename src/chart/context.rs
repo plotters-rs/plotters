@@ -537,9 +537,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
 
-        //let tick_size = (5u32).percent().max(5);
-        //let tick_size = tick_size.in_pixels(&self.drawing_area);
-
         for idx in 0..2 {
             self.draw_axis_and_labels(
                 self.x_label_area[idx].as_ref(),
