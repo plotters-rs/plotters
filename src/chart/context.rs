@@ -2,6 +2,7 @@ use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
+use std::sync::Arc;
 
 use super::dual_coord::DualCoordChartContext;
 use super::mesh::MeshStyle;
@@ -104,6 +105,14 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>>
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     pub fn into_saved_state(self) -> SavedChartState<CT> {
         self.into()
+    }
+
+    pub fn into_shared_state(self) -> SavedChartState<Arc<CT>> {
+        SavedChartState {
+            drawing_area_pos: self.drawing_area_pos,
+            drawing_area_size: self.drawing_area.dim_in_pixel(),
+            coord: Arc::new(self.drawing_area.into_coord_spec()),
+        }
     }
 }
 
