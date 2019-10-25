@@ -175,27 +175,6 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
-    /// Helper function to convert with_buffer output
-    ///
-    /// This is a simple helper function which converts RGB triples
-    /// to RGB 32 bit values. Useful when interoprtating with crates
-    /// which expect Vec<32> such as minifb
-    /// Example: 
-    /// ```
-    /// let disp_buff: Vec<u32> = raw_bit_buffer.chunks_exact(3).map(|rgb| rgb_from_u8_to_u32(
-    /// rgb[0],
-    /// rgb[1],
-    /// rgb[2])).collect();
-    /// ```
-    ///
-    /// - 'r': Red channel
-    /// - 'g': Green channel
-    /// - 'b': Blue channel
-    pub fn rgb_from_u8_to_u32(r: u8, g: u8, b: u8) -> u32 {
-    let (r, g, b) = (r as u32, g as u32, b as u32);
-        (r << 16) | (g << 8) | b
-    }
-
     /// Split a bitmap backend vertically into several sub drawing area which allows
     /// multithreading rendering.
     pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
