@@ -4,7 +4,7 @@ use std::i32;
 use std::sync::{Arc, RwLock};
 
 use lazy_static::lazy_static;
-use rusttype::{point, Error, Font, Scale, SharedBytes};
+use rusttype::{point, Error, Font, FontCollection, Scale, SharedBytes};
 
 use font_loader::system_fonts;
 use font_loader::system_fonts::FontPropertyBuilder;
@@ -63,11 +63,15 @@ fn load_font_data(face: &str, style: FontStyle) -> FontResult<Font<'static>> {
     .build();
 
     let result = system_fonts::get(&query)
-        .map(|(data, _)| data.into())
+        .map(|(data, id)| (data.into(), id))
         .ok_or(FontError::NoSuchFont)
-        .and_then(|bytes: SharedBytes| {
-            // TODO: Handles the font collection case
-            Font::from_bytes(bytes).map_err(|err| FontError::FontLoadError(Arc::new(err)))
+        .and_then(|(bytes, id): (SharedBytes, _)| {
+            // TODO: If there's multiple font in the same TTC file is loaded this waste memory a
+            // lot.
+            FontCollection::from_bytes(bytes)
+                .map_err(|err| FontError::FontLoadError(Arc::new(err)))?
+                .font_at(id.max(0) as usize)
+                .map_err(|err| FontError::FontLoadError(Arc::new(err)))
         });
 
     cache.insert(key.into_owned(), result.clone());
