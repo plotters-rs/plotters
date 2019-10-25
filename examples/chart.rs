@@ -2,18 +2,18 @@ use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area =
-        BitMapBackend::new("plotters-doc-data/sample.png", (1024, 768)).into_drawing_area();
+        SVGBackend::new("sample.svg", (1024, 768)).into_drawing_area();
 
     root_area.fill(&WHITE)?;
 
-    let root_area = root_area.titled("Image Title", ("serif", 60).into_font())?;
+    let root_area = root_area.titled("Image Title", ("Iosevka", 60, "italic").into_font())?;
 
     let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
         .margin(5)
         .set_all_label_area_size(50)
-        .caption("Sine and Cosine", ("serif", 40).into_font())
+        .caption("Sine and Cosine", ("serif", 40, "bold").into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
     cc.configure_mesh()

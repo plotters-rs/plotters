@@ -2,6 +2,10 @@
 
 ## Plotters latest (?)
 
+### Added
+
+- Add font style support, now we are able to set font variantions: normal, oblique, italic or bold.
+
 ### Improved 
 
 - Font description is greatly improved, general font family is supported: `serif`, `serif-sans`, `monospace` (Thanks to @Tatrix)

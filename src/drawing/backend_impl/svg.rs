@@ -7,7 +7,7 @@ use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
+use crate::style::{Color, FontDesc, FontStyle, FontTransform, RGBAColor};
 
 use std::io::{Cursor, Error};
 use std::path::Path;
@@ -260,6 +260,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .set("font-size", font.get_size())
             .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color));
+
+        let node = match font.get_style() {
+            FontStyle::Normal => node,
+            FontStyle::Bold => node.set("font-weight", "bold"),
+            other_style => node.set("font-style", other_style.as_str()),
+        };
 
         let node = match trans {
             FontTransform::Rotate90 => node.set("transform", format!("rotate(90, {}, {})", x0, y0)),

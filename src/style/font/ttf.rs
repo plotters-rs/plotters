@@ -1,3 +1,4 @@
+use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 use std::i32;
 use std::sync::{Arc, RwLock};
@@ -8,7 +9,7 @@ use rusttype::{point, Error, Font, Scale, SharedBytes};
 use font_loader::system_fonts;
 use font_loader::system_fonts::FontPropertyBuilder;
 
-use super::{FontData, FontFamily, FontTransform, LayoutBox};
+use super::{FontData, FontFamily, FontStyle, FontTransform, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -39,15 +40,28 @@ lazy_static! {
 #[allow(dead_code)]
 /// Lazily load font data. Font type doesn't own actual data, which
 /// lives in the cache.
-fn load_font_data(face: &str) -> FontResult<Font<'static>> {
+fn load_font_data(face: &str, style: FontStyle) -> FontResult<Font<'static>> {
+    let key = match style {
+        FontStyle::Normal => Cow::Borrowed(face),
+        _ => Cow::Owned(format!("{}, {}", face, style.as_str())),
+    };
     let cache = CACHE.read().unwrap();
-    if let Some(cached) = cache.get(face) {
+    if let Some(cached) = cache.get(Borrow::<str>::borrow(&key)) {
         return cached.clone();
     }
     drop(cache);
 
     let mut cache = CACHE.write().unwrap();
-    let query = FontPropertyBuilder::new().family(face).build();
+    let query_builder = FontPropertyBuilder::new().family(face);
+
+    let query = match style {
+        FontStyle::Normal => query_builder,
+        FontStyle::Italic => query_builder.italic(),
+        FontStyle::Oblique => query_builder.oblique(),
+        FontStyle::Bold => query_builder.bold(),
+    }
+    .build();
+
     let result = system_fonts::get(&query)
         .map(|(data, _)| data.into())
         .ok_or(FontError::NoSuchFont)
@@ -55,7 +69,7 @@ fn load_font_data(face: &str) -> FontResult<Font<'static>> {
             Font::from_bytes(bytes).map_err(|err| FontError::FontLoadError(Arc::new(err)))
         });
 
-    cache.insert(face.into(), result.clone());
+    cache.insert(key.into_owned(), result.clone());
 
     result
 }
@@ -74,8 +88,8 @@ pub struct FontDataInternal(Font<'static>);
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
 
-    fn new(family: FontFamily) -> Result<Self, FontError> {
-        Ok(FontDataInternal(load_font_data(family.as_str())?))
+    fn new(family: FontFamily, style: FontStyle) -> Result<Self, FontError> {
+        Ok(FontDataInternal(load_font_data(family.as_str(), style)?))
     }
 
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {

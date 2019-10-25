@@ -25,7 +25,7 @@ pub type LayoutBox = ((i32, i32), (i32, i32));
 
 pub trait FontData: Clone {
     type ErrorType: Sized + std::error::Error + Clone;
-    fn new(family: FontFamily) -> Result<Self, Self::ErrorType>;
+    fn new(family: FontFamily, style: FontStyle) -> Result<Self, Self::ErrorType>;
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType>;
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,

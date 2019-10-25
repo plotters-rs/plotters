@@ -3,7 +3,7 @@ use cairo::{Context as CairoContext, FontSlant, FontWeight, Status as CairoStatu
 #[allow(unused_imports)]
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 #[allow(unused_imports)]
-use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
+use crate::style::{Color, FontDesc, FontStyle, FontTransform, RGBAColor};
 
 /// The drawing backend that is backed with a Cairo context
 pub struct CairoBackend<'a> {
@@ -255,8 +255,19 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
             y = 0;
         }
 
-        self.call_cairo(|c| {
-            c.select_font_face(font.get_name(), FontSlant::Normal, FontWeight::Normal)
+        self.call_cairo(|c| match font.get_style() {
+            FontStyle::Normal => {
+                c.select_font_face(font.get_name(), FontSlant::Normal, FontWeight::Normal)
+            }
+            FontStyle::Bold => {
+                c.select_font_face(font.get_name(), FontSlant::Normal, FontWeight::Bold)
+            }
+            FontStyle::Oblique => {
+                c.select_font_face(font.get_name(), FontSlant::Oblique, FontWeight::Normal)
+            }
+            FontStyle::Italic => {
+                c.select_font_face(font.get_name(), FontSlant::Italic, FontWeight::Normal)
+            }
         })?;
         let actual_size = font.get_size();
         self.call_cairo(|c| c.set_font_size(actual_size))?;

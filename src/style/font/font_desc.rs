@@ -48,6 +48,7 @@ pub struct FontDesc<'a> {
     family: FontFamily<'a>,
     data: FontResult<FontDataInternal>,
     transform: FontTransform,
+    style: FontStyle,
 }
 
 /// Describes font family
@@ -72,7 +73,7 @@ impl<'a> FontFamily<'a> {
 
 impl<'a> From<&'a str> for FontFamily<'a> {
     fn from(from: &'a str) -> FontFamily<'a> {
-        match from {
+        match from.to_lowercase().as_str() {
             "serif" => FontFamily::Serif,
             "sans-serif" => FontFamily::SansSerif,
             "monospace" => FontFamily::Monospace,
@@ -81,27 +82,71 @@ impl<'a> From<&'a str> for FontFamily<'a> {
     }
 }
 
+/// Describes the font style
+#[derive(Clone, Copy)]
+pub enum FontStyle {
+    Normal,
+    Oblique,
+    Italic,
+    Bold,
+}
+
+impl FontStyle {
+    pub fn as_str(&self) -> &str {
+        match self {
+            FontStyle::Normal => "normal",
+            FontStyle::Italic => "italic",
+            FontStyle::Oblique => "oblique",
+            FontStyle::Bold => "bold",
+        }
+    }
+}
+
+impl<'a> From<&'a str> for FontStyle {
+    fn from(from: &'a str) -> FontStyle {
+        match from.to_lowercase().as_str() {
+            "normal" => FontStyle::Normal,
+            "italic" => FontStyle::Italic,
+            "oblique" => FontStyle::Oblique,
+            "bold" => FontStyle::Bold,
+            _ => FontStyle::Normal,
+        }
+    }
+}
+
 impl<'a> From<&'a str> for FontDesc<'a> {
     fn from(from: &'a str) -> FontDesc<'a> {
-        FontDesc::new(from.into(), 1.0)
+        FontDesc::new(from.into(), 1.0, FontStyle::Normal)
     }
 }
 
 impl<'a> From<FontFamily<'a>> for FontDesc<'a> {
     fn from(family: FontFamily<'a>) -> FontDesc<'a> {
-        FontDesc::new(family, 1.0)
+        FontDesc::new(family, 1.0, FontStyle::Normal)
     }
 }
 
 impl<'a, T: Into<f64>> From<(FontFamily<'a>, T)> for FontDesc<'a> {
     fn from((family, size): (FontFamily<'a>, T)) -> FontDesc<'a> {
-        FontDesc::new(family, size.into())
+        FontDesc::new(family, size.into(), FontStyle::Normal)
     }
 }
 
 impl<'a, T: Into<f64>> From<(&'a str, T)> for FontDesc<'a> {
     fn from((typeface, size): (&'a str, T)) -> FontDesc<'a> {
-        FontDesc::new(typeface.into(), size.into())
+        FontDesc::new(typeface.into(), size.into(), FontStyle::Normal)
+    }
+}
+
+impl<'a, T: Into<f64>, S: Into<FontStyle>> From<(FontFamily<'a>, T, S)> for FontDesc<'a> {
+    fn from((family, size, style): (FontFamily<'a>, T, S)) -> FontDesc<'a> {
+        FontDesc::new(family, size.into(), style.into())
+    }
+}
+
+impl<'a, T: Into<f64>, S: Into<FontStyle>> From<(&'a str, T, S)> for FontDesc<'a> {
+    fn from((typeface, size, style): (&'a str, T, S)) -> FontDesc<'a> {
+        FontDesc::new(typeface.into(), size.into(), style.into())
     }
 }
 
@@ -117,12 +162,13 @@ impl<'a, T: Into<FontDesc<'a>>> IntoFont<'a> for T {
 
 impl<'a> FontDesc<'a> {
     /// Create a new font
-    pub fn new(family: FontFamily<'a>, size: f64) -> Self {
+    pub fn new(family: FontFamily<'a>, size: f64, style: FontStyle) -> Self {
         Self {
             size,
             family,
-            data: FontDataInternal::new(family),
+            data: FontDataInternal::new(family, style),
             transform: FontTransform::None,
+            style,
         }
     }
 
@@ -133,6 +179,18 @@ impl<'a> FontDesc<'a> {
             family: self.family,
             data: self.data.clone(),
             transform: self.transform.clone(),
+            style: self.style,
+        }
+    }
+
+    /// SEt the style of the font
+    pub fn style(&self, style: FontStyle) -> Self {
+        Self {
+            size: self.size,
+            family: self.family,
+            data: self.data.clone(),
+            transform: self.transform.clone(),
+            style,
         }
     }
 
@@ -143,6 +201,7 @@ impl<'a> FontDesc<'a> {
             family: self.family,
             data: self.data.clone(),
             transform: trans,
+            style: self.style,
         }
     }
 
@@ -162,6 +221,11 @@ impl<'a> FontDesc<'a> {
     /// Get the name of the font
     pub fn get_name(&self) -> &str {
         self.family.as_str()
+    }
+
+    /// Get the name of the style
+    pub fn get_style(&self) -> FontStyle {
+        self.style
     }
 
     /// Get the size of font
