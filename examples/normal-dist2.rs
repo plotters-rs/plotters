@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .margin(5)
-        .caption("1D Guassian Distribution Demo", ("serif", 30))
+        .caption("1D Guassian Distribution Demo", ("Arial", 30))
         .set_label_area_size(LabelAreaPosition::Left, 60)
         .set_label_area_size(LabelAreaPosition::Bottom, 60)
         .set_label_area_size(LabelAreaPosition::Right, 60)

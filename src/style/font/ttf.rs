@@ -158,13 +158,16 @@ mod test {
     fn test_font_cache() -> FontResult<()> {
         clear_font_cache()?;
 
-        assert_eq!(CACHE.read().unwrap().len(), 0);
+        // We cannot only check the size of font cache, because
+        // the test case may be run in parallel. Thus the font cache
+        // may contains other fonts.
+        let _a = load_font_data("serif", FontStyle::Normal)?;
+        assert!(CACHE.read().unwrap().contains_key("serif"));
 
-        load_font_data("serif", FontStyle::Normal)?;
-        assert_eq!(CACHE.read().unwrap().len(), 1);
+        let _b = load_font_data("serif", FontStyle::Normal)?;
+        assert!(CACHE.read().unwrap().contains_key("serif"));
 
-        load_font_data("serif", FontStyle::Normal)?;
-        assert_eq!(CACHE.read().unwrap().len(), 1);
+        // TODO: Check they are the same
 
         return Ok(());
     }

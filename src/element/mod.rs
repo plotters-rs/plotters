@@ -46,7 +46,7 @@
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
             backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &RED.to_rgba(), false)?;
-            backend.draw_text("X", &("serif", 20).into(), pos, &RED.to_rgba())
+            backend.draw_text("X", &("Arial", 20).into(), pos, &RED.to_rgba())
         }
     }
 
@@ -76,9 +76,9 @@
             "plotters-doc-data/element-1.png",
             (640, 480)
         ).into_drawing_area();
-        let font:FontDesc = ("serif", 20).into();
+        let font:FontDesc = ("Arial", 20).into();
         root.draw(&(EmptyElement::at((200, 200))
-                + Text::new("X", (0, 0), &"serif".into_font().resize(20.0).color(&RED))
+                + Text::new("X", (0, 0), &"Arial".into_font().resize(20.0).color(&RED))
                 + Rectangle::new([(0,0), (10, 12)], &RED)
         ))?;
         Ok(())

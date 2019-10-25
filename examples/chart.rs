@@ -2,18 +2,18 @@ use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area =
-        SVGBackend::new("sample.svg", (1024, 768)).into_drawing_area();
+        BitMapBackend::new("plotters-doc-data/sample.png", (1024, 768)).into_drawing_area();
 
     root_area.fill(&WHITE)?;
 
-    let root_area = root_area.titled("Image Title", ("Iosevka", 60, "italic").into_font())?;
+    let root_area = root_area.titled("Image Title", ("Arial", 60).into_font())?;
 
     let (upper, lower) = root_area.split_vertically(512);
 
     let mut cc = ChartBuilder::on(&upper)
         .margin(5)
         .set_all_label_area_size(50)
-        .caption("Sine and Cosine", ("serif", 40, "bold").into_font())
+        .caption("Sine and Cosine", ("Arial", 40).into_font())
         .build_ranged(-3.4f32..3.4f32, -1.2f32..1.2f32)?;
 
     cc.configure_mesh()
@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|coord, size, style| {
             EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
-                + Text::new(format!("{:?}", coord), (0, 15), ("serif", 15).into_font())
+                + Text::new(format!("{:?}", coord), (0, 15), ("Arial", 15).into_font())
         },
     ))?;
 
@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(30)
             .y_label_area_size(30)
             .margin_right(20)
-            .caption(format!("y = x^{}", 1 + 2 * idx), ("serif", 40).into_font())
+            .caption(format!("y = x^{}", 1 + 2 * idx), ("Arial", 40).into_font())
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 

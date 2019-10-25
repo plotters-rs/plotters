@@ -31,7 +31,8 @@ mod ranged;
 #[cfg(feature = "chrono")]
 pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
 pub use numeric::{
-    RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64,
+    RangedCoordf32, RangedCoordf64, RangedCoordi128, RangedCoordi32, RangedCoordi64,
+    RangedCoordu128, RangedCoordu32, RangedCoordu64,
 };
 pub use ranged::{
     AsRangedCoord, DiscreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
