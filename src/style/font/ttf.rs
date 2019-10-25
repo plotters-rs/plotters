@@ -160,10 +160,10 @@ mod test {
 
         assert_eq!(CACHE.read().unwrap().len(), 0);
 
-        load_font_data("serif")?;
+        load_font_data("serif", FontStyle::Normal)?;
         assert_eq!(CACHE.read().unwrap().len(), 1);
 
-        load_font_data("serif")?;
+        load_font_data("serif", FontStyle::Normal)?;
         assert_eq!(CACHE.read().unwrap().len(), 1);
 
         return Ok(());
