@@ -148,13 +148,9 @@ impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend which only lives in-memory
     ///
     /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
-    /// Output is rendered as RGB triples. ie. 
-    /// buff[0] a the red channel for pixel one
-    /// buff[1] is the green channel for pixel one
-    /// buff[2] is the blue channel for pixel one
-    /// and so on
+    /// Plotters uses RGB pixel format
     ///
-    /// - `buf`: The path to the GIF file to create
+    /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], dimension: (u32, u32)) -> Self {
         Self {
