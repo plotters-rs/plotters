@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("Matshow Example", ("serif", 80))
+        .caption("Matshow Example", ("Arial", 80))
         .margin(5)
         .top_x_label_area_size(40)
         .y_label_area_size(40)
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_offset(25)
         .disable_x_mesh()
         .disable_y_mesh()
-        .label_style(("serif", 20))
+        .label_style(("Arial", 20))
         .draw()?;
 
     let mut matrix = [[0; 15]; 15];

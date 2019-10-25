@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .right_y_label_area_size(40)
         .margin(5)
-        .caption("Dual Y-Axis Example", ("serif", 50.0).into_font())
+        .caption("Dual Y-Axis Example", ("Arial", 50.0).into_font())
         .build_ranged(0f32..10f32, LogRange(0.1f32..1e10f32))?
         .set_secondary_coord(0f32..10f32, -1.0f32..1.0f32);
 

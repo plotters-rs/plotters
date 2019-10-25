@@ -1,4 +1,4 @@
-use super::{FontData, FontFamily, LayoutBox};
+use super::{FontData, FontFamily, FontStyle, LayoutBox};
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlElement};
 
@@ -18,12 +18,15 @@ impl std::fmt::Display for FontError {
 impl std::error::Error for FontError {}
 
 #[derive(Clone)]
-pub struct FontDataInternal(String);
+pub struct FontDataInternal(String, String);
 
 impl FontData for FontDataInternal {
     type ErrorType = FontError;
-    fn new(family: FontFamily) -> Result<Self, FontError> {
-        Ok(FontDataInternal(family.as_str().into()))
+    fn new(family: FontFamily, style: FontStyle) -> Result<Self, FontError> {
+        Ok(FontDataInternal(
+            family.as_str().into(),
+            style.as_str().into(),
+        ))
     }
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let window = window().unwrap();

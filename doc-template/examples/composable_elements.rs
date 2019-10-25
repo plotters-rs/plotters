@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(
                 format!("({:.2},{:.2})", x, y),
                 (10, 0),
-                ("serif", 15.0).into_font(),
+                ("Arial", 15.0).into_font(),
             );
     };
 
