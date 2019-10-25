@@ -66,6 +66,7 @@ fn load_font_data(face: &str, style: FontStyle) -> FontResult<Font<'static>> {
         .map(|(data, _)| data.into())
         .ok_or(FontError::NoSuchFont)
         .and_then(|bytes: SharedBytes| {
+            // TODO: Handles the font collection case
             Font::from_bytes(bytes).map_err(|err| FontError::FontLoadError(Arc::new(err)))
         });
 
