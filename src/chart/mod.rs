@@ -19,7 +19,7 @@ mod mesh;
 mod series;
 
 pub use builder::{ChartBuilder, LabelAreaPosition};
-pub use context::{ChartContext, SavedChartState, SeriesAnno};
-pub use dual_coord::DualCoordChartContext;
+pub use context::{ChartContext, ChartState, SeriesAnno};
+pub use dual_coord::{DualCoordChartContext, DualCoordChartState};
 pub use mesh::MeshStyle;
 pub use series::{SeriesLabelPosition, SeriesLabelStyle};
