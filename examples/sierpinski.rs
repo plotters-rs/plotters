@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&WHITE)?;
 
     let root = root
-        .titled("Sierpinski Carpet Demo", ("Arial", 60))?
+        .titled("Sierpinski Carpet Demo", ("sans-serif", 60))?
         .shrink(((1024 - 700) / 2, 0), (700, 700));
 
     sierpinski_carpet(5, &root)
