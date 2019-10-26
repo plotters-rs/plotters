@@ -1,13 +1,16 @@
 use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 use std::i32;
+use std::io::Read;
 use std::sync::{Arc, RwLock};
 
 use lazy_static::lazy_static;
 use rusttype::{point, Error, Font, FontCollection, Scale, SharedBytes};
 
-use font_loader::system_fonts;
-use font_loader::system_fonts::FontPropertyBuilder;
+use font_kit::family_name::FamilyName;
+use font_kit::handle::Handle;
+use font_kit::properties::{Properties, Style, Weight};
+use font_kit::source::SystemSource;
 
 use super::{FontData, FontFamily, FontStyle, FontTransform, LayoutBox};
 
@@ -16,7 +19,7 @@ type FontResult<T> = Result<T, FontError>;
 #[derive(Debug, Clone)]
 pub enum FontError {
     LockError,
-    NoSuchFont,
+    NoSuchFont(String, String),
     FontLoadError(Arc<Error>),
 }
 
@@ -24,7 +27,9 @@ impl std::fmt::Display for FontError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
             FontError::LockError => write!(fmt, "Could not lock mutex"),
-            FontError::NoSuchFont => write!(fmt, "No such font"),
+            FontError::NoSuchFont(family, style) => {
+                write!(fmt, "No such font: {} {}", family, style)
+            }
             FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e),
         }
     }
@@ -37,13 +42,17 @@ lazy_static! {
         RwLock::new(HashMap::new());
 }
 
+thread_local! {
+    static FONT_SOURCE: SystemSource = SystemSource::new();
+}
+
 #[allow(dead_code)]
 /// Lazily load font data. Font type doesn't own actual data, which
 /// lives in the cache.
-fn load_font_data(face: &str, style: FontStyle) -> FontResult<Font<'static>> {
+fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<Font<'static>> {
     let key = match style {
-        FontStyle::Normal => Cow::Borrowed(face),
-        _ => Cow::Owned(format!("{}, {}", face, style.as_str())),
+        FontStyle::Normal => Cow::Borrowed(face.as_str()),
+        _ => Cow::Owned(format!("{}, {}", face.as_str(), style.as_str())),
     };
     let cache = CACHE.read().unwrap();
     if let Some(cached) = cache.get(Borrow::<str>::borrow(&key)) {
@@ -51,32 +60,59 @@ fn load_font_data(face: &str, style: FontStyle) -> FontResult<Font<'static>> {
     }
     drop(cache);
 
-    let mut cache = CACHE.write().unwrap();
-    let query_builder = FontPropertyBuilder::new().family(face);
+    let mut properties = Properties::new();
+    match style {
+        FontStyle::Normal => properties.style(Style::Normal),
+        FontStyle::Italic => properties.style(Style::Italic),
+        FontStyle::Oblique => properties.style(Style::Oblique),
+        FontStyle::Bold => properties.weight(Weight::BOLD),
+    };
 
-    let query = match style {
-        FontStyle::Normal => query_builder,
-        FontStyle::Italic => query_builder.italic(),
-        FontStyle::Oblique => query_builder.oblique(),
-        FontStyle::Bold => query_builder.bold(),
+    let family = match face {
+        FontFamily::Serif => FamilyName::Serif,
+        FontFamily::SansSerif => FamilyName::SansSerif,
+        FontFamily::Monospace => FamilyName::Monospace,
+        FontFamily::Name(name) => FamilyName::Title(name.to_owned()),
+    };
+
+    let make_not_found_error =
+        || FontError::NoSuchFont(face.as_str().to_owned(), style.as_str().to_owned());
+
+    if let Ok(handle) = FONT_SOURCE
+        .with(|source| source.select_best_match(&[family, FamilyName::SansSerif], &properties))
+    {
+        let (data, id) = match handle {
+            Handle::Path {
+                path,
+                font_index: idx,
+            } => {
+                let mut buf = vec![];
+                std::fs::File::open(path)
+                    .map_err(|_| make_not_found_error())?
+                    .read_to_end(&mut buf)
+                    .map_err(|_| make_not_found_error())?;
+                (buf, idx)
+            }
+            Handle::Memory {
+                bytes,
+                font_index: idx,
+            } => (bytes[..].to_owned(), idx),
+        };
+        // TODO: font-kit actually have rasterizer, so consider remove dependency for rusttype as
+        // well
+        let result = FontCollection::from_bytes(Into::<SharedBytes>::into(data))
+            .map_err(|err| FontError::FontLoadError(Arc::new(err)))?
+            .font_at(id.max(0) as usize)
+            .map_err(|err| FontError::FontLoadError(Arc::new(err)));
+
+        CACHE
+            .write()
+            .map_err(|_| FontError::LockError)?
+            .insert(key.into_owned(), result.clone());
+
+        return result;
     }
-    .build();
-
-    let result = system_fonts::get(&query)
-        .map(|(data, id)| (data.into(), id))
-        .ok_or(FontError::NoSuchFont)
-        .and_then(|(bytes, id): (SharedBytes, _)| {
-            // TODO: If there's multiple font in the same TTC file is loaded this waste memory a
-            // lot.
-            FontCollection::from_bytes(bytes)
-                .map_err(|err| FontError::FontLoadError(Arc::new(err)))?
-                .font_at(id.max(0) as usize)
-                .map_err(|err| FontError::FontLoadError(Arc::new(err)))
-        });
-
-    cache.insert(key.into_owned(), result.clone());
-
-    result
+    Err(make_not_found_error())
 }
 
 /// Remove all cached fonts data.
@@ -94,7 +130,7 @@ impl FontData for FontDataInternal {
     type ErrorType = FontError;
 
     fn new(family: FontFamily, style: FontStyle) -> Result<Self, FontError> {
-        Ok(FontDataInternal(load_font_data(family.as_str(), style)?))
+        Ok(FontDataInternal(load_font_data(family, style)?))
     }
 
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
@@ -166,10 +202,10 @@ mod test {
         // We cannot only check the size of font cache, because
         // the test case may be run in parallel. Thus the font cache
         // may contains other fonts.
-        let _a = load_font_data("serif", FontStyle::Normal)?;
+        let _a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
         assert!(CACHE.read().unwrap().contains_key("serif"));
 
-        let _b = load_font_data("serif", FontStyle::Normal)?;
+        let _b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
         assert!(CACHE.read().unwrap().contains_key("serif"));
 
         // TODO: Check they are the same
