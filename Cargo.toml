@@ -21,7 +21,7 @@ cairo-rs = { version = "0.7.1", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = "0.8.1"
-font-loader = { path = "third-party/rust-font-loader" }
+font-loader = { git = "https://github.com/plotters-rs/rust-font-loader" }
 lazy_static = "^1.2"
 piston_window = {version = "0.105.0", optional = true}
 
