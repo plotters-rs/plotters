@@ -39,7 +39,7 @@ fn main() {
 
         let mut cc = ChartBuilder::on(&root)
             .margin(10)
-            .caption("Realtime CPU Usage", ("serif", 30).into_font())
+            .caption("Realtime CPU Usage", ("sans-serif", 30).into_font())
             .x_label_area_size(40)
             .y_label_area_size(50)
             .build_ranged(0..N_DATA_POINTS as u32, 0f32..1f32)?;
@@ -51,7 +51,7 @@ fn main() {
             .y_labels(5)
             .x_desc("Seconds")
             .y_desc("% Busy")
-            .axis_desc_style(("serif", 15).into_font())
+            .axis_desc_style(("sans-serif", 15).into_font())
             .draw()?;
 
         for (idx, data) in (0..).zip(data.iter()) {

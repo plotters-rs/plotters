@@ -150,7 +150,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", ("serif", 50).into_font())
+        .caption("y=x^2", ("sans-serif", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
@@ -194,7 +194,7 @@ use plotters::prelude::*;
 let figure = evcxr_figure((640, 480), |root| {
     root.fill(&WHITE);
     let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", ("serif", 50).into_font())
+        .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(30)
@@ -377,7 +377,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(
                 format!("({:.2},{:.2})", x, y),
                 (10, 0),
-                ("serif", 15.0).into_font(),
+                ("sans-serif", 15.0).into_font(),
             );
     };
 
@@ -406,7 +406,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // After this point, we should be able to draw construct a chart context
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
-        .caption("This is our first plot", ("serif", 40).into_font())
+        .caption("This is our first plot", ("sans-serif", 40).into_font())
         // Set the size of the label region
         .x_label_area_size(20)
         .y_label_area_size(40)
@@ -436,7 +436,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|c, s, st| {
             return EmptyElement::at(c)    // We want to construct a composed element on-the-fly
             + Circle::new((0,0),s,st.filled()) // At this point, the new pixel coordinate is established
-            + Text::new(format!("{:?}", c), (10, 0), ("serif", 10).into_font());
+            + Text::new(format!("{:?}", c), (10, 0), ("sans-serif", 10).into_font());
         },
     ))?;
     Ok(())

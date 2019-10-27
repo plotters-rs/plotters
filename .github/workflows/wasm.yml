@@ -9,6 +9,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      with:
+          submodules: recursive
     - name: Install WASM tool chain
       run: rustup target add wasm32-unknown-unknown
     - name: Check WASM Target Compiles

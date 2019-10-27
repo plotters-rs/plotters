@@ -263,8 +263,12 @@ impl DrawingBackend for CanvasBackend {
         self.context.set_text_baseline("bottom");
         self.context
             .set_fill_style(&make_canvas_color(color.clone()));
-        self.context
-            .set_font(&format!("{}px {}", font.get_size(), font.get_name()));
+        self.context.set_font(&format!(
+            "{} {}px {}",
+            font.get_style().as_str(),
+            font.get_size(),
+            font.get_name()
+        ));
         self.context
             .fill_text(text, f64::from(x), f64::from(y) + font.get_size())?;
 

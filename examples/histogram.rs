@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
-        .caption("Histogram Test", ("serif", 50.0).into_font())
+        .caption("Histogram Test", ("sans-serif", 50.0).into_font())
         .build_ranged(0u32..10u32, 0u32..10u32)?;
 
     chart
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_offset(30)
         .y_desc("Count")
         .x_desc("Bucket")
-        .axis_desc_style(("serif", 15).into_font())
+        .axis_desc_style(("sans-serif", 15).into_font())
         .draw()?;
 
     let data = [

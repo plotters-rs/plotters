@@ -146,6 +146,12 @@ impl<'a> BitMapBackend<'a> {
     }
 
     /// Create a new bitmap backend which only lives in-memory
+    ///
+    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
+    /// Plotters uses RGB pixel format
+    ///
+    /// - `buf`: The buffer to operate
+    /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], dimension: (u32, u32)) -> Self {
         Self {
             target: Target::Buffer(

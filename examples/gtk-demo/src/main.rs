@@ -14,7 +14,7 @@ fn build_ui(app: &gtk::Application) {
         root.fill(&WHITE).unwrap();
 
         let mut chart = ChartBuilder::on(&root)
-            .caption("This is a test", ("serif", 20))
+            .caption("This is a test", ("sans-serif", 20))
             .x_label_area_size(40)
             .y_label_area_size(40)
             .build_ranged(0..100, 0..100)

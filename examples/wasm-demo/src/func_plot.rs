@@ -7,7 +7,7 @@ fn start_plotting(
 ) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
     let backend = CanvasBackend::new(element).unwrap();
     let root = backend.into_drawing_area();
-    let font: FontDesc = ("serif", 20.0).into();
+    let font: FontDesc = ("sans-serif", 20.0).into();
 
     root.fill(&WHITE)?;
 

@@ -7,8 +7,8 @@ use crate::coord::{MeshLine, Ranged, RangedCoord};
 use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
-    AsRelative, Color, FontDesc, FontFamily, IntoTextStyle, RGBColor, ShapeStyle, SizeDesc,
-    TextStyle,
+    AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
+    SizeDesc, TextStyle,
 };
 
 /// The style used to describe the mesh for a secondary coordinate system.
@@ -330,8 +330,9 @@ where
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
         let default_axis_color = RGBColor(0, 0, 0);
         let default_label_font = FontDesc::new(
-            FontFamily::Serif,
+            FontFamily::SansSerif,
             f64::from((12i32).percent().max(12).in_pixels(&self.parent_size)),
+            FontStyle::Normal,
         );
 
         let mesh_style_1 = self

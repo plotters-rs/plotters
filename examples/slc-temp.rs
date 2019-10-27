@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .margin(10)
         .caption(
             "Monthly Average Temperate in Salt Lake City, UT",
-            ("serif", 40),
+            ("sans-serif", 40),
         )
         .set_label_area_size(LabelAreaPosition::Left, 60)
         .set_label_area_size(LabelAreaPosition::Right, 60)

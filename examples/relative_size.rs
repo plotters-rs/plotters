@@ -3,7 +3,7 @@ use plotters::prelude::*;
 
 fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(), B> {
     let mut chart = ChartBuilder::on(root)
-        .caption("Relative Size Example", ("serif", (5).percent_height()))
+        .caption("Relative Size Example", ("sans-serif", (5).percent_height()))
         .x_label_area_size((10).percent_height())
         .y_label_area_size((10).percent_width())
         .margin(5)
@@ -13,7 +13,7 @@ fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(),
         .configure_mesh()
         .disable_x_mesh()
         .disable_y_mesh()
-        .label_style(("serif", (3).percent_height()))
+        .label_style(("sans-serif", (3).percent_height()))
         .draw()?;
 
     chart.draw_series(LineSeries::new(
