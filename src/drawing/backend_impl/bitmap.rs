@@ -408,7 +408,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                     }
                     // And check the y axis isn't out of bound
                     y0 = y0.max(0);
-                    y1 = y1.min(h);
+                    y1 = y1.min(h - 1);
                     // This is ok because once y0 > y1, there won't be any iteration anymore
                     for y in y0..=y1 {
                         dst[(y * w + from.0) as usize * 3] = r;
@@ -631,7 +631,7 @@ fn test_bitmap_backend_split_and_fill() {
 
 #[cfg(test)]
 #[test]
-fn test_draw_line_out_of_range() {
+fn test_draw_rect_out_of_range() {
     use crate::prelude::*;
     let mut buffer = vec![0; 1099 * 1000 * 3];
 
@@ -651,6 +651,32 @@ fn test_draw_line_out_of_range() {
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 0], 0);
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 1], 0);
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 2], 0);
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_draw_line_out_of_range() {
+    use crate::prelude::*;
+    let mut buffer = vec![0; 1000 * 1000 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+
+        back.draw_line((-1000, -1000), (2000, 2000), &WHITE.to_rgba())
+            .unwrap();
+
+        back.draw_line((999, -1000), (999, 2000), &WHITE.to_rgba())
+            .unwrap();
+    }
+
+    for x in 0..1000 {
+        for y in 0..1000 {
+            let expected_value = if x == y || x == 999 { 255 } else { 0 };
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 0], expected_value);
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 1], expected_value);
+            assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 2], expected_value);
         }
     }
 }
