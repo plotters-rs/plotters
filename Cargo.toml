@@ -37,7 +37,7 @@ wasm-bindgen = "0.2.52"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.29"
-features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
+features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
 default = ["image_encoder", "svg", "chrono", "palette_ext", "make_partial_axis", "gif_backend"]

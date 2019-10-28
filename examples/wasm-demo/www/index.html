@@ -1,87 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Plotters WebAssembly Demo</title>
-		<link rel="stylesheet" href="./style.css">
-	</head>
-	<body>
-		<div>
-			<h1 class="centered">Plotters WebAssembly Demo</h1>
-			<div id="coord" class='centered' style='color: grey; font-size: 10px; height: 15px'></div>
-			<canvas id="canvas" class="centered" height=400 width=600></canvas>
-			<div id="status" class='centered' style='color: grey; font-size: 10px'>Loading WebAssembly...</div>
-			<div style="margin-top:20px"></div>
-			<div class="control">
-				<b>Demo: </b>
-				<select id="pow">
-					<option value="0">Graph of y=1</option>
-					<option value="1">Graph of y=x</option>
-					<option value="2">Graph of y=x^2</option>
-					<option value="3">Graph of y=x^3</option>
-					<option value="4">Graph of y=x^4</option>
-					<option value="5">Graph of y=x^5</option>
-					<option value="mandelbrot">Mandelbrot Set</option>
-				</select>
-			</div>
-		</div>
-		<div style="margin-top:50px"></div>
-		<div class='centered' style='font-size: 12px;'>
-			<div class='code-link'> 
-				<a href="https://github.com/38/plotters/blob/master/examples/wasm-demo" target='a'>Source</a> | 
-				<a href="https://github.com/38/plotters" target='a'>Repo</a> | 
-				<a href="https://crates.io/crates/plotters" target='a'>Crates</a> | 
-				<a href="https://docs.rs/plotters" target='a'>Docs</a> 
-			</div>
-		</div>
-			
-		<script type="module">
-			import * as wasm from "./pkg/wasm_demo.js";
-			wasm.default("./pkg/wasm_demo_bg.wasm").then(function() {
-				var map_coord = undefined;
-				document.getElementById("canvas").addEventListener("mousemove", function(e) {
-					if(map_coord === undefined) return false;
-					var lx = map_coord(e.offsetX, e.offsetY, 0);
-					var ly = map_coord(e.offsetX, e.offsetY, 1);
-					if(Number.isNaN(lx) || Number.isNaN(ly)) {
-						document.getElementById("coord").innerText = "Mouse pointer is out of range";
-						return;
-					}
-					document.getElementById("coord").innerText = "(" + lx.toFixed(3) + "," + ly.toFixed(3) + ")";
-				});
-				var sel = document.getElementById("pow");
-				var stat = document.getElementById("status");
-				function update_plot() {
-					stat.innerText = "Rendering " + sel.selectedOptions[0].innerText + "...";
-					setTimeout(function() {
-						map_coord = undefined;
-						var start = performance.now();
-						if(sel.selectedOptions[0].value != "mandelbrot") {
-							var pow = Number(sel.selectedOptions[0].value);
-							map_coord = wasm.draw_func("canvas", pow);
-						} else {
-							// Actually, you can directly use the #canvas element, 
-							// This is just a illustration for how we can do double buffering
-							// with plotters
-							var buffer = document.createElement("canvas");
-							buffer.height = 400;
-							buffer.width = 600;
-							map_coord = wasm.draw_mandelbrot(buffer);
-							document.getElementById("canvas").getContext("2d").drawImage(buffer, 0, 0);
-						}
-						var end = performance.now();
-						stat.innerText = "Rendered " + sel.selectedOptions[0].innerText + " in " + (end - start) + "ms";
-					}, 5);
-				}
-
-				stat.innerText = "WebAssembly loaded!";
-
-				update_plot();
-
-				sel.addEventListener("change", function (e) {
-					update_plot();
-				});
-			});
-		</script>
-	</body>
+    <head>
+	<meta charset="utf-8">
+	<title>Plotters WebAssembly Demo</title>
+	<link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
+        <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+        <script src="./bootstrap.js"></script>
+	<div>
+	    <h1 class="centered">Plotters WebAssembly Demo {TODO}</h1>
+	    <div id="coord" class="centered"></div>
+	    <canvas id="canvas" class="centered" height=400 width=600></canvas>
+	    <div id="status" class="centered">Loading WebAssembly...</div>
+	    <div id="control">
+		<label for="pow">Demo: </label>
+		<select id="pow">
+		    <option value="0">Graph of y=1</option>
+		    <option value="1">Graph of y=x</option>
+		    <option value="2">Graph of y=x^2</option>
+		    <option value="3">Graph of y=x^3</option>
+		    <option value="4">Graph of y=x^4</option>
+		    <option value="5">Graph of y=x^5</option>
+		    <option value="mandelbrot">Mandelbrot Set</option>
+		</select>
+	    </div>
+	</div>
+	<div id="links" class="centered">
+	    <a href="https://github.com/38/plotters/blob/master/examples/wasm-demo" target="a">Source</a> |
+	    <a href="https://github.com/38/plotters" target="a">Repo</a> |
+	    <a href="https://crates.io/crates/plotters" target="a">Crates</a> |
+	    <a href="https://docs.rs/plotters" target="a">Docs</a>
+	</div>
+    </body>
 </html>

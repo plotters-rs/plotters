@@ -1,36 +1,10 @@
 use plotters::prelude::*;
 use std::ops::Range;
-use wasm_bindgen::prelude::*;
 use web_sys::HtmlCanvasElement;
+use crate::DrawResult;
 
-fn mandelbrot_set(
-    real: Range<f64>,
-    complex: Range<f64>,
-    samples: (usize, usize),
-    max_iter: usize,
-) -> impl Iterator<Item = (f64, f64, usize)> {
-    let step = (
-        (real.end - real.start) / samples.0 as f64,
-        (complex.end - complex.start) / samples.1 as f64,
-    );
-    return (0..(samples.0 * samples.1)).map(move |k| {
-        let c = (
-            real.start + step.0 * (k % samples.0) as f64,
-            complex.start + step.1 * (k / samples.0) as f64,
-        );
-        let mut z = (0.0, 0.0);
-        let mut cnt = 0;
-        while cnt < max_iter && z.0 * z.0 + z.1 * z.1 <= 1e10 {
-            z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
-            cnt += 1;
-        }
-        return (c.0, c.1, cnt);
-    });
-}
-
-fn draw_mandelbrot_impl(
-    element: HtmlCanvasElement,
-) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f64, f64)>>, Box<dyn std::error::Error>> {
+/// Draw Mandelbrot set
+pub fn draw(element: HtmlCanvasElement) -> DrawResult<impl Fn((i32, i32)) -> Option<(f64, f64)>> {
     let backend = CanvasBackend::with_canvas_object(element).unwrap();
 
     let root = backend.into_drawing_area();
@@ -40,7 +14,7 @@ fn draw_mandelbrot_impl(
         .margin(20)
         .x_label_area_size(10)
         .y_label_area_size(10)
-        .build_ranged(-2.1f64..0.6f64, -1.2f64..1.2f64)?;
+        .build_ranged(-2.1..0.6, -1.2..1.2)?;
 
     chart
         .configure_mesh()
@@ -66,7 +40,27 @@ fn draw_mandelbrot_impl(
     return Ok(Box::new(chart.into_coord_trans()));
 }
 
-#[wasm_bindgen]
-pub fn draw_mandelbrot(element: HtmlCanvasElement) -> JsValue {
-    crate::make_coord_mapping_closure(draw_mandelbrot_impl(element).ok())
+fn mandelbrot_set(
+    real: Range<f64>,
+    complex: Range<f64>,
+    samples: (usize, usize),
+    max_iter: usize,
+) -> impl Iterator<Item = (f64, f64, usize)> {
+    let step = (
+        (real.end - real.start) / samples.0 as f64,
+        (complex.end - complex.start) / samples.1 as f64,
+    );
+    return (0..(samples.0 * samples.1)).map(move |k| {
+        let c = (
+            real.start + step.0 * (k % samples.0) as f64,
+            complex.start + step.1 * (k / samples.0) as f64,
+        );
+        let mut z = (0.0, 0.0);
+        let mut cnt = 0;
+        while cnt < max_iter && z.0 * z.0 + z.1 * z.1 <= 1e10 {
+            z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
+            cnt += 1;
+        }
+        return (c.0, c.1, cnt);
+    });
 }

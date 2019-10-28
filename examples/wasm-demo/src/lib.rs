@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use web_sys::HtmlCanvasElement;
 
 mod func_plot;
 mod mandelbrot;
@@ -6,29 +7,37 @@ mod mandelbrot;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-pub use func_plot::draw_func;
-pub use mandelbrot::draw_mandelbrot;
+/// Type alias for the result of a drawing function.
+pub type DrawResult<T> = Result<T, Box<dyn std::error::Error>>;
 
-pub fn make_coord_mapping_closure<T: Into<f64> + 'static>(
-    map_func: Option<Box<dyn Fn((i32, i32)) -> Option<(T, T)>>>,
-) -> JsValue {
-    if let Some(mapping_func) = map_func {
-        let closure = Closure::wrap(Box::new(move |x: i32, y: i32, idx: u32| {
-            if let Some((x, y)) = mapping_func((x, y)) {
-                if idx == 0 {
-                    return x.into();
-                }
-                return y.into();
-            } else {
-                return std::f64::NAN;
-            }
-        }) as Box<dyn FnMut(i32, i32, u32) -> f64>);
+#[wasm_bindgen]
+pub struct Chart {
+    convert: Box<dyn Fn((i32, i32)) -> Option<(f64, f64)>>,
+}
 
-        let js_value = closure.as_ref().clone();
-        closure.forget();
+#[wasm_bindgen]
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
+}
 
-        return js_value;
-    } else {
-        return JsValue::null();
+#[wasm_bindgen]
+impl Chart {
+    pub fn power(canvas_id: &str, power: i32) -> Result<Chart, JsValue> {
+        let map_coord = func_plot::draw(canvas_id, power).map_err(|err| err.to_string())?;
+        Ok(Chart{convert: Box::new(move |coord| {
+            map_coord(coord).map(|(x, y)| (x.into(), y.into()))
+        })})
+    }
+
+    pub fn mandelbrot(canvas: HtmlCanvasElement) -> Result<Chart, JsValue> {
+        let map_coord = mandelbrot::draw(canvas).map_err(|err| err.to_string())?;
+        Ok(Chart{convert: Box::new(map_coord)})
+    }
+
+    /// This function can be used to convert screen coordinates to
+    /// graph coordinates.
+    pub fn coord(&self, x: i32, y: i32) -> Option<Point> {
+        (self.convert)((x, y)).map(|(x, y)| Point{x, y})
     }
 }

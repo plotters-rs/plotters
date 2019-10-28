@@ -1,18 +1,16 @@
 use plotters::prelude::*;
-use wasm_bindgen::prelude::*;
+use crate::DrawResult;
 
-fn start_plotting(
-    element: &str,
-    pow: i32,
-) -> Result<Box<dyn Fn((i32, i32)) -> Option<(f32, f32)>>, Box<dyn std::error::Error>> {
-    let backend = CanvasBackend::new(element).unwrap();
+/// Draw power function f(x) = x^power.
+pub fn draw(canvas_id: &str, power: i32) -> DrawResult<impl Fn((i32, i32)) -> Option<(f32, f32)>> {
+    let backend = CanvasBackend::new(canvas_id).unwrap();
     let root = backend.into_drawing_area();
     let font: FontDesc = ("sans-serif", 20.0).into();
 
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption(format!("y=x^{}", pow), font)
+        .caption(format!("y=x^{}", power), font)
         .x_label_area_size(30)
         .y_label_area_size(30)
         .build_ranged(-1f32..1f32, -1.2f32..1.2f32)?;
@@ -22,15 +20,10 @@ fn start_plotting(
     chart.draw_series(LineSeries::new(
         (-50..=50)
             .map(|x| x as f32 / 50.0)
-            .map(|x| (x, x.powf(pow as f32))),
+            .map(|x| (x, x.powf(power as f32))),
         &RED,
     ))?;
 
     root.present()?;
-    return Ok(Box::new(chart.into_coord_trans()));
-}
-
-#[wasm_bindgen]
-pub fn draw_func(element: &str, p: i32) -> JsValue {
-    crate::make_coord_mapping_closure(start_plotting(element, p).ok())
+    return Ok(chart.into_coord_trans());
 }

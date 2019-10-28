@@ -72,7 +72,9 @@ impl DrawingBackend for CanvasBackend {
     type ErrorType = CanvasError;
 
     fn get_size(&self) -> (u32, u32) {
-        (self.canvas.width(), self.canvas.height())
+        // Getting just canvas.width gives poor results on HighDPI screens.
+        let rect = self.canvas.get_bounding_client_rect();
+        (rect.width() as u32, rect.height() as u32)
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
