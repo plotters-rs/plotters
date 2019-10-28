@@ -132,8 +132,7 @@ macro_rules! gen_key_points_comp {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
             let mut scale: $type = 1;
             let range = (range.0.min(range.1), range.0.max(range.1));
-            'outer: while (range.1 - range.0 + scale - 1) as usize / (scale as usize) > max_points
-            {
+            'outer: while (range.1 - range.0 + scale - 1) as usize / (scale as usize) > max_points {
                 let next_scale = scale * 10;
                 for new_scale in [scale * 2, scale * 5, scale * 10].iter() {
                     scale = *new_scale;

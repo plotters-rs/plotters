@@ -29,14 +29,8 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
         let mut secondary_x_label_area = [None, None];
         let mut secondary_y_label_area = [None, None];
 
-        std::mem::swap(
-            &mut primary.x_label_area[0],
-            &mut secondary_x_label_area[0],
-        );
-        std::mem::swap(
-            &mut primary.y_label_area[1],
-            &mut secondary_y_label_area[1],
-        );
+        std::mem::swap(&mut primary.x_label_area[0], &mut secondary_x_label_area[0]);
+        std::mem::swap(&mut primary.y_label_area[1], &mut secondary_y_label_area[1]);
 
         Self {
             primary,
