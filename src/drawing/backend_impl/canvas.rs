@@ -6,7 +6,7 @@ use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, Drawin
 use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
 
 /// The backend that is drawing on the HTML canvas
-/// TODO: Support double bufferring
+/// TODO: Support double buffering
 pub struct CanvasBackend {
     canvas: HtmlCanvasElement,
     context: CanvasRenderingContext2d,

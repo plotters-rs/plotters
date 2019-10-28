@@ -1,4 +1,4 @@
-/// The implementation of an actual font implmentation
+/// The implementation of an actual font implementation
 ///
 /// This exists since for the image rendering task, we want to use
 /// the system font. But in wasm application, we want the browser
@@ -35,6 +35,6 @@ pub trait FontData: Clone {
         _trans: FontTransform,
         _draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
-        panic!("The font implementation is unable to rasterize font");
+        panic!("The font implementation is unable to draw font");
     }
 }

@@ -16,8 +16,8 @@ pub enum LabelAreaPosition {
 }
 
 /// The helper object to create a chart context, which is used for the high-level figure drawing.
-/// With the hlep of this object, we can convert a basic drawing area into a chart context, which
-/// allows the high-level chartting API beening used on the drawing area.
+/// With the help of this object, we can convert a basic drawing area into a chart context, which
+/// allows the high-level charting API being used on the drawing area.
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
     overlap_plotting_area: [bool; 4],
@@ -121,7 +121,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     }
 
     /// Set a label area size
-    /// - `pos`: THe position where the label area locted
+    /// - `pos`: THe position where the label area located
     /// - `size`: The size of the label area size
     pub fn set_label_area_size<S: SizeDesc>(
         &mut self,
@@ -199,7 +199,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             actual_drawing_area_pos[idx] += split_point;
         }
 
-        let mut splitted: Vec<_> = drawing_area
+        let mut split: Vec<_> = drawing_area
             .split_by_breakpoints(
                 &actual_drawing_area_pos[2..4],
                 &actual_drawing_area_pos[0..2],
@@ -208,13 +208,13 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             .map(Some)
             .collect();
 
-        std::mem::swap(&mut drawing_area, splitted[4].as_mut().unwrap());
+        std::mem::swap(&mut drawing_area, split[4].as_mut().unwrap());
 
         for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
             if !self.overlap_plotting_area[dst_idx] {
-                let (h, w) = splitted[*src_idx].as_ref().unwrap().dim_in_pixel();
+                let (h, w) = split[*src_idx].as_ref().unwrap().dim_in_pixel();
                 if h > 0 && w > 0 {
-                    std::mem::swap(&mut label_areas[dst_idx], &mut splitted[*src_idx]);
+                    std::mem::swap(&mut label_areas[dst_idx], &mut split[*src_idx]);
                 }
             } else if self.label_area_size[dst_idx] != 0 {
                 let size = self.label_area_size[dst_idx] as i32;

@@ -17,7 +17,7 @@ impl<'a, Coord> BitMapElement<'a, Coord> {
     /// Create a new empty bitmap element. This can be use as
     /// the draw and blit pattern.
     ///
-    /// - `pos`: The left upper coordinte for the element
+    /// - `pos`: The left upper coordinate for the element
     /// - `size`: The size of the bitmap
     pub fn new(pos: Coord, size: (u32, u32)) -> Self {
         Self {

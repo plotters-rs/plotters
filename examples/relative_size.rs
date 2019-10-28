@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root.fill(&WHITE)?;
 
-    let (left, right) = root.split_horizentally((70).percent_width());
+    let (left, right) = root.split_horizontally((70).percent_width());
 
     draw_chart(&left)?;
 

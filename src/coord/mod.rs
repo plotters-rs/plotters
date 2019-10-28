@@ -17,7 +17,7 @@ for a interactive figure.
 
 `RangedCoord` is the 2D cartesian coordinate system that has two `Ranged` axis.
 A ranged axis can be logarithmic and by applying an logarithmic axis, the figure is logarithmic scale.
-Also, the ranged axis can be decereted, and this is required by the histogram series.
+Also, the ranged axis can be deserted, and this is required by the histogram series.
 
 */
 use crate::drawing::backend::BackendCoord;
@@ -36,7 +36,7 @@ pub use numeric::{
 };
 pub use ranged::{
     AsRangedCoord, DiscreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
-    ReversableRanged,
+    ReversibleRanged,
 };
 
 #[cfg(feature = "make_partial_axis")]
@@ -59,7 +59,7 @@ pub trait ReverseCoordTranslate: CoordTranslate {
     /// Reverse translate the coordinate from the drawing coordinate to the
     /// logic coordinate.
     /// Note: the return value is an option, because it's possible that the drawing
-    /// coordinate isn't able to be represented in te guest cooredinate system
+    /// coordinate isn't able to be represented in te guest coordinate system
     fn reverse_translate(&self, input: BackendCoord) -> Option<Self::From>;
 }
 

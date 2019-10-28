@@ -44,7 +44,7 @@
 					var lx = map_coord(e.offsetX, e.offsetY, 0);
 					var ly = map_coord(e.offsetX, e.offsetY, 1);
 					if(Number.isNaN(lx) || Number.isNaN(ly)) {
-						document.getElementById("coord").innerText = "Mouse poiner is out of range";
+						document.getElementById("coord").innerText = "Mouse pointer is out of range";
 						return;
 					}
 					document.getElementById("coord").innerText = "(" + lx.toFixed(3) + "," + ly.toFixed(3) + ")";

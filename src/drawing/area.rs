@@ -47,7 +47,7 @@ impl Rect {
             })
     }
 
-    /// Evently split the regtangle to a row * col mesh
+    /// Evenly split the rectangle to a row * col mesh
     fn split_evenly<'a>(&'a self, (row, col): (usize, usize)) -> impl Iterator<Item = Rect> + 'a {
         fn compute_evenly_split(from: i32, to: i32, n: usize, idx: usize) -> i32 {
             let size = (to - from) as usize;
@@ -140,7 +140,7 @@ impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
         match self {
             DrawingAreaErrorKind::BackendError(e) => write!(fmt, "backend error: {}", e),
             DrawingAreaErrorKind::SharingError => {
-                write!(fmt, "Mulitple backend operation in progress")
+                write!(fmt, "Multiple backend operation in progress")
             }
             DrawingAreaErrorKind::LayoutError => write!(fmt, "Bad layout"),
         }
@@ -250,7 +250,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         (self.rect.x0..self.rect.x1, self.rect.y0..self.rect.y1)
     }
 
-    /// Copy the drawing contenxt
+    /// Copy the drawing context
     fn copy_backend_ref(&self) -> Rc<RefCell<DB>> {
         self.backend.clone()
     }
@@ -338,7 +338,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         }
     }
 
-    /// Shrink the region, note all the locaitions are in guest coordinate
+    /// Shrink the region, note all the locations are in guest coordinate
     pub fn shrink<A: SizeDesc, B: SizeDesc, C: SizeDesc, D: SizeDesc>(
         mut self,
         left_upper: (A, B),
@@ -403,8 +403,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         (ret.next().unwrap(), ret.next().unwrap())
     }
 
-    /// Split the drawing area horizentally
-    pub fn split_horizentally<S: SizeDesc>(&self, x: S) -> (Self, Self) {
+    /// Split the drawing area horizontally
+    pub fn split_horizontally<S: SizeDesc>(&self, x: S) -> (Self, Self) {
         let x = x.in_pixels(self);
         let split_point = [x + self.rect.x0];
         let mut ret = self.rect.split(split_point.iter(), false).map(|rect| Self {
@@ -577,7 +577,7 @@ mod drawing_area_tests {
     }
 
     #[test]
-    fn test_split_horizentally() {
+    fn test_split_horizontally() {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, RED.to_rgba());
@@ -599,7 +599,7 @@ mod drawing_area_tests {
             });
         });
 
-        let (left, right) = drawing_area.split_horizentally(345);
+        let (left, right) = drawing_area.split_horizontally(345);
         left.fill(&RED).expect("Drawing Error");
         right.fill(&BLUE).expect("Drawing Error");
     }
@@ -810,13 +810,13 @@ mod drawing_area_tests {
             });
         });
 
-        let splited =
+        let split =
             drawing_area.split_by_breakpoints([(30).percent_width()], [(50).percent_height()]);
 
-        splited[0].fill(&RED).unwrap();
-        splited[1].fill(&BLUE).unwrap();
-        splited[2].fill(&GREEN).unwrap();
-        splited[3].fill(&WHITE).unwrap();
+        split[0].fill(&RED).unwrap();
+        split[1].fill(&BLUE).unwrap();
+        split[2].fill(&GREEN).unwrap();
+        split[3].fill(&WHITE).unwrap();
     }
 
     #[test]

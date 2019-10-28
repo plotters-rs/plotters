@@ -18,7 +18,7 @@ pub trait Color {
         RGBAColor(r, g, b, a)
     }
 
-    /// Convert the color into the RGBA color which is intrenally used by Plotters
+    /// Convert the color into the RGBA color which is internally used by Plotters
     fn to_rgba(&self) -> RGBAColor {
         let (r, g, b) = self.rgb();
         let a = self.alpha();

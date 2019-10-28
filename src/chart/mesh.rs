@@ -160,7 +160,7 @@ where
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
-    pub(super) _pahtom_data: PhantomData<(X, Y)>,
+    pub(super) _phantom_data: PhantomData<(X, Y)>,
     pub(super) x_tick_size: [i32; 2],
     pub(super) y_tick_size: [i32; 2],
 }
@@ -265,7 +265,7 @@ where
     }
 
     /// Set the style for the coarse grind grid
-    /// - `style`: This is the fcoarse grind grid style
+    /// - `style`: This is the coarse grind grid style
     pub fn line_style_1<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
         self.line_style_1 = Some(style.into());
         self

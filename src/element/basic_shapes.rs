@@ -127,7 +127,7 @@ pub struct Rectangle<Coord> {
 
 impl<Coord> Rectangle<Coord> {
     /// Create a new path
-    /// - `points`: The left upper and right lower coner of the rectangle
+    /// - `points`: The left upper and right lower corner of the rectangle
     /// - `style`: The shape style
     /// - returns the created element
     pub fn new<S: Into<ShapeStyle>>(points: [Coord; 2], style: S) -> Self {

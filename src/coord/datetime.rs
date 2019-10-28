@@ -11,9 +11,9 @@ pub trait TimeValue: Eq {
     fn date_floor(&self) -> Date<Self::Tz>;
     /// Returns the date that is no earlier than the time
     fn date_ceil(&self) -> Date<Self::Tz>;
-    /// Returns the maximum value that is eariler than the given date
+    /// Returns the maximum value that is earlier than the given date
     fn earliest_after_date(date: Date<Self::Tz>) -> Self;
-    /// Returns the duration between two time vlaue
+    /// Returns the duration between two time value
     fn subtract(&self, other: &Self) -> Duration;
     /// Get the timezone information for current value
     fn timezone(&self) -> Self::Tz;
@@ -31,8 +31,8 @@ pub trait TimeValue: Eq {
             }
         }
 
-        // If it overflows, it means we have a timespan nearly 300 years, we are safe to ignore the
-        // porition less than 1 day.
+        // If it overflows, it means we have a time span nearly 300 years, we are safe to ignore the
+        // portion less than 1 day.
         let total_days = total_span.num_days() as f64;
         let value_days = value_span.num_days() as f64;
 
@@ -148,7 +148,7 @@ impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
     type Value = Date<Z>;
 }
 
-/// Indicatets the coord has a monthly resolution
+/// Indicates the coord has a monthly resolution
 pub struct Monthly<T: TimeValue>(Range<T>);
 
 impl<T: TimeValue + Clone> AsRangedCoord for Monthly<T> {
@@ -225,7 +225,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
                 self.0.start.timezone(),
             );
         } else if total_month as usize <= max_points * 3 {
-            // Quaterly
+            // Quarterly
             return generate_key_points(
                 start_year,
                 start_month as i32,
@@ -545,19 +545,19 @@ impl Ranged for RangedDuration {
 
         let mut days_per_tick = 1;
         let mut idx = 0;
-        const MULTIPLER: &[i32] = &[1, 2, 5];
+        const MULTIPLIER: &[i32] = &[1, 2, 5];
 
-        while (end_days - begin_days) / i64::from(days_per_tick * MULTIPLER[idx])
+        while (end_days - begin_days) / i64::from(days_per_tick * MULTIPLIER[idx])
             > max_points as i64
         {
             idx += 1;
-            if idx == MULTIPLER.len() {
+            if idx == MULTIPLIER.len() {
                 idx = 0;
                 days_per_tick *= 10;
             }
         }
 
-        days_per_tick *= MULTIPLER[idx];
+        days_per_tick *= MULTIPLIER[idx];
 
         let mut ret = vec![];
 
@@ -584,7 +584,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
     let min_ns_per_point = total_ns as f64 / max_points as f64;
     let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);
 
-    fn deterime_actual_ns_per_point(
+    fn determine_actual_ns_per_point(
         total_ns: u64,
         mut actual_ns_per_point: u64,
         units: &[u64],
@@ -603,7 +603,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
     }
 
     if actual_ns_per_point < 1_000_000_000 {
-        Some(deterime_actual_ns_per_point(
+        Some(determine_actual_ns_per_point(
             total_ns as u64,
             actual_ns_per_point,
             &[1, 2, 5],
@@ -611,7 +611,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
             max_points,
         ))
     } else if actual_ns_per_point < 3600_000_000_000 {
-        Some(deterime_actual_ns_per_point(
+        Some(determine_actual_ns_per_point(
             total_ns as u64,
             1_000_000_000,
             &[1, 2, 5, 10, 15, 20, 30],
@@ -619,7 +619,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
             max_points,
         ))
     } else if actual_ns_per_point < 3600_000_000_000 * 24 {
-        Some(deterime_actual_ns_per_point(
+        Some(determine_actual_ns_per_point(
             total_ns as u64,
             3600_000_000_000,
             &[1, 2, 4, 8, 12],
@@ -628,7 +628,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         ))
     } else if !sub_daily {
         if actual_ns_per_point < 3600_000_000_000 * 24 * 10 {
-            Some(deterime_actual_ns_per_point(
+            Some(determine_actual_ns_per_point(
                 total_ns as u64,
                 3600_000_000_000 * 24,
                 &[1, 2, 5, 7],
@@ -636,7 +636,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
                 max_points,
             ))
         } else {
-            Some(deterime_actual_ns_per_point(
+            Some(determine_actual_ns_per_point(
                 total_ns as u64,
                 3600_000_000_000 * 24 * 10,
                 &[1, 2, 5],

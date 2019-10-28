@@ -13,8 +13,8 @@ Currently we have following backend implemented:
 
 - `BitMapBackend`: The backend that creates bitmap, this is based on `image` crate
 - `SVGBackend`: The backend that creates SVG image, based on `svg` crate.
-- `PistonBackend`: The backend that uses Piston Window for realtime rendering. Disabled by default, use feature `piston` to turn on.
-- `CanvasBackend`: The backend that operates HTML5 Canvas, this is availible when `Plotters` is targeting WASM.
+- `PistonBackend`: The backend that uses Piston Window for real time rendering. Disabled by default, use feature `piston` to turn on.
+- `CanvasBackend`: The backend that operates HTML5 Canvas, this is available when `Plotters` is targeting WASM.
 
 */
 mod area;

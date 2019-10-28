@@ -14,15 +14,15 @@ use crate::element::{Drawable, PointCollection};
 
 /// The chart context that has two coordinate system attached
 pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {
-    pub(super) primiary: ChartContext<'a, DB, CT1>,
+    pub(super) primary: ChartContext<'a, DB, CT1>,
     pub(super) secondary: ChartContext<'a, DB, CT2>,
 }
 
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     DualCoordChartContext<'a, DB, CT1, CT2>
 {
-    pub(super) fn new(mut primiary: ChartContext<'a, DB, CT1>, secondary_coord: CT2) -> Self {
-        let secondary_drawing_area = primiary
+    pub(super) fn new(mut primary: ChartContext<'a, DB, CT1>, secondary_coord: CT2) -> Self {
+        let secondary_drawing_area = primary
             .drawing_area
             .strip_coord_spec()
             .apply_coord_spec(secondary_coord);
@@ -30,16 +30,16 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
         let mut secondary_y_label_area = [None, None];
 
         std::mem::swap(
-            &mut primiary.x_label_area[0],
+            &mut primary.x_label_area[0],
             &mut secondary_x_label_area[0],
         );
         std::mem::swap(
-            &mut primiary.y_label_area[1],
+            &mut primary.y_label_area[1],
             &mut secondary_y_label_area[1],
         );
 
         Self {
-            primiary,
+            primary,
             secondary: ChartContext {
                 x_label_area: secondary_x_label_area,
                 y_label_area: secondary_y_label_area,
@@ -62,7 +62,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
     DualCoordChartContext<'a, DB, CT1, CT2>
 {
-    /// Convert the chart context into the secondary coodindate translation function
+    /// Convert the chart context into the secondary coordinate translation function
     pub fn into_secondary_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT2::From> {
         let coord_spec = self.secondary.drawing_area.into_coord_spec();
         move |coord| coord_spec.reverse_translate(coord)
@@ -73,14 +73,14 @@ impl<'a, DB: DrawingBackend, CT1: ReverseCoordTranslate, CT2: ReverseCoordTransl
     DualCoordChartContext<'a, DB, CT1, CT2>
 {
     /// Convert the chart context into a pair of closures that maps the pixel coordinate into the
-    /// logical coordinate for both primiary coordinate system and secondary coordinate system.
+    /// logical coordinate for both primary coordinate system and secondary coordinate system.
     pub fn into_coord_trans_pair(
         self,
     ) -> (
         impl Fn(BackendCoord) -> Option<CT1::From>,
         impl Fn(BackendCoord) -> Option<CT2::From>,
     ) {
-        let coord_spec_1 = self.primiary.drawing_area.into_coord_spec();
+        let coord_spec_1 = self.primary.drawing_area.into_coord_spec();
         let coord_spec_2 = self.secondary.drawing_area.into_coord_spec();
         (
             move |coord| coord_spec_1.reverse_translate(coord),
@@ -123,7 +123,7 @@ where
         S: IntoIterator<Item = R>,
     {
         self.secondary.draw_series_impl(series)?;
-        Ok(self.primiary.alloc_series_anno())
+        Ok(self.primary.alloc_series_anno())
     }
 }
 
@@ -131,7 +131,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     Borrow<ChartContext<'a, DB, CT1>> for DualCoordChartContext<'a, DB, CT1, CT2>
 {
     fn borrow(&self) -> &ChartContext<'a, DB, CT1> {
-        &self.primiary
+        &self.primary
     }
 }
 
@@ -139,7 +139,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     BorrowMut<ChartContext<'a, DB, CT1>> for DualCoordChartContext<'a, DB, CT1, CT2>
 {
     fn borrow_mut(&mut self) -> &mut ChartContext<'a, DB, CT1> {
-        &mut self.primiary
+        &mut self.primary
     }
 }
 

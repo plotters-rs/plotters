@@ -19,7 +19,7 @@ pub enum FontTransform {
 }
 
 impl FontTransform {
-    /// Compute the offset of the "top-left" cornor of the text.
+    /// Compute the offset of the "top-left" corner of the text.
     /// "Top-left" defined as the first char's top-left in reading orientation.
     pub fn offset(&self, layout: LayoutBox) -> (i32, i32) {
         match self {
@@ -30,7 +30,7 @@ impl FontTransform {
         }
     }
 
-    /// Transform the coordinate to performe the rotation
+    /// Transform the coordinate to perform the rotation
     pub fn transform(&self, x: i32, y: i32) -> (i32, i32) {
         match self {
             FontTransform::None => (x, y),

@@ -14,7 +14,7 @@
     element. There are two trait required for an element:
 
     - `PointCollection` - the struct should be able to return an iterator of key-points under guest coordinate
-    - `Drawable` - the struct should be able to use performe drawing on a drawing backend with pixel-based coordinate
+    - `Drawable` - the struct is a pending drawing operation on a drawing backend with pixel-based coordinate
 
     An example of element that draws a red "X" in a red rectangle onto the backend:
 
@@ -63,7 +63,7 @@
 
       ## Composable Elements
       You also have an convenient way to build an element that isn't built into the Plotters library by
-      combining existing elements into a logic group. To build an composable elemnet, you need to use an
+      combining existing elements into a logic group. To build an composable element, you need to use an
       logic empty element that draws nothing to the backend but denotes the relative zero point of the logical
       group. Any element defined with pixel based offset coordinate can be added into the group later using
       the `+` operator.
@@ -90,13 +90,13 @@
     By default, Plotters uses static dispatch for all the elements and series. For example,
     the `ChartContext::draw_series` method accepts an iterator of `T` where type `T` implements
     all the traits a element should implement. Although, we can use the series of composable element
-    for complex series drawing. But sometimes, we still want to make the series heterogyous, which means
+    for complex series drawing. But sometimes, we still want to make the series heterogynous, which means
     the iterator should be able to holds elements in different type.
-    For example, a point series with corss and circle. This requires the dynamically dispatched elements.
+    For example, a point series with cross and circle. This requires the dynamically dispatched elements.
     In plotters, all the elements can be converted into `DynElement`, the dynamic dispatch container for
-    all elements (include exernal implemented ones).
+    all elements (include external implemented ones).
     Plotters automatically implements `IntoDynElement` for all elements, by doing so, any dynamic element should have
-    `into_dyn` function which would wrap the element into a dynmanic element wrapper.
+    `into_dyn` function which would wrap the element into a dynamic element wrapper.
 
     For example, the following code counts the number of factors of integer and mark all prime numbers in cross.
     ```rust
@@ -196,7 +196,7 @@ pub trait PointCollection<'a, Coord> {
 /// The trait indicates we are able to draw it on a drawing area
 pub trait Drawable<DB: DrawingBackend> {
     /// Actually draws the element. The key points is already translated into the
-    /// image cooridnate and can be used by DC directly
+    /// image coordinate and can be used by DC directly
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         pos: I,

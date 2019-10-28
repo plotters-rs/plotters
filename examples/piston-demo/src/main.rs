@@ -9,7 +9,7 @@ const FPS: u32 = 10;
 const LENGTH: u32 = 20;
 const N_DATA_POINTS: usize = (FPS * LENGTH) as usize;
 fn main() {
-    let mut window: PistonWindow = WindowSettings::new("Realtime CPU Usage", [450, 300])
+    let mut window: PistonWindow = WindowSettings::new("Real Time CPU Usage", [450, 300])
         .samples(4)
         .build()
         .unwrap();
@@ -39,7 +39,7 @@ fn main() {
 
         let mut cc = ChartBuilder::on(&root)
             .margin(10)
-            .caption("Realtime CPU Usage", ("sans-serif", 30).into_font())
+            .caption("Real Time CPU Usage", ("sans-serif", 30).into_font())
             .x_label_area_size(40)
             .y_label_area_size(50)
             .build_ranged(0..N_DATA_POINTS as u32, 0f32..1f32)?;
