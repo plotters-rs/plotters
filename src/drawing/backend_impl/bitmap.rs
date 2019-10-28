@@ -1,17 +1,38 @@
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
+use std::marker::PhantomData;
 
-use image::{ImageBuffer, ImageError, Rgb};
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+mod image_encoding_support {
+    pub(super) use image::{ImageBuffer, ImageError, Rgb};
+    pub(super) use std::path::Path;
+    pub(super) type BorrowedImage<'a> = ImageBuffer<Rgb<u8>, &'a mut [u8]>;
+}
 
-use std::path::Path;
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+use image_encoding_support::*;
 
-pub type BorrowedImage<'a> = ImageBuffer<Rgb<u8>, &'a mut [u8]>;
+#[derive(Debug)]
+pub enum BitMapBackendError {
+    InvalidBuffer,
+    IOError(std::io::Error),
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    ImageError(ImageError),
+}
+
+impl std::fmt::Display for BitMapBackendError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for BitMapBackendError {}
 
 fn blend(prev: &mut u8, new: u8, a: f64) {
     *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
 }
 
-#[cfg(feature = "gif")]
+#[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
 mod gif_support {
     use super::*;
     use gif::{Encoder as GifEncoder, Frame as GifFrame, Repeat, SetParameter};
@@ -29,15 +50,18 @@ mod gif_support {
             path: T,
             dim: (u32, u32),
             delay: u32,
-        ) -> Result<Self, ImageError> {
+        ) -> Result<Self, BitMapBackendError> {
             let mut encoder = GifEncoder::new(
-                File::create(path.as_ref()).map_err(ImageError::IoError)?,
+                File::create(path.as_ref()).map_err(BitMapBackendError::IOError)?,
                 dim.0 as u16,
                 dim.1 as u16,
                 &[],
-            )?;
+            )
+            .map_err(BitMapBackendError::IOError)?;
 
-            encoder.set(Repeat::Infinite)?;
+            encoder
+                .set(Repeat::Infinite)
+                .map_err(BitMapBackendError::IOError)?;
 
             Ok(Self {
                 encoder,
@@ -47,13 +71,15 @@ mod gif_support {
             })
         }
 
-        pub(super) fn flush_frame(&mut self, buffer: &[u8]) -> Result<(), ImageError> {
+        pub(super) fn flush_frame(&mut self, buffer: &[u8]) -> Result<(), BitMapBackendError> {
             let mut frame =
                 GifFrame::from_rgb_speed(self.width as u16, self.height as u16, buffer, 10);
 
             frame.delay = self.delay as u16;
 
-            self.encoder.write_frame(&frame)?;
+            self.encoder
+                .write_frame(&frame)
+                .map_err(BitMapBackendError::IOError)?;
 
             Ok(())
         }
@@ -61,13 +87,15 @@ mod gif_support {
 }
 
 enum Target<'a> {
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     File(&'a Path),
-    Buffer,
-    #[cfg(feature = "gif")]
+    Buffer(PhantomData<&'a u32>),
+    #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
     Gif(Box<gif_support::GifFile>),
 }
 
 enum Buffer<'a> {
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     Owned(Vec<u8>),
     Borrowed(&'a mut [u8]),
 }
@@ -75,6 +103,7 @@ enum Buffer<'a> {
 impl<'a> Buffer<'a> {
     fn borrow_buffer(&mut self) -> &mut [u8] {
         match self {
+            #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
             Buffer::Owned(buf) => &mut buf[..],
             Buffer::Borrowed(buf) => *buf,
         }
@@ -84,20 +113,19 @@ impl<'a> Buffer<'a> {
 /// The backend that drawing a bitmap
 pub struct BitMapBackend<'a> {
     /// The path to the image
+    #[allow(dead_code)]
     target: Target<'a>,
-
     /// The size of the image
     size: (u32, u32),
-
     /// The data buffer of the image
     buffer: Buffer<'a>,
-
     /// Flag indicates if the bitmap has been saved
     saved: bool,
 }
 
 impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
         Self {
             target: Target::File(path.as_ref()),
@@ -116,12 +144,12 @@ impl<'a> BitMapBackend<'a> {
     /// - `path`: The path to the GIF file to create
     /// - `dimension`: The size of the GIF image
     /// - `speed`: The amount of time for each frame to display
-    #[cfg(feature = "gif")]
+    #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
     pub fn gif<T: AsRef<Path>>(
         path: T,
         (w, h): (u32, u32),
         frame_delay: u32,
-    ) -> Result<Self, ImageError> {
+    ) -> Result<Self, BitMapBackendError> {
         Ok(Self {
             target: Target::Gif(Box::new(gif_support::GifFile::new(
                 path,
@@ -153,7 +181,7 @@ impl<'a> BitMapBackend<'a> {
         }
 
         Self {
-            target: Target::Buffer,
+            target: Target::Buffer(PhantomData),
             size: (w, h),
             buffer: Buffer::Borrowed(buf),
             saved: false,
@@ -331,33 +359,41 @@ impl<'a> BitMapBackend<'a> {
 }
 
 impl<'a> DrawingBackend for BitMapBackend<'a> {
-    type ErrorType = ImageError;
+    type ErrorType = BitMapBackendError;
 
     fn get_size(&self) -> (u32, u32) {
         self.size
     }
 
-    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+    fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
         self.saved = false;
         Ok(())
     }
 
-    fn present(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+    #[cfg(any(target_arch = "wasm32", not(feature = "image")))]
+    fn present(&mut self) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
+        Ok(())
+    }
+
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    fn present(&mut self) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
         let (w, h) = self.get_size();
         match &mut self.target {
             Target::File(path) => {
                 if let Some(img) = BorrowedImage::from_raw(w, h, self.buffer.borrow_buffer()) {
-                    img.save(&path)
-                        .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))?;
+                    img.save(&path).map_err(|x| {
+                        DrawingErrorKind::DrawingError(BitMapBackendError::IOError(x))
+                    })?;
                     self.saved = true;
                     Ok(())
                 } else {
-                    Err(DrawingErrorKind::DrawingError(ImageError::DimensionError))
+                    Err(DrawingErrorKind::DrawingError(
+                        BitMapBackendError::InvalidBuffer,
+                    ))
                 }
             }
-            Target::Buffer => Ok(()),
+            Target::Buffer(_) => Ok(()),
 
-            #[cfg(feature = "gif")]
             Target::Gif(target) => {
                 target
                     .flush_frame(self.buffer.borrow_buffer())
@@ -372,7 +408,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         &mut self,
         point: BackendCoord,
         color: &RGBAColor,
-    ) -> Result<(), DrawingErrorKind<ImageError>> {
+    ) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
         if point.0 < 0 || point.1 < 0 {
             return Ok(());
         }
@@ -474,10 +510,10 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     fn blit_bitmap<'b>(
         &mut self,
         pos: BackendCoord,
-        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
+        (sw, sh): (u32, u32),
+        src: &'b [u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (dw, dh) = self.get_size();
-        let (sw, sh) = src.dimensions();
 
         let (x0, y0) = pos;
         let (x1, y1) = (x0 + sw as i32, y0 + sh as i32);
@@ -498,7 +534,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let mut dst = &mut self.get_raw_pixel_buffer()[dst_start..];
 
         let src_start = 3 * ((sh as i32 + y0 - y1) * sw as i32 + (sw as i32 + x0 - x1)) as usize;
-        let mut src = &(**src)[src_start..];
+        let mut src = &src[src_start..];
 
         if src_gap == 0 && dst_gap == 0 {
             chunk_size *= num_chunks;

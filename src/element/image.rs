@@ -1,4 +1,5 @@
-use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+use image::{DynamicImage, GenericImageView};
 
 use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
@@ -47,12 +48,12 @@ impl<'a, Coord> BitMapElement<'a, Coord> {
 
     /// Make the bitmap element as a bitmap backend, so that we can use
     /// plotters drawing functionality on the bitmap element
-    #[cfg(feature = "bitmap")]
     pub fn as_bitmap_backend(&mut self) -> BitMapBackend {
         BitMapBackend::with_buffer(self.image.to_mut(), self.size)
     }
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord> {
     fn from((pos, image): (Coord, DynamicImage)) -> Self {
         let (w, h) = image.dimensions();
@@ -81,15 +82,7 @@ impl<'a, Coord, DB: DrawingBackend> Drawable<DB> for BitMapElement<'a, Coord> {
         _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.blit_bitmap(
-                (x, y),
-                &(ImageBuffer::<Rgb<u8>, &[u8]>::from_raw(
-                    self.size.0,
-                    self.size.1,
-                    &self.image[..],
-                )
-                .unwrap()),
-            );
+            return backend.blit_bitmap((x, y), self.size, self.image.as_ref());
         }
         Ok(())
     }

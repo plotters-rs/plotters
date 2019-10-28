@@ -173,9 +173,7 @@ pub use candlestick::CandleStick;
 mod errorbar;
 pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 mod image;
-#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 pub use self::image::BitMapElement;
 
 mod dynelem;

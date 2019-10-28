@@ -219,15 +219,14 @@ pub trait DrawingBackend: Sized {
     ///
     /// - `text`: pos the left upper conner of the bitmap to blit
     /// - `src`: The source of the image
-    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     fn blit_bitmap<'a>(
         &mut self,
         pos: BackendCoord,
-        src: &'a image::ImageBuffer<image::Rgb<u8>, &'a [u8]>,
+        (iw, ih): (u32, u32),
+        src: &'a [u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (w, h) = self.get_size();
 
-        let (iw, ih) = src.dimensions();
         for dx in 0..iw {
             if pos.0 + dx as i32 >= w as i32 {
                 break;
@@ -236,8 +235,10 @@ pub trait DrawingBackend: Sized {
                 if pos.1 + dy as i32 >= h as i32 {
                     break;
                 }
-                let pixel = src.get_pixel(dx, dy);
-                let color = crate::style::RGBColor(pixel.0[0], pixel.0[1], pixel.0[2]);
+                let r = src[(dx + dy * w) as usize * 3 + 0];
+                let g = src[(dx + dy * w) as usize * 3 + 1];
+                let b = src[(dx + dy * w) as usize * 3 + 2];
+                let color = crate::style::RGBColor(r, g, b);
                 let result =
                     self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), &color.to_rgba());
                 if result.is_err() {

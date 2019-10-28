@@ -594,11 +594,12 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap  | Enable `BitMapBackend` Support| image | Yes |
+| image\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image | Yes |
 | svg     | Enable `SVGBackend` Support | svg | Yes |
 | datetime| Enable Date and Time Coordinate Support| chrono | Yes |
 | gif\_backend| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 | piston | Enable `PistonWindowBackend` | piston\_window | No |
+| cairo | Enable `CairoBackend` | cairo-rs | No |
 | palette\_ext | Use crate `palette` for color expression| palette | Yes |
 | evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
 | make\_partial\_axis | Support for API `make_partial_axis`, which allows configuring partial axis from visible portion. | num-trait| Yes |
@@ -680,12 +681,9 @@ pub mod prelude {
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
-        CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
-        MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
+        BitMapElement, CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar,
+        IntoDynElement, MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
-
-    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-    pub use crate::element::BitMapElement;
 
     #[allow(type_alias_bounds)]
     /// The type used to returns a drawing operation that can be failed

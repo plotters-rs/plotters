@@ -22,4 +22,4 @@ NR != FNR{
 }' <(${REPO_BASE}/doc-template/render_readme.sh ${REPO_BASE}/doc-template/readme.template.md ${REPO_BASE}/doc-template/rustdoc) ${REPO_BASE}/src/lib.rs > ${REPO_BASE}/src/lib.rs.tmp
 
 mv ${REPO_BASE}/src/lib.rs.tmp ${REPO_BASE}/src/lib.rs
-rustfmt ${REPO_BASE}/src/lib.rs
+cargo fmt

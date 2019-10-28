@@ -1,4 +1,4 @@
-# Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀 
+# Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -479,11 +479,12 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap  | Enable `BitMapBackend` Support| image | Yes |
+| image\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image | Yes |
 | svg     | Enable `SVGBackend` Support | svg | Yes |
 | datetime| Enable Date and Time Coordinate Support| chrono | Yes |
 | gif\_backend| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 | piston | Enable `PistonWindowBackend` | piston\_window | No |
+| cairo | Enable `CairoBackend` | cairo-rs | No |
 | palette\_ext | Use crate `palette` for color expression| palette | Yes |
 | evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
 | make\_partial\_axis | Support for API `make_partial_axis`, which allows configuring partial axis from visible portion. | num-trait| Yes |
