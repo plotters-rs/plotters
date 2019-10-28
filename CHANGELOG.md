@@ -9,6 +9,7 @@
 ### Improved 
 
 - Font description is greatly improved, general font family is supported: `serif`, `serif-sans`, `monospace` (Thanks to @Tatrix)
+- Tested the font loading on Linux, OSX and Windowns. Make font loading more reliable.
 
 ## Plotters 0.2.10 (2019-10-23)
 
