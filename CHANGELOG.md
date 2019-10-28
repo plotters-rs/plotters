@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters latest (?)
+## Plotters 0.2.11 (2019-10-27)
 
 ### Added
 
