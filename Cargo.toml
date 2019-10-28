@@ -4,7 +4,7 @@ version = "0.2.10"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
-description = "Plot Drawing Library in Pure Rust for both native and WASM applications"
+description = "A Rust drawing library focus on data plotting for both WASM and native applications"
 repository = "https://github.com/38/plotters"
 keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
 categories = ["visualization", "wasm"]
@@ -32,11 +32,11 @@ default_features = false
 features = ["jpeg", "png_codec", "bmp"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys= "0.3.4"
-wasm-bindgen = "0.2.43"
+js-sys= "0.3.29"
+wasm-bindgen = "0.2.52"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
-version = "0.3.4"
+version = "0.3.29"
 features = ['Document', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
