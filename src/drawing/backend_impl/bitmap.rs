@@ -1,7 +1,7 @@
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{Color, RGBAColor};
 
-use image::{ImageBuffer, ImageError, Rgb, RgbImage};
+use image::{ImageBuffer, ImageError, Rgb};
 
 use std::path::Path;
 
@@ -9,35 +9,6 @@ pub type BorrowedImage<'a> = ImageBuffer<Rgb<u8>, &'a mut [u8]>;
 
 fn blend(prev: &mut u8, new: u8, a: f64) {
     *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
-}
-
-/// Macro implementation for drawing pixels, since a generic implementation would have been
-/// much more unwieldy.
-macro_rules! draw_pixel {
-    ($img:expr, $point:expr, $color:expr) => {{
-        if $point.0 as u32 >= $img.width()
-            || $point.0 < 0
-            || $point.1 as u32 >= $img.height()
-            || $point.1 < 0
-        {
-            return Ok(());
-        }
-
-        let alpha = $color.alpha();
-        let rgb = $color.rgb();
-
-        if alpha >= 1.0 {
-            $img.put_pixel($point.0 as u32, $point.1 as u32, Rgb([rgb.0, rgb.1, rgb.2]));
-        } else {
-            let pixel = $img.get_pixel_mut($point.0 as u32, $point.1 as u32);
-            let new_color = [rgb.0, rgb.1, rgb.2];
-
-            pixel.0.iter_mut().zip(&new_color).for_each(|(old, new)| {
-                *old = (f64::from(*old) * (1.0 - alpha) + f64::from(*new) * alpha).min(255.0) as u8;
-            });
-        }
-        Ok(())
-    }};
 }
 
 #[cfg(feature = "gif")]
@@ -76,16 +47,9 @@ mod gif_support {
             })
         }
 
-        pub(super) fn flush_frame(&mut self, img: &mut RgbImage) -> Result<(), ImageError> {
-            let mut new_img = RgbImage::new(self.width, self.height);
-            std::mem::swap(&mut new_img, img);
-
-            let mut frame = GifFrame::from_rgb_speed(
-                self.width as u16,
-                self.height as u16,
-                &new_img.into_raw(),
-                10,
-            );
+        pub(super) fn flush_frame(&mut self, buffer: &[u8]) -> Result<(), ImageError> {
+            let mut frame =
+                GifFrame::from_rgb_speed(self.width as u16, self.height as u16, buffer, 10);
 
             frame.delay = self.delay as u16;
 
@@ -97,10 +61,24 @@ mod gif_support {
 }
 
 enum Target<'a> {
-    File(&'a Path, RgbImage),
-    Buffer(BorrowedImage<'a>),
+    File(&'a Path),
+    Buffer,
     #[cfg(feature = "gif")]
-    Gif(Box<gif_support::GifFile>, RgbImage),
+    Gif(Box<gif_support::GifFile>),
+}
+
+enum Buffer<'a> {
+    Owned(Vec<u8>),
+    Borrowed(&'a mut [u8]),
+}
+
+impl<'a> Buffer<'a> {
+    fn borrow_buffer(&mut self) -> &mut [u8] {
+        match self {
+            Buffer::Owned(buf) => &mut buf[..],
+            Buffer::Borrowed(buf) => *buf,
+        }
+    }
 }
 
 /// The backend that drawing a bitmap
@@ -108,15 +86,23 @@ pub struct BitMapBackend<'a> {
     /// The path to the image
     target: Target<'a>,
 
+    /// The size of the image
+    size: (u32, u32),
+
+    /// The data buffer of the image
+    buffer: Buffer<'a>,
+
     /// Flag indicates if the bitmap has been saved
     saved: bool,
 }
 
 impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
-    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, dimension: (u32, u32)) -> Self {
+    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
         Self {
-            target: Target::File(path.as_ref(), RgbImage::new(dimension.0, dimension.1)),
+            target: Target::File(path.as_ref()),
+            size: (w, h),
+            buffer: Buffer::Owned(vec![0; (3 * w * h) as usize]),
             saved: false,
         }
     }
@@ -133,14 +119,17 @@ impl<'a> BitMapBackend<'a> {
     #[cfg(feature = "gif")]
     pub fn gif<T: AsRef<Path>>(
         path: T,
-        dimension: (u32, u32),
+        (w, h): (u32, u32),
         frame_delay: u32,
     ) -> Result<Self, ImageError> {
         Ok(Self {
-            target: Target::Gif(
-                Box::new(gif_support::GifFile::new(path, dimension, frame_delay)?),
-                RgbImage::new(dimension.0, dimension.1),
-            ),
+            target: Target::Gif(Box::new(gif_support::GifFile::new(
+                path,
+                (w, h),
+                frame_delay,
+            )?)),
+            size: (w, h),
+            buffer: Buffer::Owned(vec![0; (3 * w * h) as usize]),
             saved: false,
         })
     }
@@ -152,23 +141,27 @@ impl<'a> BitMapBackend<'a> {
     ///
     /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
-    pub fn with_buffer(buf: &'a mut [u8], dimension: (u32, u32)) -> Self {
+    pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
+        if (w * h * 3) as usize > buf.len() {
+            // TODO: This doesn't deserve a panic.
+            panic!(
+                "Wrong image size: H = {}, W = {}, BufSize = {}",
+                w,
+                h,
+                buf.len()
+            );
+        }
+
         Self {
-            target: Target::Buffer(
-                BorrowedImage::from_raw(dimension.0, dimension.1, buf)
-                    .expect("Buffer size must match dimensions (w * h * 3)."),
-            ),
+            target: Target::Buffer,
+            size: (w, h),
+            buffer: Buffer::Borrowed(buf),
             saved: false,
         }
     }
 
     fn get_raw_pixel_buffer(&mut self) -> &mut [u8] {
-        match &mut self.target {
-            Target::File(_, img) => &mut (**img)[..],
-            Target::Buffer(img) => &mut (**img)[..],
-            #[cfg(feature = "gif")]
-            Target::Gif(_, img) => &mut (**img)[..],
-        }
+        self.buffer.borrow_buffer()
     }
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
@@ -341,12 +334,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     type ErrorType = ImageError;
 
     fn get_size(&self) -> (u32, u32) {
-        match &self.target {
-            Target::Buffer(img) => (img.width(), img.height()),
-            Target::File(_, img) => (img.width(), img.height()),
-            #[cfg(feature = "gif")]
-            Target::Gif(_, img) => (img.width(), img.height()),
-        }
+        self.size
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
@@ -355,19 +343,24 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 
     fn present(&mut self) -> Result<(), DrawingErrorKind<ImageError>> {
+        let (w, h) = self.get_size();
         match &mut self.target {
-            Target::File(path, img) => {
-                img.save(&path)
-                    .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))?;
-                self.saved = true;
-                Ok(())
+            Target::File(path) => {
+                if let Some(img) = BorrowedImage::from_raw(w, h, self.buffer.borrow_buffer()) {
+                    img.save(&path)
+                        .map_err(|x| DrawingErrorKind::DrawingError(ImageError::IoError(x)))?;
+                    self.saved = true;
+                    Ok(())
+                } else {
+                    Err(DrawingErrorKind::DrawingError(ImageError::DimensionError))
+                }
             }
-            Target::Buffer(_) => Ok(()),
+            Target::Buffer => Ok(()),
 
             #[cfg(feature = "gif")]
-            Target::Gif(target, img) => {
+            Target::Gif(target) => {
                 target
-                    .flush_frame(img)
+                    .flush_frame(self.buffer.borrow_buffer())
                     .map_err(DrawingErrorKind::DrawingError)?;
                 self.saved = true;
                 Ok(())
@@ -380,12 +373,35 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         point: BackendCoord,
         color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<ImageError>> {
-        match &mut self.target {
-            Target::Buffer(img) => draw_pixel!(img, point, color),
-            Target::File(_, img) => draw_pixel!(img, point, color),
-            #[cfg(feature = "gif")]
-            Target::Gif(_, img) => draw_pixel!(img, point, color),
+        if point.0 < 0 || point.1 < 0 {
+            return Ok(());
         }
+
+        let (w, _) = self.get_size();
+        let alpha = color.alpha();
+        let rgb = color.rgb();
+
+        let buf = self.get_raw_pixel_buffer();
+
+        let (x, y) = (point.0 as usize, point.1 as usize);
+        let w = w as usize;
+
+        let base = (y * w + x) * 3;
+
+        if base < buf.len() {
+            unsafe {
+                if alpha >= 1.0 {
+                    *buf.get_unchecked_mut(base) = rgb.0;
+                    *buf.get_unchecked_mut(base + 1) = rgb.1;
+                    *buf.get_unchecked_mut(base + 2) = rgb.2;
+                } else {
+                    blend(buf.get_unchecked_mut(base), rgb.0, alpha);
+                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
+                    blend(buf.get_unchecked_mut(base + 2), rgb.2, alpha);
+                }
+            }
+        }
+        Ok(())
     }
 
     fn draw_line<S: BackendStyle>(
