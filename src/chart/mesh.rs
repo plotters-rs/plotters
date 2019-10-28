@@ -11,7 +11,7 @@ use crate::style::{
     SizeDesc, TextStyle,
 };
 
-/// The style used to describe the mesh for a secondary coordinate system.
+/// The style used to describe the mesh and axis for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
     style: MeshStyle<'a, 'b, X, Y, DB>,
 }
@@ -180,6 +180,11 @@ where
         self
     }
 
+    /// Set the tick mark size on the axes. When this is set to negative, the axis value label will
+    /// become inward.
+    /// 
+    /// - `pos`: The which label area we want to set
+    /// - `value`: The size specification
     pub fn set_tick_mark_size<S: SizeDesc>(
         &mut self,
         pos: LabelAreaPosition,

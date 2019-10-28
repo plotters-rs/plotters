@@ -105,7 +105,11 @@ impl Rect {
     }
 }
 
-/// The abstraction of a region
+/// The abstraction of a drawing area. Plotters uses drawing area as the fundamental abstraction for the
+/// high level drawing API. The major functionality provided by the drawing area is
+///     1. Layout specification - Split the parent drawing area into sub-drawing-areas
+///     2. Coordinate Translation - Allows guest coordinate system attached and used for drawing.
+///     3. Element based drawing - drawing area provides the environment the element can be drawn onto it.
 pub struct DrawingArea<DB: DrawingBackend, CT: CoordTranslate> {
     backend: Rc<RefCell<DB>>,
     rect: Rect,
@@ -314,6 +318,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.coord.translate(coord)
     }
 
+    /// Estimate the dimension of the text if drawn on this drawing area. 
+    /// We can't get this directly from the font, since the drawing backend may or may not
+    /// follows the font configuration. In terminal, the font family will be dropped.
+    /// So the size of the text is drawing area related.
+    /// 
+    /// - `text`: The text we want to estimate
+    /// - `font`: The font spec in which we want to draw the text
+    /// - **return**: The size of the text if drawn on this area
     pub fn estimate_text_size(
         &self,
         text: &str,
@@ -453,7 +465,6 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     }
 
     /// Draw a title of the drawing area and return the remaining drawing area
-    /// TODO: Think about how to make this resizable
     pub fn titled<'a, S: Into<TextStyle<'a>>>(
         &self,
         text: &str,

@@ -1,4 +1,4 @@
-# Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀 
+# Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>

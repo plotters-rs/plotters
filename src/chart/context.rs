@@ -16,6 +16,8 @@ use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection
 use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
+/// When a series is drawn onto a drawing area, an series annotation object
+/// is created and a mutable reference is returned. 
 #[allow(clippy::type_complexity)]
 pub struct SeriesAnno<'a, DB: DrawingBackend> {
     label: Option<String>,
@@ -43,7 +45,7 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
     }
 
     /// Set the series label
-    /// `label`: The string would be use as label for current series
+    /// - `label`: The string would be use as label for current series
     pub fn label<L: Into<String>>(&mut self, label: L) -> &mut Self {
         self.label = Some(label.into());
         self
@@ -564,7 +566,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 
-    /// Attach a secondary coord to the chart
+    /// Convert this chart context into a dual axis chart context 
+    /// 
+    /// - `x_coord`: The coordinate spec for the X axis
+    /// - `y_coord`: The coordinate spec for the Y axis
+    /// - **returns** The newly created dual spec chart context
     #[allow(clippy::type_complexity)]
     pub fn set_secondary_coord<SX: AsRangedCoord, SY: AsRangedCoord>(
         self,

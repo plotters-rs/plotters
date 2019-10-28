@@ -47,7 +47,7 @@ impl_log_scalable!(i, u64);
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
 
-/// The wrapper type for a range of a log-scaled value
+/// The decorator type for a range of a log-scaled value
 pub struct LogRange<V: LogScalable>(pub Range<V>);
 
 impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {

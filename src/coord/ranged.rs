@@ -176,15 +176,21 @@ where
     type Value = T::ValueType;
 }
 
+/// The axis decorator that makes key-point in the center of the value range
+/// This is useful when we draw a histogram, since we want the axis value label
+/// to be shown in the middle of the range rather than exactly the location where
+/// the value mapped to.
 pub struct CentricDiscreteRange<D: DiscreteRanged>(D)
 where
     <D as Ranged>::ValueType: Eq;
 
+/// The trait for types that can decorated by `CentricDiscreteRange` decorator
 pub trait IntoCentric: AsRangedCoord
 where
     Self::CoordDescType: DiscreteRanged,
     <Self::CoordDescType as Ranged>::ValueType: Eq,
 {
+    /// Convert current ranged value into a centric ranged value
     fn into_centric(self) -> CentricDiscreteRange<Self::CoordDescType> {
         CentricDiscreteRange(self.into())
     }
@@ -238,9 +244,17 @@ where
     type Value = <Self as Ranged>::ValueType;
 }
 
+/// This axis decorator will make the axis partially display on the axis. 
+/// At some time, we want the axis only covers some part of the value.
+/// This decorator will have an additional display range defined.
 pub struct PartialAxis<R: Ranged>(R, Range<R::ValueType>);
 
+/// The trait for the types that can be converted into a partial axis
 pub trait IntoPartialAxis: AsRangedCoord {
+    /// Make the partial axis
+    /// 
+    /// - `axis_range`: The range of the axis to be displayed
+    /// - **returns**: The converted range specification
     fn partial_axis(
         self,
         axis_range: Range<<Self::CoordDescType as Ranged>::ValueType>,
@@ -299,6 +313,13 @@ where
     type Value = <Self as Ranged>::ValueType;
 }
 
+/// Make a partial axis based on the percentage of visible portion. 
+/// We can use `into_partial_axis` to create a partial axis range specification. 
+/// But sometimes, we want to directly specify the percentage visible to the user. 
+/// 
+/// - `axis_range`: The range specification
+/// - `part`: The visible part of the axis. Each value is from [0.0, 1.0]
+/// - **returns**: The partial axis created from the input, or `None` when not possible
 #[cfg(feature = "make_partial_axis")]
 pub fn make_partial_axis<T>(
     axis_range: Range<T>,

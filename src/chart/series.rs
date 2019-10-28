@@ -5,6 +5,7 @@ use crate::drawing::{DrawingAreaErrorKind, DrawingBackend};
 use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
 use crate::style::{IntoFont, IntoTextStyle, ShapeStyle, SizeDesc, TextStyle, TRANSPARENT};
 
+/// Describes where we want to put the series label
 pub enum SeriesLabelPosition {
     UpperLeft,
     MiddleLeft,
@@ -15,6 +16,7 @@ pub enum SeriesLabelPosition {
     UpperRight,
     MiddleRight,
     LowerRight,
+    /// Force the series label drawn at the specific location
     Coordinate(i32, i32),
 }
 
@@ -73,6 +75,9 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         self
     }
 
+    /// Set the margin of the series label drawing are
+    /// 
+    /// - `value`: The size specification 
     pub fn margin<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.margin = value
             .in_pixels(&self.target.plotting_area().dim_in_pixel())
