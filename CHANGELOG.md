@@ -4,7 +4,7 @@
 
 ### Added
 
-- Add font style support, now we are able to set font variantions: normal, oblique, italic or bold.
+- Add font style support, now we are able to set font variations: normal, oblique, italic or bold.
 
 ### Improved 
 
@@ -14,11 +14,11 @@
 
 ### Improved
 
-- Refactored and simplified TTF font cache, use RwLock instead of mutex which may benifit for parallel rendering. (Thanks to @Tatrix)
+- Refactored and simplified TTF font cache, use RwLock instead of mutex which may benefit for parallel rendering. (Thanks to @Tatrix)
 
 ### Bug Fix
 
-- The fast bitmap filling algorithm may overflow the framebuffer and cuase segfault
+- The fast bitmap filling algorithm may overflow the framebuffer and cause segfault
 
 ## Plotters 0.2.9 (2019-10-21)
 
@@ -32,7 +32,7 @@
 ### Bug Fix
 
 - Performance fix: '?' operator is very slow
-- Dynmaic Element lifetime bound: Fix a bug that prevents area series draws on non-static lifetime backend
+- Dynamic Element lifetime bound: Fix a bug that prevents area series draws on non-static lifetime backend
 
 ## Plotters 0.2.8 (2019-10-12)
 
@@ -80,8 +80,8 @@
 ### Improvement
 
 - More examples are included
-- Date coordinate now support using monthly or yearly axis. This is usefuly when plotting some data in monthly or yearly basis.
-- Make margin on different side of a chart can be configured seperately.
+- Date coordinate now support using monthly or yearly axis. This is useful when plotting some data in monthly or yearly basis.
+- Make margin on different side of a chart can be configured separately.
 - Better test coverage
 
 ## Plotters 0.2.5 (2019-09-07)
@@ -115,7 +115,7 @@
 
 ### Improvement
 
-- Histogram imporvements, horizental bar is supported, new creation API which compiler can infer the type
+- Histogram improvements, horizontal bar is supported, new creation API which compiler can infer the type
 - Supporting split the drawing area with a list of breakpoints using `DrawingArea::split_by_breakpoints`
 - Enable SVG support for WASM
 - Make the `BitMapBackend` takes an in memory mutable buffer
@@ -128,7 +128,7 @@
 
 ### Improvement
 
-- Move the sample images and other documentaiton data out of this repository.
+- Move the sample images and other documentation data out of this repository.
 
 ### Fix
 - Make drawing errors shareable across threads. Otherwise, it causes compile error in some cases. (Thanks to @rkarp)
@@ -140,7 +140,7 @@
 - Added piston backend, now we can render plot on a window and dynamically render the plot
 
 ### Improved
-- Creating drawing area with `&Rc<RefCell<DrawingBackend>>`. Previously, the drawing area creation requires take over the drawing backend's ownership. But sometimes the drawing backend may have additonal options. With new API, this can be done by putting the backend drawing area into smart pointers, thus, the drawing backend is accessible after creates the root drawing area.
+- Creating drawing area with `&Rc<RefCell<DrawingBackend>>`. Previously, the drawing area creation requires take over the drawing backend ownership. But sometimes the drawing backend may have additional options. With new API, this can be done by putting the backend drawing area into smart pointers, thus, the drawing backend is accessible after creates the root drawing area.
 
 ## Plotters 0.1.14 (2019-06-06)
 
@@ -152,7 +152,7 @@
 - evcxr Support
 
 ### Improvement
-- Unify `OwnedText` and `Text` into `Text`. Previously, `OwnedText` and `Text` are two seperate types, one holds a `String` another holds a `&str`. Now `OwnedText` is removed.
+- Unify `OwnedText` and `Text` into `Text`. Previously, `OwnedText` and `Text` are two separate types, one holds a `String` another holds a `&str`. Now `OwnedText` is removed.
 use `Text::new("text".to_string(),...)` for owned text element and `Text::new("text", ...)` for borrowed text.
 - Refactor the color representation code, since previously it's heavily relies on the trait object and hard to use
 - More test cases
@@ -169,9 +169,9 @@ use `Text::new("text".to_string(),...)` for owned text element and `Text::new("t
 - Improved the overall code quality
 - Documentation polish
 - Stabilized APIs
-- New conversion traits impls
+- New conversion traits implementations
 - Now transparent color is ignored by SVG, bitmap and HTML Canvas backend
 
 ### Fix
-- Changed the oepn-close pattern to a `present` function which indicates the end of drawing one frame
+- Changed the open-close pattern to a `present` function which indicates the end of drawing one frame
 - Fix the but that `ChartBuilder::title` and `ChartBuilder::margin` cannot be called at the same time && `build_ranged` now returning a result.
