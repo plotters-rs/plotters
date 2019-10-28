@@ -288,13 +288,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     fn blit_bitmap<'b>(
         &mut self,
         pos: BackendCoord,
-        src: &'b image::ImageBuffer<image::Rgb<u8>, &'b [u8]>,
+        (w, h): (u32, u32),
+        src: &'b [u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         use image::png::PNGEncoder;
         use svg::node::element::Image;
 
         let mut data = vec![0; 0];
-        let (w, h) = src.dimensions();
 
         {
             let cursor = Cursor::new(&mut data);
@@ -303,7 +303,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
             let color = image::ColorType::RGB(8);
 
-            encoder.encode(&(**src)[..], w, h, color).map_err(|e| {
+            encoder.encode(src, w, h, color).map_err(|e| {
                 DrawingErrorKind::DrawingError(Error::new(
                     std::io::ErrorKind::Other,
                     format!("Image error: {}", e),
