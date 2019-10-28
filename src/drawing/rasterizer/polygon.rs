@@ -14,7 +14,7 @@ struct Edge {
 }
 
 impl Edge {
-    fn horizental_sweep(mut from: BackendCoord, mut to: BackendCoord) -> Option<Edge> {
+    fn horizontal_sweep(mut from: BackendCoord, mut to: BackendCoord) -> Option<Edge> {
         if from.0 == to.0 {
             return None;
         }
@@ -32,7 +32,7 @@ impl Edge {
     }
 
     fn vertical_sweep(from: BackendCoord, to: BackendCoord) -> Option<Edge> {
-        Edge::horizental_sweep((from.1, from.0), (to.1, to.0))
+        Edge::horizontal_sweep((from.1, from.0), (to.1, to.0))
     }
 
     fn get_master_pos(&self) -> i32 {
@@ -92,13 +92,13 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                 )
             })
     {
-        // First of all, let's handle the case that all the points is in a same vertica or
-        // horizental line
+        // First of all, let's handle the case that all the points is in a same vertical or
+        // horizontal line
         if x_span.0 == x_span.1 || y_span.0 == y_span.1 {
             return back.draw_line((x_span.0, y_span.0), (x_span.1, y_span.1), style);
         }
 
-        let horizental_sweep = x_span.1 - x_span.0 > y_span.1 - y_span.0;
+        let horizontal_sweep = x_span.1 - x_span.0 > y_span.1 - y_span.0;
 
         let mut edges: Vec<_> = vertices
             .iter()
@@ -107,7 +107,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
             .collect();
         edges.push((vertices[vertices.len() - 1], vertices[0]));
         edges.sort_by_key(|((x1, y1), (x2, y2))| {
-            if horizental_sweep {
+            if horizontal_sweep {
                 *x1.min(x2)
             } else {
                 *y1.min(y2)
@@ -115,7 +115,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
         });
 
         for edge in &mut edges.iter_mut() {
-            if horizental_sweep {
+            if horizontal_sweep {
                 if (edge.0).0 > (edge.1).0 {
                     std::mem::swap(&mut edge.0, &mut edge.1);
                 }
@@ -124,7 +124,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
             }
         }
 
-        let (low, high) = if horizental_sweep { x_span } else { y_span };
+        let (low, high) = if horizontal_sweep { x_span } else { y_span };
 
         let mut idx = 0;
 
@@ -146,7 +146,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                 if idx >= edges.len() {
                     break;
                 }
-                let line = if horizental_sweep {
+                let line = if horizontal_sweep {
                     (edges[idx].0).0
                 } else {
                     (edges[idx].0).1
@@ -155,8 +155,8 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                     break;
                 }
 
-                let edge_obj = if horizental_sweep {
-                    Edge::horizental_sweep(edges[idx].0, edges[idx].1)
+                let edge_obj = if horizontal_sweep {
+                    Edge::horizontal_sweep(edges[idx].0, edges[idx].1)
                 } else {
                     Edge::vertical_sweep(edges[idx].0, edges[idx].1)
                 };
@@ -203,7 +203,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                             continue;
                         }
 
-                        if horizental_sweep {
+                        if horizontal_sweep {
                             check_result!(back.draw_line(
                                 (sweep_line, from.ceil() as i32),
                                 (sweep_line, to.floor() as i32),

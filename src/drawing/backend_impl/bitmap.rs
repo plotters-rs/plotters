@@ -123,7 +123,7 @@ impl<'a> BitMapBackend<'a> {
 
     /// Create a new bitmap backend that generate GIF animation
     ///
-    /// When this is used, the bitmap backend acts similar to a realtime rendering backend.
+    /// When this is used, the bitmap backend acts similar to a real-time rendering backend.
     /// When the program finished drawing one frame, use `present` function to flush the frame
     /// into the GIF file.
     ///
@@ -172,7 +172,7 @@ impl<'a> BitMapBackend<'a> {
     }
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
-    /// multithreading rendering.
+    /// multi-threading rendering.
     pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();

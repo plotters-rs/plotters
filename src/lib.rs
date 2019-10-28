@@ -18,11 +18,11 @@
   <img src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
 </a>
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of backends,
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends,
 including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 
 - A new Plotters Developer's Guide is working in progress. The preview version is available at [here](https://plotters-rs.github.io/book).
-- To try Plotters with inverative Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
+- To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
 
@@ -238,7 +238,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
   * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
   * [What types of figure are supported?](#what-types-of-figure-are-supported)
   * [Concepts by examples](#concepts-by-examples)
-    + [Drawing Backends](#drawing-backends)
+    + [Drawing Back-ends](#drawing-backends)
     + [Drawing Area](#drawing-area)
     + [Elements](#elements)
     + [Composable Elements](#composable-elements)
@@ -343,7 +343,7 @@ Thanks to the evcxr, now we have an interactive tutorial for Plotters!
 To use the interactive notebook, you must have Jupyter and evcxr installed on your computer.
 Follow the instruction on [this page](https://github.com/google/evcxr/tree/master/evcxr_jupyter) below to install it.
 
-After that, you should be able to start your Jupyer server locally and load the tutorial!
+After that, you should be able to start your Jupyter server locally and load the tutorial!
 
 ```bash
 git clone https://github.com/38/plotters-doc-data
@@ -367,7 +367,7 @@ can be very easy to use.
 * **Fast** If you need rendering a figure with trillions of data points,
 Rust is a good choice. Rust's performance allows you to combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be downsampled before feeding into the plotting
+e.g. Javascript or Python, data points must be down-sampled before feeding into the plotting
 program because of the performance considerations. Rust is fast enough to do the data processing and visualization
 within a single program. You can also integrate the
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
@@ -396,8 +396,8 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 
 ## Concepts by examples
 
-### Drawing Backends
-Plotters can use different drawing backends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
+### Drawing Back-ends
+Plotters can use different drawing back-ends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
 
 ```rust
 use plotters::prelude::*;
@@ -573,7 +573,7 @@ plotters = { git = "https://github.com/38/plotters.git" }
 
 ### Reducing Depending Libraries && Turning Off Backends
 Plotters now supports use features to control the backend dependencies. By default, `BitMapBackend` and `SVGBackend` are supported,
-use `default_features = false` in the dependency description in `Cargo.toml` and you can cherrypick the backend implementations.
+use `default_features = false` in the dependency description in `Cargo.toml` and you can cherry-pick the backend implementations.
 
 - `svg` Enable the `SVGBackend`
 - `bitmap` Enable the `BitMapBackend`
@@ -586,22 +586,22 @@ plotters = { git = "https://github.com/38/plotters.git", default_features = fals
 ```
 
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
-This behaviour can also be turned off by setting `default_features = false`.
+This behavior can also be turned off by setting `default_features = false`.
 
 ### List of Features
 
-This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherrypick what features you want to include into `Plotters` crate.
+This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherry-pick what features you want to include into `Plotters` crate.
 
-| Name    |  Description | Addional Dependency |Default?|
+| Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
 | bitmap  | Enable `BitMapBackend` Support| image | Yes |
 | svg     | Enable `SVGBackend` Support | svg | Yes |
 | datetime| Enable Date and Time Coordinate Support| chrono | Yes |
-| gif\_backend| Opt-in GIF animation Redendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
+| gif\_backend| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 | piston | Enable `PistonWindowBackend` | piston\_window | No |
 | palette\_ext | Use crate `palette` for color expression| palette | Yes |
-| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyer Note Book | None | No |
-| make\_partial\_axis | Support for API `make_partial_axis`, which allows confguring partial axis from visible protion. | num-trait| Yes |
+| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
+| make\_partial\_axis | Support for API `make_partial_axis`, which allows configuring partial axis from visible portion. | num-trait| Yes |
 
 ## FAQ List
 

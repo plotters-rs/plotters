@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use super::{AsRangedCoord, DiscreteRanged, Ranged, ReversableRanged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged, ReversibleRanged};
 
 macro_rules! impl_discrete_trait {
     ($name:ident) => {
@@ -54,7 +54,7 @@ macro_rules! make_numeric_coord {
             }
         }
 
-        impl ReversableRanged for $name {
+        impl ReversibleRanged for $name {
             fn unmap(&self, p:i32, (min,max): (i32, i32)) -> Option<$type> {
                 if p < min.min(max) || p > max.max(min) {
                     return None;
@@ -87,7 +87,7 @@ macro_rules! gen_key_points_comp {
             }
 
             // At this point we need to make sure that the loop invariant:
-            // The scale must yield number of points than reqested
+            // The scale must yield number of points than requested
             if 1 + ((range.1 - range.0) / scale).floor() as usize > max_points {
                 scale *= 10.0;
             }
@@ -133,15 +133,14 @@ macro_rules! gen_key_points_comp {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
             let mut scale: $type = 1;
             let range = (range.0.min(range.1), range.0.max(range.1));
-            'outter: while (range.1 - range.0 + scale - 1) as usize / (scale as usize) > max_points
-            {
+            'outer: while (range.1 - range.0 + scale - 1) as usize / (scale as usize) > max_points {
                 let next_scale = scale * 10;
                 for new_scale in [scale * 2, scale * 5, scale * 10].iter() {
                     scale = *new_scale;
                     if (range.1 - range.0 + *new_scale - 1) as usize / (*new_scale as usize)
                         < max_points
                     {
-                        break 'outter;
+                        break 'outer;
                     }
                 }
                 scale = next_scale;

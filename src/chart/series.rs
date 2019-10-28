@@ -42,7 +42,7 @@ impl SeriesLabelPosition {
     }
 }
 
-/// The struct to sepcify the series label of a target chart context
+/// The struct to specify the series label of a target chart context
 pub struct SeriesLabelStyle<'a, 'b, DB: DrawingBackend, CT: CoordTranslate> {
     target: &'b mut ChartContext<'a, DB, CT>,
     position: SeriesLabelPosition,

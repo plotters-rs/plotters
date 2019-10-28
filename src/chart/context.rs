@@ -215,7 +215,7 @@ impl<
             format_x: &|x| format!("{:?}", x),
             format_y: &|y| format!("{:?}", y),
             target: Some(self),
-            _pahtom_data: PhantomData,
+            _phantom_data: PhantomData,
             x_desc: None,
             y_desc: None,
             axis_desc_style: None,
@@ -359,9 +359,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             self.drawing_area.get_y_axis_pixel_range()
         };
 
-        /* At this point, the coordinate system tells us the pxiel range
+        /* At this point, the coordinate system tells us the pixel range
          * after the translation.
-         * However, we need to use the logc coordinate system for drawing. */
+         * However, we need to use the logic coordinate system for drawing. */
         if orientation.0 == 0 {
             axis_range.start -= x0;
             axis_range.end -= x0;
@@ -462,7 +462,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
 
         /* If the label area is on the right hand side, we should enable the right aligned
          * layout, thus in this case we need to estimate the right most position when all
-         * the lables are right aligned */
+         * the labels are right aligned */
         let right_alignment = if orientation.0 > 0 && orientation.1 == 0 {
             self.estimate_right_aligned_label_offset(label_style, labels)
         } else {
@@ -480,7 +480,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 continue;
             }
 
-            /* Then we need to emstimate the text if rendered */
+            /* Then we need to estimate the text if rendered */
             let (w, h) = self
                 .drawing_area
                 .estimate_text_size(&t, &label_style.font)
@@ -498,7 +498,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                     (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32),
                     // Top
                     (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - h as i32),
-                    _ => panic!("Bug: Invlid orientation specification"),
+                    _ => panic!("Bug: Invalid orientation specification"),
                 }
             } else {
                 match orientation {
@@ -512,7 +512,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                     (dx, dy) if dx == 0 && dy > 0 => (*p - x0, th as i32 - label_dist - h as i32),
                     // Top
                     (dx, dy) if dx == 0 && dy < 0 => (*p - x0, label_dist + h as i32),
-                    _ => panic!("Bug: Invlid orientation specification"),
+                    _ => panic!("Bug: Invalid orientation specification"),
                 }
             };
 
@@ -542,7 +542,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                             (dx, dy) if dx == 0 && dy < 0 => {
                                 (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
                             }
-                            _ => panic!("Bug: Invlid orientation specification"),
+                            _ => panic!("Bug: Invalid orientation specification"),
                         }
                     } else {
                         match orientation {
@@ -554,7 +554,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                                 (*p - x0, th as i32, *p - x0, th as i32 + tick_size)
                             }
                             (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
-                            _ => panic!("Bug: Invlid orientation specification"),
+                            _ => panic!("Bug: Invalid orientation specification"),
                         }
                     };
                     let line = Path::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
@@ -582,7 +582,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 (dx, dy) if dx < 0 && dy == 0 => (0, (th - h) / 2),
                 (dx, dy) if dx == 0 && dy > 0 => ((tw - w) / 2, th - h),
                 (dx, dy) if dx == 0 && dy < 0 => ((tw - w) / 2, 0),
-                _ => panic!("Bug: Invlid orientation specification"),
+                _ => panic!("Bug: Invalid orientation specification"),
             };
 
             area.draw_text(&text, &actual_style, (x0 as i32, y0 as i32))?;

@@ -1,5 +1,5 @@
 /*!
-  The candelstick element, which showing the high/low/open/close price
+  The candlestick element, which showing the high/low/open/close price
 */
 
 use std::cmp::Ordering;
@@ -8,7 +8,7 @@ use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::element::{Drawable, PointCollection};
 use crate::style::ShapeStyle;
 
-/// The candelstick data point element
+/// The candlestick data point element
 pub struct CandleStick<X, Y: PartialOrd> {
     style: ShapeStyle,
     width: u32,

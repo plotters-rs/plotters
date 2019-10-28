@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .iter()
                 .map(|(x, _)| ((x * 100.0) as u32, 0.002)),
         );
-    let y_hist = Histogram::horizental(&y_hist_ctx)
+    let y_hist = Histogram::horizontal(&y_hist_ctx)
         .style(GREEN.filled())
         .margin(0)
         .data(

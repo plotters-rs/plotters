@@ -6,7 +6,7 @@
   This module defines some "iterator transformer", which transform the data
   iterator to the element iterator.
 
-  Any type that implements interator emitting drawable elements are acceptable series.
+  Any type that implements iterator emitting drawable elements are acceptable series.
   So iterator combinator such as `map`, `zip`, etc can also be used.
 */
 

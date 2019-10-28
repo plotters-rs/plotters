@@ -5,7 +5,7 @@ use std::iter::{once, Once};
 use std::marker::PhantomData;
 use std::ops::Add;
 
-/// An empty composibable element, which is the start point of an ad-hoc composible element
+/// An empty composable element, which is the start point of an ad-hoc composable element
 pub struct EmptyElement<Coord, DB: DrawingBackend> {
     coord: Coord,
     phantom: PhantomData<DB>,

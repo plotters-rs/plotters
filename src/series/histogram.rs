@@ -11,10 +11,10 @@ use crate::style::{Color, ShapeStyle, GREEN};
 
 pub trait HistogramType {}
 pub struct Vertical;
-pub struct Horizental;
+pub struct Horizontal;
 
 impl HistogramType for Vertical {}
-impl HistogramType for Horizental {}
+impl HistogramType for Horizontal {}
 
 /// The series that aggregate data into a histogram
 pub struct Histogram<BR, A, Tag = Vertical>
@@ -122,13 +122,13 @@ where
     }
 }
 
-impl<BR, A> Histogram<BR, A, Horizental>
+impl<BR, A> Histogram<BR, A, Horizontal>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
-    pub fn horizental<ACoord, DB: DrawingBackend>(
+    pub fn horizontal<ACoord, DB: DrawingBackend>(
         _: &ChartContext<DB, RangedCoord<ACoord, BR>>,
     ) -> Self
     where
@@ -156,7 +156,7 @@ where
     }
 }
 
-impl<BR, A> Iterator for Histogram<BR, A, Horizental>
+impl<BR, A> Iterator for Histogram<BR, A, Horizontal>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,

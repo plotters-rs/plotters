@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 ErrorBar::new_vertical(*x, *yl, *ym, *yh, BLUE.filled(), 20)
             }),
         )?
-        .label("Downsampled")
+        .label("Down-sampled")
         .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     chart

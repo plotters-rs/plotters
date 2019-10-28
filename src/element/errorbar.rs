@@ -76,7 +76,7 @@ impl<K, V> ErrorBar<K, V, ErrorBarOrientV<K, V>> {
 }
 
 impl<K, V> ErrorBar<K, V, ErrorBarOrientH<K, V>> {
-    pub fn new_horizental<S: Into<ShapeStyle>>(
+    pub fn new_horizontal<S: Into<ShapeStyle>>(
         key: K,
         min: V,
         avg: V,

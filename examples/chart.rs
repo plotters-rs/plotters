@@ -61,7 +61,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &|coord, size, style| {
             EmptyElement::at(coord)
                 + Circle::new((0, 0), size, style)
-                + Text::new(format!("{:?}", coord), (0, 15), ("sans-serif", 15).into_font())
+                + Text::new(
+                    format!("{:?}", coord),
+                    (0, 15),
+                    ("sans-serif", 15).into_font(),
+                )
         },
     ))?;
 
@@ -72,7 +76,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(30)
             .y_label_area_size(30)
             .margin_right(20)
-            .caption(format!("y = x^{}", 1 + 2 * idx), ("sans-serif", 40).into_font())
+            .caption(
+                format!("y = x^{}", 1 + 2 * idx),
+                ("sans-serif", 40).into_font(),
+            )
             .build_ranged(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 

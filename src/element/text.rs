@@ -5,7 +5,7 @@ use super::{Drawable, PointCollection};
 use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{FontDesc, FontResult, LayoutBox, TextStyle};
 
-/// A single line text element. This can be owned or borrowed string, dependeneds on
+/// A single line text element. This can be owned or borrowed string, dependents on
 /// `String` or `str` moved into.
 pub struct Text<'a, Coord, T: Borrow<str>> {
     text: T,
@@ -50,7 +50,7 @@ impl<'a, Coord: 'a, DB: DrawingBackend, T: Borrow<str>> Drawable<DB> for Text<'a
     }
 }
 
-/// An multi-line text element. The `Text` element allows only signle line text
+/// An multi-line text element. The `Text` element allows only single line text
 /// and the `MultiLineText` supports drawing multiple lines
 pub struct MultiLineText<'a, Coord, T: Borrow<str>> {
     lines: Vec<T>,
@@ -60,7 +60,7 @@ pub struct MultiLineText<'a, Coord, T: Borrow<str>> {
 }
 
 impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
-    /// Create an emply multi-line text element.
+    /// Create an empty multi-line text element.
     /// Lines can be append to the empty multi-line by calling `push_line` method
     ///
     /// `pos`: The upper left corner
@@ -99,7 +99,7 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
         Ok((mx, my))
     }
 
-    /// Move the location to the sepecified location
+    /// Move the location to the specified location
     pub fn relocate(&mut self, coord: Coord) {
         self.coord = coord
     }

@@ -3,7 +3,10 @@ use plotters::prelude::*;
 
 fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(), B> {
     let mut chart = ChartBuilder::on(root)
-        .caption("Relative Size Example", ("sans-serif", (5).percent_height()))
+        .caption(
+            "Relative Size Example",
+            ("sans-serif", (5).percent_height()),
+        )
         .x_label_area_size((10).percent_height())
         .y_label_area_size((10).percent_width())
         .margin(5)
@@ -31,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root.fill(&WHITE)?;
 
-    let (left, right) = root.split_horizentally((70).percent_width());
+    let (left, right) = root.split_horizontally((70).percent_width());
 
     draw_chart(&left)?;
 

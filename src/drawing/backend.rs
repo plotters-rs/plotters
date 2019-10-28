@@ -1,7 +1,7 @@
 use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle};
 use std::error::Error;
 
-/// A coordiante in the image
+/// A coordinate in the image
 pub type BackendCoord = (i32, i32);
 
 /// The error produced by a drawing backend
@@ -29,7 +29,7 @@ impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
 
 /// The style data for the backend drawing API
 pub trait BackendStyle {
-    /// The underlying type reprsents the color for this style
+    /// The underlying type represents the color for this style
     type ColorType: Color;
 
     /// Convert the style into the underlying color
@@ -58,12 +58,12 @@ impl BackendStyle for ShapeStyle {
     }
 }
 
-///  The drawing backend trait, which implemenets the low-level drawing APIs.
+///  The drawing backend trait, which implements the low-level drawing APIs.
 ///  This trait has a set of default implementation. And the minimal requirement of
 ///  implementing a drawing backend is implementing the `draw_pixel` function.
 ///
 ///  If the drawing backend supports vector graphics, the other drawing APIs should be
-///  overrided by the backend specific implementation. Otherwise, the default implementation
+///  override by the backend specific implementation. Otherwise, the default implementation
 ///  will use the pixel-based approach to draw other types of low-level shapes.
 pub trait DrawingBackend: Sized {
     /// The error type reported by the backend
@@ -75,7 +75,7 @@ pub trait DrawingBackend: Sized {
     /// Ensure the backend is ready to draw
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
-    /// Finialize the drawing step and present all the changes.
+    /// Finalize the drawing step and present all the changes.
     /// This is used as the real-time rendering support.
     /// The backend may implement in the following way, when `ensure_prepared` is called
     /// it checks if it needs a fresh buffer and `present` is called rendering all the
