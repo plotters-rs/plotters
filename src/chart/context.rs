@@ -17,7 +17,7 @@ use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 /// When a series is drawn onto a drawing area, an series annotation object
-/// is created and a mutable reference is returned. 
+/// is created and a mutable reference is returned.
 #[allow(clippy::type_complexity)]
 pub struct SeriesAnno<'a, DB: DrawingBackend> {
     label: Option<String>,
@@ -566,8 +566,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 
-    /// Convert this chart context into a dual axis chart context 
-    /// 
+    /// Convert this chart context into a dual axis chart context
+    ///
     /// - `x_coord`: The coordinate spec for the X axis
     /// - `y_coord`: The coordinate spec for the Y axis
     /// - **returns** The newly created dual spec chart context

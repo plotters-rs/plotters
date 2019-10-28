@@ -182,7 +182,7 @@ where
 
     /// Set the tick mark size on the axes. When this is set to negative, the axis value label will
     /// become inward.
-    /// 
+    ///
     /// - `pos`: The which label area we want to set
     /// - `value`: The size specification
     pub fn set_tick_mark_size<S: SizeDesc>(

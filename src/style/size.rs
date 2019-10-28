@@ -2,8 +2,8 @@ use crate::coord::CoordTranslate;
 use crate::drawing::DrawingArea;
 use crate::drawing::DrawingBackend;
 
-/// The trait indicates that the type has a dimensional data. 
-/// This is the abstraction for the relative sizing model. 
+/// The trait indicates that the type has a dimensional data.
+/// This is the abstraction for the relative sizing model.
 /// A relative sizing value is able to be converted into a concrete size
 /// when coupling with a type with `HasDimension` type.
 pub trait HasDimension {
@@ -33,9 +33,9 @@ impl HasDimension for (u32, u32) {
 /// size is determined by the parent size, e.g., 10% of the parent width
 pub trait SizeDesc {
     /// Convert the size into the number of pixels
-    /// 
+    ///
     /// - `parent`: The reference to the parent container of this size
-    /// - **returns**: The number of pixels 
+    /// - **returns**: The number of pixels
     fn in_pixels<T: HasDimension>(&self, parent: &T) -> i32;
 }
 
@@ -51,12 +51,12 @@ impl SizeDesc for u32 {
     }
 }
 
-/// Describes a relative size, might be 
+/// Describes a relative size, might be
 ///     1. portion of height
 ///     2. portion of width
 ///     3. portion of the minimal of height and weight
 pub enum RelativeSize {
-    /// Percentage height 
+    /// Percentage height
     Height(f64),
     /// Percentage width
     Width(f64),
@@ -66,7 +66,7 @@ pub enum RelativeSize {
 
 impl RelativeSize {
     /// Set the lower bound of the relative size.
-    /// 
+    ///
     /// - `min_sz`: The minimal size the relative size can be in pixels
     /// - **returns**: The relative size with the bound
     pub fn min(self, min_sz: i32) -> RelativeSizeWithBound {
@@ -78,7 +78,7 @@ impl RelativeSize {
     }
 
     /// Set the upper bound of the relative size
-    /// 
+    ///
     /// - `max_size`: The maximum size in pixels for this relative size
     /// - **returns** The relative size with the upper bound
     pub fn max(self, max_sz: i32) -> RelativeSizeWithBound {
@@ -129,7 +129,7 @@ pub struct RelativeSizeWithBound {
 
 impl RelativeSizeWithBound {
     /// Set the lower bound of the bounded relative size
-    /// 
+    ///
     /// - `min_sz`: The lower bound of this size description
     /// - **returns**: The newly created size description with the bound
     pub fn min(mut self, min_sz: i32) -> RelativeSizeWithBound {
@@ -138,7 +138,7 @@ impl RelativeSizeWithBound {
     }
 
     /// Set the upper bound of the bounded relative size
-    /// 
+    ///
     /// - `min_sz`: The upper bound of this size description
     /// - **returns**: The newly created size description with the bound
     pub fn max(mut self, max_sz: i32) -> RelativeSizeWithBound {

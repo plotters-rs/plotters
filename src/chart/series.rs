@@ -76,8 +76,8 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
     }
 
     /// Set the margin of the series label drawing are
-    /// 
-    /// - `value`: The size specification 
+    ///
+    /// - `value`: The size specification
     pub fn margin<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.margin = value
             .in_pixels(&self.target.plotting_area().dim_in_pixel())

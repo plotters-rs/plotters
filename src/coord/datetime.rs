@@ -149,8 +149,8 @@ impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
 }
 
 /// Indicates the coord has a monthly resolution
-/// 
-/// Note: since month doesn't have a constant duration. 
+///
+/// Note: since month doesn't have a constant duration.
 /// We can't use a simple granularity to describe it. Thus we have
 /// this axis decorator to make it yield monthly key-points.
 pub struct Monthly<T: TimeValue>(Range<T>);
@@ -286,7 +286,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
     }
 }
 
-/// Indicate the coord has a yearly granularity. 
+/// Indicate the coord has a yearly granularity.
 pub struct Yearly<T: TimeValue>(Range<T>);
 
 impl<T: TimeValue + Clone> AsRangedCoord for Yearly<T> {

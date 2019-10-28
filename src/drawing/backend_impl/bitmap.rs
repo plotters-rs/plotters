@@ -306,17 +306,27 @@ impl<'a> BitMapBackend<'a> {
             } else {
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
-                    let start_ptr = &mut dst[start * 3] as *mut u8 as *mut (u8, u8, u8, u8, u8, u8);
+                    let start_ptr = &mut dst[start * 3] as *mut u8 as *mut [u8; 24];
                     let slice =
-                        unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
+                        unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 8) };
                     for p in slice.iter_mut() {
+                        // In this case, we can actually fill 8 pixels in one iteration with
+                        // only 3 movq instructions.
+                        // TODO: Consider using AVX instructions when possible
+                        let ptr = p as *mut [u8; 24] as *mut u64;
                         unsafe {
-                            let ptr = p as *mut (u8, u8, u8, u8, u8, u8) as *mut u64;
-                            *ptr = std::mem::transmute([r, g, b, r, g, b, 0, 0]);
+                            let (d1, d2, d3): (u64, u64, u64) = std::mem::transmute([
+                                r, g, b, r, g, b, r, g, // QW1
+                                b, r, g, b, r, g, b, r, // QW2
+                                g, b, r, g, b, r, g, b, // QW3
+                            ]);
+                            *ptr = d1;
+                            *ptr.offset(1) = d2;
+                            *ptr.offset(2) = d3;
                         }
                     }
 
-                    for idx in (slice.len() * 2)..count {
+                    for idx in (slice.len() * 8)..count {
                         dst[start * 3 + idx * 3] = r;
                         dst[start * 3 + idx * 3 + 1] = g;
                         dst[start * 3 + idx * 3 + 2] = b;

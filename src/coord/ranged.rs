@@ -244,7 +244,7 @@ where
     type Value = <Self as Ranged>::ValueType;
 }
 
-/// This axis decorator will make the axis partially display on the axis. 
+/// This axis decorator will make the axis partially display on the axis.
 /// At some time, we want the axis only covers some part of the value.
 /// This decorator will have an additional display range defined.
 pub struct PartialAxis<R: Ranged>(R, Range<R::ValueType>);
@@ -252,7 +252,7 @@ pub struct PartialAxis<R: Ranged>(R, Range<R::ValueType>);
 /// The trait for the types that can be converted into a partial axis
 pub trait IntoPartialAxis: AsRangedCoord {
     /// Make the partial axis
-    /// 
+    ///
     /// - `axis_range`: The range of the axis to be displayed
     /// - **returns**: The converted range specification
     fn partial_axis(
@@ -313,10 +313,10 @@ where
     type Value = <Self as Ranged>::ValueType;
 }
 
-/// Make a partial axis based on the percentage of visible portion. 
-/// We can use `into_partial_axis` to create a partial axis range specification. 
-/// But sometimes, we want to directly specify the percentage visible to the user. 
-/// 
+/// Make a partial axis based on the percentage of visible portion.
+/// We can use `into_partial_axis` to create a partial axis range specification.
+/// But sometimes, we want to directly specify the percentage visible to the user.
+///
 /// - `axis_range`: The range specification
 /// - `part`: The visible part of the axis. Each value is from [0.0, 1.0]
 /// - **returns**: The partial axis created from the input, or `None` when not possible

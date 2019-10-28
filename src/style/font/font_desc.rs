@@ -25,7 +25,7 @@ pub enum FontTransform {
 impl FontTransform {
     /// Compute the offset of the "top-left" corner of the text.
     /// "Top-left" defined as the first char's top-left in reading orientation.
-    /// 
+    ///
     /// - `layout`: The bouncing box of the text
     /// - **returns**: The offset in pixels
     pub fn offset(&self, layout: LayoutBox) -> (i32, i32) {
@@ -38,7 +38,7 @@ impl FontTransform {
     }
 
     /// Transform the coordinate to perform the rotation
-    /// 
+    ///
     /// - `x`: The x coordinate in pixels before transform
     /// - `y`: The y coordinate in pixels before transform
     /// - **returns**: The coordinate after transform
@@ -62,7 +62,7 @@ pub struct FontDesc<'a> {
     style: FontStyle,
 }
 
-/// Describes font family. 
+/// Describes font family.
 /// This can be either a specific font family name, such as "arial",
 /// or a general font family class, such as "serif" and "sans-serif"
 #[derive(Clone, Copy)]
@@ -188,10 +188,10 @@ impl<'a, T: Into<FontDesc<'a>>> IntoFont<'a> for T {
 
 impl<'a> FontDesc<'a> {
     /// Create a new font
-    /// 
+    ///
     /// - `family`: The font family name
     /// - `size`: The size of the font
-    /// - `style`: The font variations 
+    /// - `style`: The font variations
     /// - **returns** The newly created font description
     pub fn new(family: FontFamily<'a>, size: f64, style: FontStyle) -> Self {
         Self {
@@ -204,7 +204,7 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Create a new font desc with the same font but different size
-    /// 
+    ///
     /// - `size`: The new size to set
     /// - **returns** The newly created font descriptor with a new size
     pub fn resize(&self, size: f64) -> FontDesc<'a> {
@@ -218,8 +218,8 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Set the style of the font
-    /// 
-    /// - `style`: The new style 
+    ///
+    /// - `style`: The new style
     /// - **returns** The new font description with this style applied
     pub fn style(&self, style: FontStyle) -> Self {
         Self {
@@ -232,7 +232,7 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Set the font transformation
-    /// 
+    ///
     /// - `trans`: The new transformation
     /// - **returns** The new font description with this font transformation applied
     pub fn transform(&self, trans: FontTransform) -> Self {
@@ -274,7 +274,7 @@ impl<'a> FontDesc<'a> {
     }
 
     /// Get the size of the text if rendered in this font
-    /// 
+    ///
     /// For a TTF type, zero point of the layout box is the left most baseline char of the string
     /// Thus the upper bound of the box is most likely be negative
     pub fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {

@@ -318,11 +318,11 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.coord.translate(coord)
     }
 
-    /// Estimate the dimension of the text if drawn on this drawing area. 
+    /// Estimate the dimension of the text if drawn on this drawing area.
     /// We can't get this directly from the font, since the drawing backend may or may not
     /// follows the font configuration. In terminal, the font family will be dropped.
     /// So the size of the text is drawing area related.
-    /// 
+    ///
     /// - `text`: The text we want to estimate
     /// - `font`: The font spec in which we want to draw the text
     /// - **return**: The size of the text if drawn on this area
