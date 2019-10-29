@@ -1,7 +1,6 @@
 import { Chart, drawPower } from "wasm-demo";
 
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
 const coord = document.getElementById("coord");
 const plotType = document.getElementById("plot-type");
 const status = document.getElementById("status");
@@ -14,7 +13,7 @@ function main() {
     setupCanvas();
 }
 
-/** Add event listeners */
+/** Add event listeners. */
 function setupUI() {
     status.innerText = "WebAssembly loaded!";
     plotType.addEventListener("change", updatePlot);
@@ -31,13 +30,13 @@ function setupCanvas() {
     canvas.style.height = size / aspectRatio + "px";
     canvas.width = size * dpr;
     canvas.height = size / aspectRatio * dpr;
-    ctx.scale(dpr, dpr);
+    canvas.getContext("2d").scale(dpr, dpr);
     updatePlot();
 }
 
-/** Update displayed coordinates */
+/** Update displayed coordinates. */
 function onMouseMove(event) {
-	if (chart) {
+    if (chart) {
         const point = chart.coord(event.offsetX, event.offsetY);
         coord.innerText = (point)
             ? `(${point.x.toFixed(3)}, ${point.y.toFixed(3)})`
@@ -45,15 +44,15 @@ function onMouseMove(event) {
     }
 }
 
-/** Redraw currently selected plot */
+/** Redraw currently selected plot. */
 function updatePlot() {
     const selected = plotType.selectedOptions[0];
-	status.innerText = `Rendering ${selected.innerText}...`;
-	chart = undefined;
-	const start = performance.now();
+    status.innerText = `Rendering ${selected.innerText}...`;
+    chart = undefined;
+    const start = performance.now();
     chart = (selected.value == "mandelbrot")
         ? Chart.mandelbrot(canvas)
         : Chart.power("canvas", Number(selected.value));
-	const end = performance.now();
-	status.innerText = `Rendered ${selected.innerText} in ${Math.ceil(end - start)}ms`;
+    const end = performance.now();
+    status.innerText = `Rendered ${selected.innerText} in ${Math.ceil(end - start)}ms`;
 }
