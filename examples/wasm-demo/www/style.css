@@ -1,38 +1,50 @@
-.centered {
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    width: max-content;
+html, body, main {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-#coord {
+body {
+    margin: auto;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 800px) {
+    body {
+        padding: 10px;
+        box-sizing: border-box;
+    }
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#coord, #status {
     color: grey;
     font-size: 10px;
     height: 15px
 }
 
-#status {
-    color: grey;
-    font-size: 10px
-}
-
 #control {
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 400px
+    margin-top: 1em;
 }
 
 #control label {
     font-weight: bold;
+    margin-right: 1em;
 }
 
-#pow {
-    width: 300px;
-    float: right;
+#control select {
+    padding: 0.25em 0.5em;
 }
 
-#links {
-    margin-top: 50px;
+footer {
+    margin-top: 2em;
     font-size: 12px;
+    text-align: center;
 }
