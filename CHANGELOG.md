@@ -11,6 +11,7 @@
 - Font description is greatly improved, general font family is supported: `serif`, `serif-sans`, `monospace` (Thanks to @Tatrix)
 - Tested the font loading on Linux, OSX and Windowns. Make font loading more reliable.
 - `BitMapBackend` isn't depdends on `image` crate now. Only the image encoding part relies on the `image` crate
+- Refactored WASM demo use ES6 and `wasm-pack` (Thanks to @Tatrix)
 
 ## Plotters 0.2.10 (2019-10-23)
 

@@ -1,36 +1,33 @@
 {
-  "name": "create-wasm-app",
+  "name": "plotters-wasm-demo",
   "version": "0.1.0",
-  "description": "create an app to consume rust-generated wasm packages",
+  "description": "Plotters WASM Demo",
   "main": "index.js",
-  "bin": {
-    "create-wasm-app": ".bin/create-wasm-app.js"
-  },
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "start": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rustwasm/create-wasm-app.git"
+    "url": "git+https://github.com/38/plotters.git"
   },
   "keywords": [
     "webassembly",
     "wasm",
     "rust",
-    "webpack"
+    "webpack",
+	"visualization"
   ],
-  "author": "Ashley Williams <ashley666ashley@gmail.com>",
-  "license": "(MIT OR Apache-2.0)",
+  "author": "Plotters Developers",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rustwasm/create-wasm-app/issues"
+    "url": "https://github.com/38/plotters/issues"
   },
-  "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
+  "homepage": "https://github.com/38/plotters",
   "dependencies": {
     "wasm-demo": "file:../pkg"
   },
   "devDependencies": {
-    "hello-wasm-pack": "^0.1.0",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5",
