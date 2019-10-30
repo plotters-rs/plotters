@@ -1,16 +1,23 @@
-import { Chart, drawPower } from "wasm-demo";
+// If you only use `npm` you can simply
+// import { Chart } from "wasm-demo" and remove `setup` call from `bootstrap.js`.
+class Chart {}
 
 const canvas = document.getElementById("canvas");
 const coord = document.getElementById("coord");
 const plotType = document.getElementById("plot-type");
 const status = document.getElementById("status");
-let chart = undefined;
 
-main();
+let chart = null;
 
-function main() {
+/** Main entry point */
+export function main() {
     setupUI();
     setupCanvas();
+}
+
+/** This function is used in `bootstrap.js` to setup imports. */
+export function setup(WasmChart) {
+    Chart = WasmChart;
 }
 
 /** Add event listeners. */
@@ -48,7 +55,7 @@ function onMouseMove(event) {
 function updatePlot() {
     const selected = plotType.selectedOptions[0];
     status.innerText = `Rendering ${selected.innerText}...`;
-    chart = undefined;
+    chart = null;
     const start = performance.now();
     chart = (selected.value == "mandelbrot")
         ? Chart.mandelbrot(canvas)
