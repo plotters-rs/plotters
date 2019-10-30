@@ -48,7 +48,12 @@ impl<'a, Coord> BitMapElement<'a, Coord> {
 
     /// Make the bitmap element as a bitmap backend, so that we can use
     /// plotters drawing functionality on the bitmap element
-    pub fn as_bitmap_backend<P: image::Pixel<Subpixel=u8>>(&mut self) -> BitMapBackend<P> {
+    pub fn as_bitmap_backend<
+        #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+        P: 'static + image::Pixel<Subpixel=u8>,
+        #[cfg(target_arch = "wasm32")]
+        P: 'static
+    >(&mut self) -> BitMapBackend<P> {
         BitMapBackend::<P>::with_buffer(self.image.to_mut(), self.size)
     }
 }

@@ -111,7 +111,13 @@ impl<'a> Buffer<'a> {
 }
 
 /// The backend that drawing a bitmap
-pub struct BitMapBackend<'a, P: 'static + Pixel<Subpixel=u8>> {
+pub struct BitMapBackend<
+    'a,
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    P: 'static + Pixel<Subpixel=u8>,
+    #[cfg(target_arch = "wasm32")]
+    P: 'static
+> {
     _pix: PhantomData<P>,
     /// The path to the image
     #[allow(dead_code)]
@@ -124,7 +130,13 @@ pub struct BitMapBackend<'a, P: 'static + Pixel<Subpixel=u8>> {
     saved: bool,
 }
 
-impl<'a, P: 'static + Pixel<Subpixel=u8>> BitMapBackend<'a, P> {
+impl<
+    'a,
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    P: 'static + Pixel<Subpixel=u8>,
+    #[cfg(target_arch = "wasm32")]
+    P: 'static
+> BitMapBackend<'a, P> {
     /// Create a new bitmap backend
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
@@ -165,6 +177,16 @@ impl<'a, P: 'static + Pixel<Subpixel=u8>> BitMapBackend<'a, P> {
         })
     }
 
+    #[cfg(target_arch = "wasm32")]
+    fn get_channel() -> u32 {
+        3
+    }
+
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    fn get_channel() -> u32 {
+        P::CHANNEL_COUNT as u32
+    }
+
     /// Create a new bitmap backend which only lives in-memory
     ///
     /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
@@ -173,7 +195,8 @@ impl<'a, P: 'static + Pixel<Subpixel=u8>> BitMapBackend<'a, P> {
     /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
-        if (w * h * P::CHANNEL_COUNT as u32) as usize > buf.len() {
+        let c = BitMapBackend::<P>::get_channel();
+        if (w * h * c) as usize > buf.len() {
             // TODO: This doesn't deserve a panic.
             panic!(
                 "Wrong image size: H = {}, W = {}, BufSize = {}",
@@ -362,7 +385,13 @@ impl<'a, P: 'static + Pixel<Subpixel=u8>> BitMapBackend<'a, P> {
     }
 }
 
-impl<'a, P: 'static + Pixel<Subpixel=u8>> DrawingBackend for BitMapBackend<'a, P> {
+impl<
+    'a,
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    P: 'static + Pixel<Subpixel=u8>,
+    #[cfg(target_arch = "wasm32")]
+    P: 'static
+> DrawingBackend for BitMapBackend<'a, P> {
     type ErrorType = BitMapBackendError;
 
     fn get_size(&self) -> (u32, u32) {
@@ -556,7 +585,12 @@ impl<'a, P: 'static + Pixel<Subpixel=u8>> DrawingBackend for BitMapBackend<'a, P
     }
 }
 
-impl<P: 'static + Pixel<Subpixel=u8>> Drop for BitMapBackend<'_, P> {
+impl<
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    P: 'static + Pixel<Subpixel=u8>,
+    #[cfg(target_arch = "wasm32")]
+    P: 'static
+> Drop for BitMapBackend<'_, P> {
     fn drop(&mut self) {
         if !self.saved {
             self.present().expect("Unable to save the bitmap");
