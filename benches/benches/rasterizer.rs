@@ -9,7 +9,7 @@ fn draw_pixel(c: &mut Criterion) {
 
     c.bench_function("rasterizer::draw_pixel", |b| {
         b.iter(|| {
-            let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            let mut root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H));
             for x in 0..W / 10 {
                 for y in 0..H / 10 {
                     root.draw_pixel((x as i32, y as i32), &RGBColor(255, 0, 234).to_rgba())
@@ -25,7 +25,7 @@ fn draw_line(c: &mut Criterion) {
 
     c.bench_function("rasterizer::draw_line", |b| {
         b.iter(|| {
-            let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            let mut root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H));
             for y in 0..10 {
                 root.draw_line(
                     (0, 0),
@@ -43,7 +43,7 @@ fn fill_background(c: &mut Criterion) {
 
     c.bench_function("rasterizer::fill_background", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.fill(&WHITE).unwrap();
         })
     });
@@ -54,7 +54,7 @@ fn fill_circle(c: &mut Criterion) {
 
     c.bench_function("rasterizer::fill_circle", |b| {
         b.iter(|| {
-            let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            let mut root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H));
             root.draw_circle((W as i32 / 2, H as i32 / 2), W / 2, &WHITE.to_rgba(), true)
                 .unwrap();
         })
@@ -66,7 +66,7 @@ fn fill_background_red(c: &mut Criterion) {
 
     c.bench_function("rasterizer::fill_background_red", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.fill(&RED).unwrap();
         })
     });
@@ -87,7 +87,7 @@ fn fill_hexagon(c: &mut Criterion) {
 
     c.bench_function("rasterizer::fill_hexagon", |b| {
         b.iter(|| {
-            let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            let mut root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H));
             root.fill_polygon(vert.clone(), &RED).unwrap();
         })
     });

@@ -4,9 +4,9 @@ use std::marker::PhantomData;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 mod image_encoding_support {
-    pub(super) use image::{ImageBuffer, ImageError, Rgb};
+    pub(super) use image::{ImageBuffer, ImageError, Pixel};
     pub(super) use std::path::Path;
-    pub(super) type BorrowedImage<'a> = ImageBuffer<Rgb<u8>, &'a mut [u8]>;
+    pub(super) type BorrowedImage<'a, P> = ImageBuffer<P, &'a mut [u8]>;
 }
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
@@ -111,7 +111,8 @@ impl<'a> Buffer<'a> {
 }
 
 /// The backend that drawing a bitmap
-pub struct BitMapBackend<'a> {
+pub struct BitMapBackend<'a, P: 'static + Pixel<Subpixel=u8>> {
+    _pix: PhantomData<P>,
     /// The path to the image
     #[allow(dead_code)]
     target: Target<'a>,
@@ -123,11 +124,12 @@ pub struct BitMapBackend<'a> {
     saved: bool,
 }
 
-impl<'a> BitMapBackend<'a> {
+impl<'a, P: 'static + Pixel<Subpixel=u8>> BitMapBackend<'a, P> {
     /// Create a new bitmap backend
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
         Self {
+            _pix: PhantomData,
             target: Target::File(path.as_ref()),
             size: (w, h),
             buffer: Buffer::Owned(vec![0; (3 * w * h) as usize]),
@@ -151,6 +153,7 @@ impl<'a> BitMapBackend<'a> {
         frame_delay: u32,
     ) -> Result<Self, BitMapBackendError> {
         Ok(Self {
+            _pix: PhantomData,
             target: Target::Gif(Box::new(gif_support::GifFile::new(
                 path,
                 (w, h),
@@ -170,7 +173,7 @@ impl<'a> BitMapBackend<'a> {
     /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
-        if (w * h * 3) as usize > buf.len() {
+        if (w * h * P::CHANNEL_COUNT as u32) as usize > buf.len() {
             // TODO: This doesn't deserve a panic.
             panic!(
                 "Wrong image size: H = {}, W = {}, BufSize = {}",
@@ -181,6 +184,7 @@ impl<'a> BitMapBackend<'a> {
         }
 
         Self {
+            _pix: PhantomData,
             target: Target::Buffer(PhantomData),
             size: (w, h),
             buffer: Buffer::Borrowed(buf),
@@ -194,7 +198,7 @@ impl<'a> BitMapBackend<'a> {
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
     /// multi-threading rendering.
-    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
+    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<P>> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();
 
@@ -358,7 +362,7 @@ impl<'a> BitMapBackend<'a> {
     }
 }
 
-impl<'a> DrawingBackend for BitMapBackend<'a> {
+impl<'a, P: 'static + Pixel<Subpixel=u8>> DrawingBackend for BitMapBackend<'a, P> {
     type ErrorType = BitMapBackendError;
 
     fn get_size(&self) -> (u32, u32) {
@@ -380,7 +384,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let (w, h) = self.get_size();
         match &mut self.target {
             Target::File(path) => {
-                if let Some(img) = BorrowedImage::from_raw(w, h, self.buffer.borrow_buffer()) {
+                if let Some(img) = BorrowedImage::<P>::from_raw(w, h, self.buffer.borrow_buffer()) {
                     img.save(&path).map_err(|x| {
                         DrawingErrorKind::DrawingError(BitMapBackendError::IOError(x))
                     })?;
@@ -552,7 +556,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 }
 
-impl Drop for BitMapBackend<'_> {
+impl<P: 'static + Pixel<Subpixel=u8>> Drop for BitMapBackend<'_, P> {
     fn drop(&mut self) {
         if !self.saved {
             self.present().expect("Unable to save the bitmap");
@@ -567,7 +571,7 @@ fn test_bitmap_backend() {
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
-        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+        let back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (10, 10));
 
         let area = back.into_drawing_area();
         area.fill(&WHITE).unwrap();
@@ -595,7 +599,7 @@ fn test_bitmap_backend_fill_half() {
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
-        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+        let back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (10, 10));
 
         let area = back.into_drawing_area();
         area.draw(&Rectangle::new([(0, 0), (5, 10)], RED.filled()))
@@ -616,7 +620,7 @@ fn test_bitmap_backend_fill_half() {
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
-        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+        let back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (10, 10));
 
         let area = back.into_drawing_area();
         area.draw(&Rectangle::new([(0, 0), (10, 5)], RED.filled()))
@@ -642,7 +646,7 @@ fn test_bitmap_backend_blend() {
     let mut buffer = vec![255; 10 * 10 * 3];
 
     {
-        let back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+        let back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (10, 10));
 
         let area = back.into_drawing_area();
         area.draw(&Rectangle::new(
@@ -674,7 +678,7 @@ fn test_bitmap_backend_split_and_fill() {
     let mut buffer = vec![255; 10 * 10 * 3];
 
     {
-        let mut back = BitMapBackend::with_buffer(&mut buffer, (10, 10));
+        let mut back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (10, 10));
 
         for (sub_backend, color) in back.split(&[5]).into_iter().zip([&RED, &GREEN].iter()) {
             sub_backend.into_drawing_area().fill(*color).unwrap();
@@ -698,7 +702,7 @@ fn test_draw_rect_out_of_range() {
     let mut buffer = vec![0; 1099 * 1000 * 3];
 
     {
-        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+        let mut back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (1000, 1000));
 
         back.draw_line((1100, 0), (1100, 999), &RED.to_rgba())
             .unwrap();
@@ -724,7 +728,7 @@ fn test_draw_line_out_of_range() {
     let mut buffer = vec![0; 1000 * 1000 * 3];
 
     {
-        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+        let mut back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (1000, 1000));
 
         back.draw_line((-1000, -1000), (2000, 2000), &WHITE.to_rgba())
             .unwrap();

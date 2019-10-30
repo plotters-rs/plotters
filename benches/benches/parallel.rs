@@ -37,7 +37,7 @@ fn draw_func_1x1_seq(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_1x1_seq", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.fill(&WHITE).unwrap();
             draw_plot(&root, 2.0);
         })
@@ -48,7 +48,7 @@ fn draw_func_4x4_seq(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_4x4_seq", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
             areas.iter().for_each(|area| draw_plot(&area, 2.0));
         })
@@ -59,7 +59,7 @@ fn draw_func_4x4_parallel_and_blit(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_4x4_parallel_and_blit", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
             let mut elements: Vec<_> = areas
                 .iter()
@@ -83,7 +83,7 @@ fn draw_func_2x1_parallel_and_blit(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_2x1_parallel_and_blit", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((2, 1));
             let mut elements: Vec<_> = areas
                 .iter()
@@ -107,7 +107,7 @@ fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
     let mut buffer = vec![0u8; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_2x1_inplace", |b| {
         b.iter(|| {
-            let mut back = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            let mut back = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H));
             back.split(&[H / 2])
                 .into_par_iter()
                 .for_each(|b| draw_plot(&b.into_drawing_area(), 2.0));
@@ -119,7 +119,7 @@ fn draw_func_2x1_seq(c: &mut Criterion) {
     let mut buffer = vec![0u8; (W * H * 3) as usize];
     c.bench_function("parallel::draw_func_2x1_seq", |b| {
         b.iter(|| {
-            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            let root = BitMapBackend::<image::Rgb<u8>>::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.split_evenly((2, 1))
                 .iter_mut()
                 .for_each(|area| draw_plot(area, 2.0));
