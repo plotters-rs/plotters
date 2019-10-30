@@ -1,7 +1,7 @@
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
 
     root.fill(&RGBColor(240, 200, 200))?;
 

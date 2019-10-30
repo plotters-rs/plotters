@@ -7,7 +7,7 @@ use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let root =
-        BitMapBackend::new("plotters-doc-data/slc-temp.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/slc-temp.png", (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 

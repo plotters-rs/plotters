@@ -3,7 +3,7 @@ use plotters::prelude::*;
 
 pub fn sierpinski_carpet(
     depth: u32,
-    drawing_area: &DrawingArea<BitMapBackend, Shift>,
+    drawing_area: &DrawingArea<BitMapBackend<image::Rgb<u8>>, Shift>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     if depth > 0 {
         let sub_areas = drawing_area.split_evenly((3, 3));
@@ -21,7 +21,7 @@ pub fn sierpinski_carpet(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
-        BitMapBackend::new("plotters-doc-data/sierpinski.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/sierpinski.png", (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 

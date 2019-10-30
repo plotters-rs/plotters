@@ -19,7 +19,7 @@ fn snowflake_iter(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
-        BitMapBackend::new("plotters-doc-data/snowflake.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/snowflake.png", (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 

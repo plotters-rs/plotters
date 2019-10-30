@@ -30,7 +30,7 @@ fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(),
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
-        BitMapBackend::new("plotters-doc-data/relative_size.png", (1024, 768)).into_drawing_area();
+        BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/relative_size.png", (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 

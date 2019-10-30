@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context

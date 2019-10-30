@@ -51,7 +51,7 @@
     }
 
     fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let root = BitMapBackend::new(
+        let root = BitMapBackend::<image::Rgb<u8>>::new(
             "plotters-doc-data/element-0.png",
             (640, 480)
         ).into_drawing_area();
@@ -72,7 +72,7 @@
     ```rust
     use plotters::prelude::*;
     fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let root = BitMapBackend::new(
+        let root = BitMapBackend::<image::Rgb<u8>>::new(
             "plotters-doc-data/element-1.png",
             (640, 480)
         ).into_drawing_area();
@@ -120,7 +120,7 @@
     }
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root =
-            BitMapBackend::new("plotters-doc-data/element-3.png", (640, 480))
+            BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/element-3.png", (640, 480))
             .into_drawing_area();
         root.fill(&WHITE)?;
         let mut chart = ChartBuilder::on(&root)

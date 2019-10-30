@@ -16,8 +16,8 @@
   <img src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
 </a>
 
-Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends, 
-including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 
+Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends,
+including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 
 - A new Plotters Developer's Guide is working in progress. The preview version is available at [here](https://plotters-rs.github.io/book).
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
@@ -147,7 +147,7 @@ And the following code draws a quadratic function. `src/main.rs`,
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("sans-serif", 50).into_font())
@@ -225,7 +225,7 @@ figure
 *This tutorial is now working in progress and isn't complete*
 
 Thanks to the evcxr, now we have an interactive tutorial for Plotters!
-To use the interactive notebook, you must have Jupyter and evcxr installed on your computer. 
+To use the interactive notebook, you must have Jupyter and evcxr installed on your computer.
 Follow the instruction on [this page](https://github.com/google/evcxr/tree/master/evcxr_jupyter) below to install it.
 
 After that, you should be able to start your Jupyter server locally and load the tutorial!
@@ -249,23 +249,23 @@ But Rust is one of the best languages fits the need.
 Plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
 can be very easy to use.
 
-* **Fast** If you need rendering a figure with trillions of data points, 
-Rust is a good choice. Rust's performance allows you to combine data processing step 
+* **Fast** If you need rendering a figure with trillions of data points,
+Rust is a good choice. Rust's performance allows you to combine data processing step
 and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be down-sampled before feeding into the plotting 
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization 
-within a single program. You can also integrate the 
+e.g. Javascript or Python, data points must be down-sampled before feeding into the plotting
+program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+within a single program. You can also integrate the
 figure rendering code into your application handling a huge amount of data and visualize it in real-time.
 
-* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be 
+* **WebAssembly Support** Rust is one of few the language with the best WASM support. Plotting in Rust could be
 very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## Plotting on HTML5 canvas with WASM Backend
 
-Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
+Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
+There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo.
 To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
 
 
@@ -288,7 +288,7 @@ Plotters can use different drawing back-ends, including SVG, BitMap, and even re
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a 800*600 bitmap and start drawing
-    let mut backend = BitMapBackend::new("plotters-doc-data/1.png", (300, 200));
+    let mut backend = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/1.png", (300, 200));
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50, 50), (200, 150), &RED, true)?;
@@ -309,7 +309,7 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_drawing_area =
-        BitMapBackend::new("plotters-doc-data/2.png", (300, 200)).into_drawing_area();
+        BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/2.png", (300, 200)).into_drawing_area();
     // And we can split the drawing area into 3x3 grid
     let child_drawing_areas = root_drawing_area.split_evenly((3, 3));
     // Then we fill the drawing area with different color
@@ -335,7 +335,7 @@ To learn more about the element system, please read the [element module document
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/3.png", (300, 200)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/3.png", (300, 200)).into_drawing_area();
     root.fill(&WHITE)?;
     // Draw an circle on the drawing area
     root.draw(&Circle::new(
@@ -352,7 +352,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ### Composable Elements
 
 Besides the built-in elements, elements can be composed into a logic group we called composed elements.
-When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based 
+When composing new elements, the upper-left corner is given in the target coordinate, and a new pixel-based
 coordinate which has the upper-left corner defined as `(0,0)` is used for further element composition purpose.
 
 For example, we can have an element which includes a dot and its coordinate.
@@ -361,7 +361,7 @@ For example, we can have an element which includes a dot and its coordinate.
 use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
 
     root.fill(&RGBColor(240, 200, 200))?;
 
@@ -400,7 +400,7 @@ of the chart context object.
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::<image::Rgb<u8>>::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE);
     let root = root.margin(10, 10, 10, 10);
     // After this point, we should be able to draw construct a chart context
@@ -475,7 +475,7 @@ This behavior can also be turned off by setting `default_features = false`.
 
 ### List of Features
 
-This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherry-pick what features you want to include into `Plotters` crate. 
+This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherry-pick what features you want to include into `Plotters` crate.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
@@ -495,12 +495,12 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 
 	The WASM example requires using `wasm32` target to build. Using `cargo build` is likely to use the default target
 	which in most of the case is any of the x86 target. Thus you need add `--target=wasm32-unknown-unknown` in the cargo
-	parameter list  to build it. 
+	parameter list  to build it.
 
 * How to draw text/circle/point/rectangle/... on the top of chart ?
-	
-	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
+
+	As you may realized, Plotters is a drawing library rather than a traditional data plotting library,
 	you have the freedom to draw anything you want on the drawing area.
-	Use `DrawingArea::draw` to draw any element on the drawing area. 
+	Use `DrawingArea::draw` to draw any element on the drawing area.
 
 

@@ -18,7 +18,7 @@ fn snowflake_iter(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::gif("plotters-doc-data/animation.gif", (800, 600), 1_000)?
+    let root = BitMapBackend::<image::Rgb<u8>>::gif("plotters-doc-data/animation.gif", (800, 600), 1_000)?
         .into_drawing_area();
 
     for i in 0..8 {
