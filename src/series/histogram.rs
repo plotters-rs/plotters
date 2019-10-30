@@ -17,49 +17,64 @@ impl HistogramType for Vertical {}
 impl HistogramType for Horizontal {}
 
 /// The series that aggregate data into a histogram
-pub struct Histogram<BR, A, Tag = Vertical>
+pub struct Histogram<'a, BR, A, Tag = Vertical>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
 {
-    style: ShapeStyle,
+    style: Box<dyn Fn(&BR::ValueType, &A) -> ShapeStyle + 'a>,
     margin: u32,
     iter: HashMapIter<BR::ValueType, A>,
-    baseline: Box<dyn Fn() -> A>,
+    baseline: Box<dyn Fn(BR::ValueType) -> A + 'a>,
     _p: PhantomData<(BR, Tag)>,
 }
 
-impl<BR, A, Tag> Histogram<BR, A, Tag>
+impl<'a, BR, A, Tag> Histogram<'a, BR, A, Tag>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
-    A: AddAssign<A> + Default,
+    A: AddAssign<A> + Default + 'a,
     Tag: HistogramType,
 {
-    #[allow(clippy::redundant_closure)]
     fn empty() -> Self {
         Self {
-            style: GREEN.filled(),
+            style: Box::new(|_, _| GREEN.filled()),
             margin: 5,
             iter: HashMap::new().into_iter(),
-            baseline: Box::new(|| A::default()),
+            baseline: Box::new(|_| A::default()),
             _p: PhantomData,
         }
     }
     /// Set the style of the histogram
     pub fn style<S: Into<ShapeStyle>>(mut self, style: S) -> Self {
-        self.style = style.into();
+        let style = style.into();
+        self.style = Box::new(move |_, _| style.clone());
+        self
+    }
+
+    /// Set the style of histogram using a lambda function
+    pub fn style_func(
+        mut self,
+        style_func: impl Fn(&BR::ValueType, &A) -> ShapeStyle + 'a,
+    ) -> Self {
+        self.style = Box::new(style_func);
         self
     }
 
     /// Set the baseline of the histogram
     pub fn baseline(mut self, baseline: A) -> Self
     where
-        A: Clone + 'static,
+        A: Clone,
     {
-        self.baseline = Box::new(move || baseline.clone());
+        self.baseline = Box::new(move |_| baseline.clone());
+        self
+    }
+
+    /// Set a function that defines variant baseline
+    pub fn baseline_func(mut self, func: impl Fn(BR::ValueType) -> A + 'a) -> Self {
+        self.baseline = Box::new(func);
         self
     }
 
@@ -80,11 +95,11 @@ where
     }
 }
 
-impl<BR, A> Histogram<BR, A, Vertical>
+impl<'a, BR, A> Histogram<'a, BR, A, Vertical>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
-    A: AddAssign<A> + Default,
+    A: AddAssign<A> + Default + 'a,
 {
     /// Create a new histogram series.
     ///
@@ -103,11 +118,12 @@ where
         for (x, y) in iter.into_iter() {
             *buffer.entry(x).or_insert_with(Default::default) += y;
         }
+        let style = style.into();
         Self {
-            style: style.into(),
+            style: Box::new(move |_, _| style.clone()),
             margin,
             iter: buffer.into_iter(),
-            baseline: Box::new(|| A::default()),
+            baseline: Box::new(|_| A::default()),
             _p: PhantomData,
         }
     }
@@ -122,11 +138,11 @@ where
     }
 }
 
-impl<BR, A> Histogram<BR, A, Horizontal>
+impl<'a, BR, A> Histogram<'a, BR, A, Horizontal>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
-    A: AddAssign<A> + Default,
+    A: AddAssign<A> + Default + 'a,
 {
     pub fn horizontal<ACoord, DB: DrawingBackend>(
         _: &ChartContext<DB, RangedCoord<ACoord, BR>>,
@@ -138,7 +154,7 @@ where
     }
 }
 
-impl<BR, A> Iterator for Histogram<BR, A, Vertical>
+impl<'a, BR, A> Iterator for Histogram<'a, BR, A, Vertical>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
@@ -148,7 +164,9 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((x, y)) = self.iter.next() {
             let nx = BR::next_value(&x);
-            let mut rect = Rectangle::new([(x, y), (nx, (self.baseline)())], self.style.clone());
+            let base = (self.baseline)(BR::previous_value(&nx));
+            let style = (self.style)(&x, &y);
+            let mut rect = Rectangle::new([(x, y), (nx, base)], style);
             rect.set_margin(0, 0, self.margin, self.margin);
             return Some(rect);
         }
@@ -156,7 +174,7 @@ where
     }
 }
 
-impl<BR, A> Iterator for Histogram<BR, A, Horizontal>
+impl<'a, BR, A> Iterator for Histogram<'a, BR, A, Horizontal>
 where
     BR: DiscreteRanged,
     BR::ValueType: Eq + Hash,
@@ -166,7 +184,10 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((y, x)) = self.iter.next() {
             let ny = BR::next_value(&y);
-            let mut rect = Rectangle::new([(x, y), ((self.baseline)(), ny)], self.style.clone());
+            // With this trick we can avoid the clone trait bound
+            let base = (self.baseline)(BR::previous_value(&ny));
+            let style = (self.style)(&y, &x);
+            let mut rect = Rectangle::new([(x, y), (base, ny)], style);
             rect.set_margin(self.margin, self.margin, 0, 0);
             return Some(rect);
         }
