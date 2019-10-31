@@ -253,7 +253,7 @@ impl_ranged_type_trait!(u128, RangedCoordu128);
 impl_ranged_type_trait!(isize, RangedCoordisize);
 impl_ranged_type_trait!(usize, RangedCoordusize);
 
-#[cfg(feature = "num-traits")]
+// TODO: Think about how to re-organize this part
 pub mod group_integer_by {
     use super::Ranged;
     use super::{AsRangedCoord, DiscreteRanged};

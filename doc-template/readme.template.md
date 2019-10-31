@@ -257,7 +257,6 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 | cairo | Enable `CairoBackend` | cairo-rs | No |
 | palette\_ext | Use crate `palette` for color expression| palette | Yes |
 | evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
-| make\_partial\_axis | Support for API `make_partial_axis`, which allows configuring partial axis from visible portion. | num-trait| Yes |
 
 ## FAQ List
 

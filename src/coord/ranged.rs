@@ -320,7 +320,6 @@ where
 /// - `axis_range`: The range specification
 /// - `part`: The visible part of the axis. Each value is from [0.0, 1.0]
 /// - **returns**: The partial axis created from the input, or `None` when not possible
-#[cfg(feature = "make_partial_axis")]
 pub fn make_partial_axis<T>(
     axis_range: Range<T>,
     part: Range<f64>,

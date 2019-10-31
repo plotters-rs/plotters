@@ -602,7 +602,6 @@ This is the full list of features that is defined by `Plotters` crate. Use `defa
 | cairo | Enable `CairoBackend` | cairo-rs | No |
 | palette\_ext | Use crate `palette` for color expression| palette | Yes |
 | evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
-| make\_partial\_axis | Support for API `make_partial_axis`, which allows configuring partial axis from visible portion. | num-trait| Yes |
 
 ## FAQ List
 
@@ -660,19 +659,13 @@ pub use palette;
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext, LabelAreaPosition, SeriesLabelPosition};
     pub use crate::coord::{
-        CoordTranslate, IntoCentric, IntoPartialAxis, LogCoord, LogRange, LogScalable, Ranged,
-        RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64,
-        RangedCoordu32, RangedCoordu64,
+        CoordTranslate, GroupBy, IntoCentric, IntoPartialAxis, LogCoord, LogRange, LogScalable,
+        Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64,
+        RangedCoordu32, RangedCoordu64, ToGroupByRange,
     };
 
     #[cfg(feature = "chrono")]
-    pub use crate::coord::{RangedDate, RangedDateTime, RangedDuration};
-
-    #[cfg(feature = "num-traits")]
-    pub use crate::coord::{GroupBy, ToGroupByRange};
-
-    #[cfg(feature = "make_partial_axis")]
-    pub use crate::coord::make_partial_axis;
+    pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
 
     pub use crate::drawing::*;
     pub use crate::series::{AreaSeries, Histogram, LineSeries, PointSeries};

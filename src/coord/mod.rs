@@ -39,12 +39,10 @@ pub use ranged::{
     ReversibleRanged,
 };
 
-#[cfg(feature = "make_partial_axis")]
 pub use ranged::make_partial_axis;
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
-#[cfg(feature = "num-traits")]
 pub use numeric::group_integer_by::{GroupBy, ToGroupByRange};
 
 /// The trait that translates some customized object to the backend coordinate
