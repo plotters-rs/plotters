@@ -101,7 +101,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
         <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        Realtime Rendering
+        Real-time Rendering
         <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
     </div>
 </div>
@@ -131,7 +131,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
         <img src="https://plotters-rs.github.io/plotters-doc-data/matshow.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        The matplotlib Matshow Example
+        The Matplotlib Matshow Example
         <a href="https://github.com/38/plotters/blob/master/examples/matshow.rs">[code]</a>
     </div>
 </div>
@@ -151,7 +151,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
         <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        The 1D Gussian Distribution
+        The 1D Gaussian Distribution
         <a href="https://github.com/38/plotters/blob/master/examples/nomal-dist2.rs">[code]</a>
     </div>
 </div>
@@ -161,7 +161,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
         <img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem"></img>
     </a>
     <div class="galleryText">
-        The 1D Gussian Distribution
+        The 1D Gaussian Distribution
         <a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">[code]</a>
     </div>
 </div>

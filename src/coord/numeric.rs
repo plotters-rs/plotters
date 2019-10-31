@@ -259,11 +259,18 @@ pub mod group_integer_by {
     use super::{AsRangedCoord, DiscreteRanged};
     use num_traits::{FromPrimitive, PrimInt, ToPrimitive};
     use std::ops::{Mul, Range};
+
+    /// The ranged value spec that needs to be grouped.
+    /// This is useful, for example, when we have an X axis is a integer and denotes days.
+    /// And we are expecting the tick mark denotes weeks, in this way we can make the range
+    /// spec grouping by 7 elements.
     pub struct GroupBy<T>(T, T::ValueType)
     where
         T::ValueType: PrimInt + ToPrimitive + FromPrimitive + Mul,
         T: Ranged;
 
+    /// The trait that provides method `Self::group_by` function which creates a
+    /// `GroupBy` decorated ranged value.
     pub trait ToGroupByRange
     where
         Self: AsRangedCoord,
@@ -271,6 +278,10 @@ pub mod group_integer_by {
         <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType:
             PrimInt + ToPrimitive + FromPrimitive + Mul,
     {
+        /// Make a grouping ranged value, see the documentation for `GroupBy` for details.
+        ///
+        /// - `value`: The number of values we want to group it
+        /// - **return**: The newly created grouping range sepcification
         fn group_by(
             self,
             value: <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType,
