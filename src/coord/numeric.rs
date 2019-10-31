@@ -253,6 +253,92 @@ impl_ranged_type_trait!(u128, RangedCoordu128);
 impl_ranged_type_trait!(isize, RangedCoordisize);
 impl_ranged_type_trait!(usize, RangedCoordusize);
 
+#[cfg(feature = "num-traits")]
+pub mod group_integer_by {
+    use super::Ranged;
+    use super::{AsRangedCoord, DiscreteRanged};
+    use num_traits::{FromPrimitive, PrimInt, ToPrimitive};
+    use std::ops::{Mul, Range};
+    pub struct GroupBy<T>(T, T::ValueType)
+    where
+        T::ValueType: PrimInt + ToPrimitive + FromPrimitive + Mul,
+        T: Ranged;
+
+    pub trait ToGroupByRange
+    where
+        Self: AsRangedCoord,
+        <Self as AsRangedCoord>::Value: PrimInt + ToPrimitive + FromPrimitive + Mul,
+        <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType:
+            PrimInt + ToPrimitive + FromPrimitive + Mul,
+    {
+        fn group_by(
+            self,
+            value: <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType,
+        ) -> GroupBy<<Self as AsRangedCoord>::CoordDescType> {
+            GroupBy(self.into(), value)
+        }
+    }
+
+    impl<T> ToGroupByRange for T
+    where
+        Self: AsRangedCoord,
+        <Self as AsRangedCoord>::Value: PrimInt + FromPrimitive + ToPrimitive + Mul,
+        <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType:
+            PrimInt + FromPrimitive + ToPrimitive + Mul,
+    {
+    }
+
+    impl<T> AsRangedCoord for GroupBy<T>
+    where
+        T::ValueType: PrimInt + ToPrimitive + FromPrimitive + Mul,
+        T: Ranged,
+    {
+        type Value = T::ValueType;
+        type CoordDescType = Self;
+    }
+
+    impl<T> DiscreteRanged for GroupBy<T>
+    where
+        T::ValueType: PrimInt + ToPrimitive + FromPrimitive + Mul,
+        T: Ranged + DiscreteRanged,
+    {
+        fn previous_value(this: &Self::ValueType) -> Self::ValueType {
+            <T as DiscreteRanged>::previous_value(this)
+        }
+        fn next_value(this: &Self::ValueType) -> Self::ValueType {
+            <T as DiscreteRanged>::next_value(this)
+        }
+    }
+
+    impl<T> Ranged for GroupBy<T>
+    where
+        T::ValueType: PrimInt + ToPrimitive + FromPrimitive + Mul,
+        T: Ranged,
+    {
+        type ValueType = T::ValueType;
+        fn map(&self, value: &T::ValueType, limit: (i32, i32)) -> i32 {
+            self.0.map(value, limit)
+        }
+        fn range(&self) -> Range<T::ValueType> {
+            self.0.range()
+        }
+        fn key_points(&self, max_points: usize) -> Vec<T::ValueType> {
+            let actual_range = self.0.range();
+            let from = ((actual_range.start + self.1 - T::ValueType::from_u8(1).unwrap()) / self.1)
+                .to_isize()
+                .unwrap();
+            let to = (actual_range.end / self.1).to_isize().unwrap();
+            let logic_range: super::RangedCoordisize = (from..to).into();
+
+            logic_range
+                .key_points(max_points)
+                .into_iter()
+                .map(|x| T::ValueType::from_isize(x).unwrap() * self.1)
+                .collect()
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

@@ -668,6 +668,9 @@ pub mod prelude {
     #[cfg(feature = "chrono")]
     pub use crate::coord::{RangedDate, RangedDateTime, RangedDuration};
 
+    #[cfg(feature = "num-traits")]
+    pub use crate::coord::{GroupBy, ToGroupByRange};
+
     #[cfg(feature = "make_partial_axis")]
     pub use crate::coord::make_partial_axis;
 
