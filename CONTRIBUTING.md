@@ -8,7 +8,7 @@ Here's the useful information about contributing to Plotters.
 You may intesrested in reading [the full text of license](https://github.com/38/plotters/blob/master/LICENSE).
 If you have any questions or concerns please contact us at <haohou302@gmail.com>.
 
-# Contributing Code
+# Contributing to Plotters codebase 
 
 You are warmly welcomed to contribute code and make Plotters better. Here's a few things that may be helpful to you.
 
@@ -63,4 +63,3 @@ use the following command to synchronize the doc to both `src/lib.rs` and `READM
 ```bash
 bash doc-template/update-readme.sh
 ```
-
