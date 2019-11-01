@@ -59,12 +59,15 @@ fn test_pixel_element() {
         .expect("Drawing Failure");
 }
 
+#[deprecated(note = "Use new name PathElement instead")]
+pub type Path<Coord> = PathElement<Coord>;
+
 /// An element of a series of connected lines
-pub struct Path<Coord> {
+pub struct PathElement<Coord> {
     points: Vec<Coord>,
     style: ShapeStyle,
 }
-impl<Coord> Path<Coord> {
+impl<Coord> PathElement<Coord> {
     /// Create a new path
     /// - `points`: The iterator of the points
     /// - `style`: The shape style
@@ -77,7 +80,7 @@ impl<Coord> Path<Coord> {
     }
 }
 
-impl<'a, Coord> PointCollection<'a, Coord> for &'a Path<Coord> {
+impl<'a, Coord> PointCollection<'a, Coord> for &'a PathElement<Coord> {
     type Borrow = &'a Coord;
     type IntoIter = &'a [Coord];
     fn point_iter(self) -> &'a [Coord] {
@@ -85,7 +88,7 @@ impl<'a, Coord> PointCollection<'a, Coord> for &'a Path<Coord> {
     }
 }
 
-impl<Coord, DB: DrawingBackend> Drawable<DB> for Path<Coord> {
+impl<Coord, DB: DrawingBackend> Drawable<DB> for PathElement<Coord> {
     fn draw<I: Iterator<Item = BackendCoord>>(
         &self,
         points: I,
@@ -111,7 +114,7 @@ fn test_path_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Path::new(
+    da.draw(&PathElement::new(
         vec![(100, 101), (105, 107), (150, 157)],
         Into::<ShapeStyle>::into(&BLUE).stroke_width(5),
     ))

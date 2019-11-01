@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &RED.mix(0.2),
     )))?;
     snowflake_vertices.push(snowflake_vertices[0]);
-    chart.draw_series(std::iter::once(Path::new(snowflake_vertices, &RED)))?;
+    chart.draw_series(std::iter::once(PathElement::new(snowflake_vertices, &RED)))?;
 
     Ok(())
 }

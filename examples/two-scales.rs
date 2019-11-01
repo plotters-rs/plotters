@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &BLUE,
         ))?
         .label("y = 1.02^x^2")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &BLUE));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     chart
         .draw_secondary_series(LineSeries::new(
@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &RED,
         ))?
         .label("y = sin(2x)")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     chart
         .configure_series_labels()

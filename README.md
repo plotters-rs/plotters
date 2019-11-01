@@ -164,7 +164,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &RED,
         ))?
         .label("y = x^2")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     chart
         .configure_series_labels()
@@ -207,7 +207,7 @@ let figure = evcxr_figure((640, 480), |root| {
         &RED,
     )).unwrap()
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
+        .legend(|(x,y)| PathElement::new(vec![(x,y), (x + 20,y)], &RED));
 
     chart.configure_series_labels()
         .background_style(&WHITE.mix(0.8))

@@ -1,4 +1,4 @@
-use crate::element::Path;
+use crate::element::PathElement;
 use crate::style::ShapeStyle;
 
 /// The line series object, which takes an iterator of points in guest coordinate system
@@ -9,12 +9,12 @@ pub struct LineSeries<Coord, I: IntoIterator<Item = Coord>> {
 }
 
 impl<Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<Coord, I> {
-    type Item = Path<Coord>;
+    type Item = PathElement<Coord>;
     fn next(&mut self) -> Option<Self::Item> {
         if self.data_iter.is_some() {
             let mut data_iter = None;
             std::mem::swap(&mut self.data_iter, &mut data_iter);
-            Some(Path::new(
+            Some(PathElement::new(
                 data_iter.unwrap().collect::<Vec<_>>(),
                 self.style.clone(),
             ))

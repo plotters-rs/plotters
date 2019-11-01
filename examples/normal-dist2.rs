@@ -67,7 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .draw_series(pdf)?
         .label("PDF")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], RED.filled()));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED.filled()));
 
     chart.configure_series_labels().draw()?;
 

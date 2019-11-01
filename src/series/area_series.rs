@@ -1,5 +1,5 @@
 use crate::drawing::DrawingBackend;
-use crate::element::{DynElement, IntoDynElement, Path, Polygon};
+use crate::element::{DynElement, IntoDynElement, PathElement, Polygon};
 use crate::style::colors::TRANSPARENT;
 use crate::style::ShapeStyle;
 
@@ -54,7 +54,7 @@ impl<DB: DrawingBackend, X: Clone + 'static, Y: Clone + 'static> Iterator for Ar
 
             self.state = 2;
 
-            Some(Path::new(data, self.border_style.clone()).into_dyn())
+            Some(PathElement::new(data, self.border_style.clone()).into_dyn())
         } else {
             None
         }

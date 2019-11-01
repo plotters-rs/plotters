@@ -571,7 +571,7 @@ fn test_bitmap_backend() {
 
         let area = back.into_drawing_area();
         area.fill(&WHITE).unwrap();
-        area.draw(&Path::new(vec![(0, 0), (10, 10)], RED.filled()))
+        area.draw(&PathElement::new(vec![(0, 0), (10, 10)], RED.filled()))
             .unwrap();
         area.present().unwrap();
     }

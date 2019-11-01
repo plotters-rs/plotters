@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &RED,
     ))?
     .label("Sine")
-    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
+    .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     cc.draw_series(LineSeries::new(
         (0..6800).map(|x| {
@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &BLUE,
     ))?
     .label("Cosine")
-    .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &BLUE));
+    .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     cc.configure_series_labels().border_style(&BLACK).draw()?;
 

@@ -279,7 +279,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &RED,
         ))?
         .label("y = x^2")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     chart
         .configure_series_labels()
@@ -322,7 +322,7 @@ let figure = evcxr_figure((640, 480), |root| {
         &RED,
     )).unwrap()
         .label("y = x^2")
-        .legend(|(x,y)| Path::new(vec![(x,y), (x + 20,y)], &RED));
+        .legend(|(x,y)| PathElement::new(vec![(x,y), (x + 20,y)], &RED));
 
     chart.configure_series_labels()
         .background_style(&WHITE.mix(0.8))
@@ -678,8 +678,14 @@ pub mod prelude {
 
     pub use crate::element::{
         BitMapElement, CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar,
-        IntoDynElement, MultiLineText, Path, Pixel, Polygon, Rectangle, Text, TriangleMarker,
+        IntoDynElement, MultiLineText, PathElement, Pixel, Polygon, Rectangle, Text,
+        TriangleMarker,
     };
+
+    // TODO: This should be deprecated and completely removed
+    #[cfg(feature = "deprecated_items")]
+    #[allow(deprecated)]
+    pub use crate::element::Path;
 
     #[allow(type_alias_bounds)]
     /// The type used to returns a drawing operation that can be failed

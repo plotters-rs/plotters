@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .draw_series(LineSeries::new(data, &GREEN.mix(0.3)))?
         .label("Raw Data")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &GREEN));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
 
     chart.draw_series(LineSeries::new(
         down_sampled.iter().map(|(x, _, y, _)| (*x, *y)),
@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }),
         )?
         .label("Down-sampled")
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &BLUE));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
 
     chart
         .configure_series_labels()

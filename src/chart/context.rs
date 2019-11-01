@@ -12,7 +12,7 @@ use crate::coord::{
 };
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, DynElement, IntoDynElement, Path, PointCollection};
+use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
 use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
@@ -324,7 +324,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 y1 = axis_range.end;
             }
 
-            area.draw(&Path::new(vec![(x0, y0), (x1, y1)], axis_style.clone()))?;
+            area.draw(&PathElement::new(
+                vec![(x0, y0), (x1, y1)],
+                axis_style.clone(),
+            ))?;
         }
 
         Ok(axis_range)
@@ -479,7 +482,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     };
-                    let line = Path::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
+                    let line = PathElement::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
                     area.draw(&line)?;
                 }
             }
