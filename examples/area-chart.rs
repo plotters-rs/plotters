@@ -1,12 +1,13 @@
 use plotters::prelude::*;
 
-use rand::thread_rng;
+use rand::SeedableRng;
+use rand_xorshift::XorShiftRng;
 use rand_distr::{Distribution, Normal};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data: Vec<_> = {
         let norm_dist = Normal::new(500.0, 100.0).unwrap();
-        let mut x_rand = thread_rng();
+        let mut x_rand = XorShiftRng::from_seed(*b"MyFragileSeed123");
         let x_iter = norm_dist.sample_iter(&mut x_rand);
         x_iter
             .filter(|x| *x < 1500.0)

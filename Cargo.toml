@@ -57,6 +57,7 @@ itertools = "^0.8.0"
 rand_distr = "0.2.2"
 criterion = "0.3.0"
 rayon = "1.2.0"
+rand_xorshift = "0.2.0"
 
 [[bench]]
 name = "benchmark"

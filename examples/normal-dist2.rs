@@ -1,6 +1,7 @@
 use plotters::prelude::*;
 
-use rand::thread_rng;
+use rand::SeedableRng;
+use rand_xorshift::XorShiftRng;
 use rand_distr::{Distribution, Normal};
 
 use num_traits::sign::Signed;
@@ -10,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let random_points: Vec<f64> = {
         let norm_dist = Normal::new(0.0, sd).unwrap();
-        let mut x_rand = thread_rng();
+        let mut x_rand = XorShiftRng::from_seed(*b"MyFragileSeed123");
         let x_iter = norm_dist.sample_iter(&mut x_rand);
         x_iter.take(5000).filter(|x| x.abs() <= 4.0).collect()
     };
