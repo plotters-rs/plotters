@@ -1,24 +1,17 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest an idea to Plotter maintainers
 title: "[Feature Request]"
 labels: feature request
 assignees: ''
 
 ---
 
-- What is the feature ?
+### What is the feature ?
+*Detailed feature descrption*
 
-Describe what the feature request is about.  
+### (Optional) Why this feature is useful and how people would use the feature ?
+*Explain why this feature is important*
 
-- Why do you need the feature ?
-
-Describe why this is useful to you and others.
-
-- What is the use case ?
-
-Describe how would you like use it.
-
-- Additional Information
-
-If possible please give us as much context as possible
+### (Optional) Additional Information
+*More details are appreciated:)*
