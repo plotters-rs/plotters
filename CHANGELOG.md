@@ -12,6 +12,7 @@
 - Tested the font loading on Linux, OSX and Windowns. Make font loading more reliable.
 - `BitMapBackend` isn't depdends on `image` crate now. Only the image encoding part relies on the `image` crate
 - Refactored WASM demo use ES6 and `wasm-pack` (Thanks to @Tatrix)
+- Label style for X axis and Y axis can be set seperately now using `x_label_style` and `y_label_style`. (Thanks to @zhiburt)
 
 ## Plotters 0.2.10 (2019-10-23)
 

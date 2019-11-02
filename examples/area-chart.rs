@@ -1,8 +1,8 @@
 use plotters::prelude::*;
 
 use rand::SeedableRng;
-use rand_xorshift::XorShiftRng;
 use rand_distr::{Distribution, Normal};
+use rand_xorshift::XorShiftRng;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data: Vec<_> = {

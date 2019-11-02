@@ -300,7 +300,7 @@ where
         self
     }
 
-   /// Set the style of the label Y axis text
+    /// Set the style of the label Y axis text
     /// - `style`: The text style that would be applied to the labels
     pub fn y_label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
         self.y_label_style = Some(style.into_text_style(&self.parent_size));

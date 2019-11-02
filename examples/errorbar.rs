@@ -1,8 +1,8 @@
 use plotters::prelude::*;
 
 use rand::SeedableRng;
-use rand_xorshift::XorShiftRng;
 use rand_distr::{Distribution, Normal};
+use rand_xorshift::XorShiftRng;
 
 use itertools::Itertools;
 
