@@ -156,7 +156,8 @@ where
     pub(super) line_style_1: Option<ShapeStyle>,
     pub(super) line_style_2: Option<ShapeStyle>,
     pub(super) axis_style: Option<ShapeStyle>,
-    pub(super) label_style: Option<TextStyle<'b>>,
+    pub(super) x_label_style: Option<TextStyle<'b>>,
+    pub(super) y_label_style: Option<TextStyle<'b>>,
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
@@ -286,7 +287,23 @@ where
     /// Set the style of the label text
     /// - `style`: The text style that would be applied to the labels
     pub fn label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
-        self.label_style = Some(style.into_text_style(&self.parent_size));
+        let style = style.into_text_style(&self.parent_size);
+        self.x_label_style = Some(style.clone());
+        self.y_label_style = Some(style);
+        self
+    }
+
+    /// Set the style of the label X axis text
+    /// - `style`: The text style that would be applied to the labels
+    pub fn x_label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
+        self.x_label_style = Some(style.into_text_style(&self.parent_size));
+        self
+    }
+
+   /// Set the style of the label Y axis text
+    /// - `style`: The text style that would be applied to the labels
+    pub fn y_label_style<T: IntoTextStyle<'b>>(&mut self, style: T) -> &mut Self {
+        self.y_label_style = Some(style.into_text_style(&self.parent_size));
         self
     }
 
@@ -353,20 +370,26 @@ where
             .clone()
             .unwrap_or_else(|| (&default_axis_color).into());
 
-        let label_style = self
-            .label_style
+        let x_label_style = self
+            .x_label_style
+            .clone()
+            .unwrap_or_else(|| default_label_font.clone().into());
+
+        let y_label_style = self
+            .y_label_style
             .clone()
             .unwrap_or_else(|| default_label_font.into());
 
         let axis_desc_style = self
             .axis_desc_style
             .clone()
-            .unwrap_or_else(|| label_style.clone());
+            .unwrap_or_else(|| x_label_style.clone());
 
         target.draw_mesh(
             (self.n_y_labels * 10, self.n_x_labels * 10),
             &mesh_style_2,
-            &label_style,
+            &x_label_style,
+            &y_label_style,
             |_| None,
             self.draw_x_mesh,
             self.draw_y_mesh,
@@ -385,7 +408,8 @@ where
         target.draw_mesh(
             (self.n_y_labels, self.n_x_labels),
             &mesh_style_1,
-            &label_style,
+            &x_label_style,
+            &y_label_style,
             |m| match m {
                 MeshLine::XMesh(_, _, v) => Some((self.format_x)(v)),
                 MeshLine::YMesh(_, _, v) => Some((self.format_y)(v)),
