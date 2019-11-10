@@ -24,7 +24,7 @@ fn draw_plot(root: &DrawingArea<BitMapBackend, Shift>, pow: f64) {
         ))
         .unwrap()
         .label(format!("y = x^{}", pow))
-        .legend(|(x, y)| Path::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
     chart
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
