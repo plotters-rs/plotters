@@ -268,6 +268,32 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    fn fill_vertical_line_fast(&mut self, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8) {
+        let (w, h) = self.get_size();
+        let w = w as i32;
+        let h = h as i32;
+
+        // Make sure we are in the range
+        if x < 0 || x >= w {
+            return;
+        }
+
+        let dst = self.get_raw_pixel_buffer();
+        let (mut y0, mut y1) = ys;
+        if y0 > y1 {
+            std::mem::swap(&mut y0, &mut y1);
+        }
+        // And check the y axis isn't out of bound
+        y0 = y0.max(0);
+        y1 = y1.min(h - 1);
+        // This is ok because once y0 > y1, there won't be any iteration anymore
+        for y in y0..=y1 {
+            dst[(y * w + x) as usize * 3] = r;
+            dst[(y * w + x) as usize * 3 + 1] = g;
+            dst[(y * w + x) as usize * 3 + 2] = b;
+        }
+    }
+
     fn fill_rect_fast(
         &mut self,
         upper_left: (i32, i32),
@@ -454,29 +480,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
                 if from.1 == to.1 {
                     self.fill_rect_fast(from, to, r, g, b);
                 } else {
-                    let (w, h) = self.get_size();
-                    let w = w as i32;
-                    let h = h as i32;
-
-                    // Make sure we are in the range
-                    if from.0 < 0 || from.0 >= w {
-                        return Ok(());
-                    }
-
-                    let dst = self.get_raw_pixel_buffer();
-                    let (mut y0, mut y1) = (from.1, to.1);
-                    if y0 > y1 {
-                        std::mem::swap(&mut y0, &mut y1);
-                    }
-                    // And check the y axis isn't out of bound
-                    y0 = y0.max(0);
-                    y1 = y1.min(h - 1);
-                    // This is ok because once y0 > y1, there won't be any iteration anymore
-                    for y in y0..=y1 {
-                        dst[(y * w + from.0) as usize * 3] = r;
-                        dst[(y * w + from.0) as usize * 3 + 1] = g;
-                        dst[(y * w + from.0) as usize * 3 + 2] = b;
-                    }
+                    self.fill_vertical_line_fast(from.0, (from.1, to.1), r, g, b);
                 }
             } else {
                 self.blend_rect_fast(from, to, r, g, b, alpha);
