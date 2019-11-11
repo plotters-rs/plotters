@@ -160,6 +160,12 @@ impl<'a, DB: DrawingBackend + 'a, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     }
 }
 
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    pub fn as_coord_spec(&self) -> &CT {
+        self.drawing_area.as_coord_spec()
+    }
+}
+
 impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
     /// Convert the chart context into an closure that can be used for coordinate translation
     pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {

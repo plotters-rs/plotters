@@ -134,11 +134,13 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
 }
 
 impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
-    fn next_value(this: &Date<Z>) -> Date<Z> {
+    type RangeParameter = ();
+    fn get_range_parameter(&self) -> () {}
+    fn next_value(this: &Date<Z>, _: &()) -> Date<Z> {
         this.clone() + Duration::days(1)
     }
 
-    fn previous_value(this: &Date<Z>) -> Date<Z> {
+    fn previous_value(this: &Date<Z>, _: &()) -> Date<Z> {
         this.clone() - Duration::days(1)
     }
 }
@@ -263,7 +265,9 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
 }
 
 impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
-    fn next_value(this: &T) -> T {
+    type RangeParameter = ();
+    fn get_range_parameter(&self) -> () {}
+    fn next_value(this: &T, _: &()) -> T {
         let mut year = this.date_ceil().year();
         let mut month = this.date_ceil().month();
         month += 1;
@@ -274,7 +278,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
         T::earliest_after_date(this.timezone().ymd(year, month, this.date_ceil().day()))
     }
 
-    fn previous_value(this: &T) -> T {
+    fn previous_value(this: &T, _: &()) -> T {
         let mut year = this.clone().date_floor().year();
         let mut month = this.clone().date_floor().month();
         month -= 1;
@@ -373,11 +377,13 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
 }
 
 impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
-    fn next_value(this: &T) -> T {
+    type RangeParameter = ();
+    fn get_range_parameter(&self) -> () {}
+    fn next_value(this: &T, _: &()) -> T {
         T::earliest_after_date(this.timezone().ymd(this.date_floor().year() + 1, 1, 1))
     }
 
-    fn previous_value(this: &T) -> T {
+    fn previous_value(this: &T, _: &()) -> T {
         T::earliest_after_date(this.timezone().ymd(this.date_ceil().year() - 1, 1, 1))
     }
 }

@@ -105,6 +105,14 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
     pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
         self.logic_y.axis_pixel_range(self.back_y)
     }
+
+    pub fn x_spec(&self) -> &X {
+        &self.logic_x
+    }
+
+    pub fn y_spec(&self) -> &Y {
+        &self.logic_y
+    }
 }
 
 impl<X: Ranged, Y: Ranged> CoordTranslate for RangedCoord<X, Y> {
@@ -152,13 +160,16 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
 pub trait DiscreteRanged
 where
     Self: Ranged,
-    Self::ValueType: Eq,
 {
+    type RangeParameter;
+
+    fn get_range_parameter(&self) -> Self::RangeParameter;
+
     /// Get the smallest value that is larger than the `this` value
-    fn next_value(this: &Self::ValueType) -> Self::ValueType;
+    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType;
 
     /// Get the largest value that is smaller than `this` value
-    fn previous_value(this: &Self::ValueType) -> Self::ValueType;
+    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType;
 }
 
 /// The trait for the type that can be converted into a ranged coordinate axis
@@ -210,7 +221,7 @@ where
     type ValueType = <D as Ranged>::ValueType;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        let prev = <D as DiscreteRanged>::previous_value(&value);
+        let prev = <D as DiscreteRanged>::previous_value(&value, &self.0.get_range_parameter());
         (self.0.map(&prev, limit) + self.0.map(value, limit)) / 2
     }
 
@@ -227,12 +238,16 @@ impl<D: DiscreteRanged> DiscreteRanged for CentricDiscreteRange<D>
 where
     <D as Ranged>::ValueType: Eq,
 {
-    fn next_value(this: &Self::ValueType) -> Self::ValueType {
-        <D as DiscreteRanged>::next_value(this)
+    type RangeParameter = <D as DiscreteRanged>::RangeParameter;
+    fn get_range_parameter(&self) -> Self::RangeParameter {
+        self.0.get_range_parameter()
+    }
+    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
+        <D as DiscreteRanged>::next_value(this, param)
     }
 
-    fn previous_value(this: &Self::ValueType) -> Self::ValueType {
-        <D as DiscreteRanged>::previous_value(this)
+    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
+        <D as DiscreteRanged>::previous_value(this, param)
     }
 }
 
@@ -296,12 +311,16 @@ where
     R: Ranged,
     <R as Ranged>::ValueType: Eq + Clone,
 {
-    fn next_value(this: &Self::ValueType) -> Self::ValueType {
-        <R as DiscreteRanged>::next_value(this)
+    type RangeParameter = <R as DiscreteRanged>::RangeParameter;
+    fn get_range_parameter(&self) -> Self::RangeParameter {
+        self.0.get_range_parameter()
+    }
+    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
+        <R as DiscreteRanged>::next_value(this, param)
     }
 
-    fn previous_value(this: &Self::ValueType) -> Self::ValueType {
-        <R as DiscreteRanged>::previous_value(this)
+    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
+        <R as DiscreteRanged>::previous_value(this, param)
     }
 }
 

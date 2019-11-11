@@ -28,6 +28,7 @@ where
     margin: u32,
     iter: HashMapIter<BR::ValueType, A>,
     baseline: Box<dyn Fn(BR::ValueType) -> A + 'a>,
+    br_param: BR::RangeParameter,
     _p: PhantomData<(BR, Tag)>,
 }
 
@@ -38,12 +39,13 @@ where
     A: AddAssign<A> + Default + 'a,
     Tag: HistogramType,
 {
-    fn empty() -> Self {
+    fn empty(br_param: BR::RangeParameter) -> Self {
         Self {
             style: Box::new(|_, _| GREEN.filled()),
             margin: 5,
             iter: HashMap::new().into_iter(),
             baseline: Box::new(|_| A::default()),
+            br_param,
             _p: PhantomData,
         }
     }
@@ -95,6 +97,14 @@ where
     }
 }
 
+pub trait UseDefaultParameter: Default {
+    fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl UseDefaultParameter for () {}
+
 impl<'a, BR, A> Histogram<'a, BR, A, Vertical>
 where
     BR: DiscreteRanged,
@@ -113,7 +123,10 @@ where
         iter: I,
         margin: u32,
         style: S,
-    ) -> Self {
+    ) -> Self
+    where
+        BR::RangeParameter: UseDefaultParameter,
+    {
         let mut buffer = HashMap::<BR::ValueType, A>::new();
         for (x, y) in iter.into_iter() {
             *buffer.entry(x).or_insert_with(Default::default) += y;
@@ -124,17 +137,20 @@ where
             margin,
             iter: buffer.into_iter(),
             baseline: Box::new(|_| A::default()),
+            br_param: BR::RangeParameter::new(),
             _p: PhantomData,
         }
     }
 
-    pub fn vertical<ACoord, DB: DrawingBackend>(
-        _: &ChartContext<DB, RangedCoord<BR, ACoord>>,
+    pub fn vertical<ACoord, DB: DrawingBackend + 'a>(
+        parent: &ChartContext<DB, RangedCoord<BR, ACoord>>,
     ) -> Self
     where
         ACoord: Ranged<ValueType = A>,
     {
-        Self::empty()
+        let dp = parent.as_coord_spec().x_spec().get_range_parameter();
+
+        Self::empty(dp)
     }
 }
 
@@ -145,12 +161,13 @@ where
     A: AddAssign<A> + Default + 'a,
 {
     pub fn horizontal<ACoord, DB: DrawingBackend>(
-        _: &ChartContext<DB, RangedCoord<ACoord, BR>>,
+        parent: &ChartContext<DB, RangedCoord<ACoord, BR>>,
     ) -> Self
     where
         ACoord: Ranged<ValueType = A>,
     {
-        Self::empty()
+        let dp = parent.as_coord_spec().y_spec().get_range_parameter();
+        Self::empty(dp)
     }
 }
 
@@ -163,8 +180,8 @@ where
     type Item = Rectangle<(BR::ValueType, A)>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((x, y)) = self.iter.next() {
-            let nx = BR::next_value(&x);
-            let base = (self.baseline)(BR::previous_value(&nx));
+            let nx = BR::next_value(&x, &self.br_param);
+            let base = (self.baseline)(BR::previous_value(&nx, &self.br_param));
             let style = (self.style)(&x, &y);
             let mut rect = Rectangle::new([(x, y), (nx, base)], style);
             rect.set_margin(0, 0, self.margin, self.margin);
@@ -183,9 +200,9 @@ where
     type Item = Rectangle<(A, BR::ValueType)>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((y, x)) = self.iter.next() {
-            let ny = BR::next_value(&y);
+            let ny = BR::next_value(&y, &self.br_param);
             // With this trick we can avoid the clone trait bound
-            let base = (self.baseline)(BR::previous_value(&ny));
+            let base = (self.baseline)(BR::previous_value(&ny, &self.br_param));
             let style = (self.style)(&y, &x);
             let mut rect = Rectangle::new([(x, y), (base, ny)], style);
             rect.set_margin(self.margin, self.margin, 0, 0);
