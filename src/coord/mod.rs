@@ -26,6 +26,7 @@ use plotters_backend::BackendCoord;
 mod datetime;
 mod discrete;
 mod group_by;
+mod linspace;
 mod logarithmic;
 mod nested;
 mod numeric;
@@ -46,6 +47,7 @@ pub use ranged::{AsRangedCoord, MeshLine, Ranged, RangedCoord, ReversibleRanged}
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};
 
 pub use discrete::{CentricValues, DiscreteRanged, IntoCentric};
+pub use linspace::{Linspace, LinspaceRounding};
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
