@@ -50,6 +50,12 @@ impl_log_scalable!(f, f64);
 /// The decorator type for a range of a log-scaled value
 pub struct LogRange<V: LogScalable>(pub Range<V>);
 
+impl<V: LogScalable + Clone> Clone for LogRange<V> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
     fn from(range: LogRange<V>) -> LogCoord<V> {
         LogCoord {

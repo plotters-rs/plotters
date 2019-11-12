@@ -40,6 +40,17 @@ pub struct RangedCoord<X: Ranged, Y: Ranged> {
     back_y: (i32, i32),
 }
 
+impl<X: Ranged + Clone, Y: Ranged + Clone> Clone for RangedCoord<X, Y> {
+    fn clone(&self) -> Self {
+        Self {
+            logic_x: self.logic_x.clone(),
+            logic_y: self.logic_y.clone(),
+            back_x: self.back_x,
+            back_y: self.back_y,
+        }
+    }
+}
+
 impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
     /// Create a new ranged value coordinate system
     pub fn new<IntoX: Into<X>, IntoY: Into<Y>>(
@@ -214,6 +225,15 @@ where
 {
 }
 
+impl<D: DiscreteRanged + Clone> Clone for CentricDiscreteRange<D>
+where
+    <D as Ranged>::ValueType: Eq,
+{
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D>
 where
     <D as Ranged>::ValueType: Eq,
@@ -279,6 +299,15 @@ pub trait IntoPartialAxis: AsRangedCoord {
 }
 
 impl<R: AsRangedCoord> IntoPartialAxis for R {}
+
+impl<R: Ranged + Clone> Clone for PartialAxis<R>
+where
+    <R as Ranged>::ValueType: Clone,
+{
+    fn clone(&self) -> Self {
+        PartialAxis(self.0.clone(), self.1.clone())
+    }
+}
 
 impl<R: Ranged> Ranged for PartialAxis<R>
 where

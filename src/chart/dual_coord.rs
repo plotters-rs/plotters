@@ -2,11 +2,12 @@
 use std::borrow::{Borrow, BorrowMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
+use std::sync::Arc;
 
-use super::context::{ChartContext, SeriesAnno};
+use super::context::{ChartContext, ChartState, SeriesAnno};
 use super::mesh::SecondaryMeshStyle;
 
-use crate::coord::{CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate};
+use crate::coord::{CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift};
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::DrawingArea;
 use crate::drawing::DrawingAreaErrorKind;
@@ -16,6 +17,72 @@ use crate::element::{Drawable, PointCollection};
 pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {
     pub(super) primary: ChartContext<'a, DB, CT1>,
     pub(super) secondary: ChartContext<'a, DB, CT2>,
+}
+
+pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
+    primary: ChartState<CT1>,
+    secondary: ChartState<CT2>,
+}
+
+impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    DualCoordChartContext<'a, DB, CT1, CT2>
+{
+    pub fn into_chart_state(self) -> DualCoordChartState<CT1, CT2> {
+        DualCoordChartState {
+            primary: self.primary.into(),
+            secondary: self.secondary.into(),
+        }
+    }
+
+    pub fn into_shared_chart_state(self) -> DualCoordChartState<Arc<CT1>, Arc<CT2>> {
+        DualCoordChartState {
+            primary: self.primary.into_shared_chart_state(),
+            secondary: self.secondary.into_shared_chart_state(),
+        }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    DualCoordChartContext<'a, DB, CT1, CT2>
+where
+    CT1: Clone,
+    CT2: Clone,
+{
+    pub fn to_chart_state(&self) -> DualCoordChartState<CT1, CT2> {
+        DualCoordChartState {
+            primary: self.primary.to_chart_state(),
+            secondary: self.secondary.to_chart_state(),
+        }
+    }
+}
+
+impl<CT1: CoordTranslate, CT2: CoordTranslate> DualCoordChartState<CT1, CT2> {
+    pub fn restore<'a, DB: DrawingBackend + 'a>(
+        self,
+        area: &DrawingArea<DB, Shift>,
+    ) -> DualCoordChartContext<'a, DB, CT1, CT2> {
+        let primary = self.primary.restore(area);
+        let secondary = self
+            .secondary
+            .restore(&primary.plotting_area().strip_coord_spec());
+        DualCoordChartContext { primary, secondary }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    From<DualCoordChartContext<'a, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
+{
+    fn from(chart: DualCoordChartContext<'a, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
+        chart.into_chart_state()
+    }
+}
+
+impl<'a, 'b, DB: DrawingBackend, CT1: CoordTranslate + Clone, CT2: CoordTranslate + Clone>
+    From<&'b DualCoordChartContext<'a, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
+{
+    fn from(chart: &'b DualCoordChartContext<'a, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
+        chart.to_chart_state()
+    }
 }
 
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
@@ -39,6 +106,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
                 y_label_area: secondary_y_label_area,
                 drawing_area: secondary_drawing_area,
                 series_anno: vec![],
+                drawing_area_pos: (0, 0),
             },
         }
     }

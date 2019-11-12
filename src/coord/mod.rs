@@ -44,6 +44,8 @@ pub use ranged::make_partial_axis;
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
 pub use numeric::group_integer_by::{GroupBy, ToGroupByRange};
+use std::rc::Rc;
+use std::sync::Arc;
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
@@ -51,6 +53,22 @@ pub trait CoordTranslate {
 
     /// Translate the guest coordinate to the guest coordinate
     fn translate(&self, from: &Self::From) -> BackendCoord;
+}
+
+impl<T: CoordTranslate> CoordTranslate for Rc<T> {
+    type From = T::From;
+
+    fn translate(&self, from: &Self::From) -> BackendCoord {
+        self.as_ref().translate(from)
+    }
+}
+
+impl<T: CoordTranslate> CoordTranslate for Arc<T> {
+    type From = T::From;
+
+    fn translate(&self, from: &Self::From) -> BackendCoord {
+        self.as_ref().translate(from)
+    }
 }
 
 /// The trait indicates that the coordinate system supports reverse transform

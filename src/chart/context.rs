@@ -2,6 +2,7 @@ use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
+use std::sync::Arc;
 
 use super::dual_coord::DualCoordChartContext;
 use super::mesh::MeshStyle;
@@ -72,6 +73,85 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) y_label_area: [Option<DrawingArea<DB, Shift>>; 2],
     pub(super) drawing_area: DrawingArea<DB, CT>,
     pub(super) series_anno: Vec<SeriesAnno<'a, DB>>,
+    pub(super) drawing_area_pos: (i32, i32),
+}
+
+pub struct ChartState<CT: CoordTranslate> {
+    drawing_area_pos: (i32, i32),
+    drawing_area_size: (u32, u32),
+    coord: CT,
+}
+
+impl<'a, CT: CoordTranslate + Clone> Clone for ChartState<CT> {
+    fn clone(&self) -> Self {
+        Self {
+            drawing_area_size: self.drawing_area_size,
+            drawing_area_pos: self.drawing_area_pos,
+            coord: self.coord.clone(),
+        }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> for ChartState<CT> {
+    fn from(chart: ChartContext<'a, DB, CT>) -> ChartState<CT> {
+        ChartState {
+            drawing_area_pos: chart.drawing_area_pos,
+            drawing_area_size: chart.drawing_area.dim_in_pixel(),
+            coord: chart.drawing_area.into_coord_spec(),
+        }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    pub fn into_chart_state(self) -> ChartState<CT> {
+        self.into()
+    }
+
+    pub fn into_shared_chart_state(self) -> ChartState<Arc<CT>> {
+        ChartState {
+            drawing_area_pos: self.drawing_area_pos,
+            drawing_area_size: self.drawing_area.dim_in_pixel(),
+            coord: Arc::new(self.drawing_area.into_coord_spec()),
+        }
+    }
+}
+
+impl<'a, 'b, DB, CT> From<&ChartContext<'a, DB, CT>> for ChartState<CT>
+where
+    DB: DrawingBackend,
+    CT: CoordTranslate + Clone,
+{
+    fn from(chart: &ChartContext<'a, DB, CT>) -> ChartState<CT> {
+        ChartState {
+            drawing_area_pos: chart.drawing_area_pos,
+            drawing_area_size: chart.drawing_area.dim_in_pixel(),
+            coord: chart.drawing_area.as_coord_spec().clone(),
+        }
+    }
+}
+
+impl<'a, DB: DrawingBackend, CT: CoordTranslate + Clone> ChartContext<'a, DB, CT> {
+    pub fn to_chart_state(&self) -> ChartState<CT> {
+        self.into()
+    }
+}
+
+impl<CT: CoordTranslate> ChartState<CT> {
+    pub fn restore<'a, DB: DrawingBackend>(
+        self,
+        area: &DrawingArea<DB, Shift>,
+    ) -> ChartContext<'a, DB, CT> {
+        let area = area
+            .clone()
+            .shrink(self.drawing_area_pos, self.drawing_area_size);
+        ChartContext {
+            x_label_area: [None, None],
+            y_label_area: [None, None],
+            drawing_area: area.apply_coord_spec(self.coord),
+            series_anno: vec![],
+            drawing_area_pos: self.drawing_area_pos,
+        }
+    }
 }
 
 impl<
@@ -171,6 +251,45 @@ impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT>
     pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
         let coord_spec = self.drawing_area.into_coord_spec();
         move |coord| coord_spec.reverse_translate(coord)
+    }
+}
+
+impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Arc<RangedCoord<X, Y>>> {
+    pub(super) fn draw_series_impl<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        E: Drawable<DB>,
+        R: Borrow<E>,
+        S: IntoIterator<Item = R>,
+    {
+        for element in series {
+            self.drawing_area.draw(element.borrow())?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn alloc_series_anno(&mut self) -> &mut SeriesAnno<'a, DB> {
+        let idx = self.series_anno.len();
+        self.series_anno.push(SeriesAnno::new());
+        &mut self.series_anno[idx]
+    }
+
+    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
+    pub fn draw_series<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<&mut SeriesAnno<'a, DB>, DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        E: Drawable<DB>,
+        R: Borrow<E>,
+        S: IntoIterator<Item = R>,
+    {
+        self.draw_series_impl(series)?;
+        Ok(self.alloc_series_anno())
     }
 }
 
