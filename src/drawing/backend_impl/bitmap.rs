@@ -101,6 +101,7 @@ enum Buffer<'a> {
 }
 
 impl<'a> Buffer<'a> {
+    #[inline(always)]
     fn borrow_buffer(&mut self) -> &mut [u8] {
         match self {
             #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
@@ -110,126 +111,37 @@ impl<'a> Buffer<'a> {
     }
 }
 
-/// The backend that drawing a bitmap
-pub struct BitMapBackend<'a> {
-    /// The path to the image
-    #[allow(dead_code)]
-    target: Target<'a>,
-    /// The size of the image
-    size: (u32, u32),
-    /// The data buffer of the image
-    buffer: Buffer<'a>,
-    /// Flag indicates if the bitmap has been saved
-    saved: bool,
-}
 
-impl<'a> BitMapBackend<'a> {
-    const PIXEL_SIZE: usize = 3;
-}
-
-impl<'a> BitMapBackend<'a> {
-    /// Create a new bitmap backend
-    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
-        Self {
-            target: Target::File(path.as_ref()),
-            size: (w, h),
-            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
-            saved: false,
-        }
-    }
-
-    /// Create a new bitmap backend that generate GIF animation
-    ///
-    /// When this is used, the bitmap backend acts similar to a real-time rendering backend.
-    /// When the program finished drawing one frame, use `present` function to flush the frame
-    /// into the GIF file.
-    ///
-    /// - `path`: The path to the GIF file to create
-    /// - `dimension`: The size of the GIF image
-    /// - `speed`: The amount of time for each frame to display
-    #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
-    pub fn gif<T: AsRef<Path>>(
-        path: T,
-        (w, h): (u32, u32),
-        frame_delay: u32,
-    ) -> Result<Self, BitMapBackendError> {
-        Ok(Self {
-            target: Target::Gif(Box::new(gif_support::GifFile::new(
-                path,
-                (w, h),
-                frame_delay,
-            )?)),
-            size: (w, h),
-            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
-            saved: false,
-        })
-    }
-
-    /// Create a new bitmap backend which only lives in-memory
-    ///
-    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
-    /// Plotters uses RGB pixel format
-    ///
-    /// - `buf`: The buffer to operate
-    /// - `dimension`: The size of the image in pixels
-    pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
-        if (w * h) as usize * Self::PIXEL_SIZE > buf.len() {
-            // TODO: This doesn't deserve a panic.
-            panic!(
-                "Wrong image size: H = {}, W = {}, BufSize = {}",
-                w,
-                h,
-                buf.len()
-            );
-        }
-
-        Self {
-            target: Target::Buffer(PhantomData),
-            size: (w, h),
-            buffer: Buffer::Borrowed(buf),
-            saved: false,
-        }
-    }
-
-    fn get_raw_pixel_buffer(&mut self) -> &mut [u8] {
-        self.buffer.borrow_buffer()
-    }
-
-    /// Split a bitmap backend vertically into several sub drawing area which allows
-    /// multi-threading rendering.
-    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend> {
-        let (w, h) = self.get_size();
-        let buf = self.get_raw_pixel_buffer();
-
-        let base_addr = &mut buf[0] as *mut u8;
-        let mut split_points = vec![0];
-        for size in area_size {
-            let next = split_points.last().unwrap() + size;
-            if next >= h {
-                break;
-            }
-            split_points.push(next);
-        }
-        split_points.push(h);
-
-        split_points
-            .iter()
-            .zip(split_points.iter().skip(1))
-            .map(|(begin, end)| {
-                let actual_buf = unsafe {
-                    std::slice::from_raw_parts_mut(
-                        base_addr.offset((begin * w) as isize * Self::PIXEL_SIZE as isize),
-                        ((end - begin) * w) as usize * Self::PIXEL_SIZE,
-                    )
-                };
-                Self::with_buffer(actual_buf, (w, end - begin))
-            })
-            .collect()
-    }
-
+pub trait PixelFormat:Sized {
+    const PIXEL_SIZE: usize;
     fn blend_rect_fast(
-        &mut self,
+        target: &mut BitMapBackend<'_, Self>,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+        a: f64,
+    );
+
+    fn fill_vertical_line_fast(target: &mut BitMapBackend<'_, Self>, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8);
+    
+    fn fill_rect_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    );
+}
+
+pub struct RGB;
+
+impl PixelFormat for RGB {
+    const PIXEL_SIZE:usize = 3;
+    fn blend_rect_fast(
+        target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
         bottom_right: (i32, i32),
         r: u8,
@@ -237,7 +149,7 @@ impl<'a> BitMapBackend<'a> {
         b: u8,
         a: f64,
     ) {
-        let (w, h) = self.get_size();
+        let (w, h) = target.get_size();
         let a = a.min(1.0).max(0.0);
         if a == 0.0 {
             return;
@@ -258,7 +170,7 @@ impl<'a> BitMapBackend<'a> {
             return;
         }
 
-        let dst = self.get_raw_pixel_buffer();
+        let dst = target.get_raw_pixel_buffer();
 
         let af = a;
         let a = (255.9 * a).floor() as u64;
@@ -318,9 +230,9 @@ impl<'a> BitMapBackend<'a> {
             }
         }
     }
-
-    fn fill_vertical_line_fast(&mut self, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8) {
-        let (w, h) = self.get_size();
+    
+    fn fill_vertical_line_fast(target: &mut BitMapBackend<'_, Self>, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8) {
+        let (w, h) = target.get_size();
         let w = w as i32;
         let h = h as i32;
 
@@ -329,7 +241,7 @@ impl<'a> BitMapBackend<'a> {
             return;
         }
 
-        let dst = self.get_raw_pixel_buffer();
+        let dst = target.get_raw_pixel_buffer();
         let (mut y0, mut y1) = ys;
         if y0 > y1 {
             std::mem::swap(&mut y0, &mut y1);
@@ -344,16 +256,16 @@ impl<'a> BitMapBackend<'a> {
             dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = b;
         }
     }
-
+    
     fn fill_rect_fast(
-        &mut self,
+        target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
         bottom_right: (i32, i32),
         r: u8,
         g: u8,
         b: u8,
     ) {
-        let (w, h) = self.get_size();
+        let (w, h) = target.get_size();
         let (x0, y0) = (
             upper_left.0.min(bottom_right.0).max(0),
             upper_left.1.min(bottom_right.1).max(0),
@@ -369,7 +281,7 @@ impl<'a> BitMapBackend<'a> {
             return;
         }
 
-        let dst = self.get_raw_pixel_buffer();
+        let dst = target.get_raw_pixel_buffer();
 
         if r == g && g == b {
             // If r == g == b, then we can use memset
@@ -436,9 +348,142 @@ impl<'a> BitMapBackend<'a> {
             }
         }
     }
+
 }
 
-impl<'a> DrawingBackend for BitMapBackend<'a> {
+/// The backend that drawing a bitmap
+pub struct BitMapBackend<'a, P:PixelFormat = RGB> {
+    /// The path to the image
+    #[allow(dead_code)]
+    target: Target<'a>,
+    /// The size of the image
+    size: (u32, u32),
+    /// The data buffer of the image
+    buffer: Buffer<'a>,
+    /// Flag indicates if the bitmap has been saved
+    saved: bool,
+
+    _pantomdata: PhantomData<P>,
+}
+
+impl<'a, P:PixelFormat> BitMapBackend<'a, P> {
+    const PIXEL_SIZE: usize = P::PIXEL_SIZE;
+}
+
+impl <'a> BitMapBackend<'a, RGB> {
+    /// Create a new bitmap backend
+    #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
+        Self {
+            target: Target::File(path.as_ref()),
+            size: (w, h),
+            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
+            saved: false,
+            _pantomdata: PhantomData,
+        }
+    }
+
+    /// Create a new bitmap backend that generate GIF animation
+    ///
+    /// When this is used, the bitmap backend acts similar to a real-time rendering backend.
+    /// When the program finished drawing one frame, use `present` function to flush the frame
+    /// into the GIF file.
+    ///
+    /// - `path`: The path to the GIF file to create
+    /// - `dimension`: The size of the GIF image
+    /// - `speed`: The amount of time for each frame to display
+    #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
+    pub fn gif<T: AsRef<Path>>(
+        path: T,
+        (w, h): (u32, u32),
+        frame_delay: u32,
+    ) -> Result<Self, BitMapBackendError> {
+        Ok(Self {
+            target: Target::Gif(Box::new(gif_support::GifFile::new(
+                path,
+                (w, h),
+                frame_delay,
+            )?)),
+            size: (w, h),
+            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
+            saved: false,
+            _pantomdata: PhantomData,
+        })
+    }
+
+    pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
+        Self::with_buffer_and_format(buf, (w, h))
+    }
+}
+
+impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
+    /// Create a new bitmap backend which only lives in-memory
+    ///
+    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
+    /// Plotters uses RGB pixel format
+    ///
+    /// - `buf`: The buffer to operate
+    /// - `dimension`: The size of the image in pixels
+    pub fn with_buffer_and_format(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
+        if (w * h) as usize * Self::PIXEL_SIZE > buf.len() {
+            // TODO: This doesn't deserve a panic.
+            panic!(
+                "Wrong image size: H = {}, W = {}, BufSize = {}",
+                w,
+                h,
+                buf.len()
+            );
+        }
+
+        Self {
+            target: Target::Buffer(PhantomData),
+            size: (w, h),
+            buffer: Buffer::Borrowed(buf),
+            saved: false,
+            _pantomdata: PhantomData,
+        }
+    }
+
+    #[inline(always)]
+    fn get_raw_pixel_buffer(&mut self) -> &mut [u8] {
+        self.buffer.borrow_buffer()
+    }
+
+    /// Split a bitmap backend vertically into several sub drawing area which allows
+    /// multi-threading rendering.
+    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<P>> {
+        let (w, h) = self.get_size();
+        let buf = self.get_raw_pixel_buffer();
+
+        let base_addr = &mut buf[0] as *mut u8;
+        let mut split_points = vec![0];
+        for size in area_size {
+            let next = split_points.last().unwrap() + size;
+            if next >= h {
+                break;
+            }
+            split_points.push(next);
+        }
+        split_points.push(h);
+
+        split_points
+            .iter()
+            .zip(split_points.iter().skip(1))
+            .map(|(begin, end)| {
+                let actual_buf = unsafe {
+                    std::slice::from_raw_parts_mut(
+                        base_addr.offset((begin * w) as isize * Self::PIXEL_SIZE as isize),
+                        ((end - begin) * w) as usize * Self::PIXEL_SIZE,
+                    )
+                };
+                Self::with_buffer_and_format(actual_buf, (w, end - begin))
+            })
+            .collect()
+    }
+
+}
+
+impl<'a, P:PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
     type ErrorType = BitMapBackendError;
 
     fn get_size(&self) -> (u32, u32) {
@@ -532,12 +577,12 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         if from.0 == to.0 || from.1 == to.1 {
             if alpha >= 1.0 {
                 if from.1 == to.1 {
-                    self.fill_rect_fast(from, to, r, g, b);
+                    P::fill_rect_fast(self, from, to, r, g, b);
                 } else {
-                    self.fill_vertical_line_fast(from.0, (from.1, to.1), r, g, b);
+                    P::fill_vertical_line_fast(self, from.0, (from.1, to.1), r, g, b);
                 }
             } else {
-                self.blend_rect_fast(from, to, r, g, b, alpha);
+                P::blend_rect_fast(self, from, to, r, g, b, alpha);
             }
             return Ok(());
         }
@@ -556,9 +601,9 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let (r, g, b) = style.as_color().rgb();
         if fill {
             if alpha >= 1.0 {
-                self.fill_rect_fast(upper_left, bottom_right, r, g, b);
+                P::fill_rect_fast(self, upper_left, bottom_right, r, g, b);
             } else {
-                self.blend_rect_fast(upper_left, bottom_right, r, g, b, alpha);
+                P::blend_rect_fast(self, upper_left, bottom_right, r, g, b, alpha);
             }
             return Ok(());
         }
@@ -612,7 +657,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
     }
 }
 
-impl Drop for BitMapBackend<'_> {
+impl <P:PixelFormat> Drop for BitMapBackend<'_, P> {
     fn drop(&mut self) {
         if !self.saved {
             self.present().expect("Unable to save the bitmap");
