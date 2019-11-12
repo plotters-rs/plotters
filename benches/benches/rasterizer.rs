@@ -49,6 +49,17 @@ fn fill_background(c: &mut Criterion) {
     });
 }
 
+fn blend_background(c: &mut Criterion) {
+    let mut buffer = vec![0; (W * H * 3) as usize];
+
+    c.bench_function("rasterizer::blend_background", |b| {
+        b.iter(|| {
+            let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            root.fill(&WHITE.mix(0.1)).unwrap();
+        })
+    });
+}
+
 fn fill_circle(c: &mut Criterion) {
     let mut buffer = vec![0; (W * H * 3) as usize];
 
@@ -97,10 +108,11 @@ criterion_group! {
     name = rasterizer_group;
     config = Criterion::default();
     targets =
+        blend_background,
         draw_pixel,
         draw_line,
         fill_background,
         fill_circle,
         fill_background_red,
-        fill_hexagon
+        fill_hexagon,
 }
