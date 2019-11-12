@@ -124,13 +124,17 @@ pub struct BitMapBackend<'a> {
 }
 
 impl<'a> BitMapBackend<'a> {
+    const PIXEL_SIZE: usize = 3;
+}
+
+impl<'a> BitMapBackend<'a> {
     /// Create a new bitmap backend
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
         Self {
             target: Target::File(path.as_ref()),
             size: (w, h),
-            buffer: Buffer::Owned(vec![0; (3 * w * h) as usize]),
+            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
         }
     }
@@ -157,7 +161,7 @@ impl<'a> BitMapBackend<'a> {
                 frame_delay,
             )?)),
             size: (w, h),
-            buffer: Buffer::Owned(vec![0; (3 * w * h) as usize]),
+            buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
         })
     }
@@ -170,7 +174,7 @@ impl<'a> BitMapBackend<'a> {
     /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
     pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
-        if (w * h * 3) as usize > buf.len() {
+        if (w * h) as usize * Self::PIXEL_SIZE > buf.len() {
             // TODO: This doesn't deserve a panic.
             panic!(
                 "Wrong image size: H = {}, W = {}, BufSize = {}",
@@ -215,8 +219,8 @@ impl<'a> BitMapBackend<'a> {
             .map(|(begin, end)| {
                 let actual_buf = unsafe {
                     std::slice::from_raw_parts_mut(
-                        base_addr.offset((begin * w * 3) as isize),
-                        ((end - begin) * w * 3) as usize,
+                        base_addr.offset((begin * w) as isize * Self::PIXEL_SIZE as isize),
+                        ((end - begin) * w) as usize * Self::PIXEL_SIZE,
                     )
                 };
                 Self::with_buffer(actual_buf, (w, end - begin))
@@ -259,7 +263,8 @@ impl<'a> BitMapBackend<'a> {
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
             let count = (x1 - x0 + 1) as usize;
-            let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
+            let mut iter =
+                dst[(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)].iter_mut();
             for _ in 0..(x1 - x0 + 1) {
                 blend(iter.next().unwrap(), r, a);
                 blend(iter.next().unwrap(), g, a);
@@ -288,9 +293,9 @@ impl<'a> BitMapBackend<'a> {
         y1 = y1.min(h - 1);
         // This is ok because once y0 > y1, there won't be any iteration anymore
         for y in y0..=y1 {
-            dst[(y * w + x) as usize * 3] = r;
-            dst[(y * w + x) as usize * 3 + 1] = g;
-            dst[(y * w + x) as usize * 3 + 2] = b;
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE] = r;
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 1] = g;
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = b;
         }
     }
 
@@ -328,13 +333,14 @@ impl<'a> BitMapBackend<'a> {
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
                     let count = (x1 - x0 + 1) as usize;
-                    dst[(start * 3)..((start + count) * 3)]
+                    dst[(start * 3)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut()
                         .for_each(|e| *e = r);
                 }
             } else {
                 // If the entire memory block is going to be filled, just use single memset
-                dst[(3 * y0 * w as i32) as usize..(3 * (y1 + 1) * w as i32) as usize]
+                dst[(3 * y0 * w as i32) as usize
+                    ..((y1 + 1) * w as i32) as usize * Self::PIXEL_SIZE]
                     .iter_mut()
                     .for_each(|e| *e = r);
             }
@@ -343,7 +349,9 @@ impl<'a> BitMapBackend<'a> {
             if count < 8 {
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
-                    let mut iter = dst[(start * 3)..((start + count) * 3)].iter_mut();
+                    let mut iter = dst
+                        [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
+                        .iter_mut();
                     for _ in 0..(x1 - x0 + 1) {
                         *iter.next().unwrap() = r;
                         *iter.next().unwrap() = g;
@@ -353,7 +361,7 @@ impl<'a> BitMapBackend<'a> {
             } else {
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
-                    let start_ptr = &mut dst[start * 3] as *mut u8 as *mut [u8; 24];
+                    let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 24];
                     let slice =
                         unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 8) };
                     for p in slice.iter_mut() {
@@ -374,9 +382,9 @@ impl<'a> BitMapBackend<'a> {
                     }
 
                     for idx in (slice.len() * 8)..count {
-                        dst[start * 3 + idx * 3] = r;
-                        dst[start * 3 + idx * 3 + 1] = g;
-                        dst[start * 3 + idx * 3 + 2] = b;
+                        dst[start * 3 + idx * Self::PIXEL_SIZE] = r;
+                        dst[start * 3 + idx * Self::PIXEL_SIZE + 1] = g;
+                        dst[start * 3 + idx * Self::PIXEL_SIZE + 2] = b;
                     }
                 }
             }
@@ -448,7 +456,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let (x, y) = (point.0 as usize, point.1 as usize);
         let w = w as usize;
 
-        let base = (y * w + x) * 3;
+        let base = (y * w + x) * Self::PIXEL_SIZE;
 
         if base < buf.len() {
             unsafe {
@@ -533,11 +541,12 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         let dst_gap = dw as usize - chunk_size;
         let src_gap = sw as usize - chunk_size;
 
-        let dst_start = 3 * (y0 as usize * dw as usize + x0 as usize);
+        let dst_start = Self::PIXEL_SIZE * (y0 as usize * dw as usize + x0 as usize);
 
         let mut dst = &mut self.get_raw_pixel_buffer()[dst_start..];
 
-        let src_start = 3 * ((sh as i32 + y0 - y1) * sw as i32 + (sw as i32 + x0 - x1)) as usize;
+        let src_start =
+            Self::PIXEL_SIZE * ((sh as i32 + y0 - y1) * sw as i32 + (sw as i32 + x0 - x1)) as usize;
         let mut src = &src[src_start..];
 
         if src_gap == 0 && dst_gap == 0 {
@@ -545,10 +554,11 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
             num_chunks = 1;
         }
         for i in 0..num_chunks {
-            dst[0..(chunk_size * 3)].copy_from_slice(&src[0..(chunk_size * 3)]);
+            dst[0..(chunk_size * Self::PIXEL_SIZE)]
+                .copy_from_slice(&src[0..(chunk_size * Self::PIXEL_SIZE)]);
             if i != num_chunks - 1 {
-                dst = &mut dst[((chunk_size + dst_gap) * 3)..];
-                src = &src[((chunk_size + src_gap) * 3)..];
+                dst = &mut dst[((chunk_size + dst_gap) * Self::PIXEL_SIZE)..];
+                src = &src[((chunk_size + src_gap) * Self::PIXEL_SIZE)..];
             }
         }
 
