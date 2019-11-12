@@ -28,8 +28,8 @@ impl std::fmt::Display for BitMapBackendError {
 
 impl std::error::Error for BitMapBackendError {}
 
-fn blend(prev: &mut u8, new: u8, a: u8) {
-    *prev = (*prev as i32 + (new as i32 - *prev as i32) * a as i32 / 256) as u8;
+fn blend(prev: &mut u8, new: u8, a: f64) {
+    *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
 }
 
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
@@ -260,6 +260,7 @@ impl<'a> BitMapBackend<'a> {
 
         let dst = self.get_raw_pixel_buffer();
 
+        let af = a;
         let a = (255.9 * a).floor() as u64;
 
         // Since we should always make sure the RGB payload occupies the logic lower bits
@@ -311,9 +312,9 @@ impl<'a> BitMapBackend<'a> {
                 ..((start + count) * Self::PIXEL_SIZE)]
                 .iter_mut();
             for _ in (slice.len() * 8)..count {
-                blend(iter.next().unwrap(), r, a as u8);
-                blend(iter.next().unwrap(), g, a as u8);
-                blend(iter.next().unwrap(), b, a as u8);
+                blend(iter.next().unwrap(), r, af);
+                blend(iter.next().unwrap(), g, af);
+                blend(iter.next().unwrap(), b, af);
             }
         }
     }
@@ -493,7 +494,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         }
 
         let (w, _) = self.get_size();
-        let alpha = (color.alpha() * 255.9).floor() as u8;
+        let alpha = color.alpha();
         let rgb = color.rgb();
 
         let buf = self.get_raw_pixel_buffer();
@@ -505,7 +506,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         if base < buf.len() {
             unsafe {
-                if alpha >= 255 {
+                if alpha >= 1.0 {
                     *buf.get_unchecked_mut(base) = rgb.0;
                     *buf.get_unchecked_mut(base + 1) = rgb.1;
                     *buf.get_unchecked_mut(base + 2) = rgb.2;
