@@ -177,9 +177,14 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             );
         }
 
-        if let Some((ref title, ref style)) = self.title {
+        let (title_dx, title_dy) = if let Some((ref title, ref style)) = self.title {
+            let (origin_dx, origin_dy) = drawing_area.get_base_pixel();
             drawing_area = drawing_area.titled(title, style.clone())?;
-        }
+            let (current_dx, current_dy) = drawing_area.get_base_pixel();
+            (current_dx - origin_dx, current_dy - origin_dy)
+        } else {
+            (0, 0)
+        };
 
         let (w, h) = drawing_area.dim_in_pixel();
 
@@ -260,7 +265,10 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
                 pixel_range,
             )),
             series_anno: vec![],
-            drawing_area_pos: (actual_drawing_area_pos[2], actual_drawing_area_pos[0]),
+            drawing_area_pos: (
+                actual_drawing_area_pos[2] + title_dx,
+                actual_drawing_area_pos[0] + title_dy,
+            ),
         })
     }
 }

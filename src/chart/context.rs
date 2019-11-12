@@ -245,6 +245,45 @@ impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT>
     }
 }
 
+impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Arc<RangedCoord<X, Y>>> {
+    pub(super) fn draw_series_impl<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        E: Drawable<DB>,
+        R: Borrow<E>,
+        S: IntoIterator<Item = R>,
+    {
+        for element in series {
+            self.drawing_area.draw(element.borrow())?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn alloc_series_anno(&mut self) -> &mut SeriesAnno<'a, DB> {
+        let idx = self.series_anno.len();
+        self.series_anno.push(SeriesAnno::new());
+        &mut self.series_anno[idx]
+    }
+
+    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
+    pub fn draw_series<E, R, S>(
+        &mut self,
+        series: S,
+    ) -> Result<&mut SeriesAnno<'a, DB>, DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        E: Drawable<DB>,
+        R: Borrow<E>,
+        S: IntoIterator<Item = R>,
+    {
+        self.draw_series_impl(series)?;
+        Ok(self.alloc_series_anno())
+    }
+}
+
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCoord<X, Y>> {
     /// Get the range of X axis
     pub fn x_range(&self) -> Range<X::ValueType> {
