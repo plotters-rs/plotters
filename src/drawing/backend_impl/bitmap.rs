@@ -28,8 +28,8 @@ impl std::fmt::Display for BitMapBackendError {
 
 impl std::error::Error for BitMapBackendError {}
 
-fn blend(prev: &mut u8, new: u8, a: f64) {
-    *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
+fn blend(prev: &mut u8, new: u8, a: u8) {
+    *prev = (*prev as i32 + (new as i32 - *prev as i32) * a as i32 / 256) as u8;
 }
 
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
@@ -260,15 +260,60 @@ impl<'a> BitMapBackend<'a> {
 
         let dst = self.get_raw_pixel_buffer();
 
+        let a = (255.9 * a).floor() as u64;
+
+        // Since we should always make sure the RGB payload occupies the logic lower bits
+        // thus, this type purning should work for both LE and BE CPUs
+        let (p1, p2, p3): (u64, u64, u64) = unsafe {
+            std::mem::transmute([
+                r as u16, b as u16, g as u16, r as u16, // QW1
+                b as u16, g as u16, r as u16, b as u16, // QW2
+                g as u16, r as u16, b as u16, g as u16, // QW3
+            ])
+        };
+
+        let (q1, q2, q3): (u64, u64, u64) = unsafe {
+            std::mem::transmute([
+                g as u16, r as u16, b as u16, g as u16, // QW1
+                r as u16, b as u16, g as u16, r as u16, // QW2
+                b as u16, g as u16, r as u16, b as u16, // QW3
+            ])
+        };
+
+        const N: u64 = 0xff00ff00ff00ff00;
+        const M: u64 = 0x00ff00ff00ff00ff;
+
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
             let count = (x1 - x0 + 1) as usize;
-            let mut iter =
-                dst[(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)].iter_mut();
-            for _ in 0..(x1 - x0 + 1) {
-                blend(iter.next().unwrap(), r, a);
-                blend(iter.next().unwrap(), g, a);
-                blend(iter.next().unwrap(), b, a);
+
+            let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 24];
+            let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 8) };
+            for p in slice.iter_mut() {
+                let ptr = p as *mut [u8; 24] as *mut (u64, u64, u64);
+                let (d1, d2, d3) = unsafe { *ptr };
+
+                let (mut h1, mut h2, mut h3) = ((d1 >> 8) & M, (d2 >> 8) & M, (d3 >> 8) & M);
+                let (mut l1, mut l2, mut l3) = (d1 & M, d2 & M, d3 & M);
+                h1 = (h1 * (255 - a) + q1 * a) & N;
+                h2 = (h2 * (255 - a) + q2 * a) & N;
+                h3 = (h3 * (255 - a) + q3 * a) & N;
+                l1 = ((l1 * (255 - a) + p1 * a) & N) >> 8;
+                l2 = ((l2 * (255 - a) + p2 * a) & N) >> 8;
+                l3 = ((l3 * (255 - a) + p3 * a) & N) >> 8;
+
+                unsafe {
+                    *ptr = (h1 | l1, h2 | l2, h3 | l3);
+                }
+            }
+
+            let mut iter = dst[((start + slice.len() * 8) * Self::PIXEL_SIZE)
+                ..((start + count) * Self::PIXEL_SIZE)]
+                .iter_mut();
+            for _ in (slice.len() * 8)..count {
+                blend(iter.next().unwrap(), r, a as u8);
+                blend(iter.next().unwrap(), g, a as u8);
+                blend(iter.next().unwrap(), b, a as u8);
             }
         }
     }
@@ -448,7 +493,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
         }
 
         let (w, _) = self.get_size();
-        let alpha = color.alpha();
+        let alpha = (color.alpha() * 255.9).floor() as u8;
         let rgb = color.rgb();
 
         let buf = self.get_raw_pixel_buffer();
@@ -460,7 +505,7 @@ impl<'a> DrawingBackend for BitMapBackend<'a> {
 
         if base < buf.len() {
             unsafe {
-                if alpha >= 1.0 {
+                if alpha >= 255 {
                     *buf.get_unchecked_mut(base) = rgb.0;
                     *buf.get_unchecked_mut(base + 1) = rgb.1;
                     *buf.get_unchecked_mut(base + 2) = rgb.2;
