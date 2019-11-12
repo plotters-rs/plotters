@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest (?)
+
+### Improved
+
+- Faster bitmap blending algorithm, which is 5x faster than the original one.
+
 ## Plotters 0.2.11 (2019-10-27)
 
 ### Added
