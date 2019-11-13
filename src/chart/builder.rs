@@ -246,7 +246,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         }
 
         let mut pixel_range = drawing_area.get_pixel_range();
-        pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
+        pixel_range.1 = (pixel_range.1.end - 1)..(pixel_range.1.start - 1);
 
         let mut x_label_area = [None, None];
         let mut y_label_area = [None, None];

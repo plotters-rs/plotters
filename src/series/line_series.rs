@@ -44,7 +44,7 @@ mod test {
                 assert_eq!(c, RED.to_rgba());
                 assert_eq!(s, 3);
                 for i in 0..100 {
-                    assert_eq!(path[i], (i as i32 * 2, 200 - i as i32 * 2));
+                    assert_eq!(path[i], (i as i32 * 2, 200 - i as i32 * 2 - 1));
                 }
             });
 
