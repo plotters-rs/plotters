@@ -28,8 +28,12 @@ impl std::fmt::Display for BitMapBackendError {
 
 impl std::error::Error for BitMapBackendError {}
 
-fn blend(prev: &mut u8, new: u8, a: f64) {
-    *prev = ((f64::from(*prev)) * (1.0 - a) + a * f64::from(new)).min(255.0) as u8;
+fn blend(prev: &mut u8, new: u8, a: u64) {
+    if new > *prev {
+        *prev += ((new - *prev) as u64 * a / 256) as u8
+    } else {
+        *prev -= ((*prev - new) as u64 * a / 256) as u8
+    }
 }
 
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
@@ -183,6 +187,7 @@ impl PixelFormat for RGBPixel {
                     *buf.get_unchecked_mut(base + 1) = rgb.1;
                     *buf.get_unchecked_mut(base + 2) = rgb.2;
                 } else {
+                    let alpha = (alpha * 256.0).floor() as u64;
                     blend(buf.get_unchecked_mut(base), rgb.0, alpha);
                     blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
                     blend(buf.get_unchecked_mut(base + 2), rgb.2, alpha);
@@ -223,8 +228,7 @@ impl PixelFormat for RGBPixel {
 
         let dst = target.get_raw_pixel_buffer();
 
-        let af = a;
-        let a = (255.9 * a).floor() as u64;
+        let a = (256.0 * a).floor() as u64;
 
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
@@ -263,22 +267,22 @@ impl PixelFormat for RGBPixel {
 
                 #[cfg(target_endian = "little")]
                 {
-                    h1 = (h1 * (255 - a) + q1 * a) & N;
-                    h2 = (h2 * (255 - a) + q2 * a) & N;
-                    h3 = (h3 * (255 - a) + q3 * a) & N;
-                    l1 = ((l1 * (255 - a) + p1 * a) & N) >> 8;
-                    l2 = ((l2 * (255 - a) + p2 * a) & N) >> 8;
-                    l3 = ((l3 * (255 - a) + p3 * a) & N) >> 8;
+                    h1 = (h1 * (256 - a) + q1 * a) & N;
+                    h2 = (h2 * (256 - a) + q2 * a) & N;
+                    h3 = (h3 * (256 - a) + q3 * a) & N;
+                    l1 = ((l1 * (256 - a) + p1 * a) & N) >> 8;
+                    l2 = ((l2 * (256 - a) + p2 * a) & N) >> 8;
+                    l3 = ((l3 * (256 - a) + p3 * a) & N) >> 8;
                 }
 
                 #[cfg(target_endian = "big")]
                 {
-                    h1 = (h1 * (255 - a) + p1 * a) & N;
-                    h2 = (h2 * (255 - a) + p2 * a) & N;
-                    h3 = (h3 * (255 - a) + p3 * a) & N;
-                    l1 = ((l1 * (255 - a) + q1 * a) & N) >> 8;
-                    l2 = ((l2 * (255 - a) + q2 * a) & N) >> 8;
-                    l3 = ((l3 * (255 - a) + q3 * a) & N) >> 8;
+                    h1 = (h1 * (256 - a) + p1 * a) & N;
+                    h2 = (h2 * (256 - a) + p2 * a) & N;
+                    h3 = (h3 * (256 - a) + p3 * a) & N;
+                    l1 = ((l1 * (256 - a) + q1 * a) & N) >> 8;
+                    l2 = ((l2 * (256 - a) + q2 * a) & N) >> 8;
+                    l3 = ((l3 * (256 - a) + q3 * a) & N) >> 8;
                 }
 
                 unsafe {
@@ -290,9 +294,9 @@ impl PixelFormat for RGBPixel {
                 ..((start + count) * Self::PIXEL_SIZE)]
                 .iter_mut();
             for _ in (slice.len() * 8)..count {
-                blend(iter.next().unwrap(), r, af);
-                blend(iter.next().unwrap(), g, af);
-                blend(iter.next().unwrap(), b, af);
+                blend(iter.next().unwrap(), r, a);
+                blend(iter.next().unwrap(), g, a);
+                blend(iter.next().unwrap(), b, a);
             }
         }
     }
@@ -446,6 +450,7 @@ impl PixelFormat for BGRXPixel {
                     *buf.get_unchecked_mut(base + 1) = rgb.1;
                     *buf.get_unchecked_mut(base + 2) = rgb.0;
                 } else {
+                    let alpha = (256.0 * alpha).floor() as u64;
                     blend(buf.get_unchecked_mut(base), rgb.2, alpha);
                     blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
                     blend(buf.get_unchecked_mut(base + 2), rgb.0, alpha);
@@ -486,8 +491,7 @@ impl PixelFormat for BGRXPixel {
 
         let dst = target.get_raw_pixel_buffer();
 
-        let af = a;
-        let a = (255.9 * a).floor() as u64;
+        let a = (256.0 * a).floor() as u64;
 
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
@@ -522,14 +526,14 @@ impl PixelFormat for BGRXPixel {
 
                 #[cfg(target_endian = "little")]
                 {
-                    h = (h * (255 - a) + q * a) & N;
-                    l = ((l * (255 - a) + p * a) & N) >> 8;
+                    h = (h * (256 - a) + q * a) & N;
+                    l = ((l * (256 - a) + p * a) & N) >> 8;
                 }
 
                 #[cfg(target_endian = "big")]
                 {
-                    h = (h * (255 - a) + p * a) & N;
-                    l = ((l * (255 - a) + q * a) & N) >> 8;
+                    h = (h * (256 - a) + p * a) & N;
+                    l = ((l * (256 - a) + q * a) & N) >> 8;
                 }
 
                 unsafe {
@@ -541,9 +545,10 @@ impl PixelFormat for BGRXPixel {
                 ..((start + count) * Self::PIXEL_SIZE)]
                 .iter_mut();
             for _ in (slice.len() * 2)..count {
-                blend(iter.next().unwrap(), b, af);
-                blend(iter.next().unwrap(), g, af);
-                blend(iter.next().unwrap(), r, af);
+                blend(iter.next().unwrap(), b, a);
+                blend(iter.next().unwrap(), g, a);
+                blend(iter.next().unwrap(), r, a);
+                iter.next();
             }
         }
     }
@@ -638,6 +643,7 @@ impl PixelFormat for BGRXPixel {
                         *iter.next().unwrap() = b;
                         *iter.next().unwrap() = g;
                         *iter.next().unwrap() = r;
+                        iter.next();
                     }
                 }
             } else {
@@ -1063,7 +1069,7 @@ fn test_bitmap_backend_blend() {
     for x in 0..10 {
         for y in 0..10 {
             let (r, g, b) = if x <= 5 {
-                (204, 224, 244)
+                (205, 225, 245)
             } else {
                 (255, 255, 255)
             };
@@ -1146,6 +1152,177 @@ fn test_draw_line_out_of_range() {
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 0], expected_value);
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 1], expected_value);
             assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 2], expected_value);
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_blend_large() {
+    use crate::prelude::*;
+    let mut buffer = vec![0; 1000 * 1000 * 3];
+
+    for fill_color in [RED, GREEN, BLUE].iter() {
+        buffer.iter_mut().for_each(|x| *x = 0);
+
+        {
+            let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+
+            back.draw_rect((0, 0), (1000, 1000), &WHITE.mix(0.1), true)
+                .unwrap(); // should be (24, 24, 24)
+            back.draw_rect((0, 0), (100, 100), &fill_color.mix(0.5), true)
+                .unwrap(); // should be (139, 24, 24)
+        }
+
+        for x in 0..1000 {
+            for y in 0..1000 {
+                let expected_value = if x <= 100 && y <= 100 {
+                    let (r, g, b) = fill_color.to_rgba().rgb();
+                    (
+                        if r > 0 { 139 } else { 12 },
+                        if g > 0 { 139 } else { 12 },
+                        if b > 0 { 139 } else { 12 },
+                    )
+                } else {
+                    (24, 24, 24)
+                };
+                assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 0], expected_value.0);
+                assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 1], expected_value.1);
+                assert_eq!(buffer[(y * 1000 + x) as usize * 3 + 2], expected_value.2);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_bgrx_pixel_format() {
+    use crate::drawing::bitmap_pixel::BGRXPixel;
+    use crate::prelude::*;
+    let mut rgb_buffer = vec![0; 1000 * 1000 * 3];
+    let mut bgrx_buffer = vec![0; 1000 * 1000 * 4];
+
+    {
+        let mut rgb_back = BitMapBackend::with_buffer(&mut rgb_buffer, (1000, 1000));
+        let mut bgrx_back =
+            BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut bgrx_buffer, (1000, 1000));
+
+        rgb_back
+            .draw_rect((0, 0), (1000, 1000), &BLACK, true)
+            .unwrap();
+        bgrx_back
+            .draw_rect((0, 0), (1000, 1000), &BLACK, true)
+            .unwrap();
+
+        rgb_back
+            .draw_rect(
+                (0, 0),
+                (1000, 1000),
+                &RGBColor(0xaa, 0xbb, 0xcc).mix(0.85),
+                true,
+            )
+            .unwrap();
+        bgrx_back
+            .draw_rect(
+                (0, 0),
+                (1000, 1000),
+                &RGBColor(0xaa, 0xbb, 0xcc).mix(0.85),
+                true,
+            )
+            .unwrap();
+
+        rgb_back
+            .draw_rect((0, 0), (1000, 1000), &RED.mix(0.85), true)
+            .unwrap();
+        bgrx_back
+            .draw_rect((0, 0), (1000, 1000), &RED.mix(0.85), true)
+            .unwrap();
+
+        rgb_back.draw_circle((300, 300), 100, &GREEN, true).unwrap();
+        bgrx_back
+            .draw_circle((300, 300), 100, &GREEN, true)
+            .unwrap();
+
+        rgb_back.draw_rect((10, 10), (50, 50), &BLUE, true).unwrap();
+        bgrx_back
+            .draw_rect((10, 10), (50, 50), &BLUE, true)
+            .unwrap();
+
+        rgb_back
+            .draw_rect((10, 10), (50, 50), &WHITE, true)
+            .unwrap();
+        bgrx_back
+            .draw_rect((10, 10), (50, 50), &WHITE, true)
+            .unwrap();
+
+        rgb_back
+            .draw_rect((10, 10), (15, 50), &YELLOW, true)
+            .unwrap();
+        bgrx_back
+            .draw_rect((10, 10), (15, 50), &YELLOW, true)
+            .unwrap();
+    }
+
+    for x in 0..1000 {
+        for y in 0..1000 {
+            assert!(
+                (rgb_buffer[y * 3000 + x * 3 + 0] as i32
+                    - bgrx_buffer[y * 4000 + x * 4 + 2] as i32)
+                    .abs()
+                    <= 1
+            );
+            assert!(
+                (rgb_buffer[y * 3000 + x * 3 + 1] as i32
+                    - bgrx_buffer[y * 4000 + x * 4 + 1] as i32)
+                    .abs()
+                    <= 1
+            );
+            assert!(
+                (rgb_buffer[y * 3000 + x * 3 + 2] as i32
+                    - bgrx_buffer[y * 4000 + x * 4 + 0] as i32)
+                    .abs()
+                    <= 1
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_bitmap_blit() {
+    let src_bitmap: Vec<u8> = (0..100)
+        .map(|y| (0..300).map(move |x| ((x * y) % 253) as u8))
+        .flatten()
+        .collect();
+
+    use crate::prelude::*;
+    let mut buffer = vec![0; 1000 * 1000 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+        back.blit_bitmap((500, 500), (100, 100), &src_bitmap[..])
+            .unwrap();
+    }
+
+    for y in 0..1000 {
+        for x in 0..1000 {
+            if x >= 500 && x < 600 && y >= 500 && y < 600 {
+                let lx = x - 500;
+                let ly = y - 500;
+                assert_eq!(buffer[y * 3000 + x * 3 + 0] as usize, (ly * lx * 3) % 253);
+                assert_eq!(
+                    buffer[y * 3000 + x * 3 + 1] as usize,
+                    (ly * (lx * 3 + 1)) % 253
+                );
+                assert_eq!(
+                    buffer[y * 3000 + x * 3 + 2] as usize,
+                    (ly * (lx * 3 + 2)) % 253
+                );
+            } else {
+                assert_eq!(buffer[y * 3000 + x * 3 + 0], 0);
+                assert_eq!(buffer[y * 3000 + x * 3 + 1], 0);
+                assert_eq!(buffer[y * 3000 + x * 3 + 2], 0);
+            }
         }
     }
 }
