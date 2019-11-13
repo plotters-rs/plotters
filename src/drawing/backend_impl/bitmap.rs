@@ -111,8 +111,7 @@ impl<'a> Buffer<'a> {
     }
 }
 
-
-pub trait PixelFormat:Sized {
+pub trait PixelFormat: Sized {
     const PIXEL_SIZE: usize;
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
@@ -124,8 +123,15 @@ pub trait PixelFormat:Sized {
         a: f64,
     );
 
-    fn fill_vertical_line_fast(target: &mut BitMapBackend<'_, Self>, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8);
-    
+    fn fill_vertical_line_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        x: i32,
+        ys: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    );
+
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -134,12 +140,57 @@ pub trait PixelFormat:Sized {
         g: u8,
         b: u8,
     );
+
+    fn draw_pixel(
+        target: &mut BitMapBackend<'_, Self>,
+        point: (i32, i32),
+        rgb: (u8, u8, u8),
+        alpha: f64,
+    );
+
+    fn can_be_saved() -> bool {
+        false
+    }
 }
 
-pub struct RGB;
+pub struct RGBPixel;
+pub struct BGRXPixel;
 
-impl PixelFormat for RGB {
-    const PIXEL_SIZE:usize = 3;
+impl PixelFormat for RGBPixel {
+    const PIXEL_SIZE: usize = 3;
+
+    fn can_be_saved() -> bool {
+        true
+    }
+
+    #[inline(always)]
+    fn draw_pixel(
+        target: &mut BitMapBackend<'_, Self>,
+        point: (i32, i32),
+        rgb: (u8, u8, u8),
+        alpha: f64,
+    ) {
+        let (x, y) = (point.0 as usize, point.1 as usize);
+        let (w, _) = target.get_size();
+        let buf = target.get_raw_pixel_buffer();
+        let w = w as usize;
+        let base = (y * w + x) * Self::PIXEL_SIZE;
+
+        if base < buf.len() {
+            unsafe {
+                if alpha >= 1.0 {
+                    *buf.get_unchecked_mut(base) = rgb.0;
+                    *buf.get_unchecked_mut(base + 1) = rgb.1;
+                    *buf.get_unchecked_mut(base + 2) = rgb.2;
+                } else {
+                    blend(buf.get_unchecked_mut(base), rgb.0, alpha);
+                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
+                    blend(buf.get_unchecked_mut(base + 2), rgb.2, alpha);
+                }
+            }
+        }
+    }
+
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -178,6 +229,7 @@ impl PixelFormat for RGB {
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
         let (p1, p2, p3): (u64, u64, u64) = unsafe {
+            //0011 0022 0033 0011
             std::mem::transmute([
                 r as u16, b as u16, g as u16, r as u16, // QW1
                 b as u16, g as u16, r as u16, b as u16, // QW2
@@ -186,6 +238,7 @@ impl PixelFormat for RGB {
         };
 
         let (q1, q2, q3): (u64, u64, u64) = unsafe {
+            //0022 0011 0033 0022
             std::mem::transmute([
                 g as u16, r as u16, b as u16, g as u16, // QW1
                 r as u16, b as u16, g as u16, r as u16, // QW2
@@ -205,15 +258,28 @@ impl PixelFormat for RGB {
             for p in slice.iter_mut() {
                 let ptr = p as *mut [u8; 24] as *mut (u64, u64, u64);
                 let (d1, d2, d3) = unsafe { *ptr };
-
                 let (mut h1, mut h2, mut h3) = ((d1 >> 8) & M, (d2 >> 8) & M, (d3 >> 8) & M);
                 let (mut l1, mut l2, mut l3) = (d1 & M, d2 & M, d3 & M);
-                h1 = (h1 * (255 - a) + q1 * a) & N;
-                h2 = (h2 * (255 - a) + q2 * a) & N;
-                h3 = (h3 * (255 - a) + q3 * a) & N;
-                l1 = ((l1 * (255 - a) + p1 * a) & N) >> 8;
-                l2 = ((l2 * (255 - a) + p2 * a) & N) >> 8;
-                l3 = ((l3 * (255 - a) + p3 * a) & N) >> 8;
+
+                #[cfg(target_endian = "little")]
+                {
+                    h1 = (h1 * (255 - a) + q1 * a) & N;
+                    h2 = (h2 * (255 - a) + q2 * a) & N;
+                    h3 = (h3 * (255 - a) + q3 * a) & N;
+                    l1 = ((l1 * (255 - a) + p1 * a) & N) >> 8;
+                    l2 = ((l2 * (255 - a) + p2 * a) & N) >> 8;
+                    l3 = ((l3 * (255 - a) + p3 * a) & N) >> 8;
+                }
+
+                #[cfg(target_endian = "big")]
+                {
+                    h1 = (h1 * (255 - a) + p1 * a) & N;
+                    h2 = (h2 * (255 - a) + p2 * a) & N;
+                    h3 = (h3 * (255 - a) + p3 * a) & N;
+                    l1 = ((l1 * (255 - a) + q1 * a) & N) >> 8;
+                    l2 = ((l2 * (255 - a) + q2 * a) & N) >> 8;
+                    l3 = ((l3 * (255 - a) + q3 * a) & N) >> 8;
+                }
 
                 unsafe {
                     *ptr = (h1 | l1, h2 | l2, h3 | l3);
@@ -230,8 +296,15 @@ impl PixelFormat for RGB {
             }
         }
     }
-    
-    fn fill_vertical_line_fast(target: &mut BitMapBackend<'_, Self>, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8) {
+
+    fn fill_vertical_line_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        x: i32,
+        ys: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    ) {
         let (w, h) = target.get_size();
         let w = w as i32;
         let h = h as i32;
@@ -256,7 +329,7 @@ impl PixelFormat for RGB {
             dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = b;
         }
     }
-    
+
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -291,13 +364,13 @@ impl PixelFormat for RGB {
                 for y in y0..=y1 {
                     let start = (y * w as i32 + x0) as usize;
                     let count = (x1 - x0 + 1) as usize;
-                    dst[(start * 3)..((start + count) * Self::PIXEL_SIZE)]
+                    dst[(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut()
                         .for_each(|e| *e = r);
                 }
             } else {
                 // If the entire memory block is going to be filled, just use single memset
-                dst[(3 * y0 * w as i32) as usize
+                dst[Self::PIXEL_SIZE * (y0 * w as i32) as usize
                     ..((y1 + 1) * w as i32) as usize * Self::PIXEL_SIZE]
                     .iter_mut()
                     .for_each(|e| *e = r);
@@ -340,19 +413,265 @@ impl PixelFormat for RGB {
                     }
 
                     for idx in (slice.len() * 8)..count {
-                        dst[start * 3 + idx * Self::PIXEL_SIZE] = r;
-                        dst[start * 3 + idx * Self::PIXEL_SIZE + 1] = g;
-                        dst[start * 3 + idx * Self::PIXEL_SIZE + 2] = b;
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE] = r;
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE + 1] = g;
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE + 2] = b;
                     }
                 }
             }
         }
     }
+}
 
+impl PixelFormat for BGRXPixel {
+    const PIXEL_SIZE: usize = 4;
+
+    #[inline(always)]
+    fn draw_pixel(
+        target: &mut BitMapBackend<'_, Self>,
+        point: (i32, i32),
+        rgb: (u8, u8, u8),
+        alpha: f64,
+    ) {
+        let (x, y) = (point.0 as usize, point.1 as usize);
+        let (w, _) = target.get_size();
+        let buf = target.get_raw_pixel_buffer();
+        let w = w as usize;
+        let base = (y * w + x) * Self::PIXEL_SIZE;
+
+        if base < buf.len() {
+            unsafe {
+                if alpha >= 1.0 {
+                    *buf.get_unchecked_mut(base) = rgb.2;
+                    *buf.get_unchecked_mut(base + 1) = rgb.1;
+                    *buf.get_unchecked_mut(base + 2) = rgb.0;
+                } else {
+                    blend(buf.get_unchecked_mut(base), rgb.2, alpha);
+                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
+                    blend(buf.get_unchecked_mut(base + 2), rgb.0, alpha);
+                }
+            }
+        }
+    }
+
+    fn blend_rect_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+        a: f64,
+    ) {
+        let (w, h) = target.get_size();
+        let a = a.min(1.0).max(0.0);
+        if a == 0.0 {
+            return;
+        }
+
+        let (x0, y0) = (
+            upper_left.0.min(bottom_right.0).max(0),
+            upper_left.1.min(bottom_right.1).max(0),
+        );
+        let (x1, y1) = (
+            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
+            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+        );
+
+        // This may happen when the minimal value is larger than the limit.
+        // Thus we just have something that is completely out-of-range
+        if x0 > x1 || y0 > y1 {
+            return;
+        }
+
+        let dst = target.get_raw_pixel_buffer();
+
+        let af = a;
+        let a = (255.9 * a).floor() as u64;
+
+        // Since we should always make sure the RGB payload occupies the logic lower bits
+        // thus, this type purning should work for both LE and BE CPUs
+        let p: u64 = unsafe {
+            //0011 0022 0033 0011
+            std::mem::transmute([
+                b as u16, r as u16, b as u16, r as u16, // QW1
+            ])
+        };
+
+        let q: u64 = unsafe {
+            //0022 0011 0033 0022
+            std::mem::transmute([
+                g as u16, 0 as u16, g as u16, 0 as u16, // QW1
+            ])
+        };
+
+        const N: u64 = 0xff00ff00ff00ff00;
+        const M: u64 = 0x00ff00ff00ff00ff;
+
+        for y in y0..=y1 {
+            let start = (y * w as i32 + x0) as usize;
+            let count = (x1 - x0 + 1) as usize;
+
+            let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 8];
+            let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
+            for rp in slice.iter_mut() {
+                let ptr = rp as *mut [u8; 8] as *mut u64;
+                let d1 = unsafe { *ptr };
+                let mut h = (d1 >> 8) & M;
+                let mut l = d1 & M;
+
+                #[cfg(target_endian = "little")]
+                {
+                    h = (h * (255 - a) + q * a) & N;
+                    l = ((l * (255 - a) + p * a) & N) >> 8;
+                }
+
+                #[cfg(target_endian = "big")]
+                {
+                    h = (h * (255 - a) + p * a) & N;
+                    l = ((l * (255 - a) + q * a) & N) >> 8;
+                }
+
+                unsafe {
+                    *ptr = h | l;
+                }
+            }
+
+            let mut iter = dst[((start + slice.len() * 2) * Self::PIXEL_SIZE)
+                ..((start + count) * Self::PIXEL_SIZE)]
+                .iter_mut();
+            for _ in (slice.len() * 2)..count {
+                blend(iter.next().unwrap(), b, af);
+                blend(iter.next().unwrap(), g, af);
+                blend(iter.next().unwrap(), r, af);
+            }
+        }
+    }
+
+    fn fill_vertical_line_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        x: i32,
+        ys: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    ) {
+        let (w, h) = target.get_size();
+        let w = w as i32;
+        let h = h as i32;
+
+        // Make sure we are in the range
+        if x < 0 || x >= w {
+            return;
+        }
+
+        let dst = target.get_raw_pixel_buffer();
+        let (mut y0, mut y1) = ys;
+        if y0 > y1 {
+            std::mem::swap(&mut y0, &mut y1);
+        }
+        // And check the y axis isn't out of bound
+        y0 = y0.max(0);
+        y1 = y1.min(h - 1);
+        // This is ok because once y0 > y1, there won't be any iteration anymore
+        for y in y0..=y1 {
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE] = b;
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 1] = g;
+            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = r;
+        }
+    }
+
+    fn fill_rect_fast(
+        target: &mut BitMapBackend<'_, Self>,
+        upper_left: (i32, i32),
+        bottom_right: (i32, i32),
+        r: u8,
+        g: u8,
+        b: u8,
+    ) {
+        let (w, h) = target.get_size();
+        let (x0, y0) = (
+            upper_left.0.min(bottom_right.0).max(0),
+            upper_left.1.min(bottom_right.1).max(0),
+        );
+        let (x1, y1) = (
+            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
+            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+        );
+
+        // This may happen when the minimal value is larger than the limit.
+        // Thus we just have something that is completely out-of-range
+        if x0 > x1 || y0 > y1 {
+            return;
+        }
+
+        let dst = target.get_raw_pixel_buffer();
+
+        if r == g && g == b {
+            // If r == g == b, then we can use memset
+            if x0 != 0 || x1 != w as i32 - 1 {
+                // If it's not the entire row is filled, we can only do
+                // memset per row
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    let count = (x1 - x0 + 1) as usize;
+                    dst[(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
+                        .iter_mut()
+                        .for_each(|e| *e = r);
+                }
+            } else {
+                // If the entire memory block is going to be filled, just use single memset
+                dst[Self::PIXEL_SIZE * (y0 * w as i32) as usize
+                    ..((y1 + 1) * w as i32) as usize * Self::PIXEL_SIZE]
+                    .iter_mut()
+                    .for_each(|e| *e = r);
+            }
+        } else {
+            let count = (x1 - x0 + 1) as usize;
+            if count < 8 {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    let mut iter = dst
+                        [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
+                        .iter_mut();
+                    for _ in 0..(x1 - x0 + 1) {
+                        *iter.next().unwrap() = b;
+                        *iter.next().unwrap() = g;
+                        *iter.next().unwrap() = r;
+                    }
+                }
+            } else {
+                for y in y0..=y1 {
+                    let start = (y * w as i32 + x0) as usize;
+                    let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 8];
+                    let slice =
+                        unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
+                    for p in slice.iter_mut() {
+                        // In this case, we can actually fill 8 pixels in one iteration with
+                        // only 3 movq instructions.
+                        // TODO: Consider using AVX instructions when possible
+                        let ptr = p as *mut [u8; 8] as *mut u64;
+                        unsafe {
+                            let d: u64 = std::mem::transmute([
+                                b, g, r, 0, b, g, r, 0, // QW1
+                            ]);
+                            *ptr = d;
+                        }
+                    }
+
+                    for idx in (slice.len() * 2)..count {
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE] = b;
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE + 1] = g;
+                        dst[start * Self::PIXEL_SIZE + idx * Self::PIXEL_SIZE + 2] = r;
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// The backend that drawing a bitmap
-pub struct BitMapBackend<'a, P:PixelFormat = RGB> {
+pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     /// The path to the image
     #[allow(dead_code)]
     target: Target<'a>,
@@ -366,11 +685,11 @@ pub struct BitMapBackend<'a, P:PixelFormat = RGB> {
     _pantomdata: PhantomData<P>,
 }
 
-impl<'a, P:PixelFormat> BitMapBackend<'a, P> {
+impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
     const PIXEL_SIZE: usize = P::PIXEL_SIZE;
 }
 
-impl <'a> BitMapBackend<'a, RGB> {
+impl<'a> BitMapBackend<'a, RGBPixel> {
     /// Create a new bitmap backend
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, (w, h): (u32, u32)) -> Self {
@@ -480,10 +799,9 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
             })
             .collect()
     }
-
 }
 
-impl<'a, P:PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
+impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
     type ErrorType = BitMapBackendError;
 
     fn get_size(&self) -> (u32, u32) {
@@ -502,6 +820,9 @@ impl<'a, P:PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
 
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     fn present(&mut self) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
+        if !P::can_be_saved() {
+            return Ok(());
+        }
         let (w, h) = self.get_size();
         match &mut self.target {
             Target::File(path) => {
@@ -538,30 +859,11 @@ impl<'a, P:PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             return Ok(());
         }
 
-        let (w, _) = self.get_size();
         let alpha = color.alpha();
         let rgb = color.rgb();
 
-        let buf = self.get_raw_pixel_buffer();
+        P::draw_pixel(self, point, rgb, alpha);
 
-        let (x, y) = (point.0 as usize, point.1 as usize);
-        let w = w as usize;
-
-        let base = (y * w + x) * Self::PIXEL_SIZE;
-
-        if base < buf.len() {
-            unsafe {
-                if alpha >= 1.0 {
-                    *buf.get_unchecked_mut(base) = rgb.0;
-                    *buf.get_unchecked_mut(base + 1) = rgb.1;
-                    *buf.get_unchecked_mut(base + 2) = rgb.2;
-                } else {
-                    blend(buf.get_unchecked_mut(base), rgb.0, alpha);
-                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
-                    blend(buf.get_unchecked_mut(base + 2), rgb.2, alpha);
-                }
-            }
-        }
         Ok(())
     }
 
@@ -657,7 +959,7 @@ impl<'a, P:PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
     }
 }
 
-impl <P:PixelFormat> Drop for BitMapBackend<'_, P> {
+impl<P: PixelFormat> Drop for BitMapBackend<'_, P> {
     fn drop(&mut self) {
         if !self.saved {
             self.present().expect("Unable to save the bitmap");
