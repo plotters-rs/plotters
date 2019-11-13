@@ -399,7 +399,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         inward_labels: bool,
     ) -> Result<Range<i32>, DrawingAreaErrorKind<DB::ErrorType>> {
         let (x0, y0) = self.drawing_area.get_base_pixel();
-        let (tw, th) = area.dim_in_pixel();
+        let (mut tw, mut th) = area.dim_in_pixel();
+
+        tw -= 1;
+        th -= 1;
 
         let mut axis_range = if orientation.0 == 0 {
             self.drawing_area.get_x_axis_pixel_range()
@@ -419,26 +422,26 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         }
 
         if let Some(axis_style) = axis_style {
-            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
-            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 };
-            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
-            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+            let mut x0 = if orientation.0 > 0 { 1 } else { tw as i32 };
+            let mut y0 = if orientation.1 > 0 { 1 } else { th as i32 };
+            let mut x1 = if orientation.0 >= 0 { 1 } else { tw as i32 };
+            let mut y1 = if orientation.1 >= 0 { 1 } else { th as i32 };
 
             if inward_labels {
                 if orientation.0 == 0 {
-                    if y0 == 0 {
+                    if y0 == 1 {
                         y0 = th as i32;
                         y1 = th as i32;
                     } else {
-                        y0 = 0;
-                        y1 = 0;
+                        y0 = 1;
+                        y1 = 1;
                     }
-                } else if x0 == 0 {
+                } else if x0 == 1 {
                     x0 = tw as i32;
                     x1 = tw as i32;
                 } else {
-                    x0 = 0;
-                    x1 = 0;
+                    x0 = 1;
+                    x1 = 1;
                 }
             }
 
@@ -497,7 +500,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         };
 
         let (x0, y0) = self.drawing_area.get_base_pixel();
-        let (tw, th) = area.dim_in_pixel();
+        let (mut tw, mut th) = area.dim_in_pixel();
+
+        tw -= 1;
+        th -= 1;
 
         /* This is the minimal distance from the axis to the box of the labels */
         let label_dist =
@@ -585,11 +591,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 if let Some(style) = axis_style {
                     let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
                         match orientation {
-                            (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
+                            (dx, dy) if dx > 0 && dy == 0 => (1, *p - y0, tick_size, *p - y0),
                             (dx, dy) if dx < 0 && dy == 0 => {
                                 (tw as i32 - tick_size, *p - y0, tw as i32, *p - y0)
                             }
-                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
+                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 1, *p - x0, tick_size),
                             (dx, dy) if dx == 0 && dy < 0 => {
                                 (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
                             }
@@ -600,11 +606,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                             (dx, dy) if dx > 0 && dy == 0 => {
                                 (tw as i32, *p - y0, tw as i32 + tick_size, *p - y0)
                             }
-                            (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
+                            (dx, dy) if dx < 0 && dy == 0 => (1, *p - y0, -tick_size, *p - y0),
                             (dx, dy) if dx == 0 && dy > 0 => {
                                 (*p - x0, th as i32, *p - x0, th as i32 + tick_size)
                             }
-                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
+                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 1, *p - x0, -tick_size),
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     };
