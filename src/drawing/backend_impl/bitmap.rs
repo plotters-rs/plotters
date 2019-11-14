@@ -13,10 +13,14 @@ mod image_encoding_support {
 use image_encoding_support::*;
 
 #[derive(Debug)]
+/// Indicates some error occurs within the bitmap backend
 pub enum BitMapBackendError {
+    /// The buffer provided is invalid, for example, wrong pixel buffer size
     InvalidBuffer,
+    /// Some IO error occurs while the bitmap maniuplation
     IOError(std::io::Error),
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+    /// Image encoding error
     ImageError(ImageError),
 }
 
@@ -116,11 +120,24 @@ impl<'a> Buffer<'a> {
     }
 }
 
+/// The trait that describes some details about a particular pixel format
 pub trait PixelFormat: Sized {
+    /// Number of bytes per pixel
     const PIXEL_SIZE: usize;
+
+    /// Number of effective bytes per pixel, e.g. for BGRX pixel format, the size of pixel
+    /// is 4 but the effective size is 3, since the 4th byte isn't used
     const EFFECTIVE_PIXEL_SIZE: usize;
+
+    /// Encoding a pixel and returns the idx-th byte for the pixel
     fn byte_at(r: u8, g: u8, b: u8, a: u64, idx: usize) -> u8;
 
+    /// The fast alpha blending algorithm for this pixel format
+    ///
+    /// - `target`: The target bitmap backend
+    /// - `upper_left`: The upper-left coord for the rect
+    /// - `bottom_right`: The bottom-right coord for the rect
+    /// - `r`, `g`, `b`, `a`: The blending color and alpha value
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -131,6 +148,12 @@ pub trait PixelFormat: Sized {
         a: f64,
     );
 
+    /// The fast vertical line filling algorithm
+    ///
+    /// - `target`: The target bitmap backend
+    /// - `x`: the X coordinate for the entire line
+    /// - `ys`: The range of y coord
+    /// - `r`, `g`, `b`: The blending color and alpha value
     fn fill_vertical_line_fast(
         target: &mut BitMapBackend<'_, Self>,
         x: i32,
@@ -164,6 +187,12 @@ pub trait PixelFormat: Sized {
         }
     }
 
+    /// The fast rectangle filling algorithm
+    ///
+    /// - `target`: The target bitmap backend
+    /// - `upper_left`: The upper-left coord for the rect
+    /// - `bottom_right`: The bottom-right coord for the rect
+    /// - `r`, `g`, `b`: The filling color
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -174,6 +203,12 @@ pub trait PixelFormat: Sized {
     );
 
     #[inline(always)]
+    /// Drawing a single pixel in this format
+    ///
+    /// - `target`: The target bitmap backend
+    /// - `point`: The coord of the point
+    /// - `r`, `g`, `b`: The filling color
+    /// - `alpha`: The alpha value
     fn draw_pixel(
         target: &mut BitMapBackend<'_, Self>,
         point: (i32, i32),
@@ -206,12 +241,20 @@ pub trait PixelFormat: Sized {
         }
     }
 
+    /// Indicates if this pixel format can be saved as image.
+    /// Note: Currently we only using RGB pixel format in the image crate, but later we may lift
+    /// this restriction
+    ///
+    /// - `returns`: If the image can be saved as image file
     fn can_be_saved() -> bool {
         false
     }
 }
 
+/// The marker type that indicates we are currently using a RGB888 pixel format
 pub struct RGBPixel;
+
+/// The marker type that indicates we are currently using a BGRX8888 pixel format
 pub struct BGRXPixel;
 
 impl PixelFormat for RGBPixel {
@@ -637,11 +680,11 @@ pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     buffer: Buffer<'a>,
     /// Flag indicates if the bitmap has been saved
     saved: bool,
-
     _pantomdata: PhantomData<P>,
 }
 
 impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
+    /// The number of bytes per pixel
     const PIXEL_SIZE: usize = P::PIXEL_SIZE;
 }
 
@@ -686,37 +729,47 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
         })
     }
 
+    /// Create a new bitmap backend which only lives in-memory
+    ///
+    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>)
+    /// in RGB pixel format.
+    ///
+    /// Note: This function provides backward compatibility for those code that assumes Plotters
+    /// uses RGB pixel format and maniuplates the in-memory framebuffer.
+    /// For more pixel format option, use `with_buffer_and_format` instead.
+    ///
+    /// - `buf`: The buffer to operate
+    /// - `dimension`: The size of the image in pixels
+    /// - **returns**: The newly created bitmap backend
     pub fn with_buffer(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
-        Self::with_buffer_and_format(buf, (w, h))
+        Self::with_buffer_and_format(buf, (w, h)).expect("Wrong buffer size")
     }
 }
 
 impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
-    /// Create a new bitmap backend which only lives in-memory
+    /// Create a new bitmap backend with a in-memory buffer with specific pixel format.
     ///
-    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>).
-    /// Plotters uses RGB pixel format
+    /// Note: This can be used as a way to manipulate framebuffer, `mmap` can be used on the top of this
+    /// as well.
     ///
     /// - `buf`: The buffer to operate
     /// - `dimension`: The size of the image in pixels
-    pub fn with_buffer_and_format(buf: &'a mut [u8], (w, h): (u32, u32)) -> Self {
+    /// - **returns**: The newly created bitmap backend
+    pub fn with_buffer_and_format(
+        buf: &'a mut [u8],
+        (w, h): (u32, u32),
+    ) -> Result<Self, BitMapBackendError> {
         if (w * h) as usize * Self::PIXEL_SIZE > buf.len() {
-            // TODO: This doesn't deserve a panic.
-            panic!(
-                "Wrong image size: H = {}, W = {}, BufSize = {}",
-                w,
-                h,
-                buf.len()
-            );
+            return Err(BitMapBackendError::InvalidBuffer);
         }
 
-        Self {
+        Ok(Self {
             target: Target::Buffer(PhantomData),
             size: (w, h),
             buffer: Buffer::Borrowed(buf),
             saved: false,
             _pantomdata: PhantomData,
-        }
+        })
     }
 
     #[inline(always)]
@@ -726,6 +779,9 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
     /// multi-threading rendering.
+    ///
+    /// - `area_size`: The size of the area
+    /// - **returns**: The splitted backends that can be rendered in parallel
     pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<P>> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();
@@ -751,7 +807,7 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
                         ((end - begin) * w) as usize * Self::PIXEL_SIZE,
                     )
                 };
-                Self::with_buffer_and_format(actual_buf, (w, end - begin))
+                Self::with_buffer_and_format(actual_buf, (w, end - begin)).unwrap()
             })
             .collect()
     }
@@ -1155,7 +1211,8 @@ fn test_bitmap_bgrx_pixel_format() {
     {
         let mut rgb_back = BitMapBackend::with_buffer(&mut rgb_buffer, (1000, 1000));
         let mut bgrx_back =
-            BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut bgrx_buffer, (1000, 1000));
+            BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut bgrx_buffer, (1000, 1000))
+            .unwrap();
 
         rgb_back
             .draw_rect((0, 0), (1000, 1000), &BLACK, true)
