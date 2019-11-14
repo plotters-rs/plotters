@@ -28,6 +28,7 @@ impl std::fmt::Display for BitMapBackendError {
 
 impl std::error::Error for BitMapBackendError {}
 
+#[inline(always)]
 fn blend(prev: &mut u8, new: u8, a: u64) {
     if new > *prev {
         *prev += ((new - *prev) as u64 * a / 256) as u8
@@ -117,6 +118,9 @@ impl<'a> Buffer<'a> {
 
 pub trait PixelFormat: Sized {
     const PIXEL_SIZE: usize;
+    const EFFECTIVE_PIXEL_SIZE: usize;
+    fn byte_at(r: u8, g: u8, b: u8, a: u64, idx: usize) -> u8;
+
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -134,7 +138,31 @@ pub trait PixelFormat: Sized {
         r: u8,
         g: u8,
         b: u8,
-    );
+    ) {
+        let (w, h) = target.get_size();
+        let w = w as i32;
+        let h = h as i32;
+
+        // Make sure we are in the range
+        if x < 0 || x >= w {
+            return;
+        }
+
+        let dst = target.get_raw_pixel_buffer();
+        let (mut y0, mut y1) = ys;
+        if y0 > y1 {
+            std::mem::swap(&mut y0, &mut y1);
+        }
+        // And check the y axis isn't out of bound
+        y0 = y0.max(0);
+        y1 = y1.min(h - 1);
+        // This is ok because once y0 > y1, there won't be any iteration anymore
+        for y in y0..=y1 {
+            for idx in 0..Self::EFFECTIVE_PIXEL_SIZE {
+                dst[(y * w + x) as usize * Self::PIXEL_SIZE + idx] = Self::byte_at(r, g, b, 0, idx);
+            }
+        }
+    }
 
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
@@ -145,33 +173,11 @@ pub trait PixelFormat: Sized {
         b: u8,
     );
 
-    fn draw_pixel(
-        target: &mut BitMapBackend<'_, Self>,
-        point: (i32, i32),
-        rgb: (u8, u8, u8),
-        alpha: f64,
-    );
-
-    fn can_be_saved() -> bool {
-        false
-    }
-}
-
-pub struct RGBPixel;
-pub struct BGRXPixel;
-
-impl PixelFormat for RGBPixel {
-    const PIXEL_SIZE: usize = 3;
-
-    fn can_be_saved() -> bool {
-        true
-    }
-
     #[inline(always)]
     fn draw_pixel(
         target: &mut BitMapBackend<'_, Self>,
         point: (i32, i32),
-        rgb: (u8, u8, u8),
+        (r, g, b): (u8, u8, u8),
         alpha: f64,
     ) {
         let (x, y) = (point.0 as usize, point.1 as usize);
@@ -183,17 +189,47 @@ impl PixelFormat for RGBPixel {
         if base < buf.len() {
             unsafe {
                 if alpha >= 1.0 {
-                    *buf.get_unchecked_mut(base) = rgb.0;
-                    *buf.get_unchecked_mut(base + 1) = rgb.1;
-                    *buf.get_unchecked_mut(base + 2) = rgb.2;
+                    for idx in 0..Self::EFFECTIVE_PIXEL_SIZE {
+                        *buf.get_unchecked_mut(base + idx) = Self::byte_at(r, g, b, 0, idx);
+                    }
                 } else {
                     let alpha = (alpha * 256.0).floor() as u64;
-                    blend(buf.get_unchecked_mut(base), rgb.0, alpha);
-                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
-                    blend(buf.get_unchecked_mut(base + 2), rgb.2, alpha);
+                    for idx in 0..Self::EFFECTIVE_PIXEL_SIZE {
+                        blend(
+                            buf.get_unchecked_mut(base + idx),
+                            Self::byte_at(r, g, b, 0, idx),
+                            alpha,
+                        );
+                    }
                 }
             }
         }
+    }
+
+    fn can_be_saved() -> bool {
+        false
+    }
+}
+
+pub struct RGBPixel;
+pub struct BGRXPixel;
+
+impl PixelFormat for RGBPixel {
+    const PIXEL_SIZE: usize = 3;
+    const EFFECTIVE_PIXEL_SIZE: usize = 3;
+
+    #[inline(always)]
+    fn byte_at(r: u8, g: u8, b: u8, _a: u64, idx: usize) -> u8 {
+        match idx {
+            0 => r,
+            1 => g,
+            2 => b,
+            _ => 0xff,
+        }
+    }
+
+    fn can_be_saved() -> bool {
+        true
     }
 
     fn blend_rect_fast(
@@ -233,7 +269,6 @@ impl PixelFormat for RGBPixel {
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
         let (p1, p2, p3): (u64, u64, u64) = unsafe {
-            //0011 0022 0033 0011
             std::mem::transmute([
                 r as u16, b as u16, g as u16, r as u16, // QW1
                 b as u16, g as u16, r as u16, b as u16, // QW2
@@ -242,7 +277,6 @@ impl PixelFormat for RGBPixel {
         };
 
         let (q1, q2, q3): (u64, u64, u64) = unsafe {
-            //0022 0011 0033 0022
             std::mem::transmute([
                 g as u16, r as u16, b as u16, g as u16, // QW1
                 r as u16, b as u16, g as u16, r as u16, // QW2
@@ -298,39 +332,6 @@ impl PixelFormat for RGBPixel {
                 blend(iter.next().unwrap(), g, a);
                 blend(iter.next().unwrap(), b, a);
             }
-        }
-    }
-
-    fn fill_vertical_line_fast(
-        target: &mut BitMapBackend<'_, Self>,
-        x: i32,
-        ys: (i32, i32),
-        r: u8,
-        g: u8,
-        b: u8,
-    ) {
-        let (w, h) = target.get_size();
-        let w = w as i32;
-        let h = h as i32;
-
-        // Make sure we are in the range
-        if x < 0 || x >= w {
-            return;
-        }
-
-        let dst = target.get_raw_pixel_buffer();
-        let (mut y0, mut y1) = ys;
-        if y0 > y1 {
-            std::mem::swap(&mut y0, &mut y1);
-        }
-        // And check the y axis isn't out of bound
-        y0 = y0.max(0);
-        y1 = y1.min(h - 1);
-        // This is ok because once y0 > y1, there won't be any iteration anymore
-        for y in y0..=y1 {
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE] = r;
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 1] = g;
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = b;
         }
     }
 
@@ -429,33 +430,15 @@ impl PixelFormat for RGBPixel {
 
 impl PixelFormat for BGRXPixel {
     const PIXEL_SIZE: usize = 4;
+    const EFFECTIVE_PIXEL_SIZE: usize = 3;
 
     #[inline(always)]
-    fn draw_pixel(
-        target: &mut BitMapBackend<'_, Self>,
-        point: (i32, i32),
-        rgb: (u8, u8, u8),
-        alpha: f64,
-    ) {
-        let (x, y) = (point.0 as usize, point.1 as usize);
-        let (w, _) = target.get_size();
-        let buf = target.get_raw_pixel_buffer();
-        let w = w as usize;
-        let base = (y * w + x) * Self::PIXEL_SIZE;
-
-        if base < buf.len() {
-            unsafe {
-                if alpha >= 1.0 {
-                    *buf.get_unchecked_mut(base) = rgb.2;
-                    *buf.get_unchecked_mut(base + 1) = rgb.1;
-                    *buf.get_unchecked_mut(base + 2) = rgb.0;
-                } else {
-                    let alpha = (256.0 * alpha).floor() as u64;
-                    blend(buf.get_unchecked_mut(base), rgb.2, alpha);
-                    blend(buf.get_unchecked_mut(base + 1), rgb.1, alpha);
-                    blend(buf.get_unchecked_mut(base + 2), rgb.0, alpha);
-                }
-            }
+    fn byte_at(r: u8, g: u8, b: u8, _a: u64, idx: usize) -> u8 {
+        match idx {
+            0 => b,
+            1 => g,
+            2 => r,
+            _ => 0xff,
         }
     }
 
@@ -550,39 +533,6 @@ impl PixelFormat for BGRXPixel {
                 blend(iter.next().unwrap(), r, a);
                 iter.next();
             }
-        }
-    }
-
-    fn fill_vertical_line_fast(
-        target: &mut BitMapBackend<'_, Self>,
-        x: i32,
-        ys: (i32, i32),
-        r: u8,
-        g: u8,
-        b: u8,
-    ) {
-        let (w, h) = target.get_size();
-        let w = w as i32;
-        let h = h as i32;
-
-        // Make sure we are in the range
-        if x < 0 || x >= w {
-            return;
-        }
-
-        let dst = target.get_raw_pixel_buffer();
-        let (mut y0, mut y1) = ys;
-        if y0 > y1 {
-            std::mem::swap(&mut y0, &mut y1);
-        }
-        // And check the y axis isn't out of bound
-        y0 = y0.max(0);
-        y1 = y1.min(h - 1);
-        // This is ok because once y0 > y1, there won't be any iteration anymore
-        for y in y0..=y1 {
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE] = b;
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 1] = g;
-            dst[(y * w + x) as usize * Self::PIXEL_SIZE + 2] = r;
         }
     }
 
