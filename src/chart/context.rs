@@ -76,6 +76,12 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) drawing_area_pos: (i32, i32),
 }
 
+/// A chart context state - This is the data that is needed to reconstruct the chart context
+/// without actually drawing the chart. This is useful when we want to do realtime rendering and
+/// want to incrementally update the chart.
+///
+/// For each frame, instead of updating the entire backend, we are able to keep the keep the figure
+/// component like axis, labels untouched and make updates only in the plotting drawing area.
 pub struct ChartState<CT: CoordTranslate> {
     drawing_area_pos: (i32, i32),
     drawing_area_size: (u32, u32),
@@ -103,10 +109,16 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> 
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    /// Convert a chart context into a chart state, by doing so, the chart context is consumed and
+    /// a saved chart state is created for later use.
     pub fn into_chart_state(self) -> ChartState<CT> {
         self.into()
     }
 
+    /// Convert the chart context into a sharable chart state.
+    /// Normally a chart state can not be clone, since the coordinate spec may not be able to be
+    /// cloned. In this case, we can use an `Arc` get the coordinate wrapped thus the state can be
+    /// cloned and shared by multiple chart context
     pub fn into_shared_chart_state(self) -> ChartState<Arc<CT>> {
         ChartState {
             drawing_area_pos: self.drawing_area_pos,
@@ -131,12 +143,17 @@ where
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate + Clone> ChartContext<'a, DB, CT> {
+    /// Make the chart context, do not consume the chart context and clone the coordinate spec
     pub fn to_chart_state(&self) -> ChartState<CT> {
         self.into()
     }
 }
 
 impl<CT: CoordTranslate> ChartState<CT> {
+    /// Restore the chart context on the given drawing area
+    ///
+    /// - `area`: The given drawing area where we want to restore the chart context
+    /// - **returns** The newly created chart context
     pub fn restore<'a, DB: DrawingBackend>(
         self,
         area: &DrawingArea<DB, Shift>,

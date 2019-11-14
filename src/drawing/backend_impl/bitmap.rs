@@ -1212,7 +1212,7 @@ fn test_bitmap_bgrx_pixel_format() {
         let mut rgb_back = BitMapBackend::with_buffer(&mut rgb_buffer, (1000, 1000));
         let mut bgrx_back =
             BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut bgrx_buffer, (1000, 1000))
-            .unwrap();
+                .unwrap();
 
         rgb_back
             .draw_rect((0, 0), (1000, 1000), &BLACK, true)
