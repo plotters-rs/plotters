@@ -132,6 +132,9 @@ pub trait PixelFormat: Sized {
     /// Encoding a pixel and returns the idx-th byte for the pixel
     fn byte_at(r: u8, g: u8, b: u8, a: u64, idx: usize) -> u8;
 
+    /// Decode a pixel at the given location
+    fn decode_pixel(data: &[u8]) -> (u8, u8, u8, u64);
+
     /// The fast alpha blending algorithm for this pixel format
     ///
     /// - `target`: The target bitmap backend
@@ -269,6 +272,11 @@ impl PixelFormat for RGBPixel {
             2 => b,
             _ => 0xff,
         }
+    }
+
+    #[inline(always)]
+    fn decode_pixel(data: &[u8]) -> (u8, u8, u8, u64) {
+        (data[0], data[1], data[2], 0x255)
     }
 
     fn can_be_saved() -> bool {
@@ -483,6 +491,11 @@ impl PixelFormat for BGRXPixel {
             2 => r,
             _ => 0xff,
         }
+    }
+
+    #[inline(always)]
+    fn decode_pixel(data: &[u8]) -> (u8, u8, u8, u64) {
+        (data[2], data[1], data[0], 0x255)
     }
 
     fn blend_rect_fast(

@@ -7,7 +7,7 @@ mod bitmap;
 pub use bitmap::BitMapBackend;
 
 pub mod bitmap_pixel {
-    pub use super::bitmap::{BGRXPixel, RGBPixel};
+    pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
 }
 
 #[cfg(target_arch = "wasm32")]
