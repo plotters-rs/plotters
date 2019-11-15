@@ -7,7 +7,7 @@ use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc, FontStyle, FontTransform, RGBAColor};
+use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextAlignment, TextStyle};
 
 use std::io::{Cursor, Error};
 use std::path::Path;
@@ -235,13 +235,15 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         self.update_document(|d| d.add(node));
         Ok(())
     }
-    fn draw_text<'b>(
+
+    fn draw_text(
         &mut self,
         text: &str,
-        font: &FontDesc<'b>,
+        style: &TextStyle,
         pos: BackendCoord,
-        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let font = &style.font;
+        let color = &style.color;
         if color.alpha() == 0.0 {
             return Ok(());
         }
@@ -253,9 +255,16 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         let x0 = pos.0 + offset.0;
         let y0 = pos.1 + offset.1;
 
+        let max_x = (layout.1).0;
+        let (dx, anchor) = match style.alignment {
+            TextAlignment::Left => (0, "start"),
+            TextAlignment::Right => (max_x, "end"),
+            TextAlignment::Center => (max_x / 2, "middle"),
+        };
         let node = Text::new()
-            .set("x", x0)
+            .set("x", x0 + dx)
             .set("y", y0 - (layout.0).1)
+            .set("text-anchor", anchor)
             .set("font-family", font.get_name())
             .set("font-size", font.get_size())
             .set("opacity", make_svg_opacity(color))
@@ -372,6 +381,84 @@ impl Drop for SVGBackend<'_> {
     fn drop(&mut self) {
         if !self.saved {
             self.present().expect("Unable to save the SVG image");
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+    use std::fs;
+    use std::path::Path;
+
+    static DST_DIR: &str = "target/test/svg";
+
+    fn save_file(name: &str, content: &str) {
+        /*
+          Please use the SVG file to manually verify the results.
+        */
+        fs::create_dir_all(DST_DIR).unwrap();
+        let file_name = format!("{}.svg", name);
+        let file_path = Path::new(DST_DIR).join(file_name);
+        println!("{:?} created", file_path);
+        fs::write(file_path, &content).unwrap();
+    }
+
+    #[test]
+    fn test_draw_mesh() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let root = SVGBackend::with_buffer(&mut buffer, (500, 500)).into_drawing_area();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("This is a test", ("sans-serif", 20))
+                .x_label_area_size(40)
+                .y_label_area_size(40)
+                .build_ranged(0..100, 0..100)
+                .unwrap();
+
+            chart.configure_mesh().draw().unwrap();
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        save_file("test_draw_mesh", &content);
+
+        assert!(content.contains("This is a test"));
+    }
+
+    #[test]
+    fn test_text_alignments() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let mut root = SVGBackend::with_buffer(&mut buffer, (500, 500));
+
+            let style =
+                TextStyle::from(("sans-serif", 20).into_font()).alignment(TextAlignment::Right);
+            root.draw_text("right-align", &style, (150, 50)).unwrap();
+
+            let style = style.alignment(TextAlignment::Center);
+            root.draw_text("center-align", &style, (150, 150)).unwrap();
+
+            let style = style.alignment(TextAlignment::Left);
+            root.draw_text("left-align", &style, (150, 200)).unwrap();
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        save_file("test_text_alignments", &content);
+
+        for svg_line in content.split("</text>") {
+            if let Some(anchor_and_rest) = svg_line.split("text-anchor=\"").nth(1) {
+                if anchor_and_rest.starts_with("end") {
+                    assert!(anchor_and_rest.contains("right-align"))
+                }
+                if anchor_and_rest.starts_with("middle") {
+                    assert!(anchor_and_rest.contains("center-align"))
+                }
+                if anchor_and_rest.starts_with("start") {
+                    assert!(anchor_and_rest.contains("left-align"))
+                }
+            }
         }
     }
 }
