@@ -17,6 +17,23 @@ pub struct CandleStick<X, Y: PartialOrd> {
 
 impl<X: Clone, Y: PartialOrd> CandleStick<X, Y> {
     /// Create a new candlestick element, which requires the Y coordinate can be compared
+    ///
+    /// - `x`: The x coordinate
+    /// - `open`: The open value
+    /// - `high`: The high value
+    /// - `low`: The low value
+    /// - `close`: The close value
+    /// - `gain_style`: The style for gain
+    /// - `loss_style`: The style for loss
+    /// - `width`: The width
+    /// - **returns** The newly created candlestick element
+    ///
+    /// ```rust
+    /// use chrono::prelude::*;
+    /// use plotters::prelude::*;
+    ///
+    /// let candlestick = CandleStick::new(Local::now(), 130.0600, 131.3700, 128.8300, 129.1500, &GREEN, &RED, 15);
+    /// ```
     #[allow(clippy::too_many_arguments)]
     pub fn new<GS: Into<ShapeStyle>, LS: Into<ShapeStyle>>(
         x: X,
@@ -38,7 +55,7 @@ impl<X: Clone, Y: PartialOrd> CandleStick<X, Y> {
                 (x.clone(), open),
                 (x.clone(), high),
                 (x.clone(), low),
-                (x.clone(), close),
+                (x, close),
             ],
         }
     }

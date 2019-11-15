@@ -16,7 +16,7 @@
     "wasm",
     "rust",
     "webpack",
-	"visualization"
+    "visualization"
   ],
   "author": "Plotters Developers",
   "license": "MIT",

@@ -22,6 +22,7 @@
     use std::iter::{Once, once};
     use plotters::element::{PointCollection, Drawable};
     use plotters::drawing::backend::{BackendCoord, DrawingErrorKind};
+    use plotters::style::IntoTextStyle;
     use plotters::prelude::*;
 
     // Any example drawing a red X
@@ -45,8 +46,10 @@
             _: (u32, u32),
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
-            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &RED.to_rgba(), false)?;
-            backend.draw_text("X", &("sans-serif", 20).into(), pos, &RED.to_rgba())
+            let color = RED.to_rgba();
+            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &color, false)?;
+            let text_style = &("sans-serif", 20).into_text_style(backend).color(&color);
+            backend.draw_text("X", &text_style, pos)
         }
     }
 
@@ -172,6 +175,9 @@ pub use candlestick::CandleStick;
 
 mod errorbar;
 pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
+
+mod boxplot;
+pub use boxplot::Boxplot;
 
 mod image;
 pub use self::image::BitMapElement;

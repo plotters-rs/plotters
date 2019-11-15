@@ -1,4 +1,4 @@
-use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle};
+use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle, TextStyle};
 use std::error::Error;
 
 /// A coordinate in the image
@@ -177,16 +177,16 @@ pub trait DrawingBackend: Sized {
 
     /// Draw a text on the drawing backend
     /// - `text`: The text to draw
-    /// - `font`: The description of the font
+    /// - `style`: The text style
     /// - `pos` : The position backend
-    /// - `color`: The color of the text
-    fn draw_text<'a>(
+    fn draw_text(
         &mut self,
         text: &str,
-        font: &FontDesc<'a>,
+        style: &TextStyle,
         pos: BackendCoord,
-        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let font = &style.font;
+        let color = &style.color;
         if color.alpha() == 0.0 {
             return Ok(());
         }
@@ -235,7 +235,7 @@ pub trait DrawingBackend: Sized {
                 if pos.1 + dy as i32 >= h as i32 {
                     break;
                 }
-                let r = src[(dx + dy * w) as usize * 3 + 0];
+                let r = src[(dx + dy * w) as usize * 3];
                 let g = src[(dx + dy * w) as usize * 3 + 1];
                 let b = src[(dx + dy * w) as usize * 3 + 2];
                 let color = crate::style::RGBColor(r, g, b);

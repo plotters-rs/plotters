@@ -18,16 +18,16 @@ enum PixelState {
 }
 
 impl PixelState {
-    fn to_char(&self) -> char {
+    fn to_char(self) -> char {
         match self {
             Self::Empty => ' ',
             Self::HLine => '-',
             Self::VLine => '|',
             Self::Cross => '+',
             Self::Pixel => '.',
-            Self::Text(c) => *c,
+            Self::Text(c) => c,
             Self::Circle(filled) => {
-                if *filled {
+                if filled {
                     '@'
                 } else {
                     'O'
@@ -35,6 +35,7 @@ impl PixelState {
             }
         }
     }
+
     fn update(&mut self, new_state: PixelState) {
         let next_state = match (*self, new_state) {
             (Self::HLine, Self::VLine) => Self::Cross,
@@ -123,12 +124,11 @@ impl DrawingBackend for TextDrawingBackend {
         Ok((text.len() as u32, 1))
     }
 
-    fn draw_text<'a>(
+    fn draw_text(
         &mut self,
         text: &str,
-        _font: &FontDesc<'a>,
+        _style: &TextStyle,
         pos: (i32, i32),
-        _color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let offset = pos.1.max(0) * 100 + pos.0.max(0);
         for (idx, chr) in (offset..).zip(text.chars()) {
@@ -150,7 +150,7 @@ where
         .set_label_area_size(LabelAreaPosition::Left, (5i32).percent_width())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
-        .build_ranged(-3.14..3.14, -1.2..1.2)?;
+        .build_ranged(-std::f64::consts::PI..std::f64::consts::PI, -1.2..1.2)?;
 
     chart
         .configure_mesh()
