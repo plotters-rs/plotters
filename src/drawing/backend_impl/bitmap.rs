@@ -228,6 +228,7 @@ impl<'a> BitMapBackend<'a> {
             .collect()
     }
 
+    #[allow(clippy::cast_ptr_alignment, clippy::many_single_char_names)]
     fn blend_rect_fast(
         &mut self,
         upper_left: (i32, i32),
@@ -281,8 +282,8 @@ impl<'a> BitMapBackend<'a> {
             ])
         };
 
-        const N: u64 = 0xff00ff00ff00ff00;
-        const M: u64 = 0x00ff00ff00ff00ff;
+        const N: u64 = 0xff00_ff00_ff00_ff00;
+        const M: u64 = 0x00ff_00ff_00ff_00ff;
 
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
@@ -319,6 +320,7 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    #[allow(clippy::many_single_char_names)]
     fn fill_vertical_line_fast(&mut self, x: i32, ys: (i32, i32), r: u8, g: u8, b: u8) {
         let (w, h) = self.get_size();
         let w = w as i32;
@@ -345,6 +347,7 @@ impl<'a> BitMapBackend<'a> {
         }
     }
 
+    #[allow(clippy::cast_ptr_alignment, clippy::many_single_char_names)]
     fn fill_rect_fast(
         &mut self,
         upper_left: (i32, i32),
@@ -398,7 +401,7 @@ impl<'a> BitMapBackend<'a> {
                     let mut iter = dst
                         [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut();
-                    for _ in 0..(x1 - x0 + 1) {
+                    for _ in 0..=x1 - x0 {
                         *iter.next().unwrap() = r;
                         *iter.next().unwrap() = g;
                         *iter.next().unwrap() = b;
