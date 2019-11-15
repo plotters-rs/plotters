@@ -3,7 +3,7 @@ use cairo::{Context as CairoContext, FontSlant, FontWeight, Status as CairoStatu
 #[allow(unused_imports)]
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 #[allow(unused_imports)]
-use crate::style::{Color, FontDesc, FontStyle, FontTransform, RGBAColor};
+use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextStyle};
 
 /// The drawing backend that is backed with a Cairo context
 pub struct CairoBackend<'a> {
@@ -227,13 +227,14 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
         Ok(())
     }
 
-    fn draw_text<'b>(
+    fn draw_text(
         &mut self,
         text: &str,
-        font: &FontDesc<'b>,
+        style: &TextStyle,
         pos: BackendCoord,
-        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let font = &style.font;
+        let color = &style.color;
         let (mut x, mut y) = (pos.0, pos.1);
 
         let degree = match font.get_transform() {
@@ -279,5 +280,51 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
             self.call_cairo(|c| c.restore())?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+    use std::fs;
+    use std::path::Path;
+
+    static DST_DIR: &str = "target/test/cairo";
+
+    #[test]
+    fn test_draw_mesh() {
+        let buffer: Vec<u8> = vec![];
+        let surface = cairo::PsSurface::for_stream(1024.0, 768.0, buffer);
+        let cr = CairoContext::new(&surface);
+        let root = CairoBackend::new(&cr, (500, 500))
+            .unwrap()
+            .into_drawing_area();
+        root.fill(&WHITE).unwrap();
+
+        // Text could be rendered to different elements if has whitespaces
+        let mut chart = ChartBuilder::on(&root)
+            .caption("this-is-a-test", ("sans-serif", 20))
+            .x_label_area_size(40)
+            .y_label_area_size(40)
+            .build_ranged(0..100, 0..100)
+            .unwrap();
+
+        chart.configure_mesh().draw().unwrap();
+
+        let buffer = *surface.finish_output_stream().unwrap().downcast().unwrap();
+        let content = String::from_utf8(buffer).unwrap();
+
+        /*
+          Please use the PS file to manually verify the results.
+
+          You may want to use `ps2pdf` to get the readable PDF file.
+        */
+        fs::create_dir_all(DST_DIR).unwrap();
+        let file_path = Path::new(DST_DIR).join("test_draw_mesh.ps");
+        println!("{:?} created", file_path);
+        fs::write(file_path, &content).unwrap();
+
+        assert!(content.contains("this-is-a-test"));
     }
 }

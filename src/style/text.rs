@@ -3,11 +3,23 @@ use super::font::{FontDesc, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
 
+/// The alignment of the text
+#[derive(Copy, Clone)]
+pub enum TextAlignment {
+    /// Left alignment
+    Left,
+    /// Right alignment
+    Right,
+    /// Center alignment
+    Center,
+}
+
 /// Style of a text
 #[derive(Clone)]
 pub struct TextStyle<'a> {
     pub font: FontDesc<'a>,
     pub color: RGBAColor,
+    pub alignment: TextAlignment,
 }
 
 pub trait IntoTextStyle<'a> {
@@ -57,18 +69,58 @@ impl<'a, T: SizeDesc> IntoTextStyle<'a> for (FontFamily<'a>, T, FontStyle) {
 }
 
 impl<'a> TextStyle<'a> {
-    /// Determine the color of the style
+    /// Sets the color of the style.
+    ///
+    /// - `color`: The required color
+    /// - **returns** The up-to-dated text style
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let style = TextStyle::from(("sans-serif", 20).into_font()).color(&RED);
+    /// ```
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         Self {
             font: self.font.clone(),
             color: color.to_rgba(),
+            alignment: self.alignment,
         }
     }
 
+    /// Sets the font transformation of the style.
+    ///
+    /// - `trans`: The required transformation
+    /// - **returns** The up-to-dated text style
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let style = TextStyle::from(("sans-serif", 20).into_font()).transform(FontTransform::Rotate90);
+    /// ```
     pub fn transform(&self, trans: FontTransform) -> Self {
         Self {
             font: self.font.clone().transform(trans),
             color: self.color.clone(),
+            alignment: self.alignment,
+        }
+    }
+
+    /// Sets the text alignment of the style.
+    ///
+    /// - `color`: The required alignment
+    /// - **returns** The up-to-dated text style
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    /// use plotters::style::TextAlignment;
+    ///
+    /// let style = TextStyle::from(("sans-serif", 20).into_font()).alignment(TextAlignment::Right);
+    /// ```
+    pub fn alignment(&self, alignment: TextAlignment) -> Self {
+        Self {
+            font: self.font.clone(),
+            color: self.color.clone(),
+            alignment,
         }
     }
 }
@@ -85,6 +137,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
         Self {
             font: font.into(),
             color: BLACK.to_rgba(),
+            alignment: TextAlignment::Left,
         }
     }
 }

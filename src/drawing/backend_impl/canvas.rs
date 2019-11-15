@@ -3,7 +3,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontDesc, FontTransform, RGBAColor};
+use crate::style::{Color, FontTransform, RGBAColor, TextStyle};
 
 /// The backend that is drawing on the HTML canvas
 /// TODO: Support double buffering
@@ -230,13 +230,14 @@ impl DrawingBackend for CanvasBackend {
         Ok(())
     }
 
-    fn draw_text<'b>(
+    fn draw_text(
         &mut self,
         text: &str,
-        font: &FontDesc<'b>,
+        style: &TextStyle,
         pos: BackendCoord,
-        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let font = &style.font;
+        let color = &style.color;
         if color.alpha() == 0.0 {
             return Ok(());
         }
@@ -279,5 +280,56 @@ impl DrawingBackend for CanvasBackend {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+    use wasm_bindgen_test::wasm_bindgen_test_configure;
+    use wasm_bindgen_test::*;
+
+    wasm_bindgen_test_configure!(run_in_browser);
+
+    #[wasm_bindgen_test]
+    fn test_draw_mesh() {
+        let document = web_sys::window().unwrap().document().unwrap();
+        let canvas = document
+            .create_element("canvas")
+            .unwrap()
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .unwrap();
+        canvas.set_attribute("id", "canvas-id").unwrap();
+        document.body().unwrap().append_child(&canvas).unwrap();
+        canvas.set_width(100);
+        canvas.set_height(100);
+
+        let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
+        let root = backend.into_drawing_area();
+
+        let mut chart = ChartBuilder::on(&root)
+            .caption("This is a test", ("sans-serif", 10))
+            .x_label_area_size(30)
+            .y_label_area_size(30)
+            .build_ranged(-1f32..1f32, -1.2f32..1.2f32)
+            .unwrap();
+
+        chart
+            .configure_mesh()
+            .x_labels(3)
+            .y_labels(3)
+            .draw()
+            .unwrap();
+
+        let canvas = document
+            .get_element_by_id("canvas-id")
+            .unwrap()
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .unwrap();
+
+        let data_uri = canvas.to_data_url().unwrap();
+        let prefix = "data:image/png;base64,";
+        assert!(&data_uri.starts_with(prefix));
     }
 }

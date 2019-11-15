@@ -22,6 +22,7 @@ Also, the ranged axis can be deserted, and this is required by the histogram ser
 */
 use crate::drawing::backend::BackendCoord;
 
+mod category;
 #[cfg(feature = "chrono")]
 mod datetime;
 mod logarithmic;
@@ -46,6 +47,8 @@ pub use logarithmic::{LogCoord, LogRange, LogScalable};
 pub use numeric::group_integer_by::{GroupBy, ToGroupByRange};
 use std::rc::Rc;
 use std::sync::Arc;
+
+pub use category::Category;
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {

@@ -1,5 +1,5 @@
 use super::{FontData, FontDataInternal};
-use crate::style::{Color, LayoutBox, TextStyle};
+use crate::style::{Color, LayoutBox, TextAlignment, TextStyle};
 
 use std::convert::From;
 
@@ -255,6 +255,7 @@ impl<'a> FontDesc<'a> {
         TextStyle {
             font: self.clone(),
             color: color.to_rgba(),
+            alignment: TextAlignment::Left,
         }
     }
 

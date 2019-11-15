@@ -2,7 +2,7 @@ use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::drawing::DrawingArea;
-use crate::style::{Color, FontDesc, RGBAColor};
+use crate::style::{Color, RGBAColor, TextStyle};
 
 use std::collections::VecDeque;
 
@@ -232,13 +232,14 @@ impl DrawingBackend for MockedBackend {
         Ok(())
     }
 
-    fn draw_text<'a>(
+    fn draw_text(
         &mut self,
         text: &str,
-        font: &FontDesc<'a>,
+        style: &TextStyle,
         pos: BackendCoord,
-        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+        let font = &style.font;
+        let color = &style.color;
         self.check_before_draw();
         self.num_draw_text_call += 1;
         let color = color.to_rgba();
