@@ -3,7 +3,10 @@ use super::font::{FontDesc, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
 
-/// The alignment of the text
+/// The alignment of the text.
+///
+/// Used to determine the invariant (anchor) points for backends
+/// which render the text on the client side.
 #[derive(Copy, Clone)]
 pub enum TextAlignment {
     /// Left alignment
