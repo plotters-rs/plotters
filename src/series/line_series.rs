@@ -1,35 +1,53 @@
-use crate::element::PathElement;
+use crate::drawing::DrawingBackend;
+use crate::element::{Circle, DynElement, IntoDynElement, PathElement};
 use crate::style::ShapeStyle;
+use std::marker::PhantomData;
 
 /// The line series object, which takes an iterator of points in guest coordinate system
 /// and creates the element rendering the line plot
-pub struct LineSeries<Coord, I: IntoIterator<Item = Coord>> {
+pub struct LineSeries<DB: DrawingBackend, Coord> {
     style: ShapeStyle,
-    data_iter: Option<I::IntoIter>,
+    data: Vec<Coord>,
+    point_idx: usize,
+    point_size: u32,
+    phantom: PhantomData<DB>,
 }
 
-impl<Coord, I: IntoIterator<Item = Coord>> Iterator for LineSeries<Coord, I> {
-    type Item = PathElement<Coord>;
+impl<DB: DrawingBackend, Coord: Clone + 'static> Iterator for LineSeries<DB, Coord> {
+    type Item = DynElement<'static, DB, Coord>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.data_iter.is_some() {
-            let mut data_iter = None;
-            std::mem::swap(&mut self.data_iter, &mut data_iter);
-            Some(PathElement::new(
-                data_iter.unwrap().collect::<Vec<_>>(),
-                self.style.clone(),
-            ))
+        if !self.data.is_empty() {
+            if self.point_size > 0 && self.point_idx < self.data.len() {
+                let idx = self.point_idx;
+                self.point_idx += 1;
+                return Some(
+                    Circle::new(self.data[idx].clone(), self.point_size, self.style.clone())
+                        .into_dyn(),
+                );
+            }
+            let mut data = vec![];
+            std::mem::swap(&mut self.data, &mut data);
+            Some(PathElement::new(data, self.style.clone()).into_dyn())
         } else {
             None
         }
     }
 }
 
-impl<Coord, I: IntoIterator<Item = Coord>> LineSeries<Coord, I> {
-    pub fn new<S: Into<ShapeStyle>>(iter: I, style: S) -> Self {
+impl<DB: DrawingBackend, Coord> LineSeries<DB, Coord> {
+    pub fn new<I: IntoIterator<Item = Coord>, S: Into<ShapeStyle>>(iter: I, style: S) -> Self {
         Self {
             style: style.into(),
-            data_iter: Some(iter.into_iter()),
+            data: iter.into_iter().collect(),
+            point_size: 0,
+            point_idx: 0,
+            phantom: PhantomData,
         }
+    }
+
+    pub fn point_size(mut self, size: u32) -> Self {
+        self.point_size = size;
+        self
     }
 }
 

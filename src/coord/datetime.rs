@@ -419,7 +419,7 @@ pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
 
 impl<Z: TimeZone> AsRangedCoord for Range<DateTime<Z>> {
     type CoordDescType = RangedDateTime<Z>;
-    type Value = Date<Z>;
+    type Value = DateTime<Z>;
 }
 
 impl<Z: TimeZone> From<Range<DateTime<Z>>> for RangedDateTime<Z> {

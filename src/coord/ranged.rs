@@ -185,7 +185,7 @@ where
 
 /// The trait for the type that can be converted into a ranged coordinate axis
 pub trait AsRangedCoord: Sized {
-    type CoordDescType: Ranged + From<Self>;
+    type CoordDescType: Ranged<ValueType = Self::Value> + From<Self>;
     type Value;
 }
 
