@@ -2,7 +2,7 @@
 use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
-use crate::style::{Color, FontDesc, SizeDesc, TextStyle};
+use crate::style::{Color, FontDesc, SizeDesc, TextAlignment, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -481,6 +481,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         };
 
         let y_padding = (text_h / 2).min(5) as i32;
+        let style = &style.alignment(TextAlignment::Center);
 
         self.backend_ops(|b| {
             b.draw_text(

@@ -1,6 +1,7 @@
 use itertools::Itertools;
 use plotters::data::fitting_range;
 use plotters::prelude::*;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -51,7 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut colors = (0..).map(Palette99::pick);
     let mut offsets = (-12..).step_by(24);
-    let mut series = HashMap::new();
+    let mut series = BTreeMap::new();
     for x in dataset.iter() {
         let entry = series
             .entry(x.1.clone())
@@ -126,15 +127,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )?;
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;
-    let area = chart.plotting_area();
-    area.draw(&Boxplot::new_vertical(
-        category_ab.get(&"a").unwrap(),
-        &quartiles_a,
-    ))?;
-    area.draw(&Boxplot::new_vertical(
-        category_ab.get(&"b").unwrap(),
-        &quartiles_b,
-    ))?;
+    chart.draw_series(vec![
+        Boxplot::new_vertical(category_ab.get(&"a").unwrap(), &quartiles_a),
+        Boxplot::new_vertical(category_ab.get(&"b").unwrap(), &quartiles_b),
+    ])?;
 
     let mut chart = ChartBuilder::on(&right)
         .x_label_area_size(40)
@@ -143,9 +139,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_ranged(-30f32..90f32, 0..3)?;
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;
-    let area = chart.plotting_area();
-    area.draw(&Boxplot::new_horizontal(1, &quartiles_a))?;
-    area.draw(&Boxplot::new_horizontal(2, &Quartiles::new(&[30])))?;
+    chart.draw_series(vec![
+        Boxplot::new_horizontal(1, &quartiles_a),
+        Boxplot::new_horizontal(2, &Quartiles::new(&[30])),
+    ])?;
 
     Ok(())
 }
