@@ -35,7 +35,7 @@ fn make_point_pair(a: BackendCoord, b: BackendCoord, scale: f64) -> [f64; 4] {
 }
 
 impl<'a, 'b> PistonBackend<'a, 'b> {
-    fn new(size: (u32, u32), scale: f64, context: Context, graphics: &'b mut G2d<'a>) -> Self {
+    pub fn new(size: (u32, u32), scale: f64, context: Context, graphics: &'b mut G2d<'a>) -> Self {
         Self {
             size,
             context,
