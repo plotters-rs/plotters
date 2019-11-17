@@ -239,6 +239,7 @@ pub trait DrawingBackend: Sized {
                 if pos.1 + dy as i32 >= h as i32 {
                     break;
                 }
+                // FIXME: This assume we have RGB image buffer
                 let r = src[(dx + dy * w) as usize * 3 + 0];
                 let g = src[(dx + dy * w) as usize * 3 + 1];
                 let b = src[(dx + dy * w) as usize * 3 + 2];
