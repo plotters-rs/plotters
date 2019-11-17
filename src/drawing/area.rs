@@ -278,7 +278,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.backend_ops(|backend| {
             backend.draw_rect(
                 (self.rect.x0, self.rect.y0),
-                (self.rect.x1, self.rect.y1),
+                (self.rect.x1 - 1, self.rect.y1 - 1),
                 color,
                 true,
             )
@@ -541,7 +541,7 @@ mod drawing_area_tests {
                 assert_eq!(c, WHITE.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (0, 0));
-                assert_eq!(d, (1024, 768));
+                assert_eq!(d, (1023, 767));
             });
 
             m.drop_check(|b| {
@@ -569,8 +569,8 @@ mod drawing_area_tests {
                         assert_eq!(
                             d,
                             (
-                                300 + 300 * row as i32 + 2.min(row + 1) as i32,
-                                300 + 300 * col as i32
+                                300 + 300 * row as i32 + 2.min(row + 1) as i32 - 1,
+                                300 + 300 * col as i32 - 1
                             )
                         );
                     });
@@ -598,14 +598,14 @@ mod drawing_area_tests {
                 assert_eq!(c, RED.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (0, 0));
-                assert_eq!(d, (345, 768));
+                assert_eq!(d, (345 - 1, 768 - 1));
             });
 
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (345, 0));
-                assert_eq!(d, (1024, 768));
+                assert_eq!(d, (1024 - 1, 768 - 1));
             });
 
             m.drop_check(|b| {
@@ -626,14 +626,14 @@ mod drawing_area_tests {
                 assert_eq!(c, RED.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (0, 0));
-                assert_eq!(d, (1024, 345));
+                assert_eq!(d, (1024 - 1, 345 - 1));
             });
 
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (0, 345));
-                assert_eq!(d, (1024, 768));
+                assert_eq!(d, (1024 - 1, 768 - 1));
             });
 
             m.drop_check(|b| {
@@ -670,8 +670,10 @@ mod drawing_area_tests {
                             };
 
                             let expected_u = (get_bp(1024, nxb, col), get_bp(768, nyb, row));
-                            let expected_d =
-                                (get_bp(1024, nxb, col + 1), get_bp(768, nyb, row + 1));
+                            let expected_d = (
+                                get_bp(1024, nxb, col + 1) - 1,
+                                get_bp(768, nyb, row + 1) - 1,
+                            );
                             let expected_color =
                                 colors[(row * (nxb + 1) + col) as usize % colors.len()];
 
@@ -714,7 +716,7 @@ mod drawing_area_tests {
                 assert_eq!(f, true);
                 assert_eq!(u.0, 0);
                 assert!(u.1 > 0);
-                assert_eq!(d, (1024, 768));
+                assert_eq!(d, (1024 - 1, 768 - 1));
             });
             m.drop_check(|b| {
                 assert_eq!(b.num_draw_text_call, 1);
@@ -737,7 +739,7 @@ mod drawing_area_tests {
                 assert_eq!(c, WHITE.to_rgba());
                 assert_eq!(f, true);
                 assert_eq!(u, (3, 1));
-                assert_eq!(d, (1024 - 4, 768 - 2));
+                assert_eq!(d, (1024 - 4 - 1, 768 - 2 - 1));
             });
 
             m.drop_check(|b| {
@@ -796,22 +798,22 @@ mod drawing_area_tests {
                     0 => {
                         assert_eq!(c, RED.to_rgba());
                         assert_eq!(u, (0, 0));
-                        assert_eq!(d, (300, 600));
+                        assert_eq!(d, (300 - 1, 600 - 1));
                     }
                     1 => {
                         assert_eq!(c, BLUE.to_rgba());
                         assert_eq!(u, (300, 0));
-                        assert_eq!(d, (1000, 600));
+                        assert_eq!(d, (1000 - 1, 600 - 1));
                     }
                     2 => {
                         assert_eq!(c, GREEN.to_rgba());
                         assert_eq!(u, (0, 600));
-                        assert_eq!(d, (300, 1200));
+                        assert_eq!(d, (300 - 1, 1200 - 1));
                     }
                     3 => {
                         assert_eq!(c, WHITE.to_rgba());
                         assert_eq!(u, (300, 600));
-                        assert_eq!(d, (1000, 1200));
+                        assert_eq!(d, (1000 - 1, 1200 - 1));
                     }
                     _ => panic!("Too many draw rect"),
                 }
@@ -839,7 +841,7 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
             m.check_draw_rect(move |_, _, _, u, d| {
                 assert_eq!((100, 100), u);
-                assert_eq!((300, 700), d);
+                assert_eq!((300 - 1, 700 - 1), d);
             });
 
             m.drop_check(|b| {
