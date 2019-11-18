@@ -168,14 +168,14 @@ impl<T: PartialEq> Ranged for CategoryElementsRange<T> {
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
         // Add margins to spans as edge values are not applicable to category
-        let total_span = (self.1.idx - self.0.idx + 2) as f64;
-        let value_span = (value.idx - self.0.idx + 1) as f64;
+        let total_span = f64::from(self.1.idx - self.0.idx + 2);
+        let value_span = f64::from(value.idx - self.0.idx + 1);
         (f64::from(limit.1 - limit.0) * value_span / total_span) as i32 + limit.0
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
         let mut ret = vec![];
-        let intervals = (self.1.idx - self.0.idx) as f64;
+        let intervals = f64::from(self.1.idx - self.0.idx);
         let inner = &self.0.inner;
         let step = (intervals / max_points as f64 + 1.0) as usize;
         for idx in (self.0.idx..=self.1.idx).step_by(step) {

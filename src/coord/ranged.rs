@@ -20,6 +20,7 @@ pub trait Ranged {
     fn range(&self) -> Range<Self::ValueType>;
 
     /// This function provides the on-axis part of its range
+    #[allow(clippy::range_plus_one)]
     fn axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
         if limit.0 < limit.1 {
             limit.0..limit.1

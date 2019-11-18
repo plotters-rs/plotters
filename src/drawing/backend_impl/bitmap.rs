@@ -35,9 +35,9 @@ impl std::error::Error for BitMapBackendError {}
 #[inline(always)]
 fn blend(prev: &mut u8, new: u8, a: u64) {
     if new > *prev {
-        *prev += ((new - *prev) as u64 * a / 256) as u8
+        *prev += (u64::from(new - *prev) * a / 256) as u8
     } else {
-        *prev -= ((*prev - new) as u64 * a / 256) as u8
+        *prev -= (u64::from(*prev - new) * a / 256) as u8
     }
 }
 
@@ -283,6 +283,7 @@ impl PixelFormat for RGBPixel {
         true
     }
 
+    #[allow(clippy::many_single_char_names, clippy::cast_ptr_alignment)]
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -321,22 +322,22 @@ impl PixelFormat for RGBPixel {
         // thus, this type purning should work for both LE and BE CPUs
         let (p1, p2, p3): (u64, u64, u64) = unsafe {
             std::mem::transmute([
-                r as u16, b as u16, g as u16, r as u16, // QW1
-                b as u16, g as u16, r as u16, b as u16, // QW2
-                g as u16, r as u16, b as u16, g as u16, // QW3
+                u16::from(r), u16::from(b), u16::from(g), u16::from(r), // QW1
+                u16::from(b), u16::from(g), u16::from(r), u16::from(b), // QW2
+                u16::from(g), u16::from(r), u16::from(b), u16::from(g), // QW3
             ])
         };
 
         let (q1, q2, q3): (u64, u64, u64) = unsafe {
             std::mem::transmute([
-                g as u16, r as u16, b as u16, g as u16, // QW1
-                r as u16, b as u16, g as u16, r as u16, // QW2
-                b as u16, g as u16, r as u16, b as u16, // QW3
+                u16::from(g), u16::from(r), u16::from(b), u16::from(g), // QW1
+                u16::from(r), u16::from(b), u16::from(g), u16::from(r), // QW2
+                u16::from(b), u16::from(g), u16::from(r), u16::from(b), // QW3
             ])
         };
 
-        const N: u64 = 0xff00ff00ff00ff00;
-        const M: u64 = 0x00ff00ff00ff00ff;
+        const N: u64 = 0xff00_ff00_ff00_ff00;
+        const M: u64 = 0x00ff_00ff_00ff_00ff;
 
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
@@ -386,6 +387,7 @@ impl PixelFormat for RGBPixel {
         }
     }
 
+    #[allow(clippy::many_single_char_names, clippy::cast_ptr_alignment)]
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -439,7 +441,7 @@ impl PixelFormat for RGBPixel {
                     let mut iter = dst
                         [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut();
-                    for _ in 0..(x1 - x0 + 1) {
+                    for _ in 0..=(x1 - x0) {
                         *iter.next().unwrap() = r;
                         *iter.next().unwrap() = g;
                         *iter.next().unwrap() = b;
@@ -498,6 +500,7 @@ impl PixelFormat for BGRXPixel {
         (data[2], data[1], data[0], 0x255)
     }
 
+    #[allow(clippy::many_single_char_names, clippy::cast_ptr_alignment)]
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -535,21 +538,19 @@ impl PixelFormat for BGRXPixel {
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
         let p: u64 = unsafe {
-            //0011 0022 0033 0011
             std::mem::transmute([
-                b as u16, r as u16, b as u16, r as u16, // QW1
+                u16::from(b), u16::from(r), u16::from(b), u16::from(r), // QW1
             ])
         };
 
         let q: u64 = unsafe {
-            //0022 0011 0033 0022
             std::mem::transmute([
-                g as u16, 0 as u16, g as u16, 0 as u16, // QW1
+                u16::from(g), 0u16, u16::from(g), 0u16, // QW1
             ])
         };
 
-        const N: u64 = 0xff00ff00ff00ff00;
-        const M: u64 = 0x00ff00ff00ff00ff;
+        const N: u64 = 0xff00_ff00_ff00_ff00;
+        const M: u64 = 0x00ff_00ff_00ff_00ff;
 
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
@@ -592,6 +593,7 @@ impl PixelFormat for BGRXPixel {
         }
     }
 
+    #[allow(clippy::many_single_char_names, clippy::cast_ptr_alignment)]
     fn fill_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -645,7 +647,7 @@ impl PixelFormat for BGRXPixel {
                     let mut iter = dst
                         [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut();
-                    for _ in 0..(x1 - x0 + 1) {
+                    for _ in 0..=(x1 - x0) {
                         *iter.next().unwrap() = b;
                         *iter.next().unwrap() = g;
                         *iter.next().unwrap() = r;

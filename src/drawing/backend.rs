@@ -240,7 +240,7 @@ pub trait DrawingBackend: Sized {
                     break;
                 }
                 // FIXME: This assume we have RGB image buffer
-                let r = src[(dx + dy * w) as usize * 3 + 0];
+                let r = src[(dx + dy * w) as usize * 3];
                 let g = src[(dx + dy * w) as usize * 3 + 1];
                 let b = src[(dx + dy * w) as usize * 3 + 2];
                 let color = crate::style::RGBColor(r, g, b);
