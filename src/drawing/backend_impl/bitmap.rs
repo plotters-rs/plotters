@@ -283,7 +283,6 @@ impl PixelFormat for RGBPixel {
         true
     }
 
-    #[allow(clippy::cast_ptr_alignment, clippy::many_single_char_names)]
     fn blend_rect_fast(
         target: &mut BitMapBackend<'_, Self>,
         upper_left: (i32, i32),
@@ -549,8 +548,8 @@ impl PixelFormat for BGRXPixel {
             ])
         };
 
-        const N: u64 = 0xff00_ff00_ff00_ff00;
-        const M: u64 = 0x00ff_00ff_00ff_00ff;
+        const N: u64 = 0xff00ff00ff00ff00;
+        const M: u64 = 0x00ff00ff00ff00ff;
 
         for y in y0..=y1 {
             let start = (y * w as i32 + x0) as usize;
