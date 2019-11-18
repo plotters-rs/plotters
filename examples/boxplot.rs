@@ -122,7 +122,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .caption("Vertical Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
-            category_ab.get(&"a").unwrap()..category_ab.get(&"b").unwrap(),
+            category_ab.clone(),
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 

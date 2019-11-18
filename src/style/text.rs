@@ -6,7 +6,12 @@ use super::BLACK;
 /// The alignment of the text.
 ///
 /// Used to determine the invariant (anchor) points for backends
-/// which render the text on the client side.
+/// which render the text on the client side like SVG. The current
+/// implementation calculates the font inked rectangle using
+/// fontkit-based glyphs, but the client side (i.e. web browsers)
+/// may use different fonts for the same font family. As the calculations
+/// assume some invariant points, we may use the same on the client
+/// side to properly position the text.
 #[derive(Copy, Clone)]
 pub enum TextAlignment {
     /// Left alignment

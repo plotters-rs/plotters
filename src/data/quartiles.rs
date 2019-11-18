@@ -9,13 +9,27 @@ pub struct Quartiles {
 }
 
 impl Quartiles {
-    fn calc_median<T: Into<f64> + Copy + PartialOrd>(s: &[T]) -> f64 {
-        let mut s = s.to_owned();
-        s.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        match s.len() % 2 {
-            0 => (s[(s.len() / 2) - 1].into() / 2.0) + (s[(s.len() / 2)].into() / 2.0),
-            _ => s[s.len() / 2].into(),
+    // Extract a value representing the `pct` percentile of a
+    // sorted `s`, using linear interpolation.
+    fn percentile_of_sorted<T: Into<f64> + Copy>(s: &[T], pct: f64) -> f64 {
+        assert!(!s.is_empty());
+        if s.len() == 1 {
+            return s[0].into();
         }
+        assert!(0_f64 <= pct);
+        let hundred = 100_f64;
+        assert!(pct <= hundred);
+        if (pct - hundred).abs() < std::f64::EPSILON {
+            return s[s.len() - 1].into();
+        }
+        let length = (s.len() - 1) as f64;
+        let rank = (pct / hundred) * length;
+        let lower_rank = rank.floor();
+        let d = rank - lower_rank;
+        let n = lower_rank as usize;
+        let lo = s[n].into();
+        let hi = s[n + 1].into();
+        lo + (hi - lo) * d
     }
 
     /// Create a new quartiles struct with the values calculated from the argument.
@@ -30,26 +44,12 @@ impl Quartiles {
     /// assert_eq!(quartiles.median(), 37.5);
     /// ```
     pub fn new<T: Into<f64> + Copy + PartialOrd>(s: &[T]) -> Self {
-        if s.len() == 1 {
-            let value = s[0].into();
-            return Self {
-                lower_fence: value,
-                lower: value,
-                median: value,
-                upper: value,
-                upper_fence: value,
-            };
-        }
         let mut s = s.to_owned();
-        s.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        let (a, b) = if s.len() % 2 == 0 {
-            s.split_at(s.len() / 2)
-        } else {
-            (&s[..(s.len() / 2)], &s[((s.len() / 2) + 1)..])
-        };
-        let lower = Quartiles::calc_median(a);
-        let median = Quartiles::calc_median(&s);
-        let upper = Quartiles::calc_median(b);
+        s.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+
+        let lower = Quartiles::percentile_of_sorted(&s, 25_f64);
+        let median = Quartiles::percentile_of_sorted(&s, 50_f64);
+        let upper = Quartiles::percentile_of_sorted(&s, 75_f64);
         let iqr = upper - lower;
         let lower_fence = lower - 1.5 * iqr;
         let upper_fence = upper + 1.5 * iqr;
@@ -71,7 +71,7 @@ impl Quartiles {
     ///
     /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
     /// let values = quartiles.values();
-    /// assert_eq!(values, [-22.5, 15.0, 37.5, 40.0, 77.5]);
+    /// assert_eq!(values, [-9.0, 20.25, 37.5, 39.75, 69.0]);
     /// ```
     pub fn values(&self) -> [f32; 5] {
         [
@@ -117,11 +117,11 @@ mod test {
         );
         assert_eq!(
             Quartiles::new(&[10, 20]).values(),
-            [-5.0, 10.0, 15.0, 20.0, 35.0]
+            [5.0, 12.5, 15.0, 17.5, 25.0]
         );
         assert_eq!(
             Quartiles::new(&[10, 20, 30]).values(),
-            [-20.0, 10.0, 20.0, 30.0, 60.0]
+            [0.0, 15.0, 20.0, 25.0, 40.0]
         );
     }
 }
