@@ -246,7 +246,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         }
 
         let mut pixel_range = drawing_area.get_pixel_range();
-        pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
+        pixel_range.1 = (pixel_range.1.end - 1)..(pixel_range.1.start - 1);
 
         let mut x_label_area = [None, None];
         let mut y_label_area = [None, None];
@@ -266,8 +266,8 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             )),
             series_anno: vec![],
             drawing_area_pos: (
-                actual_drawing_area_pos[2] + title_dx,
-                actual_drawing_area_pos[0] + title_dy,
+                actual_drawing_area_pos[2] + title_dx + self.margin[2] as i32,
+                actual_drawing_area_pos[0] + title_dy + self.margin[0] as i32,
             ),
         })
     }

@@ -76,6 +76,12 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) drawing_area_pos: (i32, i32),
 }
 
+/// A chart context state - This is the data that is needed to reconstruct the chart context
+/// without actually drawing the chart. This is useful when we want to do realtime rendering and
+/// want to incrementally update the chart.
+///
+/// For each frame, instead of updating the entire backend, we are able to keep the keep the figure
+/// component like axis, labels untouched and make updates only in the plotting drawing area.
 pub struct ChartState<CT: CoordTranslate> {
     drawing_area_pos: (i32, i32),
     drawing_area_size: (u32, u32),
@@ -103,10 +109,16 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> 
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    /// Convert a chart context into a chart state, by doing so, the chart context is consumed and
+    /// a saved chart state is created for later use.
     pub fn into_chart_state(self) -> ChartState<CT> {
         self.into()
     }
 
+    /// Convert the chart context into a sharable chart state.
+    /// Normally a chart state can not be clone, since the coordinate spec may not be able to be
+    /// cloned. In this case, we can use an `Arc` get the coordinate wrapped thus the state can be
+    /// cloned and shared by multiple chart context
     pub fn into_shared_chart_state(self) -> ChartState<Arc<CT>> {
         ChartState {
             drawing_area_pos: self.drawing_area_pos,
@@ -131,12 +143,17 @@ where
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate + Clone> ChartContext<'a, DB, CT> {
+    /// Make the chart context, do not consume the chart context and clone the coordinate spec
     pub fn to_chart_state(&self) -> ChartState<CT> {
         self.into()
     }
 }
 
 impl<CT: CoordTranslate> ChartState<CT> {
+    /// Restore the chart context on the given drawing area
+    ///
+    /// - `area`: The given drawing area where we want to restore the chart context
+    /// - **returns** The newly created chart context
     pub fn restore<'a, DB: DrawingBackend>(
         self,
         area: &DrawingArea<DB, Shift>,
@@ -417,23 +434,23 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         }
 
         if let Some(axis_style) = axis_style {
-            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 };
-            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 };
-            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 };
-            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 };
+            let mut x0 = if orientation.0 > 0 { 0 } else { tw as i32 - 1 };
+            let mut y0 = if orientation.1 > 0 { 0 } else { th as i32 - 1 };
+            let mut x1 = if orientation.0 >= 0 { 0 } else { tw as i32 - 1 };
+            let mut y1 = if orientation.1 >= 0 { 0 } else { th as i32 - 1 };
 
             if inward_labels {
                 if orientation.0 == 0 {
                     if y0 == 0 {
-                        y0 = th as i32;
-                        y1 = th as i32;
+                        y0 = th as i32 - 1;
+                        y1 = th as i32 - 1;
                     } else {
                         y0 = 0;
                         y1 = 0;
                     }
                 } else if x0 == 0 {
-                    x0 = tw as i32;
-                    x1 = tw as i32;
+                    x0 = tw as i32 - 1;
+                    x1 = tw as i32 - 1;
                 } else {
                     x0 = 0;
                     x1 = 0;
@@ -584,26 +601,28 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 area.draw_text(&t, label_style, (text_x, text_y))?;
 
                 if let Some(style) = axis_style {
+                    let xmax = tw as i32 - 1;
+                    let ymax = th as i32 - 1;
                     let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
                         match orientation {
                             (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
                             (dx, dy) if dx < 0 && dy == 0 => {
-                                (tw as i32 - tick_size, *p - y0, tw as i32, *p - y0)
+                                (xmax - tick_size, *p - y0, xmax, *p - y0)
                             }
                             (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
                             (dx, dy) if dx == 0 && dy < 0 => {
-                                (*p - x0, th as i32 - tick_size, *p - x0, th as i32)
+                                (*p - x0, ymax - tick_size, *p - x0, ymax)
                             }
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     } else {
                         match orientation {
                             (dx, dy) if dx > 0 && dy == 0 => {
-                                (tw as i32, *p - y0, tw as i32 + tick_size, *p - y0)
+                                (xmax, *p - y0, xmax + tick_size, *p - y0)
                             }
                             (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
                             (dx, dy) if dx == 0 && dy > 0 => {
-                                (*p - x0, th as i32, *p - x0, th as i32 + tick_size)
+                                (*p - x0, ymax, *p - x0, ymax + tick_size)
                             }
                             (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
                             _ => panic!("Bug: Invalid orientation specification"),

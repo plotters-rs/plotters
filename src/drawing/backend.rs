@@ -219,6 +219,10 @@ pub trait DrawingBackend: Sized {
     ///
     /// - `text`: pos the left upper conner of the bitmap to blit
     /// - `src`: The source of the image
+    ///
+    /// TODO: The default implementation of bitmap blitting assumes that the bitmap is RGB, but
+    /// this may not be the case. But for bitmap backend it's actually ok if we use the bitmap
+    /// element that matches the pixel format, but we need to fix this.
     fn blit_bitmap<'a>(
         &mut self,
         pos: BackendCoord,
@@ -235,7 +239,8 @@ pub trait DrawingBackend: Sized {
                 if pos.1 + dy as i32 >= h as i32 {
                     break;
                 }
-                let r = src[(dx + dy * w) as usize * 3];
+                // FIXME: This assume we have RGB image buffer
+                let r = src[(dx + dy * w) as usize * 3 + 0];
                 let g = src[(dx + dy * w) as usize * 3 + 1];
                 let b = src[(dx + dy * w) as usize * 3 + 2];
                 let color = crate::style::RGBColor(r, g, b);

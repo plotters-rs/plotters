@@ -1,4 +1,5 @@
 use criterion::{criterion_group, Criterion};
+use plotters::drawing::bitmap_pixel::BGRXPixel;
 use plotters::prelude::*;
 
 const W: u32 = 1000;
@@ -10,6 +11,21 @@ fn draw_pixel(c: &mut Criterion) {
     c.bench_function("rasterizer::draw_pixel", |b| {
         b.iter(|| {
             let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
+            for x in 0..W / 10 {
+                for y in 0..H / 10 {
+                    root.draw_pixel((x as i32, y as i32), &RGBColor(255, 0, 234).to_rgba())
+                        .unwrap();
+                }
+            }
+        })
+    });
+
+    let mut buffer = vec![0; (W * H * 4) as usize];
+
+    c.bench_function("rasterizer::draw_pixel_bgrx", |b| {
+        b.iter(|| {
+            let mut root =
+                BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H)).unwrap();
             for x in 0..W / 10 {
                 for y in 0..H / 10 {
                     root.draw_pixel((x as i32, y as i32), &RGBColor(255, 0, 234).to_rgba())
@@ -36,6 +52,23 @@ fn draw_line(c: &mut Criterion) {
             }
         })
     });
+
+    let mut buffer = vec![0; (W * H * 4) as usize];
+
+    c.bench_function("rasterizer::draw_line_bgrx", |b| {
+        b.iter(|| {
+            let mut root =
+                BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H)).unwrap();
+            for y in 0..10 {
+                root.draw_line(
+                    (0, 0),
+                    ((W / 2) as i32, (y * 100) as i32),
+                    &RGBColor(255, 0, 234).to_rgba(),
+                )
+                .unwrap();
+            }
+        })
+    });
 }
 
 fn fill_background(c: &mut Criterion) {
@@ -47,6 +80,17 @@ fn fill_background(c: &mut Criterion) {
             root.fill(&WHITE).unwrap();
         })
     });
+
+    let mut buffer = vec![0; (W * H * 4) as usize];
+
+    c.bench_function("rasterizer::fill_background_bgrx", |b| {
+        b.iter(|| {
+            let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H))
+                .unwrap()
+                .into_drawing_area();
+            root.fill(&WHITE).unwrap();
+        })
+    });
 }
 
 fn blend_background(c: &mut Criterion) {
@@ -55,6 +99,17 @@ fn blend_background(c: &mut Criterion) {
     c.bench_function("rasterizer::blend_background", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            root.fill(&WHITE.mix(0.1)).unwrap();
+        })
+    });
+
+    let mut buffer = vec![0; (W * H * 4) as usize];
+
+    c.bench_function("rasterizer::blend_background_bgrx", |b| {
+        b.iter(|| {
+            let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H))
+                .unwrap()
+                .into_drawing_area();
             root.fill(&WHITE.mix(0.1)).unwrap();
         })
     });
@@ -78,6 +133,17 @@ fn fill_background_red(c: &mut Criterion) {
     c.bench_function("rasterizer::fill_background_red", |b| {
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
+            root.fill(&RED).unwrap();
+        })
+    });
+
+    let mut buffer = vec![0; (W * H * 4) as usize];
+
+    c.bench_function("rasterizer::fill_background_red_bgrx", |b| {
+        b.iter(|| {
+            let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H))
+                .unwrap()
+                .into_drawing_area();
             root.fill(&RED).unwrap();
         })
     });

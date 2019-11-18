@@ -6,6 +6,10 @@ pub use self::svg::{svg_types, SVGBackend};
 mod bitmap;
 pub use bitmap::BitMapBackend;
 
+pub mod bitmap_pixel {
+    pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
+}
+
 #[cfg(target_arch = "wasm32")]
 mod canvas;
 #[cfg(target_arch = "wasm32")]

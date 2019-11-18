@@ -21,7 +21,11 @@ pub trait Ranged {
 
     /// This function provides the on-axis part of its range
     fn axis_pixel_range(&self, limit: (i32, i32)) -> Range<i32> {
-        limit.0..limit.1
+        if limit.0 < limit.1 {
+            limit.0..limit.1
+        } else {
+            (limit.1 + 1)..(limit.0 + 1)
+        }
     }
 }
 
