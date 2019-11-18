@@ -19,6 +19,8 @@ pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT
     pub(super) secondary: ChartContext<'a, DB, CT2>,
 }
 
+/// The chart state for a dual coord chart, see the detailed description for `ChartState` for more
+/// information about the purpose of a chart state
 pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
     primary: ChartState<CT1>,
     secondary: ChartState<CT2>,
@@ -27,6 +29,7 @@ pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     DualCoordChartContext<'a, DB, CT1, CT2>
 {
+    /// Convert the chart context into a chart state
     pub fn into_chart_state(self) -> DualCoordChartState<CT1, CT2> {
         DualCoordChartState {
             primary: self.primary.into(),
@@ -34,6 +37,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
         }
     }
 
+    /// Convert the chart context into a sharable chart state
     pub fn into_shared_chart_state(self) -> DualCoordChartState<Arc<CT1>, Arc<CT2>> {
         DualCoordChartState {
             primary: self.primary.into_shared_chart_state(),
@@ -48,6 +52,7 @@ where
     CT1: Clone,
     CT2: Clone,
 {
+    /// Copy the coordinate specs and make the chart state
     pub fn to_chart_state(&self) -> DualCoordChartState<CT1, CT2> {
         DualCoordChartState {
             primary: self.primary.to_chart_state(),
@@ -57,6 +62,7 @@ where
 }
 
 impl<CT1: CoordTranslate, CT2: CoordTranslate> DualCoordChartState<CT1, CT2> {
+    /// Restore the chart state on the given drawing area
     pub fn restore<'a, DB: DrawingBackend + 'a>(
         self,
         area: &DrawingArea<DB, Shift>,

@@ -48,10 +48,12 @@ pub trait Color {
 pub struct RGBAColor(pub(super) u8, pub(super) u8, pub(super) u8, pub(super) f64);
 
 impl Color for RGBAColor {
+    #[inline(always)]
     fn rgb(&self) -> (u8, u8, u8) {
         (self.0, self.1, self.2)
     }
 
+    #[inline(always)]
     fn alpha(&self) -> f64 {
         self.3
     }

@@ -1,6 +1,10 @@
 # Changelog
 
 ## Plotters latest (?)
+### Added
+
+- BitMapBackend now is able to support different pixel format natively. Check our new minifb demo for details.
+- Incremental Rendering by saving the previous chart context into a state and restore it on a different drawing area.
 
 ### Improved
 
