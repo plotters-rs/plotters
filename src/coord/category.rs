@@ -8,30 +8,26 @@ use super::{AsRangedCoord, Ranged};
 pub struct Category<T: PartialEq> {
     name: String,
     elements: Rc<Vec<T>>,
-}
-
-/// The category element reference (tick).
-pub struct CategoryElementRef<T: PartialEq> {
-    inner: Rc<Vec<T>>,
     // i32 type is required for the empty ref (having -1 value)
     idx: i32,
 }
 
-/// The category elements range.
-pub struct CategoryElementsRange<T: PartialEq>(CategoryElementRef<T>, CategoryElementRef<T>);
+/// The category elements range
+pub struct CategoryElementsRange<T: PartialEq>(Category<T>, Category<T>);
 
-impl<T: PartialEq> Clone for CategoryElementRef<T> {
+impl<T: PartialEq> Clone for Category<T> {
     fn clone(&self) -> Self {
-        CategoryElementRef {
-            inner: Rc::clone(&self.inner),
+        Category {
+            name: self.name.clone(),
+            elements: Rc::clone(&self.elements),
             idx: self.idx,
         }
     }
 }
 
-impl<T: PartialEq + fmt::Display> fmt::Debug for CategoryElementRef<T> {
+impl<T: PartialEq + fmt::Display> fmt::Debug for Category<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let element = &self.inner[self.idx as usize];
+        let element = &self.elements[self.idx as usize];
         write!(f, "{}", element)
     }
 }
@@ -52,6 +48,7 @@ impl<T: PartialEq> Category<T> {
         Self {
             name: name.into(),
             elements: Rc::new(elements),
+            idx: -1,
         }
     }
 
@@ -69,11 +66,12 @@ impl<T: PartialEq> Category<T> {
     /// let unknown = category.get(&"unknown");
     /// assert!(unknown.is_none());
     /// ```
-    pub fn get(&self, val: &T) -> Option<CategoryElementRef<T>> {
+    pub fn get(&self, val: &T) -> Option<Category<T>> {
         match self.elements.iter().position(|x| x == val) {
             Some(pos) => {
-                let element_ref = CategoryElementRef {
-                    inner: Rc::clone(&self.elements),
+                let element_ref = Category {
+                    name: self.name.clone(),
+                    elements: Rc::clone(&self.elements),
                     idx: pos as i32,
                 };
                 Some(element_ref)
@@ -96,12 +94,14 @@ impl<T: PartialEq> Category<T> {
         let start = 0;
         let end = self.elements.len() as i32 - 1;
         CategoryElementsRange(
-            CategoryElementRef {
-                inner: Rc::clone(&self.elements),
+            Category {
+                name: self.name.clone(),
+                elements: Rc::clone(&self.elements),
                 idx: start,
             },
-            CategoryElementRef {
-                inner: Rc::clone(&self.elements),
+            Category {
+                name: self.name.clone(),
+                elements: Rc::clone(&self.elements),
                 idx: end,
             },
         )
@@ -153,16 +153,16 @@ impl<T: PartialEq> Category<T> {
     }
 }
 
-impl<T: PartialEq> From<Range<CategoryElementRef<T>>> for CategoryElementsRange<T> {
-    fn from(range: Range<CategoryElementRef<T>>) -> Self {
+impl<T: PartialEq> From<Range<Category<T>>> for CategoryElementsRange<T> {
+    fn from(range: Range<Category<T>>) -> Self {
         Self(range.start, range.end)
     }
 }
 
 impl<T: PartialEq> Ranged for CategoryElementsRange<T> {
-    type ValueType = CategoryElementRef<T>;
+    type ValueType = Category<T>;
 
-    fn range(&self) -> Range<CategoryElementRef<T>> {
+    fn range(&self) -> Range<Category<T>> {
         self.0.clone()..self.1.clone()
     }
 
@@ -176,11 +176,13 @@ impl<T: PartialEq> Ranged for CategoryElementsRange<T> {
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
         let mut ret = vec![];
         let intervals = (self.1.idx - self.0.idx) as f64;
-        let inner = &self.0.inner;
+        let elements = &self.0.elements;
+        let name = &self.0.name;
         let step = (intervals / max_points as f64 + 1.0) as usize;
         for idx in (self.0.idx..=self.1.idx).step_by(step) {
-            ret.push(CategoryElementRef {
-                inner: Rc::clone(&inner),
+            ret.push(Category {
+                name: name.clone(),
+                elements: Rc::clone(&elements),
                 idx,
             });
         }
@@ -188,9 +190,9 @@ impl<T: PartialEq> Ranged for CategoryElementsRange<T> {
     }
 }
 
-impl<T: PartialEq> AsRangedCoord for Range<CategoryElementRef<T>> {
+impl<T: PartialEq> AsRangedCoord for Range<Category<T>> {
     type CoordDescType = CategoryElementsRange<T>;
-    type Value = CategoryElementRef<T>;
+    type Value = Category<T>;
 }
 
 #[cfg(test)]
