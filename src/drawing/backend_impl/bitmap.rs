@@ -320,6 +320,7 @@ impl PixelFormat for RGBPixel {
 
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
+        #[rustfmt::skip]
         let (p1, p2, p3): (u64, u64, u64) = unsafe {
             std::mem::transmute([
                 u16::from(r), u16::from(b), u16::from(g), u16::from(r), // QW1
@@ -328,6 +329,7 @@ impl PixelFormat for RGBPixel {
             ])
         };
 
+        #[rustfmt::skip]
         let (q1, q2, q3): (u64, u64, u64) = unsafe {
             std::mem::transmute([
                 u16::from(g), u16::from(r), u16::from(b), u16::from(g), // QW1
@@ -537,12 +539,14 @@ impl PixelFormat for BGRXPixel {
 
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
+        #[rustfmt::skip]
         let p: u64 = unsafe {
             std::mem::transmute([
                 u16::from(b), u16::from(r), u16::from(b), u16::from(r), // QW1
             ])
         };
 
+        #[rustfmt::skip]
         let q: u64 = unsafe {
             std::mem::transmute([
                 u16::from(g), 0u16, u16::from(g), 0u16, // QW1
