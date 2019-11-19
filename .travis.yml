@@ -12,7 +12,7 @@ os:
 
 script:
     - env
-    - cargo --all-features test && \
+    - cargo test --all-features && \
       rustup target add wasm32-unknown-unknown && \
       cargo build --target=wasm32-unknown-unknown
 
