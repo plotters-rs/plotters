@@ -5,10 +5,13 @@
 
 - BitMapBackend now is able to support different pixel format natively. Check our new minifb demo for details.
 - Incremental Rendering by saving the previous chart context into a state and restore it on a different drawing area.
+- BoxPlot support (See boxplot example for more details) (Thanks to @nuald)
+- Category coordinate spec which allows use a list of given values as coordinate (Thanks to @nuald)
 
 ### Improved
 
 - Faster bitmap blending algorithm, which is 5x faster than the original one.
+- Text alignment improvement, now we can suggest the invariant point by giving `TextAlignment` to the text style (Thanks to @nauld)
 
 ## Plotters 0.2.11 (2019-10-27)
 
