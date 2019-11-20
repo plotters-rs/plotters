@@ -3,9 +3,12 @@ mod svg;
 #[cfg(feature = "svg")]
 pub use self::svg::{svg_types, SVGBackend};
 
+#[cfg(feature = "bitmap")]
 mod bitmap;
+#[cfg(feature = "bitmap")]
 pub use bitmap::BitMapBackend;
 
+#[cfg(feature = "bitmap")]
 pub mod bitmap_pixel {
     pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
 }

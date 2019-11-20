@@ -871,6 +871,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             }
             Target::Buffer(_) => Ok(()),
 
+            #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
             Target::Gif(target) => {
                 target
                     .flush_frame(self.buffer.borrow_buffer())

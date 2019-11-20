@@ -49,14 +49,15 @@ version = "0.3.29"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items"]
-image_encoder = ["image"]
+default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items", "bitmap"]
+image_encoder = ["image", "bitmap"]
 palette_ext = ["palette"]
-gif_backend = ["gif"]
+gif_backend = ["gif", "bitmap"]
 datetime = ["chrono"]
 evcxr = ["svg"]
 piston = ["piston_window"]
 cairo = ["cairo-rs"]
+bitmap = []
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 
