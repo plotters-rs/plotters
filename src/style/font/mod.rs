@@ -35,9 +35,8 @@ pub trait FontData: Clone {
         _pos: (i32, i32),
         _size: f64,
         _text: &str,
-        _trans: FontTransform,
         _draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
-        panic!("The font implementation is unable to draw font");
+        panic!("The font implementation is unable to draw text");
     }
 }

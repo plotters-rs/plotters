@@ -3,6 +3,7 @@ use plotters::drawing::{
     DrawingBackend,
 };
 use plotters::prelude::*;
+use plotters::style::text_anchor::{HPos, VPos};
 use plotters::style::RGBAColor;
 use std::error::Error;
 
@@ -127,10 +128,22 @@ impl DrawingBackend for TextDrawingBackend {
     fn draw_text(
         &mut self,
         text: &str,
-        _style: &TextStyle,
+        style: &TextStyle,
         pos: (i32, i32),
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let offset = pos.1.max(0) * 100 + pos.0.max(0);
+        let (width, height) = self.estimate_text_size(text, &style.font)?;
+        let (width, height) = (width as i32, height as i32);
+        let dx = match style.pos.h_pos {
+            HPos::Left => 0,
+            HPos::Right => -width,
+            HPos::Center => -width / 2,
+        };
+        let dy = match style.pos.v_pos {
+            VPos::Top => 0,
+            VPos::Center => -height / 2,
+            VPos::Bottom => -height,
+        };
+        let offset = (pos.1 + dy).max(0) * 100 + (pos.0 + dx).max(0);
         for (idx, chr) in (offset..).zip(text.chars()) {
             self.0[idx as usize].update(PixelState::Text(chr));
         }
@@ -148,7 +161,6 @@ where
         .margin(1)
         .caption("Sine and Cosine", ("sans-serif", (10).percent_height()))
         .set_label_area_size(LabelAreaPosition::Left, (5i32).percent_width())
-        .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
         .build_ranged(-std::f64::consts::PI..std::f64::consts::PI, -1.2..1.2)?;
 

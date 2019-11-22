@@ -1,5 +1,6 @@
 use super::{FontData, FontDataInternal};
-use crate::style::{Color, LayoutBox, TextAlignment, TextStyle};
+use crate::style::text_anchor::Pos;
+use crate::style::{Color, LayoutBox, TextStyle};
 
 use std::convert::From;
 
@@ -255,7 +256,7 @@ impl<'a> FontDesc<'a> {
         TextStyle {
             font: self.clone(),
             color: color.to_rgba(),
-            alignment: TextAlignment::Left,
+            pos: Pos::default(),
         }
     }
 
@@ -302,7 +303,7 @@ impl<'a> FontDesc<'a> {
         draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
         match &self.data {
-            Ok(ref font) => font.draw((x, y), self.size, text, self.get_transform(), draw),
+            Ok(ref font) => font.draw((x, y), self.size, text, draw),
             Err(e) => Err(e.clone()),
         }
     }

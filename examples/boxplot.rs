@@ -80,7 +80,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_mesh()
         .x_desc("Ping, ms")
         .y_desc(category.name())
-        .y_labels(category.len())
         .line_style_2(&WHITE)
         .draw()?;
 
@@ -94,13 +93,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .offset(*offset)
             }))?
             .label(label)
-            .legend(move |(x, y)| Rectangle::new([(x - 5, y - 5), (x + 5, y + 5)], style.filled()));
+            .legend(move |(x, y)| Rectangle::new([(x, y - 3), (x + 12, y + 9)], style.filled()));
     }
     chart
         .configure_series_labels()
         .position(SeriesLabelPosition::UpperRight)
         .background_style(WHITE.filled())
         .border_style(&BLACK.mix(0.5))
+        .legend_area_size(22)
         .draw()?;
 
     let drawing_areas = lower.split_evenly((1, 2));

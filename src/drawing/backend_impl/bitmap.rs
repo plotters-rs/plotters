@@ -231,6 +231,11 @@ pub trait PixelFormat: Sized {
                         *buf.get_unchecked_mut(base + idx) = Self::byte_at(r, g, b, 0, idx);
                     }
                 } else {
+                    let alpha = alpha.min(1.0).max(0.0);
+                    if alpha == 0.0 {
+                        return;
+                    }
+
                     let alpha = (alpha * 256.0).floor() as u64;
                     for idx in 0..Self::EFFECTIVE_PIXEL_SIZE {
                         blend(
@@ -1351,5 +1356,198 @@ fn test_bitmap_blit() {
                 assert_eq!(buffer[y * 3000 + x * 3 + 2], 0);
             }
         }
+    }
+}
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+#[cfg(test)]
+mod test {
+    use crate::prelude::*;
+    use crate::style::text_anchor::{HPos, Pos, VPos};
+    use image::{ImageBuffer, Rgb};
+    use std::fs;
+    use std::path::Path;
+
+    static DST_DIR: &str = "target/test/bitmap";
+
+    fn checked_save_file(name: &str, content: &[u8], w: u32, h: u32) {
+        /*
+          Please use the PNG file to manually verify the results.
+        */
+        assert!(content.iter().any(|x| *x != 0));
+        fs::create_dir_all(DST_DIR).unwrap();
+        let file_name = format!("{}.png", name);
+        let file_path = Path::new(DST_DIR).join(file_name);
+        println!("{:?} created", file_path);
+        let img = ImageBuffer::<Rgb<u8>, &[u8]>::from_raw(w, h, content).unwrap();
+        img.save(&file_path).unwrap();
+    }
+
+    fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
+        let (width, height) = (500, 500);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
+            root.fill(&WHITE).unwrap();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("This is a test", ("sans-serif", 20))
+                .set_all_label_area_size(40)
+                .build_ranged(0..10, 0..10)
+                .unwrap();
+
+            chart
+                .configure_mesh()
+                .set_all_tick_mark_size(tick_size)
+                .draw()
+                .unwrap();
+        }
+        checked_save_file(test_name, &buffer, width, height);
+    }
+
+    #[test]
+    fn test_draw_mesh_no_ticks() {
+        draw_mesh_with_custom_ticks(0, "test_draw_mesh_no_ticks");
+    }
+
+    #[test]
+    fn test_draw_mesh_negative_ticks() {
+        draw_mesh_with_custom_ticks(-10, "test_draw_mesh_negative_ticks");
+    }
+
+    #[test]
+    fn test_text_draw() {
+        let (width, height) = (1000, 500);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
+            root.fill(&WHITE).unwrap();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("All anchor point positions", ("sans-serif", 20))
+                .set_all_label_area_size(40)
+                .build_ranged(0..100, 0..50)
+                .unwrap();
+
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .x_desc("X Axis")
+                .y_desc("Y Axis")
+                .draw()
+                .unwrap();
+
+            for (dy, trans) in [
+                FontTransform::None,
+                FontTransform::Rotate90,
+                FontTransform::Rotate180,
+                FontTransform::Rotate270,
+            ]
+            .iter()
+            .enumerate()
+            {
+                for (dx1, h_pos) in [HPos::Left, HPos::Right, HPos::Center].iter().enumerate() {
+                    for (dx2, v_pos) in [VPos::Top, VPos::Center, VPos::Bottom].iter().enumerate() {
+                        let x = 100_i32 + (dx1 as i32 * 3 + dx2 as i32) * 100;
+                        let y = 100 + dy as i32 * 100;
+                        root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
+                        let style = TextStyle::from(("sans-serif", 20).into_font())
+                            .pos(Pos::new(*h_pos, *v_pos))
+                            .transform(trans.clone());
+                        root.draw_text("test", &style, (x, y)).unwrap();
+                    }
+                }
+            }
+        }
+        checked_save_file("test_text_draw", &buffer, width, height);
+    }
+
+    #[test]
+    fn test_text_clipping() {
+        let (width, height) = (500_i32, 500_i32);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+                .into_drawing_area();
+            root.fill(&WHITE).unwrap();
+
+            let style = TextStyle::from(("sans-serif", 20).into_font())
+                .pos(Pos::new(HPos::Center, VPos::Center));
+            root.draw_text("TOP LEFT", &style, (0, 0)).unwrap();
+            root.draw_text("TOP CENTER", &style, (width / 2, 0))
+                .unwrap();
+            root.draw_text("TOP RIGHT", &style, (width, 0)).unwrap();
+
+            root.draw_text("MIDDLE LEFT", &style, (0, height / 2))
+                .unwrap();
+            root.draw_text("MIDDLE RIGHT", &style, (width, height / 2))
+                .unwrap();
+
+            root.draw_text("BOTTOM LEFT", &style, (0, height)).unwrap();
+            root.draw_text("BOTTOM CENTER", &style, (width / 2, height))
+                .unwrap();
+            root.draw_text("BOTTOM RIGHT", &style, (width, height))
+                .unwrap();
+        }
+        checked_save_file("test_text_clipping", &buffer, width as u32, height as u32);
+    }
+
+    #[test]
+    fn test_series_labels() {
+        let (width, height) = (500, 500);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
+            root.fill(&WHITE).unwrap();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("All series label positions", ("sans-serif", 20))
+                .set_all_label_area_size(40)
+                .build_ranged(0..50, 0..50)
+                .unwrap();
+
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .draw()
+                .unwrap();
+
+            chart
+                .draw_series(std::iter::once(Circle::new((5, 15), 5, &RED)))
+                .expect("Drawing error")
+                .label("Series 1")
+                .legend(|(x, y)| Circle::new((x, y), 3, RED.filled()));
+
+            chart
+                .draw_series(std::iter::once(Circle::new((5, 15), 10, &BLUE)))
+                .expect("Drawing error")
+                .label("Series 2")
+                .legend(|(x, y)| Circle::new((x, y), 3, BLUE.filled()));
+
+            for pos in vec![
+                SeriesLabelPosition::UpperLeft,
+                SeriesLabelPosition::MiddleLeft,
+                SeriesLabelPosition::LowerLeft,
+                SeriesLabelPosition::UpperMiddle,
+                SeriesLabelPosition::MiddleMiddle,
+                SeriesLabelPosition::LowerMiddle,
+                SeriesLabelPosition::UpperRight,
+                SeriesLabelPosition::MiddleRight,
+                SeriesLabelPosition::LowerRight,
+                SeriesLabelPosition::Coordinate(70, 70),
+            ]
+            .into_iter()
+            {
+                chart
+                    .configure_series_labels()
+                    .border_style(&BLACK.mix(0.5))
+                    .position(pos)
+                    .draw()
+                    .expect("Drawing error");
+            }
+        }
+        checked_save_file("test_series_labels", &buffer, width, height);
     }
 }

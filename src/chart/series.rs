@@ -25,21 +25,21 @@ impl SeriesLabelPosition {
         use SeriesLabelPosition::*;
         (
             match self {
-                UpperLeft | MiddleLeft | LowerLeft => 0,
+                UpperLeft | MiddleLeft | LowerLeft => 5,
                 UpperMiddle | MiddleMiddle | LowerMiddle => {
                     (area_dim.0 as i32 - label_dim.0 as i32) / 2
                 }
-                UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32,
+                UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32 - 5,
                 Coordinate(x, _) => *x,
-            } - 5,
+            },
             match self {
-                UpperLeft | UpperMiddle | UpperRight => 0,
+                UpperLeft | UpperMiddle | UpperRight => 5,
                 MiddleLeft | MiddleMiddle | MiddleRight => {
                     (area_dim.1 as i32 - label_dim.1 as i32) / 2
                 }
-                LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32,
+                LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32 - 5,
                 Coordinate(_, y) => *y,
-            } - 5,
+            },
         )
     }
 }

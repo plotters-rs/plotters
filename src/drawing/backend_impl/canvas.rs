@@ -3,6 +3,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, CanvasRenderingContext2d, HtmlCanvasElement};
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
+use crate::style::text_anchor::{HPos, VPos};
 use crate::style::{Color, FontTransform, RGBAColor, TextStyle};
 
 /// The backend that is drawing on the HTML canvas
@@ -254,16 +255,26 @@ impl DrawingBackend for CanvasBackend {
 
         if degree != 0.0 {
             self.context.save();
-            let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
-            let offset = font.get_transform().offset(layout);
-            self.context
-                .translate(f64::from(x + offset.0), f64::from(y + offset.1))?;
+            self.context.translate(f64::from(x), f64::from(y))?;
             self.context.rotate(degree)?;
             x = 0;
             y = 0;
         }
 
-        self.context.set_text_baseline("bottom");
+        let text_baseline = match style.pos.v_pos {
+            VPos::Top => "top",
+            VPos::Center => "middle",
+            VPos::Bottom => "bottom",
+        };
+        self.context.set_text_baseline(text_baseline);
+
+        let text_align = match style.pos.h_pos {
+            HPos::Left => "start",
+            HPos::Right => "end",
+            HPos::Center => "center",
+        };
+        self.context.set_text_align(text_align);
+
         self.context
             .set_fill_style(&make_canvas_color(color.clone()));
         self.context.set_font(&format!(
@@ -272,8 +283,7 @@ impl DrawingBackend for CanvasBackend {
             font.get_size(),
             font.get_name()
         ));
-        self.context
-            .fill_text(text, f64::from(x), f64::from(y) + font.get_size())?;
+        self.context.fill_text(text, f64::from(x), f64::from(y))?;
 
         if degree != 0.0 {
             self.context.restore();
@@ -286,50 +296,202 @@ impl DrawingBackend for CanvasBackend {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::element::Circle;
     use crate::prelude::*;
+    use crate::style::text_anchor::Pos;
     use wasm_bindgen_test::wasm_bindgen_test_configure;
     use wasm_bindgen_test::*;
+    use web_sys::Document;
 
     wasm_bindgen_test_configure!(run_in_browser);
 
-    #[wasm_bindgen_test]
-    fn test_draw_mesh() {
-        let document = web_sys::window().unwrap().document().unwrap();
+    fn create_canvas(document: &Document, id: &str, width: u32, height: u32) -> HtmlCanvasElement {
         let canvas = document
             .create_element("canvas")
             .unwrap()
-            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .dyn_into::<HtmlCanvasElement>()
             .unwrap();
-        canvas.set_attribute("id", "canvas-id").unwrap();
-        document.body().unwrap().append_child(&canvas).unwrap();
-        canvas.set_width(100);
-        canvas.set_height(100);
+        let div = document.create_element("div").unwrap();
+        div.append_child(&canvas).unwrap();
+        document.body().unwrap().append_child(&div).unwrap();
+        canvas.set_attribute("id", id).unwrap();
+        canvas.set_width(width);
+        canvas.set_height(height);
+        canvas
+    }
 
+    fn check_content(document: &Document, id: &str) {
+        let canvas = document
+            .get_element_by_id(id)
+            .unwrap()
+            .dyn_into::<HtmlCanvasElement>()
+            .unwrap();
+        let data_uri = canvas.to_data_url().unwrap();
+        let prefix = "data:image/png;base64,";
+        assert!(&data_uri.starts_with(prefix));
+    }
+
+    fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
+        let document = window().unwrap().document().unwrap();
+        let canvas = create_canvas(&document, test_name, 500, 500);
         let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
         let root = backend.into_drawing_area();
 
         let mut chart = ChartBuilder::on(&root)
-            .caption("This is a test", ("sans-serif", 10))
-            .x_label_area_size(30)
-            .y_label_area_size(30)
-            .build_ranged(-1f32..1f32, -1.2f32..1.2f32)
+            .caption("This is a test", ("sans-serif", 20))
+            .set_all_label_area_size(40)
+            .build_ranged(0..10, 0..10)
             .unwrap();
 
         chart
             .configure_mesh()
-            .x_labels(3)
-            .y_labels(3)
+            .set_all_tick_mark_size(tick_size)
             .draw()
             .unwrap();
 
-        let canvas = document
-            .get_element_by_id("canvas-id")
-            .unwrap()
-            .dyn_into::<web_sys::HtmlCanvasElement>()
+        check_content(&document, test_name);
+    }
+
+    #[wasm_bindgen_test]
+    fn test_draw_mesh_no_ticks() {
+        draw_mesh_with_custom_ticks(0, "test_draw_mesh_no_ticks");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_draw_mesh_negative_ticks() {
+        draw_mesh_with_custom_ticks(-10, "test_draw_mesh_negative_ticks");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_text_draw() {
+        let document = window().unwrap().document().unwrap();
+        let canvas = create_canvas(&document, "test_text_draw", 1000, 500);
+        let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
+        let root = backend.into_drawing_area();
+
+        let mut chart = ChartBuilder::on(&root)
+            .caption("All anchor point positions", ("sans-serif", 20))
+            .set_all_label_area_size(40)
+            .build_ranged(0..100, 0..50)
             .unwrap();
 
-        let data_uri = canvas.to_data_url().unwrap();
-        let prefix = "data:image/png;base64,";
-        assert!(&data_uri.starts_with(prefix));
+        chart
+            .configure_mesh()
+            .disable_x_mesh()
+            .disable_y_mesh()
+            .x_desc("X Axis")
+            .y_desc("Y Axis")
+            .draw()
+            .unwrap();
+
+        for (dy, trans) in [
+            FontTransform::None,
+            FontTransform::Rotate90,
+            FontTransform::Rotate180,
+            FontTransform::Rotate270,
+        ]
+        .iter()
+        .enumerate()
+        {
+            for (dx1, h_pos) in [HPos::Left, HPos::Right, HPos::Center].iter().enumerate() {
+                for (dx2, v_pos) in [VPos::Top, VPos::Center, VPos::Bottom].iter().enumerate() {
+                    let x = 100_i32 + (dx1 as i32 * 3 + dx2 as i32) * 100;
+                    let y = 100 + dy as i32 * 100;
+                    root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
+                    let style = TextStyle::from(("sans-serif", 20).into_font())
+                        .pos(Pos::new(*h_pos, *v_pos))
+                        .transform(trans.clone());
+                    root.draw_text("test", &style, (x, y)).unwrap();
+                }
+            }
+        }
+        check_content(&document, "test_text_draw");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_text_clipping() {
+        let (width, height) = (500_i32, 500_i32);
+        let document = window().unwrap().document().unwrap();
+        let canvas = create_canvas(&document, "test_text_clipping", width as u32, height as u32);
+        let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
+        let root = backend.into_drawing_area();
+
+        let style = TextStyle::from(("sans-serif", 20).into_font())
+            .pos(Pos::new(HPos::Center, VPos::Center));
+        root.draw_text("TOP LEFT", &style, (0, 0)).unwrap();
+        root.draw_text("TOP CENTER", &style, (width / 2, 0))
+            .unwrap();
+        root.draw_text("TOP RIGHT", &style, (width, 0)).unwrap();
+
+        root.draw_text("MIDDLE LEFT", &style, (0, height / 2))
+            .unwrap();
+        root.draw_text("MIDDLE RIGHT", &style, (width, height / 2))
+            .unwrap();
+
+        root.draw_text("BOTTOM LEFT", &style, (0, height)).unwrap();
+        root.draw_text("BOTTOM CENTER", &style, (width / 2, height))
+            .unwrap();
+        root.draw_text("BOTTOM RIGHT", &style, (width, height))
+            .unwrap();
+
+        check_content(&document, "test_text_clipping");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_series_labels() {
+        let (width, height) = (500, 500);
+        let document = window().unwrap().document().unwrap();
+        let canvas = create_canvas(&document, "test_series_labels", width, height);
+        let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
+        let root = backend.into_drawing_area();
+
+        let mut chart = ChartBuilder::on(&root)
+            .caption("All series label positions", ("sans-serif", 20))
+            .set_all_label_area_size(40)
+            .build_ranged(0..50, 0..50)
+            .unwrap();
+
+        chart
+            .configure_mesh()
+            .disable_x_mesh()
+            .disable_y_mesh()
+            .draw()
+            .unwrap();
+
+        chart
+            .draw_series(std::iter::once(Circle::new((5, 15), 5, &RED)))
+            .expect("Drawing error")
+            .label("Series 1")
+            .legend(|(x, y)| Circle::new((x, y), 3, RED.filled()));
+
+        chart
+            .draw_series(std::iter::once(Circle::new((5, 15), 10, &BLUE)))
+            .expect("Drawing error")
+            .label("Series 2")
+            .legend(|(x, y)| Circle::new((x, y), 3, BLUE.filled()));
+
+        for pos in vec![
+            SeriesLabelPosition::UpperLeft,
+            SeriesLabelPosition::MiddleLeft,
+            SeriesLabelPosition::LowerLeft,
+            SeriesLabelPosition::UpperMiddle,
+            SeriesLabelPosition::MiddleMiddle,
+            SeriesLabelPosition::LowerMiddle,
+            SeriesLabelPosition::UpperRight,
+            SeriesLabelPosition::MiddleRight,
+            SeriesLabelPosition::LowerRight,
+            SeriesLabelPosition::Coordinate(70, 70),
+        ]
+        .into_iter()
+        {
+            chart
+                .configure_series_labels()
+                .border_style(&BLACK.mix(0.5))
+                .position(pos)
+                .draw()
+                .expect("Drawing error");
+        }
+
+        check_content(&document, "test_series_labels");
     }
 }

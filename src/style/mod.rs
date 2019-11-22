@@ -21,4 +21,5 @@ pub use font::{
 };
 pub use shape::ShapeStyle;
 pub use size::{AsRelative, RelativeSize, SizeDesc};
-pub use text::{IntoTextStyle, TextAlignment, TextStyle};
+pub use text::text_anchor;
+pub use text::{IntoTextStyle, TextStyle};

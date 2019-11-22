@@ -12,7 +12,7 @@ use font_kit::handle::Handle;
 use font_kit::properties::{Properties, Style, Weight};
 use font_kit::source::SystemSource;
 
-use super::{FontData, FontFamily, FontStyle, FontTransform, LayoutBox};
+use super::{FontData, FontFamily, FontStyle, LayoutBox};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -159,31 +159,25 @@ impl FontData for FontDataInternal {
 
     fn draw<E, DrawFunc: FnMut(i32, i32, f32) -> Result<(), E>>(
         &self,
-        (x, y): (i32, i32),
+        (base_x, base_y): (i32, i32),
         size: f64,
         text: &str,
-        trans: FontTransform,
         mut draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
-        let layout = self.estimate_layout(size, text)?;
-
         let scale = Scale::uniform(size as f32);
         let mut result = Ok(());
         let font = &self.0;
 
-        let base_x = x + trans.offset(layout).0;
-        let base_y = y + trans.offset(layout).1;
-
         for g in font.layout(text, scale, point(0.0, 0.0)) {
             if let Some(rect) = g.pixel_bounding_box() {
-                let x0 = rect.min.x;
-                let y0 = rect.min.y - (layout.0).1;
+                let (x0, y0) = (rect.min.x, rect.min.y);
                 g.draw(|x, y, v| {
-                    let (x, y) = trans.transform(x as i32 + x0, y as i32 + y0);
-                    if x + base_x >= 0 && y + base_y >= 0 && result.is_ok() {
-                        result = draw(x + base_x, y + base_y, v);
-                    }
+                    let (x, y) = (x as i32 + x0, y as i32 + y0);
+                    result = draw(x + base_x, y + base_y, v);
                 });
+                if result.is_err() {
+                    break;
+                }
             }
         }
         Ok(result)

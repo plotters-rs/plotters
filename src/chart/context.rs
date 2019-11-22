@@ -14,7 +14,8 @@ use crate::coord::{
 use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
-use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextAlignment, TextStyle};
+use crate::style::text_anchor::{HPos, Pos, VPos};
+use crate::style::{AsRelative, FontTransform, ShapeStyle, SizeDesc, TextStyle};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 /// When a series is drawn onto a drawing area, an series annotation object
@@ -474,23 +475,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(axis_range)
     }
 
-    fn estimate_right_aligned_label_offset(
-        &self,
-        label_style: &TextStyle,
-        labels: &[(i32, String)],
-    ) -> i32 {
-        labels
-            .iter()
-            .map(|(_, t)| {
-                self.drawing_area
-                    .estimate_text_size(t, &label_style.font)
-                    .unwrap_or((0, 0))
-                    .0
-            })
-            .max()
-            .unwrap_or(0) as i32
-    }
-
     // TODO: consider make this function less complicated
     #[allow(clippy::too_many_arguments)]
     #[allow(clippy::cognitive_complexity)]
@@ -515,28 +499,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let (tw, th) = area.dim_in_pixel();
 
         /* This is the minimal distance from the axis to the box of the labels */
-        let label_dist =
-            if (tick_size > 0 && orientation.1 > 0) || (tick_size < 0 && orientation.1 < 0) {
-                0
-            } else {
-                tick_size.abs() * 2
-            };
-
-        /* All labels are right-aligned. */
-        let label_style = &label_style.alignment(TextAlignment::Right);
+        let label_dist = tick_size.abs() * 2;
 
         /* Draw the axis and get the axis range so that we can do further label
          * and tick mark drawing */
         let axis_range = self.draw_axis(area, axis_style, orientation, tick_size < 0)?;
-
-        /* If the label area is on the right hand side, we should enable the right aligned
-         * layout, thus in this case we need to estimate the right most position when all
-         * the labels are right aligned */
-        let right_alignment = if orientation.0 > 0 && orientation.1 == 0 {
-            self.estimate_right_aligned_label_offset(label_style, labels)
-        } else {
-            0
-        };
 
         /* Then we need to draw the tick mark and the label */
         for (p, t) in labels {
@@ -549,81 +516,70 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 continue;
             }
 
-            /* Then we need to estimate the text if rendered */
-            let (w, h) = self
-                .drawing_area
-                .estimate_text_size(&t, &label_style.font)
-                .unwrap_or((0, 0));
-
-            let (cx, cy) = if tick_size >= 0 {
+            let (cx, cy, h_pos, v_pos) = if tick_size >= 0 {
                 match orientation {
                     // Right
                     (dx, dy) if dx > 0 && dy == 0 => {
-                        (right_alignment + label_dist - w as i32, *p - y0)
+                        (label_dist, *p - y0, HPos::Left, VPos::Center)
                     }
                     // Left
-                    (dx, dy) if dx < 0 && dy == 0 => (tw as i32 - label_dist - w as i32, *p - y0),
+                    (dx, dy) if dx < 0 && dy == 0 => {
+                        (tw as i32 - label_dist, *p - y0, HPos::Right, VPos::Center)
+                    }
                     // Bottom
-                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist + h as i32),
+                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist, HPos::Center, VPos::Top),
                     // Top
-                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, th as i32 - label_dist - h as i32),
+                    (dx, dy) if dx == 0 && dy < 0 => {
+                        (*p - x0, th as i32 - label_dist, HPos::Center, VPos::Bottom)
+                    }
                     _ => panic!("Bug: Invalid orientation specification"),
                 }
             } else {
                 match orientation {
                     // Right
                     (dx, dy) if dx > 0 && dy == 0 => {
-                        (tw as i32 - right_alignment - label_dist, *p - y0)
+                        (tw as i32 - label_dist, *p - y0, HPos::Right, VPos::Center)
                     }
                     // Left
-                    (dx, dy) if dx < 0 && dy == 0 => (label_dist, *p - y0),
+                    (dx, dy) if dx < 0 && dy == 0 => {
+                        (label_dist, *p - y0, HPos::Left, VPos::Center)
+                    }
                     // Bottom
-                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, th as i32 - label_dist - h as i32),
+                    (dx, dy) if dx == 0 && dy > 0 => {
+                        (*p - x0, th as i32 - label_dist, HPos::Center, VPos::Bottom)
+                    }
                     // Top
-                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, label_dist + h as i32),
+                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, label_dist, HPos::Center, VPos::Top),
                     _ => panic!("Bug: Invalid orientation specification"),
                 }
             };
 
-            let should_draw = if orientation.0 == 0 {
-                cx >= 0 && cx + label_offset + w as i32 / 2 <= tw as i32
+            let (text_x, text_y) = if orientation.0 == 0 {
+                (cx + label_offset, cy)
             } else {
-                cy >= 0 && cy + label_offset + h as i32 / 2 <= th as i32
+                (cx, cy + label_offset)
             };
 
-            if should_draw {
-                let (text_x, text_y) = if orientation.0 == 0 {
-                    (cx - w as i32 / 2 + label_offset, cy)
-                } else {
-                    (cx, cy - h as i32 / 2 + label_offset)
-                };
+            let label_style = &label_style.pos(Pos::new(h_pos, v_pos));
+            area.draw_text(&t, label_style, (text_x, text_y))?;
 
-                area.draw_text(&t, label_style, (text_x, text_y))?;
-
+            if tick_size != 0 {
                 if let Some(style) = axis_style {
                     let xmax = tw as i32 - 1;
                     let ymax = th as i32 - 1;
                     let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
                         match orientation {
                             (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
-                            (dx, dy) if dx < 0 && dy == 0 => {
-                                (xmax - tick_size, *p - y0, xmax, *p - y0)
-                            }
+                            (dx, dy) if dx < 0 && dy == 0 => (xmax - tick_size, *p - y0, xmax, *p - y0),
                             (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
-                            (dx, dy) if dx == 0 && dy < 0 => {
-                                (*p - x0, ymax - tick_size, *p - x0, ymax)
-                            }
+                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, ymax - tick_size, *p - x0, ymax),
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     } else {
                         match orientation {
-                            (dx, dy) if dx > 0 && dy == 0 => {
-                                (xmax, *p - y0, xmax + tick_size, *p - y0)
-                            }
+                            (dx, dy) if dx > 0 && dy == 0 => (xmax, *p - y0, xmax + tick_size, *p - y0),
                             (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
-                            (dx, dy) if dx == 0 && dy > 0 => {
-                                (*p - x0, ymax, *p - x0, ymax + tick_size)
-                            }
+                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, ymax, *p - x0, ymax + tick_size),
                             (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
@@ -643,19 +599,19 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 style.transform(FontTransform::Rotate90)
             };
 
-            let (w, h) = self
-                .drawing_area
-                .estimate_text_size(text, &actual_style.font)
-                .unwrap_or((0, 0));
-
-            let (x0, y0) = match orientation {
-                (dx, dy) if dx > 0 && dy == 0 => (tw - w, (th - h) / 2),
-                (dx, dy) if dx < 0 && dy == 0 => (0, (th - h) / 2),
-                (dx, dy) if dx == 0 && dy > 0 => ((tw - w) / 2, th - h),
-                (dx, dy) if dx == 0 && dy < 0 => ((tw - w) / 2, 0),
+            let (x0, y0, h_pos, v_pos) = match orientation {
+                // Right
+                (dx, dy) if dx > 0 && dy == 0 => (tw, th / 2, HPos::Center, VPos::Top),
+                // Left
+                (dx, dy) if dx < 0 && dy == 0 => (0, th / 2, HPos::Center, VPos::Top),
+                // Bottom
+                (dx, dy) if dx == 0 && dy > 0 => (tw / 2, th, HPos::Center, VPos::Bottom),
+                // Top
+                (dx, dy) if dx == 0 && dy < 0 => (tw / 2, 0, HPos::Center, VPos::Top),
                 _ => panic!("Bug: Invalid orientation specification"),
             };
 
+            let actual_style = &actual_style.pos(Pos::new(h_pos, v_pos));
             area.draw_text(&text, &actual_style, (x0 as i32, y0 as i32))?;
         }
 

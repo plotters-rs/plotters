@@ -3,31 +3,99 @@ use super::font::{FontDesc, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
 
-/// The alignment of the text.
+/// Text anchor attributes are used to properly position the text.
 ///
-/// Used to determine the invariant (anchor) points for backends
-/// which render the text on the client side like SVG. The current
-/// implementation calculates the font inked rectangle using
-/// fontkit-based glyphs, but the client side (i.e. web browsers)
-/// may use different fonts for the same font family. As the calculations
-/// assume some invariant points, we may use the same on the client
-/// side to properly position the text.
-#[derive(Copy, Clone)]
-pub enum TextAlignment {
-    /// Left alignment
-    Left,
-    /// Right alignment
-    Right,
-    /// Center alignment
-    Center,
+/// # Examples
+///
+/// In the example below, the text anchor (X) position is `Pos::new(HPos::Right, VPos::Center)`.
+/// ```text
+///    ***** X
+/// ```
+/// The position is always relative to the text regardless of its rotation.
+/// In the example below, the text has style
+/// `style.transform(FontTransform::Rotate90).pos(Pos::new(HPos::Center, VPos::Top))`.
+/// ```text
+///        *
+///        *
+///        * X
+///        *
+///        *
+/// ```
+pub mod text_anchor {
+    /// The horizontal position of the anchor point relative to the text.
+    #[derive(Clone, Copy)]
+    pub enum HPos {
+        /// Anchor point is on the left side of the text
+        Left,
+        /// Anchor point is on the right side of the text
+        Right,
+        /// Anchor point is in the horizontal center of the text
+        Center,
+    }
+
+    /// The vertical position of the anchor point relative to the text.
+    #[derive(Clone, Copy)]
+    pub enum VPos {
+        /// Anchor point is on the top of the text
+        Top,
+        /// Anchor point is in the vertical center of the text
+        Center,
+        /// Anchor point is on the bottom of the text
+        Bottom,
+    }
+
+    /// The text anchor position.
+    #[derive(Clone, Copy)]
+    pub struct Pos {
+        /// The horizontal position of the anchor point
+        pub h_pos: HPos,
+        /// The vertical position of the anchor point
+        pub v_pos: VPos,
+    }
+
+    impl Pos {
+        /// Create a new text anchor position.
+        ///
+        /// - `h_pos`: The horizontal position of the anchor point
+        /// - `v_pos`: The vertical position of the anchor point
+        /// - **returns** The newly created text anchor position
+        ///
+        /// ```rust
+        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
+        ///
+        /// let pos = Pos::new(HPos::Left, VPos::Top);
+        /// ```
+        pub fn new(h_pos: HPos, v_pos: VPos) -> Self {
+            Pos { h_pos, v_pos }
+        }
+
+        /// Create a default text anchor position (top left).
+        ///
+        /// - **returns** The default text anchor position
+        ///
+        /// ```rust
+        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
+        ///
+        /// let pos = Pos::default();
+        /// ```
+        pub fn default() -> Self {
+            Pos {
+                h_pos: HPos::Left,
+                v_pos: VPos::Top,
+            }
+        }
+    }
 }
 
 /// Style of a text
 #[derive(Clone)]
 pub struct TextStyle<'a> {
+    /// The font description
     pub font: FontDesc<'a>,
+    /// The text color
     pub color: RGBAColor,
-    pub alignment: TextAlignment,
+    /// The anchor point position
+    pub pos: text_anchor::Pos,
 }
 
 pub trait IntoTextStyle<'a> {
@@ -91,7 +159,7 @@ impl<'a> TextStyle<'a> {
         Self {
             font: self.font.clone(),
             color: color.to_rgba(),
-            alignment: self.alignment,
+            pos: self.pos,
         }
     }
 
@@ -109,26 +177,27 @@ impl<'a> TextStyle<'a> {
         Self {
             font: self.font.clone().transform(trans),
             color: self.color.clone(),
-            alignment: self.alignment,
+            pos: self.pos,
         }
     }
 
-    /// Sets the text alignment of the style.
+    /// Sets the anchor position.
     ///
-    /// - `color`: The required alignment
+    /// - `pos`: The required anchor position
     /// - **returns** The up-to-dated text style
     ///
     /// ```rust
     /// use plotters::prelude::*;
-    /// use plotters::style::TextAlignment;
+    /// use plotters::style::text_anchor::{Pos, HPos, VPos};
     ///
-    /// let style = TextStyle::from(("sans-serif", 20).into_font()).alignment(TextAlignment::Right);
+    /// let pos = Pos::new(HPos::Left, VPos::Top);
+    /// let style = TextStyle::from(("sans-serif", 20).into_font()).pos(pos);
     /// ```
-    pub fn alignment(&self, alignment: TextAlignment) -> Self {
+    pub fn pos(&self, pos: text_anchor::Pos) -> Self {
         Self {
             font: self.font.clone(),
             color: self.color.clone(),
-            alignment,
+            pos,
         }
     }
 }
@@ -145,7 +214,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
         Self {
             font: font.into(),
             color: BLACK.to_rgba(),
-            alignment: TextAlignment::Left,
+            pos: text_anchor::Pos::default(),
         }
     }
 }
