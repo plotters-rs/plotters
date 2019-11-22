@@ -7,7 +7,8 @@ use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextAlignment, TextStyle};
+use crate::style::text_anchor::{HPos, VPos};
+use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextStyle};
 
 use std::io::{Cursor, Error};
 use std::path::Path;
@@ -46,7 +47,7 @@ impl<'a> SVGBackend<'a> {
         Self {
             target: Target::File(path.as_ref()),
             size,
-            document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
+            document: Some(Document::new().set("width", size.0).set("height", size.1)),
             saved: false,
         }
     }
@@ -56,7 +57,7 @@ impl<'a> SVGBackend<'a> {
         Self {
             target: Target::Buffer(Cursor::new(buf)),
             size,
-            document: Some(Document::new().set("viewBox", (0, 0, size.0, size.1))),
+            document: Some(Document::new().set("width", size.0).set("height", size.1)),
             saved: false,
         }
     }
@@ -247,24 +248,24 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if color.alpha() == 0.0 {
             return Ok(());
         }
-        let context = svg::node::Text::new(text);
-        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
 
-        let trans = font.get_transform();
-        let offset = trans.offset(layout);
-        let x0 = pos.0 + offset.0;
-        let y0 = pos.1 + offset.1;
-
-        let max_x = (layout.1).0;
-        let (dx, anchor) = match style.alignment {
-            TextAlignment::Left => (0, "start"),
-            TextAlignment::Right => (max_x, "end"),
-            TextAlignment::Center => (max_x / 2, "middle"),
+        let (x0, y0) = pos;
+        let text_anchor = match style.pos.h_pos {
+            HPos::Left => "start",
+            HPos::Right => "end",
+            HPos::Center => "middle",
         };
+        let dominant_baseline = match style.pos.v_pos {
+            VPos::Top => "hanging",
+            VPos::Center => "middle",
+            VPos::Bottom => "baseline",
+        };
+
         let node = Text::new()
-            .set("x", x0 + dx)
-            .set("y", y0 - (layout.0).1)
-            .set("text-anchor", anchor)
+            .set("x", x0)
+            .set("y", y0)
+            .set("dominant-baseline", dominant_baseline)
+            .set("text-anchor", text_anchor)
             .set("font-family", font.get_name())
             .set("font-size", font.get_size())
             .set("opacity", make_svg_opacity(color))
@@ -276,6 +277,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             other_style => node.set("font-style", other_style.as_str()),
         };
 
+        let context = svg::node::Text::new(text);
+        let trans = font.get_transform();
         let node = match trans {
             FontTransform::Rotate90 => node.set("transform", format!("rotate(90, {}, {})", x0, y0)),
             FontTransform::Rotate180 => {
@@ -388,16 +391,19 @@ impl Drop for SVGBackend<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::element::Circle;
     use crate::prelude::*;
+    use crate::style::text_anchor::{HPos, Pos, VPos};
     use std::fs;
     use std::path::Path;
 
     static DST_DIR: &str = "target/test/svg";
 
-    fn save_file(name: &str, content: &str) {
+    fn checked_save_file(name: &str, content: &str) {
         /*
           Please use the SVG file to manually verify the results.
         */
+        assert!(!content.is_empty());
         fs::create_dir_all(DST_DIR).unwrap();
         let file_name = format!("{}.svg", name);
         let file_path = Path::new(DST_DIR).join(file_name);
@@ -405,26 +411,38 @@ mod test {
         fs::write(file_path, &content).unwrap();
     }
 
-    #[test]
-    fn test_draw_mesh() {
+    fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
         let mut buffer: Vec<u8> = vec![];
         {
             let root = SVGBackend::with_buffer(&mut buffer, (500, 500)).into_drawing_area();
 
             let mut chart = ChartBuilder::on(&root)
                 .caption("This is a test", ("sans-serif", 20))
-                .x_label_area_size(40)
-                .y_label_area_size(40)
-                .build_ranged(0..100, 0..100)
+                .set_all_label_area_size(40)
+                .build_ranged(0..10, 0..10)
                 .unwrap();
 
-            chart.configure_mesh().draw().unwrap();
+            chart
+                .configure_mesh()
+                .set_all_tick_mark_size(tick_size)
+                .draw()
+                .unwrap();
         }
 
         let content = String::from_utf8(buffer).unwrap();
-        save_file("test_draw_mesh", &content);
+        checked_save_file(test_name, &content);
 
         assert!(content.contains("This is a test"));
+    }
+
+    #[test]
+    fn test_draw_mesh_no_ticks() {
+        draw_mesh_with_custom_ticks(0, "test_draw_mesh_no_ticks");
+    }
+
+    #[test]
+    fn test_draw_mesh_negative_ticks() {
+        draw_mesh_with_custom_ticks(-10, "test_draw_mesh_negative_ticks");
     }
 
     #[test]
@@ -433,19 +451,19 @@ mod test {
         {
             let mut root = SVGBackend::with_buffer(&mut buffer, (500, 500));
 
-            let style =
-                TextStyle::from(("sans-serif", 20).into_font()).alignment(TextAlignment::Right);
+            let style = TextStyle::from(("sans-serif", 20).into_font())
+                .pos(Pos::new(HPos::Right, VPos::Top));
             root.draw_text("right-align", &style, (150, 50)).unwrap();
 
-            let style = style.alignment(TextAlignment::Center);
+            let style = style.pos(Pos::new(HPos::Center, VPos::Top));
             root.draw_text("center-align", &style, (150, 150)).unwrap();
 
-            let style = style.alignment(TextAlignment::Left);
+            let style = style.pos(Pos::new(HPos::Left, VPos::Top));
             root.draw_text("left-align", &style, (150, 200)).unwrap();
         }
 
         let content = String::from_utf8(buffer).unwrap();
-        save_file("test_text_alignments", &content);
+        checked_save_file("test_text_alignments", &content);
 
         for svg_line in content.split("</text>") {
             if let Some(anchor_and_rest) = svg_line.split("text-anchor=\"").nth(1) {
@@ -460,5 +478,145 @@ mod test {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_text_draw() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let root = SVGBackend::with_buffer(&mut buffer, (1000, 500)).into_drawing_area();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("All anchor point positions", ("sans-serif", 20))
+                .set_all_label_area_size(40)
+                .build_ranged(0..100, 0..50)
+                .unwrap();
+
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .x_desc("X Axis")
+                .y_desc("Y Axis")
+                .draw()
+                .unwrap();
+
+            for (dy, trans) in [
+                FontTransform::None,
+                FontTransform::Rotate90,
+                FontTransform::Rotate180,
+                FontTransform::Rotate270,
+            ]
+            .iter()
+            .enumerate()
+            {
+                for (dx1, h_pos) in [HPos::Left, HPos::Right, HPos::Center].iter().enumerate() {
+                    for (dx2, v_pos) in [VPos::Top, VPos::Center, VPos::Bottom].iter().enumerate() {
+                        let x = 100_i32 + (dx1 as i32 * 3 + dx2 as i32) * 100;
+                        let y = 100 + dy as i32 * 100;
+                        root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
+                        let style = TextStyle::from(("sans-serif", 20).into_font())
+                            .pos(Pos::new(*h_pos, *v_pos))
+                            .transform(trans.clone());
+                        root.draw_text("test", &style, (x, y)).unwrap();
+                    }
+                }
+            }
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        checked_save_file("test_text_draw", &content);
+
+        assert_eq!(content.matches("test").count(), 36);
+    }
+
+    #[test]
+    fn test_text_clipping() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let (width, height) = (500_i32, 500_i32);
+            let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+                .into_drawing_area();
+
+            let style = TextStyle::from(("sans-serif", 20).into_font())
+                .pos(Pos::new(HPos::Center, VPos::Center));
+            root.draw_text("TOP LEFT", &style, (0, 0)).unwrap();
+            root.draw_text("TOP CENTER", &style, (width / 2, 0))
+                .unwrap();
+            root.draw_text("TOP RIGHT", &style, (width, 0)).unwrap();
+
+            root.draw_text("MIDDLE LEFT", &style, (0, height / 2))
+                .unwrap();
+            root.draw_text("MIDDLE RIGHT", &style, (width, height / 2))
+                .unwrap();
+
+            root.draw_text("BOTTOM LEFT", &style, (0, height)).unwrap();
+            root.draw_text("BOTTOM CENTER", &style, (width / 2, height))
+                .unwrap();
+            root.draw_text("BOTTOM RIGHT", &style, (width, height))
+                .unwrap();
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        checked_save_file("test_text_clipping", &content);
+    }
+
+    #[test]
+    fn test_series_labels() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let (width, height) = (500, 500);
+            let root = SVGBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
+
+            let mut chart = ChartBuilder::on(&root)
+                .caption("All series label positions", ("sans-serif", 20))
+                .set_all_label_area_size(40)
+                .build_ranged(0..50, 0..50)
+                .unwrap();
+
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .draw()
+                .unwrap();
+
+            chart
+                .draw_series(std::iter::once(Circle::new((5, 15), 5, &RED)))
+                .expect("Drawing error")
+                .label("Series 1")
+                .legend(|(x, y)| Circle::new((x, y), 3, RED.filled()));
+
+            chart
+                .draw_series(std::iter::once(Circle::new((5, 15), 10, &BLUE)))
+                .expect("Drawing error")
+                .label("Series 2")
+                .legend(|(x, y)| Circle::new((x, y), 3, BLUE.filled()));
+
+            for pos in vec![
+                SeriesLabelPosition::UpperLeft,
+                SeriesLabelPosition::MiddleLeft,
+                SeriesLabelPosition::LowerLeft,
+                SeriesLabelPosition::UpperMiddle,
+                SeriesLabelPosition::MiddleMiddle,
+                SeriesLabelPosition::LowerMiddle,
+                SeriesLabelPosition::UpperRight,
+                SeriesLabelPosition::MiddleRight,
+                SeriesLabelPosition::LowerRight,
+                SeriesLabelPosition::Coordinate(70, 70),
+            ]
+            .into_iter()
+            {
+                chart
+                    .configure_series_labels()
+                    .border_style(&BLACK.mix(0.5))
+                    .position(pos)
+                    .draw()
+                    .expect("Drawing error");
+            }
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        checked_save_file("test_series_labels", &content);
     }
 }
