@@ -24,9 +24,9 @@ optional = true
 features = ["std"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rusttype = "0.8.1"
-lazy_static = "^1.2"
-font-kit = "0.4.0"
+rusttype = {version = "0.8.1", optional = true}
+lazy_static = {version = "^1.2", optional = true }
+font-kit = {version = "0.4.0", optional = true }
 piston_window = {version = "0.105.0", optional = true}
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
@@ -49,15 +49,16 @@ version = "0.3.29"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items", "bitmap"]
+default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items", "bitmap", "ttf"]
+ttf = ["font-kit", "rusttype", "lazy_static"]
 image_encoder = ["image", "bitmap"]
 palette_ext = ["palette"]
 gif_backend = ["gif", "bitmap"]
 datetime = ["chrono"]
 evcxr = ["svg"]
-piston = ["piston_window"]
-cairo = ["cairo-rs"]
-bitmap = []
+piston = ["piston_window", "ttf"]
+cairo = ["cairo-rs", "ttf"]
+bitmap = ["ttf"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 

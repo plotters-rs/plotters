@@ -6,12 +6,15 @@
 ///
 /// Thus we need different mechanism for the font implementation
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), feature = "ttf"))]
 mod ttf;
-
-#[cfg(not(target_arch = "wasm32"))]
-#[allow(unused_imports, dead_code)]
+#[cfg(all(not(target_arch = "wasm32"), feature = "ttf"))]
 use ttf::FontDataInternal;
+
+#[cfg(all(not(target_arch = "wasm32"), not(feature = "ttf")))]
+mod naive;
+#[cfg(all(not(target_arch = "wasm32"), not(feature = "ttf")))]
+use naive::FontDataInternal;
 
 #[cfg(target_arch = "wasm32")]
 mod web;

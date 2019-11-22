@@ -677,9 +677,8 @@ pub mod prelude {
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     pub use crate::element::{
-         Boxplot, CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar,
-        IntoDynElement, MultiLineText, PathElement, Pixel, Polygon, Rectangle, Text,
-        TriangleMarker,
+        Boxplot, CandleStick, Circle, Cross, DynElement, EmptyElement, ErrorBar, IntoDynElement,
+        MultiLineText, PathElement, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
     #[cfg(features = "bitmap")]
