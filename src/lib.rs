@@ -681,7 +681,7 @@ pub mod prelude {
         MultiLineText, PathElement, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
-    #[cfg(features = "bitmap")]
+    #[cfg(feature = "bitmap")]
     pub use crate::element::BitMapElement;
 
     pub use crate::data::Quartiles;

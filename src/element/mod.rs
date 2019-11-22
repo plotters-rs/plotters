@@ -179,9 +179,9 @@ pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
 mod boxplot;
 pub use boxplot::Boxplot;
 
-#[cfg(features = "bitmap")]
+#[cfg(feature = "bitmap")]
 mod image;
-#[cfg(features = "bitmap")]
+#[cfg(feature = "bitmap")]
 pub use self::image::BitMapElement;
 
 mod dynelem;
