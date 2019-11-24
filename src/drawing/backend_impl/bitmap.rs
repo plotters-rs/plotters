@@ -231,7 +231,7 @@ pub trait PixelFormat: Sized {
                         *buf.get_unchecked_mut(base + idx) = Self::byte_at(r, g, b, 0, idx);
                     }
                 } else {
-                    let alpha = alpha.min(1.0).max(0.0);
+                    let alpha = alpha.min(255.0 / 256.0).max(0.0);
                     if alpha == 0.0 {
                         return;
                     }
@@ -1417,11 +1417,14 @@ mod test {
 
     #[test]
     fn test_text_draw() {
-        let (width, height) = (1000, 500);
+        let (width, height) = (1000, 600);
         let mut buffer = vec![0; (width * height * 3) as usize];
         {
             let root = BitMapBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
             root.fill(&WHITE).unwrap();
+            let root = root
+                .titled("Image Title", ("sans-serif", 60).into_font())
+                .unwrap();
 
             let mut chart = ChartBuilder::on(&root)
                 .caption("All anchor point positions", ("sans-serif", 20))

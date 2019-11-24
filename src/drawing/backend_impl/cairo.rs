@@ -297,20 +297,22 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
         self.set_font(&font)?;
         self.set_color(&color)?;
 
-        let (width, height) = self.estimate_text_size(text, &style.font)?;
-        let (width, height) = (width as f64, height as f64);
         self.call_cairo(|c| {
+            let extents = c.text_extents(text);
             let dx = match style.pos.h_pos {
                 HPos::Left => 0.0,
-                HPos::Right => -width,
-                HPos::Center => -width / 2.0,
+                HPos::Right => -extents.width,
+                HPos::Center => -extents.width / 2.0,
             };
             let dy = match style.pos.v_pos {
-                VPos::Top => height,
-                VPos::Center => height / 2.0,
+                VPos::Top => extents.height,
+                VPos::Center => extents.height / 2.0,
                 VPos::Bottom => 0.0,
             };
-            c.move_to(f64::from(x) + dx, f64::from(y) + dy);
+            c.move_to(
+                f64::from(x) + dx - extents.x_bearing,
+                f64::from(y) + dy - extents.y_bearing - extents.height,
+            );
             c.show_text(text);
             if degree != 0.0 {
                 c.restore();
@@ -384,12 +386,15 @@ mod test {
     #[test]
     fn test_text_draw() {
         let buffer: Vec<u8> = vec![];
-        let (width, height) = (1000, 500);
+        let (width, height) = (1000, 600);
         let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer);
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (width, height))
             .unwrap()
             .into_drawing_area();
+        let root = root
+            .titled("Image Title", ("sans-serif", 60).into_font())
+            .unwrap();
 
         let mut chart = ChartBuilder::on(&root)
             .caption("All anchor point positions", ("sans-serif", 20))

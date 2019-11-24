@@ -484,7 +484,10 @@ mod test {
     fn test_text_draw() {
         let mut buffer: Vec<u8> = vec![];
         {
-            let root = SVGBackend::with_buffer(&mut buffer, (1000, 500)).into_drawing_area();
+            let root = SVGBackend::with_buffer(&mut buffer, (1000, 600)).into_drawing_area();
+            let root = root
+                .titled("Image Title", ("sans-serif", 60).into_font())
+                .unwrap();
 
             let mut chart = ChartBuilder::on(&root)
                 .caption("All anchor point positions", ("sans-serif", 20))

@@ -570,16 +570,24 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                     let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
                         match orientation {
                             (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
-                            (dx, dy) if dx < 0 && dy == 0 => (xmax - tick_size, *p - y0, xmax, *p - y0),
+                            (dx, dy) if dx < 0 && dy == 0 => {
+                                (xmax - tick_size, *p - y0, xmax, *p - y0)
+                            }
                             (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
-                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, ymax - tick_size, *p - x0, ymax),
+                            (dx, dy) if dx == 0 && dy < 0 => {
+                                (*p - x0, ymax - tick_size, *p - x0, ymax)
+                            }
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     } else {
                         match orientation {
-                            (dx, dy) if dx > 0 && dy == 0 => (xmax, *p - y0, xmax + tick_size, *p - y0),
+                            (dx, dy) if dx > 0 && dy == 0 => {
+                                (xmax, *p - y0, xmax + tick_size, *p - y0)
+                            }
                             (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
-                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, ymax, *p - x0, ymax + tick_size),
+                            (dx, dy) if dx == 0 && dy > 0 => {
+                                (*p - x0, ymax, *p - x0, ymax + tick_size)
+                            }
                             (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
                             _ => panic!("Bug: Invalid orientation specification"),
                         }

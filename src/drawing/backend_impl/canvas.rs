@@ -365,9 +365,12 @@ mod test {
     #[wasm_bindgen_test]
     fn test_text_draw() {
         let document = window().unwrap().document().unwrap();
-        let canvas = create_canvas(&document, "test_text_draw", 1000, 500);
+        let canvas = create_canvas(&document, "test_text_draw", 1000, 600);
         let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
         let root = backend.into_drawing_area();
+        let root = root
+            .titled("Image Title", ("sans-serif", 60).into_font())
+            .unwrap();
 
         let mut chart = ChartBuilder::on(&root)
             .caption("All anchor point positions", ("sans-serif", 20))

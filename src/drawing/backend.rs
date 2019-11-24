@@ -192,8 +192,10 @@ pub trait DrawingBackend: Sized {
             return Ok(());
         }
 
-        let (width, height) = self.estimate_text_size(text, &style.font)?;
-        let (width, height) = (width as i32, height as i32);
+        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+        let ((min_x, min_y), (max_x, max_y)) = layout;
+        let width = (max_x - min_x) as i32;
+        let height = (max_y - min_y) as i32;
         let dx = match style.pos.h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
@@ -207,7 +209,7 @@ pub trait DrawingBackend: Sized {
         let trans = font.get_transform();
         let (w, h) = self.get_size();
         match font.draw(text, (0, 0), |x, y, v| {
-            let (x, y) = trans.transform(x + dx, y + dy);
+            let (x, y) = trans.transform(x + dx - min_x, y + dy - max_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
                 self.draw_pixel((x, y), &color.mix(f64::from(v)))
@@ -235,8 +237,8 @@ pub trait DrawingBackend: Sized {
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
         let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
         Ok((
-            ((layout.0).0 - (layout.1).0).abs() as u32,
-            ((layout.0).1 - (layout.1).1).abs() as u32,
+            ((layout.1).0 - (layout.0).0) as u32,
+            ((layout.1).1 - (layout.0).1) as u32,
         ))
     }
 
