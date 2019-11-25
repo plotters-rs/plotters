@@ -1553,4 +1553,20 @@ mod test {
         }
         checked_save_file("test_series_labels", &buffer, width, height);
     }
+
+    #[test]
+    fn test_draw_pixel_alphas() {
+        let (width, height) = (100_i32, 100_i32);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+                .into_drawing_area();
+            root.fill(&WHITE).unwrap();
+            for i in -20..20 {
+                let alpha = i as f64 * 0.1;
+                root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha)).unwrap();
+            }
+        }
+        checked_save_file("test_draw_pixel_alphas", &buffer, width as u32, height as u32);
+    }
 }
