@@ -44,20 +44,20 @@ fn draw_func_1x1_seq(c: &mut Criterion) {
     });
 }
 
-fn draw_func_4x4_seq(c: &mut Criterion) {
-    let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("parallel::draw_func_4x4_seq", |b| {
+fn draw_func_4x4(c: &mut Criterion) {
+    let mut group = c.benchmark_group("draw_func_4x4");
+
+    group.bench_function("parallel", |b| {
+        let mut buffer = vec![0; (W * H * 3) as usize];
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
             areas.iter().for_each(|area| draw_plot(&area, 2.0));
         })
     });
-}
 
-fn draw_func_4x4_parallel_and_blit(c: &mut Criterion) {
-    let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("parallel::draw_func_4x4_parallel_and_blit", |b| {
+    group.bench_function("blit", |b| {
+        let mut buffer = vec![0; (W * H * 3) as usize];
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((4, 4));
@@ -79,9 +79,10 @@ fn draw_func_4x4_parallel_and_blit(c: &mut Criterion) {
     });
 }
 
-fn draw_func_2x1_parallel_and_blit(c: &mut Criterion) {
-    let mut buffer = vec![0; (W * H * 3) as usize];
-    c.bench_function("parallel::draw_func_2x1_parallel_and_blit", |b| {
+fn draw_func_2x1(c: &mut Criterion) {
+    let mut group = c.benchmark_group("draw_func_2x1");
+    group.bench_function("blit", |b| {
+        let mut buffer = vec![0; (W * H * 3) as usize];
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             let areas = root.split_evenly((2, 1));
@@ -101,11 +102,9 @@ fn draw_func_2x1_parallel_and_blit(c: &mut Criterion) {
                 .for_each(|(a, e)| a.draw(&e).unwrap());
         })
     });
-}
 
-fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
-    let mut buffer = vec![0u8; (W * H * 3) as usize];
-    c.bench_function("parallel::draw_func_2x1_inplace", |b| {
+    group.bench_function("inplace", |b| {
+        let mut buffer = vec![0; (W * H * 3) as usize];
         b.iter(|| {
             let mut back = BitMapBackend::with_buffer(&mut buffer, (W, H));
             back.split(&[H / 2])
@@ -113,11 +112,9 @@ fn draw_func_2x1_inplace_parallel(c: &mut Criterion) {
                 .for_each(|b| draw_plot(&b.into_drawing_area(), 2.0));
         })
     });
-}
 
-fn draw_func_2x1_seq(c: &mut Criterion) {
-    let mut buffer = vec![0u8; (W * H * 3) as usize];
-    c.bench_function("parallel::draw_func_2x1_seq", |b| {
+    group.bench_function("sequential", |b| {
+        let mut buffer = vec![0; (W * H * 3) as usize];
         b.iter(|| {
             let root = BitMapBackend::with_buffer(&mut buffer, (W, H)).into_drawing_area();
             root.split_evenly((2, 1))
@@ -132,9 +129,6 @@ criterion_group! {
     config = Criterion::default().sample_size(10);
     targets =
         draw_func_1x1_seq,
-        draw_func_4x4_seq,
-        draw_func_4x4_parallel_and_blit,
-        draw_func_2x1_parallel_and_blit,
-        draw_func_2x1_inplace_parallel,
-        draw_func_2x1_seq
+        draw_func_4x4,
+        draw_func_2x1,
 }
