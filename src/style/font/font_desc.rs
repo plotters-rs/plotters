@@ -1,6 +1,6 @@
 use super::{FontData, FontDataInternal};
 use crate::style::text_anchor::Pos;
-use crate::style::{Color, LayoutBox, TextStyle};
+use crate::style::{Color, TextStyle};
 
 use std::convert::From;
 
@@ -24,20 +24,6 @@ pub enum FontTransform {
 }
 
 impl FontTransform {
-    /// Compute the offset of the "top-left" corner of the text.
-    /// "Top-left" defined as the first char's top-left in reading orientation.
-    ///
-    /// - `layout`: The bouncing box of the text
-    /// - **returns**: The offset in pixels
-    pub fn offset(&self, layout: LayoutBox) -> (i32, i32) {
-        match self {
-            FontTransform::None => (0, 0),
-            FontTransform::Rotate90 => ((layout.1).1 - (layout.0).1, 0),
-            FontTransform::Rotate180 => ((layout.1).0 - (layout.0).0, (layout.1).1 - (layout.0).1),
-            FontTransform::Rotate270 => (0, (layout.1).0 - (layout.0).0),
-        }
-    }
-
     /// Transform the coordinate to perform the rotation
     ///
     /// - `x`: The x coordinate in pixels before transform

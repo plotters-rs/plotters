@@ -141,14 +141,14 @@ impl FontData for FontDataInternal {
 
         let font = &self.0;
 
-        font.layout(text, scale, point(0.0, 0.0)).for_each(|g| {
+        for g in font.layout(text, scale, point(0.0, 0.0)) {
             if let Some(rect) = g.pixel_bounding_box() {
                 min_x = min_x.min(rect.min.x);
                 min_y = min_y.min(rect.min.y);
                 max_x = max_x.max(rect.max.x);
                 max_y = max_y.max(rect.max.y);
             }
-        });
+        }
 
         if min_x == i32::MAX || min_y == i32::MAX {
             return Ok(((0, 0), (0, 0)));

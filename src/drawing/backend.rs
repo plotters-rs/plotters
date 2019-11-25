@@ -202,14 +202,14 @@ pub trait DrawingBackend: Sized {
             HPos::Center => -width / 2,
         };
         let dy = match style.pos.v_pos {
-            VPos::Top => height,
-            VPos::Center => height / 2,
-            VPos::Bottom => 0,
+            VPos::Top => 0,
+            VPos::Center => -height / 2,
+            VPos::Bottom => -height,
         };
         let trans = font.get_transform();
         let (w, h) = self.get_size();
         match font.draw(text, (0, 0), |x, y, v| {
-            let (x, y) = trans.transform(x + dx - min_x, y + dy - max_y);
+            let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
                 self.draw_pixel((x, y), &color.mix(f64::from(v)))
