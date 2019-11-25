@@ -634,4 +634,23 @@ mod test {
         let content = String::from_utf8(buffer).unwrap();
         checked_save_file("test_series_labels", &content);
     }
+
+    #[test]
+    fn test_draw_pixel_alphas() {
+        let mut buffer: Vec<u8> = vec![];
+        {
+            let (width, height) = (100_i32, 100_i32);
+            let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+                .into_drawing_area();
+            root.fill(&WHITE).unwrap();
+
+            for i in -20..20 {
+                let alpha = i as f64 * 0.1;
+                root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha)).unwrap();
+            }
+        }
+
+        let content = String::from_utf8(buffer).unwrap();
+        checked_save_file("test_draw_pixel_alphas", &content);
+    }
 }
