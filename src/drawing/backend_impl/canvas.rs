@@ -497,4 +497,20 @@ mod test {
 
         check_content(&document, "test_series_labels");
     }
+
+    #[wasm_bindgen_test]
+    fn test_draw_pixel_alphas() {
+        let (width, height) = (100_i32, 100_i32);
+        let document = window().unwrap().document().unwrap();
+        let canvas = create_canvas(&document, "test_draw_pixel_alphas", width as u32, height as u32);
+        let backend = CanvasBackend::with_canvas_object(canvas).expect("cannot find canvas");
+        let root = backend.into_drawing_area();
+
+        for i in -20..20 {
+            let alpha = i as f64 * 0.1;
+            root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha)).unwrap();
+        }
+
+        check_content(&document, "test_draw_pixel_alphas");
+    }
 }
