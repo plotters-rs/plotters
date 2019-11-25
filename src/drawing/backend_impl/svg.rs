@@ -255,16 +255,28 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             HPos::Right => "end",
             HPos::Center => "middle",
         };
-        let dominant_baseline = match style.pos.v_pos {
-            VPos::Top => "hanging",
-            VPos::Center => "middle",
-            VPos::Bottom => "baseline",
+
+        let ((_, x_min_y), (_, x_max_y)) =
+            font.layout_box("x").map_err(DrawingErrorKind::FontError)?;
+        let ((_, text_min_y), (_, text_max_y)) =
+            font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+        let x_height = x_max_y as f32 - x_min_y as f32;
+        let x_middle = x_min_y as f32 + x_height / 2.0;
+        let text_height = text_max_y as f32 - text_min_y as f32;
+        let text_middle = text_min_y as f32 + text_height / 2.0;
+        let scaled_height = text_height / x_height;
+        let offset = (text_middle - x_middle) / x_height;
+
+        let dy = match style.pos.v_pos {
+            VPos::Top => format!("{}ex", offset + scaled_height),
+            VPos::Center => format!("{}ex", offset + scaled_height / 2.0),
+            VPos::Bottom => format!("{}ex", offset),
         };
 
         let node = Text::new()
             .set("x", x0)
             .set("y", y0)
-            .set("dominant-baseline", dominant_baseline)
+            .set("dy", dy)
             .set("text-anchor", text_anchor)
             .set("font-family", font.get_name())
             .set("font-size", font.get_size())
