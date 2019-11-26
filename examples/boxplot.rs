@@ -80,6 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_mesh()
         .x_desc("Ping, ms")
         .y_desc(category.name())
+        .y_labels(category.len())
         .line_style_2(&WHITE)
         .draw()?;
 

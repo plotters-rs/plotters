@@ -141,7 +141,6 @@ impl<T: PartialEq> Ranged for Category<T> {
     type ValueType = Category<T>;
 
     fn range(&self) -> Range<Category<T>> {
-        //self.0.clone()..self.1.clone()
         let mut left = self.clone();
         let mut right = self.clone();
         left.idx = 0;
@@ -151,14 +150,14 @@ impl<T: PartialEq> Ranged for Category<T> {
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
         // Add margins to spans as edge values are not applicable to category
-        let total_span = (self.len() + 2) as f64;
+        let total_span = (self.len() + 1) as f64;
         let value_span = f64::from(value.idx + 1);
         (f64::from(limit.1 - limit.0) * value_span / total_span) as i32 + limit.0
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
         let mut ret = vec![];
-        let intervals = self.len() as f64;
+        let intervals = (self.len() - 1) as f64;
         let elements = &self.elements;
         let name = &self.name;
         let step = (intervals / max_points as f64 + 1.0) as usize;
@@ -201,7 +200,10 @@ mod test {
     #[test]
     fn test_ranged_trait() {
         let category = Category::new("color", vec!["red", "green", "blue"]);
-        assert_eq!(category.map(&category.get(&"red").unwrap(), (10, 20)), 12);
+        assert_eq!(category.map(&category.get(&"red").unwrap(), (0, 8)), 2);
+        assert_eq!(category.map(&category.get(&"green").unwrap(), (0, 8)), 4);
+        assert_eq!(category.map(&category.get(&"blue").unwrap(), (0, 8)), 6);
+        assert_eq!(category.key_points(3).len(), 3);
         assert_eq!(category.key_points(5).len(), 3);
     }
 }

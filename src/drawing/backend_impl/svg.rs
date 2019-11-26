@@ -256,21 +256,10 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             HPos::Center => "middle",
         };
 
-        let ((_, x_min_y), (_, x_max_y)) =
-            font.layout_box("x").map_err(DrawingErrorKind::FontError)?;
-        let ((_, text_min_y), (_, text_max_y)) =
-            font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
-        let x_height = x_max_y as f32 - x_min_y as f32;
-        let x_middle = x_min_y as f32 + x_height / 2.0;
-        let text_height = text_max_y as f32 - text_min_y as f32;
-        let text_middle = text_min_y as f32 + text_height / 2.0;
-        let scaled_height = text_height / x_height;
-        let offset = (text_middle - x_middle) / x_height;
-
         let dy = match style.pos.v_pos {
-            VPos::Top => format!("{}ex", offset + scaled_height),
-            VPos::Center => format!("{}ex", offset + scaled_height / 2.0),
-            VPos::Bottom => format!("{}ex", offset),
+            VPos::Top => "0.76em",
+            VPos::Center => "0.5ex",
+            VPos::Bottom => "-0.5ex",
         };
 
         let node = Text::new()
@@ -496,7 +485,7 @@ mod test {
     fn test_text_draw() {
         let mut buffer: Vec<u8> = vec![];
         {
-            let root = SVGBackend::with_buffer(&mut buffer, (1000, 600)).into_drawing_area();
+            let root = SVGBackend::with_buffer(&mut buffer, (1500, 800)).into_drawing_area();
             let root = root
                 .titled("Image Title", ("sans-serif", 60).into_font())
                 .unwrap();
@@ -516,6 +505,8 @@ mod test {
                 .draw()
                 .unwrap();
 
+            let ((x1, y1), (x2, y2), (x3, y3)) = ((-30, 30), (0, -30), (30, 30));
+
             for (dy, trans) in [
                 FontTransform::None,
                 FontTransform::Rotate90,
@@ -527,13 +518,18 @@ mod test {
             {
                 for (dx1, h_pos) in [HPos::Left, HPos::Right, HPos::Center].iter().enumerate() {
                     for (dx2, v_pos) in [VPos::Top, VPos::Center, VPos::Bottom].iter().enumerate() {
-                        let x = 100_i32 + (dx1 as i32 * 3 + dx2 as i32) * 100;
-                        let y = 100 + dy as i32 * 100;
-                        root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
-                        let style = TextStyle::from(("sans-serif", 20).into_font())
-                            .pos(Pos::new(*h_pos, *v_pos))
-                            .transform(trans.clone());
-                        root.draw_text("test", &style, (x, y)).unwrap();
+                        let x = 150_i32 + (dx1 as i32 * 3 + dx2 as i32) * 150;
+                        let y = 120 + dy as i32 * 150;
+                        let draw = |x, y, text| {
+                            root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
+                            let style = TextStyle::from(("sans-serif", 20).into_font())
+                                .pos(Pos::new(*h_pos, *v_pos))
+                                .transform(trans.clone());
+                            root.draw_text(text, &style, (x, y)).unwrap();
+                        };
+                        draw(x + x1, y + y1, "dood");
+                        draw(x + x2, y + y2, "dog");
+                        draw(x + x3, y + y3, "goog");
                     }
                 }
             }
@@ -542,7 +538,9 @@ mod test {
         let content = String::from_utf8(buffer).unwrap();
         checked_save_file("test_text_draw", &content);
 
-        assert_eq!(content.matches("test").count(), 36);
+        assert_eq!(content.matches("dog").count(), 36);
+        assert_eq!(content.matches("dood").count(), 36);
+        assert_eq!(content.matches("goog").count(), 36);
     }
 
     #[test]
@@ -646,7 +644,8 @@ mod test {
 
             for i in -20..20 {
                 let alpha = i as f64 * 0.1;
-                root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha)).unwrap();
+                root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha))
+                    .unwrap();
             }
         }
 
