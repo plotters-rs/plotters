@@ -505,8 +505,34 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
          * and tick mark drawing */
         let axis_range = self.draw_axis(area, axis_style, orientation, tick_size < 0)?;
 
+        /* To make the right label area looks nice, it's a little bit tricky, since for a that is
+         * very long, we actually prefer left alignment instead of right alignment.
+         * Otherwise, the right alignment looks better. So we estimate the max and min label width
+         * So that we are able decide if we should apply right alignment for the text. */
+        let label_width: Vec<_> = labels
+            .iter()
+            .map(|(_, text)| {
+                if orientation.0 > 0 && orientation.1 == 0 && tick_size >= 0 {
+                    let ((x0, _), (x1, _)) = label_style
+                        .font
+                        .layout_box(text)
+                        .unwrap_or(((0, 0), (0, 0)));
+                    println!("{} {} {}", text, x0, x1);
+                    x1 - x0
+                } else {
+                    // Don't ever do the layout estimationfor the drawing area that is either not
+                    // the right one or the tick mark is inward.
+                    0
+                }
+            })
+            .collect();
+
+        let min_width = *label_width.iter().min().unwrap_or(&1).max(&1);
+        let max_width = *label_width.iter().max().unwrap_or(&min_width);
+        let right_align_width = (min_width * 2).min(max_width);
+
         /* Then we need to draw the tick mark and the label */
-        for (p, t) in labels {
+        for ((p, t), w) in labels.into_iter().zip(label_width.into_iter()) {
             /* Make sure we are actually in the visible range */
             let rp = if orientation.0 == 0 { *p - x0 } else { *p - y0 };
 
@@ -520,7 +546,17 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                 match orientation {
                     // Right
                     (dx, dy) if dx > 0 && dy == 0 => {
-                        (label_dist, *p - y0, HPos::Left, VPos::Center)
+                        if w >= right_align_width {
+                            (label_dist, *p - y0, HPos::Left, VPos::Center)
+                        } else {
+                            println!("{} {}", label_dist, right_align_width);
+                            (
+                                label_dist + right_align_width,
+                                *p - y0,
+                                HPos::Right,
+                                VPos::Center,
+                            )
+                        }
                     }
                     // Left
                     (dx, dy) if dx < 0 && dy == 0 => {

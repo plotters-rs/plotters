@@ -60,6 +60,7 @@ piston = ["piston_window", "ttf"]
 cairo = ["cairo-rs", "ttf"]
 bitmap = ["ttf"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
+debug = [] # Enable debugging code
 
 
 [dev-dependencies]

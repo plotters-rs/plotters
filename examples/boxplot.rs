@@ -25,6 +25,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = SVGBackend::new("plotters-doc-data/boxplot.svg", (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
+    let root = root.margin(5, 5, 5, 5);
+
     let (upper, lower) = root.split_vertically(512);
 
     let args: Vec<String> = env::args().collect();
@@ -69,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&upper)
         .x_label_area_size(40)
-        .y_label_area_size(120)
+        .y_label_area_size(80)
         .caption("Ping Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
             values_range.start - 1.0..values_range.end + 1.0,
@@ -94,7 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .offset(*offset)
             }))?
             .label(label)
-            .legend(move |(x, y)| Rectangle::new([(x, y - 3), (x + 12, y + 9)], style.filled()));
+            .legend(move |(x, y)| Rectangle::new([(x, y - 6), (x + 12, y + 6)], style.filled()));
     }
     chart
         .configure_series_labels()

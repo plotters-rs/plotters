@@ -262,13 +262,38 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             VPos::Bottom => "-0.5ex",
         };
 
+        #[cfg(feature = "debug")]
+        {
+            let ((fx0, fy0), (fx1, fy1)) =
+                font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+            let x0 = match style.pos.h_pos {
+                HPos::Left => x0,
+                HPos::Center => x0 - fx1 / 2 + fx0 / 2,
+                HPos::Right => x0 - fx1 + fx0,
+            };
+            let y0 = match style.pos.v_pos {
+                VPos::Top => y0,
+                VPos::Center => y0 - fy1 / 2 + fy0 / 2,
+                VPos::Bottom => y0 - fy1 + fy0,
+            };
+            self.draw_rect(
+                (x0, y0),
+                (x0 + fx1 - fx0, y0 + fy1 - fy0),
+                &crate::prelude::RED,
+                false,
+            )
+            .unwrap();
+            self.draw_circle((x0, y0), 2, &crate::prelude::RED, false)
+                .unwrap();
+        }
+
         let node = Text::new()
             .set("x", x0)
             .set("y", y0)
             .set("dy", dy)
             .set("text-anchor", text_anchor)
             .set("font-family", font.get_name())
-            .set("font-size", font.get_size())
+            .set("font-size", font.get_size() / 1.24)
             .set("opacity", make_svg_opacity(color))
             .set("fill", make_svg_color(color));
 

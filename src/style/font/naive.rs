@@ -28,11 +28,12 @@ impl FontData for FontDataInternal {
     /// know the real size of the text anyway. Thus using font-kit is an overkill and doesn't helps
     /// the layout.
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
+        let em = size / 1.24 / 1.24;
         Ok((
-            (0, -(size * 0.8).round() as i32),
+            (0, -em.round() as i32),
             (
-                (size * text.len() as f64 / 2.0).round() as i32,
-                (size * 0.2).round() as i32,
+                (em * 0.7 * text.len() as f64).round() as i32,
+                (em * 0.24).round() as i32,
             ),
         ))
     }
