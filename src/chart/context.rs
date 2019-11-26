@@ -527,7 +527,11 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             .collect();
 
         let min_width = *label_width.iter().min().unwrap_or(&1).max(&1);
-        let max_width = *label_width.iter().filter(|&&x| x < min_width * 2).max().unwrap_or(&min_width);
+        let max_width = *label_width
+            .iter()
+            .filter(|&&x| x < min_width * 2)
+            .max()
+            .unwrap_or(&min_width);
         let right_align_width = (min_width * 2).min(max_width);
 
         /* Then we need to draw the tick mark and the label */

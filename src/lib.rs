@@ -228,6 +228,16 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        Drawing bitmap on chart
+        <a href="https://github.com/38/plotters/blob/master/examples/boxplot.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

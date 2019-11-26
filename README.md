@@ -113,6 +113,10 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/blit-bitmap.png" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/boxplot.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

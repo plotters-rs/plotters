@@ -7,6 +7,7 @@
 - Incremental Rendering by saving the previous chart context into a state and restore it on a different drawing area.
 - BoxPlot support (See boxplot example for more details) (Thanks to @nuald)
 - Category coordinate spec which allows use a list of given values as coordinate (Thanks to @nuald)
+- New text positioning model which allows develvoper sepecify the anchor point. This is critical for layouting SVG correctly. See `plotters::style::text::text_anchor` for details. (Thanks to @nuald)
 
 ### Improved
 
@@ -25,7 +26,7 @@
 - Tested the font loading on Linux, OSX and Windowns. Make font loading more reliable.
 - `BitMapBackend` isn't depdends on `image` crate now. Only the image encoding part relies on the `image` crate
 - Refactored WASM demo use ES6 and `wasm-pack` (Thanks to @Tatrix)
-- Label style for X axis and Y axis can be set seperately now using `x_label_style` and `y_label_style`. (Thanks to @zhiburt)
+- Label style for X axis and Y axis can be set seperately now using `x\_label\_style` and `y\_label\_style`. (Thanks to @zhiburt)
 
 ## Plotters 0.2.10 (2019-10-23)
 
