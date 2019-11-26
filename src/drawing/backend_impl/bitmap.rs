@@ -226,13 +226,12 @@ pub trait PixelFormat: Sized {
 
         if base < buf.len() {
             unsafe {
-                if alpha >= 1.0 {
+                if alpha >= 1.0 - 1.0 / 256.0 {
                     for idx in 0..Self::EFFECTIVE_PIXEL_SIZE {
                         *buf.get_unchecked_mut(base + idx) = Self::byte_at(r, g, b, 0, idx);
                     }
                 } else {
-                    let alpha = alpha.min(255.0 / 256.0).max(0.0);
-                    if alpha == 0.0 {
+                    if alpha <= 0.0 {
                         return;
                     }
 
