@@ -1417,7 +1417,7 @@ mod test {
 
     #[test]
     fn test_text_draw() {
-        let (width, height) = (1000, 600);
+        let (width, height) = (1500, 800);
         let mut buffer = vec![0; (width * height * 3) as usize];
         {
             let root = BitMapBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
@@ -1441,6 +1441,8 @@ mod test {
                 .draw()
                 .unwrap();
 
+            let ((x1, y1), (x2, y2), (x3, y3)) = ((-30, 30), (0, -30), (30, 30));
+
             for (dy, trans) in [
                 FontTransform::None,
                 FontTransform::Rotate90,
@@ -1452,13 +1454,18 @@ mod test {
             {
                 for (dx1, h_pos) in [HPos::Left, HPos::Right, HPos::Center].iter().enumerate() {
                     for (dx2, v_pos) in [VPos::Top, VPos::Center, VPos::Bottom].iter().enumerate() {
-                        let x = 100_i32 + (dx1 as i32 * 3 + dx2 as i32) * 100;
-                        let y = 100 + dy as i32 * 100;
-                        root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
-                        let style = TextStyle::from(("sans-serif", 20).into_font())
-                            .pos(Pos::new(*h_pos, *v_pos))
-                            .transform(trans.clone());
-                        root.draw_text("test", &style, (x, y)).unwrap();
+                        let x = 150_i32 + (dx1 as i32 * 3 + dx2 as i32) * 150;
+                        let y = 120 + dy as i32 * 150;
+                        let draw = |x, y, text| {
+                            root.draw(&Circle::new((x, y), 3, &BLACK.mix(0.5))).unwrap();
+                            let style = TextStyle::from(("sans-serif", 20).into_font())
+                                .pos(Pos::new(*h_pos, *v_pos))
+                                .transform(trans.clone());
+                            root.draw_text(text, &style, (x, y)).unwrap();
+                        };
+                        draw(x + x1, y + y1, "dood");
+                        draw(x + x2, y + y2, "dog");
+                        draw(x + x3, y + y3, "goog");
                     }
                 }
             }
@@ -1552,5 +1559,27 @@ mod test {
             }
         }
         checked_save_file("test_series_labels", &buffer, width, height);
+    }
+
+    #[test]
+    fn test_draw_pixel_alphas() {
+        let (width, height) = (100_i32, 100_i32);
+        let mut buffer = vec![0; (width * height * 3) as usize];
+        {
+            let root = BitMapBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+                .into_drawing_area();
+            root.fill(&WHITE).unwrap();
+            for i in -20..20 {
+                let alpha = i as f64 * 0.1;
+                root.draw_pixel((50 + i, 50 + i), &BLACK.mix(alpha))
+                    .unwrap();
+            }
+        }
+        checked_save_file(
+            "test_draw_pixel_alphas",
+            &buffer,
+            width as u32,
+            height as u32,
+        );
     }
 }
