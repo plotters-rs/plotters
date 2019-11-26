@@ -517,7 +517,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                         .font
                         .layout_box(text)
                         .unwrap_or(((0, 0), (0, 0)));
-                    println!("{} {} {}", text, x0, x1);
                     x1 - x0
                 } else {
                     // Don't ever do the layout estimationfor the drawing area that is either not
@@ -528,7 +527,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
             .collect();
 
         let min_width = *label_width.iter().min().unwrap_or(&1).max(&1);
-        let max_width = *label_width.iter().max().unwrap_or(&min_width);
+        let max_width = *label_width.iter().filter(|&&x| x < min_width * 2).max().unwrap_or(&min_width);
         let right_align_width = (min_width * 2).min(max_width);
 
         /* Then we need to draw the tick mark and the label */
@@ -549,7 +548,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
                         if w >= right_align_width {
                             (label_dist, *p - y0, HPos::Left, VPos::Center)
                         } else {
-                            println!("{} {}", label_dist, right_align_width);
                             (
                                 label_dist + right_align_width,
                                 *p - y0,
