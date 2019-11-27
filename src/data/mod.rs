@@ -8,3 +8,5 @@ pub use data_range::fitting_range;
 
 mod quartiles;
 pub use quartiles::Quartiles;
+
+pub mod float;

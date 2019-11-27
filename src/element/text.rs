@@ -131,8 +131,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
             while !remaining.is_empty() {
                 let mut left = 0;
                 while left < remaining.len() {
-                    let width =
-                        font.box_size(&remaining[0..=left]).unwrap_or((0, 0)).0 as i32;
+                    let width = font.box_size(&remaining[0..=left]).unwrap_or((0, 0)).0 as i32;
 
                     if width > max_width as i32 {
                         break;
