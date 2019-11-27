@@ -535,7 +535,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         let right_align_width = (min_width * 2).min(max_width);
 
         /* Then we need to draw the tick mark and the label */
-        for ((p, t), w) in labels.into_iter().zip(label_width.into_iter()) {
+        for ((p, t), w) in labels.iter().zip(label_width.into_iter()) {
             /* Make sure we are actually in the visible range */
             let rp = if orientation.0 == 0 { *p - x0 } else { *p - y0 };
 

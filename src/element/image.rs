@@ -6,12 +6,51 @@ use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::drawing::bitmap_pixel::{PixelFormat, RGBPixel};
 
 use crate::drawing::BitMapBackend;
-use std::borrow::{Borrow, Cow};
+use std::borrow::Borrow;
 use std::marker::PhantomData;
+
+enum Buffer<'a> {
+    Owned(Vec<u8>),
+    Borrowed(&'a [u8]),
+    BorrowedMut(&'a mut [u8]),
+}
+
+impl<'a> Borrow<[u8]> for Buffer<'a> {
+    fn borrow(&self) -> &[u8] {
+        self.as_ref()
+    }
+}
+
+impl AsRef<[u8]> for Buffer<'_> {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Buffer::Owned(owned) => owned.as_ref(),
+            Buffer::Borrowed(target) => target,
+            Buffer::BorrowedMut(target) => target,
+        }
+    }
+}
+
+impl<'a> Buffer<'a> {
+    fn to_mut(&mut self) -> &mut [u8] {
+        let owned = match self {
+            Buffer::Owned(owned) => return &mut owned[..],
+            Buffer::BorrowedMut(target) => return target,
+            Buffer::Borrowed(target) => {
+                let mut value = vec![];
+                value.extend_from_slice(target);
+                value
+            }
+        };
+
+        *self = Buffer::Owned(owned);
+        self.to_mut()
+    }
+}
 
 /// The element that contains a bitmap on it
 pub struct BitMapElement<'a, Coord, P: PixelFormat = RGBPixel> {
-    image: Cow<'a, Vec<u8>>,
+    image: Buffer<'a>,
     size: (u32, u32),
     pos: Coord,
     phantom: PhantomData<P>,
@@ -25,11 +64,73 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// - `size`: The size of the bitmap
     pub fn new(pos: Coord, size: (u32, u32)) -> Self {
         Self {
-            image: Cow::Owned(vec![0; (size.0 * size.1) as usize * P::PIXEL_SIZE]),
+            image: Buffer::Owned(vec![0; (size.0 * size.1) as usize * P::PIXEL_SIZE]),
             size,
             pos,
             phantom: PhantomData,
         }
+    }
+
+    /// Create a new bitmap element with an pre-allocated owned buffer, this function will
+    /// take the ownership of the buffer.
+    ///
+    /// - `pos`: The left upper coordinate of the elelent
+    /// - `size`: The size of the bitmap
+    /// - `buf`: The buffer to use
+    /// - **returns**: The newly created image element, if the buffer isn't fit the image
+    /// dimension, this will returns an `None`.
+    pub fn with_owned_buffer(pos: Coord, size: (u32, u32), buf: Vec<u8>) -> Option<Self> {
+        if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
+            return None;
+        }
+
+        Some(Self {
+            image: Buffer::Owned(buf),
+            size,
+            pos,
+            phantom: PhantomData,
+        })
+    }
+
+    /// Create a new bitmap element with a mut borrow to an existing buffer
+    ///
+    /// - `pos`: The left upper coordinate of the elelent
+    /// - `size`: The size of the bitmap
+    /// - `buf`: The buffer to use
+    /// - **returns**: The newly created image element, if the buffer isn't fit the image
+    /// dimension, this will returns an `None`.
+    pub fn with_mut(pos: Coord, size: (u32, u32), buf: &'a mut [u8]) -> Option<Self> {
+        if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
+            return None;
+        }
+
+        Some(Self {
+            image: Buffer::BorrowedMut(buf),
+            size,
+            pos,
+            phantom: PhantomData,
+        })
+    }
+
+    /// Create a new bitmap element with a shared borrowed buffer. This means if we want to modifiy
+    /// the content of the image, the buffer is automatically copied
+    ///
+    /// - `pos`: The left upper coordinate of the elelent
+    /// - `size`: The size of the bitmap
+    /// - `buf`: The buffer to use
+    /// - **returns**: The newly created image element, if the buffer isn't fit the image
+    /// dimension, this will returns an `None`.
+    pub fn with_ref(pos: Coord, size: (u32, u32), buf: &'a [u8]) -> Option<Self> {
+        if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
+            return None;
+        }
+
+        Some(Self {
+            image: Buffer::Borrowed(buf),
+            size,
+            pos,
+            phantom: PhantomData,
+        })
     }
 
     /// Copy the existing bitmap element to another location
@@ -37,7 +138,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// - `pos`: The new location to copy
     pub fn copy_to<Coord2>(&self, pos: Coord2) -> BitMapElement<Coord2, P> {
         BitMapElement {
-            image: Cow::Borrowed(self.image.borrow()),
+            image: Buffer::Borrowed(self.image.borrow()),
             size: self.size,
             pos,
             phantom: PhantomData,
@@ -65,7 +166,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, RGBPixe
         let rgb_image = image.to_rgb().into_raw();
         Self {
             pos,
-            image: Cow::Owned(rgb_image),
+            image: Buffer::Owned(rgb_image),
             size: (w, h),
             phantom: PhantomData,
         }
@@ -81,7 +182,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)>
         let rgb_image = image.to_bgra().into_raw();
         Self {
             pos,
-            image: Cow::Owned(rgb_image),
+            image: Buffer::Owned(rgb_image),
             size: (w, h),
             phantom: PhantomData,
         }

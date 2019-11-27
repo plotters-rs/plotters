@@ -54,7 +54,7 @@ fn draw_func_4x4(c: &mut Criterion) {
     c.bench(
         "draw_func_4x4",
         ParameterizedBenchmark::new(
-            "parallel",
+            "sequential",
             |b, &&s| {
                 let mut buffer = vec![0; (s * s * 3) as usize];
                 b.iter(|| {
@@ -67,23 +67,54 @@ fn draw_func_4x4(c: &mut Criterion) {
         )
         .with_function("blit", |b, &&s| {
             let mut buffer = vec![0; (s * s * 3) as usize];
+            let mut element_buffer = vec![vec![0; (s * s / 4 * 3) as usize]; 4];
             b.iter(|| {
                 let root = BitMapBackend::with_buffer(&mut buffer, (s, s)).into_drawing_area();
                 let areas = root.split_evenly((4, 4));
-                let mut elements: Vec<_> = areas
-                    .iter()
-                    .map(|area| area.dim_in_pixel())
-                    .map(|size| BitMapElement::new((0, 0), size))
-                    .collect();
-
-                elements
+                let elements: Vec<_> = element_buffer
                     .par_iter_mut()
-                    .for_each(|e| draw_plot(&e.as_bitmap_backend().into_drawing_area(), 2.0));
+                    .map(|b| {
+                        let mut e = BitMapElement::with_mut((0, 0), (s / 2, s / 2), b).unwrap();
+                        draw_plot(&e.as_bitmap_backend().into_drawing_area(), 2.0);
+                        e
+                    })
+                    .collect();
 
                 areas
                     .into_iter()
                     .zip(elements.into_iter())
                     .for_each(|(a, e)| a.draw(&e).unwrap());
+            })
+        })
+        .with_function("inplace-blit", |b, &&s| {
+            let mut buffer = vec![0; (s * s * 3) as usize];
+            let mut element_buffer = vec![vec![vec![0; (s * s / 4 * 3) as usize]; 2]; 2];
+            b.iter(|| {
+                let mut back = BitMapBackend::with_buffer(&mut buffer, (s, s));
+                back.split(&[s / 2])
+                    .into_iter()
+                    .zip(element_buffer.iter_mut())
+                    .collect::<Vec<_>>()
+                    .into_par_iter()
+                    .for_each(|(back, buffer)| {
+                        let root = back.into_drawing_area();
+                        let areas = root.split_evenly((1, 2));
+
+                        let elements: Vec<_> = buffer
+                            .par_iter_mut()
+                            .map(|b| {
+                                let mut e =
+                                    BitMapElement::with_mut((0, 0), (s / 2, s / 2), b).unwrap();
+                                draw_plot(&e.as_bitmap_backend().into_drawing_area(), 2.0);
+                                e
+                            })
+                            .collect();
+
+                        areas
+                            .into_iter()
+                            .zip(elements.into_iter())
+                            .for_each(|(a, e)| a.draw(&e).unwrap())
+                    });
             })
         }),
     );
@@ -93,21 +124,22 @@ fn draw_func_2x1(c: &mut Criterion) {
     c.bench(
         "draw_func_2x1",
         ParameterizedBenchmark::new(
-            "parallel",
+            "blit",
             |b, &&s| {
                 let mut buffer = vec![0; (s * s * 3) as usize];
+                let mut element_buffer = vec![vec![0; (s * s / 2 * 3) as usize]; 2];
                 b.iter(|| {
                     let root = BitMapBackend::with_buffer(&mut buffer, (s, s)).into_drawing_area();
                     let areas = root.split_evenly((2, 1));
-                    let mut elements: Vec<_> = areas
-                        .iter()
-                        .map(|area| area.dim_in_pixel())
-                        .map(|size| BitMapElement::new((0, 0), size))
-                        .collect();
-
-                    elements
+                    let elements: Vec<_> = element_buffer
                         .par_iter_mut()
-                        .for_each(|e| draw_plot(&e.as_bitmap_backend().into_drawing_area(), 2.0));
+                        .map(|buf| {
+                            let mut element =
+                                BitMapElement::with_mut((0, 0), (s, s / 2), buf).unwrap();
+                            draw_plot(&element.as_bitmap_backend().into_drawing_area(), 2.0);
+                            element
+                        })
+                        .collect();
 
                     areas
                         .into_iter()

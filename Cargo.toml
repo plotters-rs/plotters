@@ -67,7 +67,7 @@ debug = [] # Enable debugging code
 rand = "^0.7.2"
 itertools = "^0.8.0"
 rand_distr = "0.2.2"
-criterion = "0.3.0"
+criterion = {path = "../../criterion.rs"}
 rayon = "1.2.0"
 rand_xorshift = "0.2.0"
 

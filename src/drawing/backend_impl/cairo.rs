@@ -56,7 +56,7 @@ impl<'a> CairoBackend<'a> {
                 f64::from(color.rgb().0) / 255.0,
                 f64::from(color.rgb().1) / 255.0,
                 f64::from(color.rgb().2) / 255.0,
-                f64::from(color.alpha()),
+                color.alpha(),
             )
         })
     }
@@ -133,7 +133,7 @@ impl<'a> DrawingBackend for CairoBackend<'a> {
                 f64::from(color.rgb().0) / 255.0,
                 f64::from(color.rgb().1) / 255.0,
                 f64::from(color.rgb().2) / 255.0,
-                f64::from(color.alpha()),
+                color.alpha(),
             );
             c.fill();
         })
