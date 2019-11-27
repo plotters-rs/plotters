@@ -3,15 +3,54 @@ name: Push Check
 on: [push]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  build_and_test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
     - uses: actions/checkout@v1
       with:
           submodules: recursive
-    - name: Build
-      run: cargo build --verbose --all-features
-    - name: Run tests
-      run: cargo test --verbose --all-features
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+    - uses: actions-rs/cargo@v1
+      with:
+          command: test
+          args: --verbose
+    - uses: actions-rs/cargo@v1
+      with:
+          command: test
+          args: --verbose --no-default-features --lib
+  test_all_features:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+          submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+    - uses: actions-rs/cargo@v1
+      with:
+          command: test
+          args: --verbose --all-features
+  run_all_examples:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+          submodules: recursive
+    - uses: actions-rs/cargo@v1
+      with:
+          command: build
+          args: --verbose --release --examples
+    - name: Run all the examples
+      run: for example in examples/*.rs; do ./target/release/examples/$(basename ${example} .rs); done && tar -czvf example-outputs.tar.gz plotters-doc-data
+    - uses: actions/upload-artifact@v1
+      with:
+          name: example-outputs
+          path: example-outputs.tar.gz
