@@ -72,7 +72,7 @@ fn draw_line(c: &mut Criterion) {
 }
 
 fn fill_background(c: &mut Criterion) {
-    let mut group = c.benchmark_group("rasterizer::draw_background");
+    let mut group = c.benchmark_group("rasterizer::fill_background");
 
     group.bench_function("rgb", |b| {
         let mut buffer = vec![0; (W * H * 3) as usize];
