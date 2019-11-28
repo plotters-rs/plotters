@@ -10,12 +10,20 @@
   So iterator combinator such as `map`, `zip`, etc can also be used.
 */
 
+#[cfg(feature = "area_series")]
 mod area_series;
+#[cfg(feature = "histogram")]
 mod histogram;
+#[cfg(feature = "line_series")]
 mod line_series;
+#[cfg(feature = "point_series")]
 mod point_series;
 
+#[cfg(feature = "area_series")]
 pub use area_series::AreaSeries;
+#[cfg(feature = "histogram")]
 pub use histogram::Histogram;
+#[cfg(feature = "line_series")]
 pub use line_series::LineSeries;
+#[cfg(feature = "point_series")]
 pub use point_series::PointSeries;

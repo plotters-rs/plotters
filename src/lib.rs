@@ -678,7 +678,15 @@ pub mod prelude {
     pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
 
     pub use crate::drawing::*;
-    pub use crate::series::{AreaSeries, Histogram, LineSeries, PointSeries};
+    #[cfg(feature = "area_series")]
+    pub use crate::series::AreaSeries;
+    #[cfg(feature = "histogram")]
+    pub use crate::series::Histogram;
+    #[cfg(feature = "line_series")]
+    pub use crate::series::LineSeries;
+    #[cfg(feature = "point_series")]
+    pub use crate::series::PointSeries;
+
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle,
