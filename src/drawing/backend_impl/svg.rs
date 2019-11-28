@@ -1,16 +1,13 @@
 /*!
 The SVG image drawing backend
 */
-pub use svg as svg_types;
-
-use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
-use svg::Document;
 
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::text_anchor::{HPos, VPos};
 use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextStyle};
 
-use std::io::{Cursor, Error};
+use std::fs::File;
+use std::io::{BufWriter, Cursor, Error, Write};
 use std::path::Path;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
@@ -23,43 +20,122 @@ fn make_svg_opacity<C: Color>(color: &C) -> String {
 }
 
 enum Target<'a> {
-    File(&'a Path),
-    Buffer(Cursor<&'a mut Vec<u8>>),
+    File(String, &'a Path),
+    Buffer(&'a mut String),
+}
+
+impl Target<'_> {
+    fn get_mut(&mut self) -> &mut String {
+        match self {
+            Target::File(ref mut buf, _) => buf,
+            Target::Buffer(buf) => buf,
+        }
+    }
+}
+//use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
+
+enum SVGTag {
+    SVG,
+    Circle,
+    Line,
+    Polygon,
+    Polyline,
+    Rectangle,
+    Text,
+    Image,
+}
+
+impl SVGTag {
+    fn to_tag_name(&self) -> &'static str {
+        match self {
+            SVGTag::SVG => "svg",
+            SVGTag::Circle => "circle",
+            SVGTag::Line => "line",
+            SVGTag::Polyline => "polyline",
+            SVGTag::Rectangle => "rect",
+            SVGTag::Text => "text",
+            SVGTag::Image => "image",
+            SVGTag::Polygon => "polygon",
+        }
+    }
 }
 
 /// The SVG image drawing backend
 pub struct SVGBackend<'a> {
     target: Target<'a>,
     size: (u32, u32),
-    document: Option<Document>,
+    tag_stack: Vec<SVGTag>,
     saved: bool,
 }
 
 impl<'a> SVGBackend<'a> {
-    pub fn update_document<F: FnOnce(Document) -> Document>(&mut self, op: F) {
-        let mut temp = None;
-        std::mem::swap(&mut temp, &mut self.document);
-        self.document = Some(op(temp.unwrap()));
+    fn open_tag(&mut self, tag: SVGTag, attr: &[(&str, &str)], close: bool) {
+        let buf = self.target.get_mut();
+        buf.push_str("<");
+        buf.push_str(tag.to_tag_name());
+        for (key, value) in attr {
+            buf.push_str(" ");
+            buf.push_str(key);
+            buf.push_str("=\"");
+            buf.push_str(value);
+            buf.push_str("\"");
+        }
+        if close {
+            buf.push_str("/>\n");
+        } else {
+            self.tag_stack.push(tag);
+            buf.push_str(">");
+        }
+    }
+
+    fn close_tag(&mut self) -> bool {
+        if let Some(tag) = self.tag_stack.pop() {
+            let buf = self.target.get_mut();
+            buf.push_str("</");
+            buf.push_str(tag.to_tag_name());
+            buf.push_str(">\n");
+            return true;
+        }
+        false
+    }
+
+    fn init_svg_file(&mut self, size: (u32, u32)) {
+        self.open_tag(
+            SVGTag::SVG,
+            &[
+                ("width", &format!("{}", size.0)),
+                ("height", &format!("{}", size.1)),
+                ("xmlns", "http://www.w3.org/2000/svg"),
+            ],
+            false,
+        );
     }
 
     /// Create a new SVG drawing backend
     pub fn new<T: AsRef<Path> + ?Sized>(path: &'a T, size: (u32, u32)) -> Self {
-        Self {
-            target: Target::File(path.as_ref()),
+        let mut ret = Self {
+            target: Target::File(String::default(), path.as_ref()),
             size,
-            document: Some(Document::new().set("width", size.0).set("height", size.1)),
+            tag_stack: vec![],
             saved: false,
-        }
+        };
+
+        ret.init_svg_file(size);
+        ret
     }
 
     /// Create a new SVG drawing backend and store the document into a u8 buffer
-    pub fn with_buffer(buf: &'a mut Vec<u8>, size: (u32, u32)) -> Self {
-        Self {
-            target: Target::Buffer(Cursor::new(buf)),
+    pub fn with_buffer(buf: &'a mut String, size: (u32, u32)) -> Self {
+        let mut ret = Self {
+            target: Target::Buffer(buf),
             size,
-            document: Some(Document::new().set("width", size.0).set("height", size.1)),
+            tag_stack: vec![],
             saved: false,
-        }
+        };
+
+        ret.init_svg_file(size);
+
+        ret
     }
 }
 
@@ -76,11 +152,16 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
     fn present(&mut self) -> Result<(), DrawingErrorKind<Error>> {
         if !self.saved {
+            while self.close_tag() {}
             match self.target {
-                Target::File(path) => svg::save(path, self.document.as_ref().unwrap())
-                    .map_err(DrawingErrorKind::DrawingError)?,
-                Target::Buffer(ref mut w) => svg::write(w, self.document.as_ref().unwrap())
-                    .map_err(DrawingErrorKind::DrawingError)?,
+                Target::File(ref buf, path) => {
+                    let outfile = File::create(path).map_err(DrawingErrorKind::DrawingError)?;
+                    let mut outfile = BufWriter::new(outfile);
+                    outfile
+                        .write_all(buf.as_ref())
+                        .map_err(DrawingErrorKind::DrawingError)?;
+                }
+                Target::Buffer(_) => {}
             }
             self.saved = true;
         }
@@ -95,15 +176,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if color.alpha() == 0.0 {
             return Ok(());
         }
-        let node = Rectangle::new()
-            .set("x", point.0)
-            .set("y", point.1)
-            .set("width", 1)
-            .set("height", 1)
-            .set("stroke", "none")
-            .set("opacity", make_svg_opacity(color))
-            .set("fill", make_svg_color(color));
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Rectangle,
+            &[
+                ("x", &format!("{}", point.0)),
+                ("y", &format!("{}", point.1)),
+                ("width", "1"),
+                ("height", "1"),
+                ("stroke", "none"),
+                ("opacity", &make_svg_opacity(color)),
+                ("fill", &make_svg_color(color)),
+            ],
+            true,
+        );
         Ok(())
     }
 
@@ -116,15 +201,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        let node = Line::new()
-            .set("x1", from.0)
-            .set("y1", from.1)
-            .set("x2", to.0)
-            .set("y2", to.1)
-            .set("opacity", make_svg_opacity(&style.as_color()))
-            .set("stroke", make_svg_color(&style.as_color()))
-            .set("stroke-width", style.stroke_width());
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Line,
+            &[
+                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("stroke", &make_svg_color(&style.as_color())),
+                ("stroke-width", &format!("{}", style.stroke_width())),
+                ("x1", &format!("{}", from.0)),
+                ("y1", &format!("{}", from.1)),
+                ("x2", &format!("{}", to.0)),
+                ("y2", &format!("{}", to.1)),
+            ],
+            true,
+        );
         Ok(())
     }
 
@@ -138,25 +227,27 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        let mut node = Rectangle::new()
-            .set("x", upper_left.0)
-            .set("y", upper_left.1)
-            .set("width", bottom_right.0 - upper_left.0)
-            .set("height", bottom_right.1 - upper_left.1);
 
-        if !fill {
-            node = node
-                .set("opacity", make_svg_opacity(&style.as_color()))
-                .set("stroke", make_svg_color(&style.as_color()))
-                .set("fill", "none");
+        let (fill, stroke) = if !fill {
+            ("none".to_string(), make_svg_color(&style.as_color()))
         } else {
-            node = node
-                .set("opacity", make_svg_opacity(&style.as_color()))
-                .set("fill", make_svg_color(&style.as_color()))
-                .set("stroke", "none");
-        }
+            (make_svg_color(&style.as_color()), "none".to_string())
+        };
 
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Rectangle,
+            &[
+                ("x", &format!("{}", upper_left.0)),
+                ("y", &format!("{}", upper_left.1)),
+                ("width", &format!("{}", bottom_right.0 - upper_left.0)),
+                ("height", &format!("{}", bottom_right.1 - upper_left.1)),
+                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("fill", &fill),
+                ("stroke", &stroke),
+            ],
+            true,
+        );
+
         Ok(())
     }
 
@@ -168,19 +259,23 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        let node = Polyline::new()
-            .set("fill", "none")
-            .set("opacity", make_svg_opacity(&style.as_color()))
-            .set("stroke", make_svg_color(&style.as_color()))
-            .set("stroke-width", style.stroke_width())
-            .set(
-                "points",
-                path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                    s.push_str(&format!("{},{} ", x, y));
-                    s
-                }),
-            );
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Polyline,
+            &[
+                ("fill", "none"),
+                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("stroke", &make_svg_color(&style.as_color())),
+                ("stroke-width", &format!("{}", style.stroke_width())),
+                (
+                    "points",
+                    &path.into_iter().fold(String::new(), |mut s, (x, y)| {
+                        s.push_str(&format!("{},{} ", x, y));
+                        s
+                    }),
+                ),
+            ],
+            true,
+        );
         Ok(())
     }
 
@@ -192,17 +287,21 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        let node = Polygon::new()
-            .set("opacity", make_svg_opacity(&style.as_color()))
-            .set("fill", make_svg_color(&style.as_color()))
-            .set(
-                "points",
-                path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                    s.push_str(&format!("{},{} ", x, y));
-                    s
-                }),
-            );
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Polygon,
+            &[
+                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("fill", &make_svg_color(&style.as_color())),
+                (
+                    "points",
+                    &path.into_iter().fold(String::new(), |mut s, (x, y)| {
+                        s.push_str(&format!("{},{} ", x, y));
+                        s
+                    }),
+                ),
+            ],
+            true,
+        );
         Ok(())
     }
 
@@ -216,24 +315,23 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
-        let mut node = Circle::new()
-            .set("cx", center.0)
-            .set("cy", center.1)
-            .set("r", radius);
-
-        if !fill {
-            node = node
-                .set("opacity", make_svg_opacity(&style.as_color()))
-                .set("stroke", make_svg_color(&style.as_color()))
-                .set("fill", "none");
+        let (stroke, fill) = if !fill {
+            (make_svg_color(&style.as_color()), "none".to_string())
         } else {
-            node = node
-                .set("opacity", make_svg_opacity(&style.as_color()))
-                .set("fill", make_svg_color(&style.as_color()))
-                .set("stroke", "none");
-        }
-
-        self.update_document(|d| d.add(node));
+            ("none".to_string(), make_svg_color(&style.as_color()))
+        };
+        self.open_tag(
+            SVGTag::Circle,
+            &[
+                ("cx", &format!("{}", center.0)),
+                ("cy", &format!("{}", center.1)),
+                ("r", &format!("{}", radius)),
+                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("fill", &fill),
+                ("stroke", &stroke),
+            ],
+            true,
+        );
         Ok(())
     }
 
@@ -287,37 +385,50 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 .unwrap();
         }
 
-        let node = Text::new()
-            .set("x", x0)
-            .set("y", y0)
-            .set("dy", dy)
-            .set("text-anchor", text_anchor)
-            .set("font-family", font.get_name())
-            .set("font-size", font.get_size() / 1.24)
-            .set("opacity", make_svg_opacity(color))
-            .set("fill", make_svg_color(color));
+        let mut attrs = vec![
+            ("x", format!("{}", x0)),
+            ("y", format!("{}", y0)),
+            ("dy", format!("{}", dy)),
+            ("text-anchor", text_anchor.to_string()),
+            ("font-family", font.get_name().to_string()),
+            ("font-size", format!("{}", font.get_size() / 1.24)),
+            ("opacity", make_svg_opacity(color)),
+            ("fill", make_svg_color(color)),
+        ];
 
-        let node = match font.get_style() {
-            FontStyle::Normal => node,
-            FontStyle::Bold => node.set("font-weight", "bold"),
-            other_style => node.set("font-style", other_style.as_str()),
+        match font.get_style() {
+            FontStyle::Normal => {}
+            FontStyle::Bold => attrs.push(("font-weight", "bold".to_string())),
+            other_style => attrs.push(("font-style", other_style.as_str().to_string())),
         };
 
-        let context = svg::node::Text::new(text);
         let trans = font.get_transform();
-        let node = match trans {
-            FontTransform::Rotate90 => node.set("transform", format!("rotate(90, {}, {})", x0, y0)),
+        match trans {
+            FontTransform::Rotate90 => {
+                attrs.push(("transform", format!("rotate(90, {}, {})", x0, y0)))
+            }
             FontTransform::Rotate180 => {
-                node.set("transform", format!("rotate(180, {}, {})", x0, y0))
+                attrs.push(("transform", format!("rotate(180, {}, {})", x0, y0)));
             }
             FontTransform::Rotate270 => {
-                node.set("transform", format!("rotate(270, {}, {})", x0, y0))
+                attrs.push(("transform", format!("rotate(270, {}, {})", x0, y0)));
             }
-            _ => node,
+            _ => {}
         }
-        .add(context);
 
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Text,
+            attrs
+                .iter()
+                .map(|(a, b)| (*a, b.as_ref()))
+                .collect::<Vec<_>>()
+                .as_ref(),
+            false,
+        );
+
+        self.target.get_mut().push_str(text);
+
+        self.close_tag();
 
         Ok(())
     }
@@ -330,7 +441,6 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         src: &'b [u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         use image::png::PNGEncoder;
-        use svg::node::element::Image;
 
         let mut data = vec![0; 0];
 
@@ -393,14 +503,17 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             buf.push('=');
         }
 
-        let node = Image::new()
-            .set("x", pos.0)
-            .set("y", pos.1)
-            .set("width", w)
-            .set("height", h)
-            .set("href", buf.as_str());
-
-        self.update_document(|d| d.add(node));
+        self.open_tag(
+            SVGTag::Image,
+            &[
+                ("x", &format!("{}", pos.0)),
+                ("y", &format!("{}", pos.1)),
+                ("width", &format!("{}", w)),
+                ("height", &format!("{}", h)),
+                ("href", buf.as_str()),
+            ],
+            true,
+        );
 
         Ok(())
     }
@@ -438,7 +551,7 @@ mod test {
     }
 
     fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer: String = Default::default();
         {
             let root = SVGBackend::with_buffer(&mut buffer, (500, 500)).into_drawing_area();
 
@@ -455,7 +568,7 @@ mod test {
                 .unwrap();
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file(test_name, &content);
 
         assert!(content.contains("This is a test"));
@@ -473,7 +586,7 @@ mod test {
 
     #[test]
     fn test_text_alignments() {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer: String = Default::default();
         {
             let mut root = SVGBackend::with_buffer(&mut buffer, (500, 500));
 
@@ -488,7 +601,7 @@ mod test {
             root.draw_text("left-align", &style, (150, 200)).unwrap();
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file("test_text_alignments", &content);
 
         for svg_line in content.split("</text>") {
@@ -508,7 +621,7 @@ mod test {
 
     #[test]
     fn test_text_draw() {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer: String = Default::default();
         {
             let root = SVGBackend::with_buffer(&mut buffer, (1500, 800)).into_drawing_area();
             let root = root
@@ -560,7 +673,7 @@ mod test {
             }
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file("test_text_draw", &content);
 
         assert_eq!(content.matches("dog").count(), 36);
@@ -570,7 +683,7 @@ mod test {
 
     #[test]
     fn test_text_clipping() {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer: String = Default::default();
         {
             let (width, height) = (500_i32, 500_i32);
             let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
@@ -595,13 +708,13 @@ mod test {
                 .unwrap();
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file("test_text_clipping", &content);
     }
 
     #[test]
     fn test_series_labels() {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer = String::default();
         {
             let (width, height) = (500, 500);
             let root = SVGBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
@@ -654,13 +767,13 @@ mod test {
             }
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file("test_series_labels", &content);
     }
 
     #[test]
     fn test_draw_pixel_alphas() {
-        let mut buffer: Vec<u8> = vec![];
+        let mut buffer = String::default();
         {
             let (width, height) = (100_i32, 100_i32);
             let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
@@ -674,7 +787,7 @@ mod test {
             }
         }
 
-        let content = String::from_utf8(buffer).unwrap();
+        let content = buffer;
         checked_save_file("test_draw_pixel_alphas", &content);
     }
 }

@@ -1,7 +1,7 @@
 #[cfg(feature = "svg")]
 mod svg;
 #[cfg(feature = "svg")]
-pub use self::svg::{svg_types, SVGBackend};
+pub use self::svg::SVGBackend;
 
 #[cfg(feature = "bitmap")]
 mod bitmap;

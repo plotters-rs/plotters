@@ -2,7 +2,7 @@ use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea, SVGBackend};
 
 /// The wrapper for the generated SVG
-pub struct SVGWrapper(Vec<u8>, String);
+pub struct SVGWrapper(String, String);
 
 impl SVGWrapper {
     pub fn evcxr_display(&self) {
@@ -17,7 +17,7 @@ impl SVGWrapper {
 
 impl std::fmt::Debug for SVGWrapper {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let svg = String::from_utf8_lossy(self.0.as_slice());
+        let svg = self.0.as_str();
         write!(
             formatter,
             "EVCXR_BEGIN_CONTENT text/html\n<div style=\"{}\">{}</div>\nEVCXR_END_CONTENT",
@@ -33,7 +33,7 @@ pub fn evcxr_figure<
     size: (u32, u32),
     draw: Draw,
 ) -> SVGWrapper {
-    let mut buffer = vec![];
+    let mut buffer = "".to_string();
     let root = SVGBackend::with_buffer(&mut buffer, size).into_drawing_area();
     draw(root).expect("Drawing failure");
     SVGWrapper(buffer, "".to_string())
