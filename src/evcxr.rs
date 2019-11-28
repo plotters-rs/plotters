@@ -34,7 +34,7 @@ pub fn evcxr_figure<
     draw: Draw,
 ) -> SVGWrapper {
     let mut buffer = "".to_string();
-    let root = SVGBackend::with_buffer(&mut buffer, size).into_drawing_area();
+    let root = SVGBackend::with_string(&mut buffer, size).into_drawing_area();
     draw(root).expect("Drawing failure");
     SVGWrapper(buffer, "".to_string())
 }

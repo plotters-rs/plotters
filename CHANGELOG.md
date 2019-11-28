@@ -13,6 +13,8 @@
 
 - Faster bitmap blending algorithm, which is 5x faster than the original one.
 - Text alignment improvement, now we can suggest the invariant point by giving `TextAlignment` to the text style (Thanks to @nauld)
+- More controls on features, allows opt in and out series types
+- Remove dependency to svg crate, since it doesn't provide more feature than a plain string.
 
 ## Plotters 0.2.11 (2019-10-27)
 

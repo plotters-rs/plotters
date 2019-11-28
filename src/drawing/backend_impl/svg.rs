@@ -24,6 +24,11 @@ fn make_svg_opacity<C: Color>(color: &C) -> String {
 enum Target<'a> {
     File(String, &'a Path),
     Buffer(&'a mut String),
+    // TODO: At this point we won't make the breaking change
+    // so the u8 buffer is still supported. But in 0.3, we definitely
+    // should get rid of this.
+    #[cfg(feature = "deprecated_items")]
+    U8Buffer(String, &'a mut Vec<u8>),
 }
 
 impl Target<'_> {
@@ -31,10 +36,11 @@ impl Target<'_> {
         match self {
             Target::File(ref mut buf, _) => buf,
             Target::Buffer(buf) => buf,
+            #[cfg(feature = "deprecated_items")]
+            Target::U8Buffer(ref mut buf, _) => buf,
         }
     }
 }
-//use svg::node::element::{Circle, Line, Polygon, Polyline, Rectangle, Text};
 
 enum SVGTag {
     SVG,
@@ -72,6 +78,16 @@ pub struct SVGBackend<'a> {
 }
 
 impl<'a> SVGBackend<'a> {
+    fn escape_and_push(buf: &mut String, value: &str) {
+        value.chars().for_each(|c| match c {
+            '<' => buf.push_str("&lt;"),
+            '>' => buf.push_str("&gt;"),
+            '&' => buf.push_str("&amp;"),
+            '"' => buf.push_str("&quot;"),
+            '\'' => buf.push_str("&apos;"),
+            other => buf.push(other),
+        });
+    }
     fn open_tag(&mut self, tag: SVGTag, attr: &[(&str, &str)], close: bool) {
         let buf = self.target.get_mut();
         buf.push_str("<");
@@ -80,14 +96,14 @@ impl<'a> SVGBackend<'a> {
             buf.push_str(" ");
             buf.push_str(key);
             buf.push_str("=\"");
-            buf.push_str(value);
+            Self::escape_and_push(buf, value);
             buf.push_str("\"");
         }
         if close {
             buf.push_str("/>\n");
         } else {
             self.tag_stack.push(tag);
-            buf.push_str(">");
+            buf.push_str(">\n");
         }
     }
 
@@ -127,8 +143,26 @@ impl<'a> SVGBackend<'a> {
         ret
     }
 
-    /// Create a new SVG drawing backend and store the document into a u8 buffer
-    pub fn with_buffer(buf: &'a mut String, size: (u32, u32)) -> Self {
+    /// Create a new SVG drawing backend and store the document into a u8 vector
+    #[cfg(feature = "deprecated_items")]
+    #[deprecated(
+        note = "This will be replaced by `with_string`, consider use `with_string` to avoid breaking change in the future"
+    )]
+    pub fn with_buffer(buf: &'a mut Vec<u8>, size: (u32, u32)) -> Self {
+        let mut ret = Self {
+            target: Target::U8Buffer(String::default(), buf),
+            size,
+            tag_stack: vec![],
+            saved: false,
+        };
+
+        ret.init_svg_file(size);
+
+        ret
+    }
+
+    /// Create a new SVG drawing backend and store the document into a String buffer
+    pub fn with_string(buf: &'a mut String, size: (u32, u32)) -> Self {
         let mut ret = Self {
             target: Target::Buffer(buf),
             size,
@@ -165,6 +199,11 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                         .map_err(DrawingErrorKind::DrawingError)?;
                 }
                 Target::Buffer(_) => {}
+                #[cfg(feature = "deprecated_items")]
+                Target::U8Buffer(ref actual, ref mut target) => {
+                    target.clear();
+                    target.extend_from_slice(actual.as_bytes());
+                }
             }
             self.saved = true;
         }
@@ -429,7 +468,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             false,
         );
 
-        self.target.get_mut().push_str(text);
+        Self::escape_and_push(self.target.get_mut(), text);
+        self.target.get_mut().push_str("\n");
 
         self.close_tag();
 
@@ -554,9 +594,9 @@ mod test {
     }
 
     fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
-        let mut buffer: String = Default::default();
+        let mut content: String = Default::default();
         {
-            let root = SVGBackend::with_buffer(&mut buffer, (500, 500)).into_drawing_area();
+            let root = SVGBackend::with_string(&mut content, (500, 500)).into_drawing_area();
 
             let mut chart = ChartBuilder::on(&root)
                 .caption("This is a test", ("sans-serif", 20))
@@ -571,7 +611,6 @@ mod test {
                 .unwrap();
         }
 
-        let content = buffer;
         checked_save_file(test_name, &content);
 
         assert!(content.contains("This is a test"));
@@ -589,9 +628,9 @@ mod test {
 
     #[test]
     fn test_text_alignments() {
-        let mut buffer: String = Default::default();
+        let mut content: String = Default::default();
         {
-            let mut root = SVGBackend::with_buffer(&mut buffer, (500, 500));
+            let mut root = SVGBackend::with_string(&mut content, (500, 500));
 
             let style = TextStyle::from(("sans-serif", 20).into_font())
                 .pos(Pos::new(HPos::Right, VPos::Top));
@@ -604,7 +643,6 @@ mod test {
             root.draw_text("left-align", &style, (150, 200)).unwrap();
         }
 
-        let content = buffer;
         checked_save_file("test_text_alignments", &content);
 
         for svg_line in content.split("</text>") {
@@ -624,9 +662,9 @@ mod test {
 
     #[test]
     fn test_text_draw() {
-        let mut buffer: String = Default::default();
+        let mut content: String = Default::default();
         {
-            let root = SVGBackend::with_buffer(&mut buffer, (1500, 800)).into_drawing_area();
+            let root = SVGBackend::with_string(&mut content, (1500, 800)).into_drawing_area();
             let root = root
                 .titled("Image Title", ("sans-serif", 60).into_font())
                 .unwrap();
@@ -676,7 +714,6 @@ mod test {
             }
         }
 
-        let content = buffer;
         checked_save_file("test_text_draw", &content);
 
         assert_eq!(content.matches("dog").count(), 36);
@@ -686,10 +723,10 @@ mod test {
 
     #[test]
     fn test_text_clipping() {
-        let mut buffer: String = Default::default();
+        let mut content: String = Default::default();
         {
             let (width, height) = (500_i32, 500_i32);
-            let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+            let root = SVGBackend::with_string(&mut content, (width as u32, height as u32))
                 .into_drawing_area();
 
             let style = TextStyle::from(("sans-serif", 20).into_font())
@@ -711,16 +748,15 @@ mod test {
                 .unwrap();
         }
 
-        let content = buffer;
         checked_save_file("test_text_clipping", &content);
     }
 
     #[test]
     fn test_series_labels() {
-        let mut buffer = String::default();
+        let mut content = String::default();
         {
             let (width, height) = (500, 500);
-            let root = SVGBackend::with_buffer(&mut buffer, (width, height)).into_drawing_area();
+            let root = SVGBackend::with_string(&mut content, (width, height)).into_drawing_area();
 
             let mut chart = ChartBuilder::on(&root)
                 .caption("All series label positions", ("sans-serif", 20))
@@ -770,16 +806,15 @@ mod test {
             }
         }
 
-        let content = buffer;
         checked_save_file("test_series_labels", &content);
     }
 
     #[test]
     fn test_draw_pixel_alphas() {
-        let mut buffer = String::default();
+        let mut content = String::default();
         {
             let (width, height) = (100_i32, 100_i32);
-            let root = SVGBackend::with_buffer(&mut buffer, (width as u32, height as u32))
+            let root = SVGBackend::with_string(&mut content, (width as u32, height as u32))
                 .into_drawing_area();
             root.fill(&WHITE).unwrap();
 
@@ -790,7 +825,6 @@ mod test {
             }
         }
 
-        let content = buffer;
         checked_save_file("test_draw_pixel_alphas", &content);
     }
 }
