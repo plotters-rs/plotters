@@ -7,7 +7,9 @@ use crate::style::text_anchor::{HPos, VPos};
 use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextStyle};
 
 use std::fs::File;
-use std::io::{BufWriter, Cursor, Error, Write};
+#[allow(unused_imports)]
+use std::io::Cursor;
+use std::io::{BufWriter, Error, Write};
 use std::path::Path;
 
 fn make_svg_color<C: Color>(color: &C) -> String {
@@ -42,6 +44,7 @@ enum SVGTag {
     Polyline,
     Rectangle,
     Text,
+    #[allow(dead_code)]
     Image,
 }
 

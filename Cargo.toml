@@ -48,7 +48,7 @@ version = "0.3.29"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items", "bitmap", "ttf"]
+default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", "boxplot"]
 ttf = ["font-kit", "rusttype", "lazy_static"]
 image_encoder = ["image", "bitmap"]
 palette_ext = ["palette"]
@@ -61,6 +61,9 @@ cairo = ["cairo-rs", "ttf"]
 bitmap = ["ttf"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 debug = [] # Enable debugging code
+errorbar = []
+candlestick = []
+boxplot = []
 
 
 [dev-dependencies]

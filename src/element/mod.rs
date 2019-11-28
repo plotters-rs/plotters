@@ -170,13 +170,19 @@ pub use points::*;
 mod composable;
 pub use composable::{ComposedElement, EmptyElement};
 
+#[cfg(feature = "candlestick")]
 mod candlestick;
+#[cfg(feature = "candlestick")]
 pub use candlestick::CandleStick;
 
+#[cfg(feature = "errorbar")]
 mod errorbar;
+#[cfg(feature = "errorbar")]
 pub use errorbar::{ErrorBar, ErrorBarOrientH, ErrorBarOrientV};
 
+#[cfg(feature = "boxplot")]
 mod boxplot;
+#[cfg(feature = "boxplot")]
 pub use boxplot::Boxplot;
 
 #[cfg(feature = "bitmap")]
