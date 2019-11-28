@@ -479,18 +479,54 @@ This behavior can also be turned off by setting `default_features = false`.
 
 ### List of Features
 
-This is the full list of features that is defined by `Plotters` crate. Use `default_features = false` to disable those default enabled features, and then you should be able to cherry-pick what features you want to include into `Plotters` crate. 
+This is the full list of features that is defined by `Plotters` crate. 
+Use `default_features = false` to disable those default enabled features,
+and then you should be able to cherry-pick what features you want to include into `Plotters` crate. 
+By doing so, you can minimize the number of dependencies down to only `itertools` and compile time is less than 6s.
+
+The following list is a complete list of features that can be opt in and out.
+
+- Drawing backends related features
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| image\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image | Yes |
-| svg     | Enable `SVGBackend` Support | svg | Yes |
-| datetime| Enable Date and Time Coordinate Support| chrono | Yes |
+| image\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
+| svg     | Enable `SVGBackend` Support | None | Yes |
 | gif\_backend| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
-| piston | Enable `PistonWindowBackend` | piston\_window | No |
-| cairo | Enable `CairoBackend` | cairo-rs | No |
-| palette\_ext | Use crate `palette` for color expression| palette | Yes |
-| evcxr | Enable Evcxr support, which allows use `Plotters` in Jupyter Note Book | None | No |
+| piston | Enable `PistonWindowBackend` | piston\_window, rusttype, font-kit | No |
+| cairo | Enable `CairoBackend` | cairo-rs, rusttype, font-kit | No |
+
+- Font manipulation features
+
+| Name    |  Description | Additional Dependency |Default?|
+|---------|--------------|--------|------------|
+| ttf | Allows TrueType font support | rusttype, font-kit | Yes |
+
+- Coordinate features
+
+| Name    |  Description | Additional Dependency |Default?|
+|---------|--------------|--------|------------|
+| datetime | Eanble the date and time coordinate support | chrono | Yes |
+
+- Element, series and util functions
+
+| Name    |  Description | Additional Dependency |Default?|
+|---------|--------------|--------|------------|
+| errorbar | The errorbar element support | None | Yes |
+| candlestick | The candlestick element support | None | Yes |
+| boxplot | The boxplot element support | None | Yes |
+| area\_series | The area series support | None | Yes |
+| line\_series | The line series support | None | Yes |
+| histogram | The histogram series support | None | Yes |
+| point\_series| The point series support | None | Yes |
+
+- Misc
+
+| Name    |  Description | Additional Dependency |Default?|
+|---------|--------------|--------|------------|
+| deprecated\_items | This feature allows use of deprecated items which is going to be removed in the future | None | Yes |
+| debug | Enable the code used for debugging | None | No |
+
 
 ## FAQ List
 
