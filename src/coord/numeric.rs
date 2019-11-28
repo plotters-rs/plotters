@@ -33,7 +33,7 @@ macro_rules! make_numeric_coord {
         pub struct $name($type, $type);
         impl From<Range<$type>> for $name {
             fn from(range: Range<$type>) -> Self {
-                return Self(range.start, range.end);
+                return $name(range.start, range.end);
             }
         }
         impl Ranged for $name {
