@@ -24,6 +24,15 @@ where
     /// - `value`: The index to map
     /// - **returns** The value
     fn from_index(&self, index: usize) -> Option<Self::ValueType>;
+
+    /// Return a iterator that iterates over the all possible values
+    ///
+    /// - **returns** The value iterator
+    fn values(&self) -> DiscreteValueIter<'_, Self> 
+        where Self:Sized
+    {
+        DiscreteValueIter(self, 0, self.size())
+    }
 }
 
 /// The axis decorator that makes key-point in the center of the value range
@@ -134,5 +143,36 @@ impl<D: DiscreteRanged> DiscreteRanged for CentricDiscreteRange<D> {
 impl<T> From<T> for CentricValues<T> {
     fn from(this: T) -> CentricValues<T> {
         CentricValues::Exact(this)
+    }
+}
+
+pub struct DiscreteValueIter<'a, T: DiscreteRanged>(&'a T, usize, usize);
+
+impl <'a, T:DiscreteRanged> Iterator for DiscreteValueIter<'a, T> {
+    type Item = T::ValueType;
+    fn next(&mut self) -> Option<T::ValueType> {
+        if self.1 >= self.2 {
+            return None;
+        }
+        let idx = self.1;
+        self.1 += 1;
+        self.0.from_index(idx)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_value_iter() {
+        let range:crate::coord::numeric::RangedCoordi32 = (-10..10).into();
+
+        let values:Vec<_> = range.values().collect();
+
+        assert_eq!(21, values.len());
+
+        for (expected, value) in (-10..=10).zip(values) {
+            assert_eq!(expected, value)
+        }
     }
 }

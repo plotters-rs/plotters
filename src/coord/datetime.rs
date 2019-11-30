@@ -277,8 +277,11 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
             let floor = self.0.end.date_floor();
             (floor.year(), floor.month())
         };
-        ((end_year - start_year).max(0) * 12 + (start_month as i32) + (end_month as i32 - 1) + 1)
-            .max(0) as usize
+        ((end_year - start_year).max(0) * 12
+            + (1 - start_month as i32)
+            + (end_month as i32 - 1)
+            + 1)
+        .max(0) as usize
     }
 
     fn index_of(&self, value: &T) -> Option<usize> {
@@ -298,13 +301,16 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
     }
 
     fn from_index(&self, index: usize) -> Option<T> {
+        if index == 0 {
+            return Some(T::earliest_after_date(self.0.start.date_ceil()));
+        }
         let index_from_start_year = index + (self.0.start.date_ceil().month() - 1) as usize;
         let year = self.0.start.date_ceil().year() + index_from_start_year as i32 / 12;
         let month = index_from_start_year % 12;
         Some(T::earliest_after_date(self.0.start.timezone().ymd(
             year,
-            month as u32,
-            self.0.start.date_ceil().day(),
+            month as u32 + 1,
+            1,
         )))
     }
 }
@@ -977,5 +983,35 @@ mod test {
             .unwrap();
         assert!(max == min);
         assert_eq!(max, 3600 * 2);
+    }
+
+    #[test]
+    fn test_date_discrete() {
+        let coord: RangedDate<Utc> = (Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 12, 31)).into();
+        assert_eq!(coord.size(), 365);
+        assert_eq!(coord.index_of(&Utc.ymd(2019, 2, 28)), Some(31 + 28 - 1));
+        assert_eq!(coord.from_index(364), Some(Utc.ymd(2019, 12, 31)));
+    }
+
+    #[test]
+    fn test_monthly_discrete() {
+        let coord1 = (Utc.ymd(2019, 1, 10)..Utc.ymd(2019, 12, 31)).monthly();
+        let coord2 = (Utc.ymd(2019, 1, 10)..Utc.ymd(2020, 1, 1)).monthly();
+        assert_eq!(coord1.size(), 12);
+        assert_eq!(coord2.size(), 13);
+
+        for i in 1..=12 {
+            assert_eq!(coord1.from_index(i - 1).unwrap().month(), i as u32);
+        }
+    }
+
+    #[test]
+    fn test_yearly_discrete() {
+        let coord1 = (Utc.ymd(2000, 1, 10)..Utc.ymd(2019, 12, 31)).yearly();
+        assert_eq!(coord1.size(), 20);
+
+        for i in 0..20 {
+            assert_eq!(coord1.from_index(i).unwrap().year(), 2000 + i as i32);
+        }
     }
 }
