@@ -177,15 +177,23 @@ pub trait DiscreteRanged
 where
     Self: Ranged,
 {
-    type RangeParameter;
+    /// Get the number of element in the range
+    /// Note: we assume that all the ranged discrete coordinate has finite value
+    ///
+    /// - **returns** The number of values in the range
+    fn size(&self) -> usize;
 
-    fn get_range_parameter(&self) -> Self::RangeParameter;
+    /// Map a value to the index
+    ///
+    /// - `value`: The value to map
+    /// - **returns** The index of the value
+    fn index_of(&self, value: &Self::ValueType) -> Option<usize>;
 
-    /// Get the smallest value that is larger than the `this` value
-    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType;
-
-    /// Get the largest value that is smaller than `this` value
-    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType;
+    /// Reverse map the index to the value
+    ///
+    /// - `value`: The index to map
+    /// - **returns** The value
+    fn from_index(&self, index: usize) -> Option<Self::ValueType>;
 }
 
 /// The trait for the type that can be converted into a ranged coordinate axis
@@ -221,67 +229,6 @@ where
     fn into_centric(self) -> CentricDiscreteRange<Self::CoordDescType> {
         CentricDiscreteRange(self.into())
     }
-}
-
-impl<T: AsRangedCoord> IntoCentric for T
-where
-    T::CoordDescType: DiscreteRanged,
-    <Self::CoordDescType as Ranged>::ValueType: Eq,
-{
-}
-
-impl<D: DiscreteRanged + Clone> Clone for CentricDiscreteRange<D>
-where
-    <D as Ranged>::ValueType: Eq,
-{
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
-
-impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D>
-where
-    <D as Ranged>::ValueType: Eq,
-{
-    type ValueType = <D as Ranged>::ValueType;
-
-    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        let prev = <D as DiscreteRanged>::previous_value(&value, &self.0.get_range_parameter());
-        (self.0.map(&prev, limit) + self.0.map(value, limit)) / 2
-    }
-
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
-        self.0.key_points(max_points)
-    }
-
-    fn range(&self) -> Range<Self::ValueType> {
-        self.0.range()
-    }
-}
-
-impl<D: DiscreteRanged> DiscreteRanged for CentricDiscreteRange<D>
-where
-    <D as Ranged>::ValueType: Eq,
-{
-    type RangeParameter = <D as DiscreteRanged>::RangeParameter;
-    fn get_range_parameter(&self) -> Self::RangeParameter {
-        self.0.get_range_parameter()
-    }
-    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
-        <D as DiscreteRanged>::next_value(this, param)
-    }
-
-    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
-        <D as DiscreteRanged>::previous_value(this, param)
-    }
-}
-
-impl<D: DiscreteRanged> AsRangedCoord for CentricDiscreteRange<D>
-where
-    <D as Ranged>::ValueType: Eq,
-{
-    type CoordDescType = Self;
-    type Value = <Self as Ranged>::ValueType;
 }
 
 /// This axis decorator will make the axis partially display on the axis.
@@ -345,16 +292,16 @@ where
     R: Ranged,
     <R as Ranged>::ValueType: Eq + Clone,
 {
-    type RangeParameter = <R as DiscreteRanged>::RangeParameter;
-    fn get_range_parameter(&self) -> Self::RangeParameter {
-        self.0.get_range_parameter()
-    }
-    fn next_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
-        <R as DiscreteRanged>::next_value(this, param)
+    fn size(&self) -> usize {
+        self.0.size()
     }
 
-    fn previous_value(this: &Self::ValueType, param: &Self::RangeParameter) -> Self::ValueType {
-        <R as DiscreteRanged>::previous_value(this, param)
+    fn index_of(&self, value: &R::ValueType) -> Option<usize> {
+        self.0.index_of(value)
+    }
+
+    fn from_index(&self, index: usize) -> Option<Self::ValueType> {
+        self.0.from_index(index)
     }
 }
 
