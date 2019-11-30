@@ -28,6 +28,7 @@ mod datetime;
 mod logarithmic;
 mod numeric;
 mod ranged;
+mod group_by;
 
 #[cfg(feature = "chrono")]
 pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
@@ -44,7 +45,7 @@ pub use ranged::make_partial_axis;
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
-pub use numeric::group_integer_by::{GroupBy, ToGroupByRange};
+pub use group_by::{GroupBy, ToGroupByRange};
 use std::rc::Rc;
 use std::sync::Arc;
 

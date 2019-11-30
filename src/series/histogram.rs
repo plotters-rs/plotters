@@ -1,5 +1,4 @@
 use std::collections::{hash_map::IntoIter as HashMapIter, HashMap};
-use std::hash::Hash;
 use std::marker::PhantomData;
 use std::ops::AddAssign;
 
@@ -20,32 +19,30 @@ impl HistogramType for Horizontal {}
 pub struct Histogram<'a, BR, A, Tag = Vertical>
 where
     BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
     Tag: HistogramType,
 {
     style: Box<dyn Fn(&BR::ValueType, &A) -> ShapeStyle + 'a>,
     margin: u32,
-    iter: HashMapIter<BR::ValueType, A>,
-    baseline: Box<dyn Fn(BR::ValueType) -> A + 'a>,
-    br_param: BR::RangeParameter,
-    _p: PhantomData<(BR, Tag)>,
+    iter: HashMapIter<usize, A>,
+    baseline: Box<dyn Fn(&BR::ValueType) -> A + 'a>,
+    br: BR,
+    _p: PhantomData<Tag>,
 }
 
 impl<'a, BR, A, Tag> Histogram<'a, BR, A, Tag>
 where
-    BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
+    BR: DiscreteRanged + Clone,
     A: AddAssign<A> + Default + 'a,
     Tag: HistogramType,
 {
-    fn empty(br_param: BR::RangeParameter) -> Self {
+    fn empty(br: &BR) -> Self {
         Self {
             style: Box::new(|_, _| GREEN.filled()),
             margin: 5,
             iter: HashMap::new().into_iter(),
             baseline: Box::new(|_| A::default()),
-            br_param,
+            br: br.clone(),
             _p: PhantomData,
         }
     }
@@ -75,7 +72,7 @@ where
     }
 
     /// Set a function that defines variant baseline
-    pub fn baseline_func(mut self, func: impl Fn(BR::ValueType) -> A + 'a) -> Self {
+    pub fn baseline_func(mut self, func: impl Fn(&BR::ValueType) -> A + 'a) -> Self {
         self.baseline = Box::new(func);
         self
     }
@@ -88,67 +85,29 @@ where
 
     /// Set the data iterator
     pub fn data<I: IntoIterator<Item = (BR::ValueType, A)>>(mut self, iter: I) -> Self {
-        let mut buffer = HashMap::<BR::ValueType, A>::new();
+        let mut buffer = HashMap::<usize, A>::new();
         for (x, y) in iter.into_iter() {
-            *buffer.entry(x).or_insert_with(Default::default) += y;
+            if let Some(x) = self.br.index_of(&x) {
+                *buffer.entry(x).or_insert_with(Default::default) += y;
+            }
         }
         self.iter = buffer.into_iter();
         self
     }
 }
 
-pub trait UseDefaultParameter: Default {
-    fn new() -> Self {
-        Default::default()
-    }
-}
-
-impl UseDefaultParameter for () {}
-
 impl<'a, BR, A> Histogram<'a, BR, A, Vertical>
 where
-    BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
+    BR: DiscreteRanged + Clone,
     A: AddAssign<A> + Default + 'a,
 {
-    /// Create a new histogram series.
-    ///
-    /// - `iter`: The data iterator
-    /// - `margin`: The margin between bars
-    /// - `style`: The style of bars
-    ///
-    /// Returns the newly created histogram series
-    #[allow(clippy::redundant_closure)]
-    pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (BR::ValueType, A)>>(
-        iter: I,
-        margin: u32,
-        style: S,
-    ) -> Self
-    where
-        BR::RangeParameter: UseDefaultParameter,
-    {
-        let mut buffer = HashMap::<BR::ValueType, A>::new();
-        for (x, y) in iter.into_iter() {
-            *buffer.entry(x).or_insert_with(Default::default) += y;
-        }
-        let style = style.into();
-        Self {
-            style: Box::new(move |_, _| style.clone()),
-            margin,
-            iter: buffer.into_iter(),
-            baseline: Box::new(|_| A::default()),
-            br_param: BR::RangeParameter::new(),
-            _p: PhantomData,
-        }
-    }
-
     pub fn vertical<ACoord, DB: DrawingBackend + 'a>(
         parent: &ChartContext<DB, RangedCoord<BR, ACoord>>,
     ) -> Self
     where
         ACoord: Ranged<ValueType = A>,
     {
-        let dp = parent.as_coord_spec().x_spec().get_range_parameter();
+        let dp = parent.as_coord_spec().x_spec();
 
         Self::empty(dp)
     }
@@ -156,8 +115,7 @@ where
 
 impl<'a, BR, A> Histogram<'a, BR, A, Horizontal>
 where
-    BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
+    BR: DiscreteRanged + Clone,
     A: AddAssign<A> + Default + 'a,
 {
     pub fn horizontal<ACoord, DB: DrawingBackend>(
@@ -166,7 +124,7 @@ where
     where
         ACoord: Ranged<ValueType = A>,
     {
-        let dp = parent.as_coord_spec().y_spec().get_range_parameter();
+        let dp = parent.as_coord_spec().y_spec();
         Self::empty(dp)
     }
 }
@@ -174,18 +132,18 @@ where
 impl<'a, BR, A> Iterator for Histogram<'a, BR, A, Vertical>
 where
     BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     type Item = Rectangle<(BR::ValueType, A)>;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((x, y)) = self.iter.next() {
-            let nx = BR::next_value(&x, &self.br_param);
-            let base = (self.baseline)(BR::previous_value(&nx, &self.br_param));
-            let style = (self.style)(&x, &y);
-            let mut rect = Rectangle::new([(x, y), (nx, base)], style);
-            rect.set_margin(0, 0, self.margin, self.margin);
-            return Some(rect);
+        while let Some((x, y)) = self.iter.next() {
+            if let Some((x, Some(nx))) = self.br.from_index(x).map(|v| (v, self.br.from_index(x + 1))) {
+                let base = (self.baseline)(&x);
+                let style = (self.style)(&x, &y);
+                let mut rect = Rectangle::new([(x, y), (nx, base)], style);
+                rect.set_margin(0, 0, self.margin, self.margin);
+                return Some(rect)
+            }
         }
         None
     }
@@ -194,19 +152,18 @@ where
 impl<'a, BR, A> Iterator for Histogram<'a, BR, A, Horizontal>
 where
     BR: DiscreteRanged,
-    BR::ValueType: Eq + Hash,
     A: AddAssign<A> + Default,
 {
     type Item = Rectangle<(A, BR::ValueType)>;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((y, x)) = self.iter.next() {
-            let ny = BR::next_value(&y, &self.br_param);
-            // With this trick we can avoid the clone trait bound
-            let base = (self.baseline)(BR::previous_value(&ny, &self.br_param));
-            let style = (self.style)(&y, &x);
-            let mut rect = Rectangle::new([(x, y), (base, ny)], style);
-            rect.set_margin(self.margin, self.margin, 0, 0);
-            return Some(rect);
+        while let Some((y, x)) = self.iter.next() {
+            if let Some((y, Some(ny))) = self.br.from_index(y).map(|v| (v, self.br.from_index(y + 1))) {
+                let base = (self.baseline)(&y);
+                let style = (self.style)(&y, &x);
+                let mut rect = Rectangle::new([(x,y), (base, ny)], style);
+                rect.set_margin(0, 0, self.margin, self.margin);
+                return Some(rect);
+            }
         }
         None
     }

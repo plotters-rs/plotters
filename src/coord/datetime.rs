@@ -135,14 +135,20 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
 }
 
 impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
-    type RangeParameter = ();
-    fn get_range_parameter(&self) {}
-    fn next_value(this: &Date<Z>, _: &()) -> Date<Z> {
-        this.clone() + Duration::days(1)
+    fn size(&self) -> usize {
+        ((self.1.clone() - self.0.clone()).num_days().max(0) + 1) as usize
     }
 
-    fn previous_value(this: &Date<Z>, _: &()) -> Date<Z> {
-        this.clone() - Duration::days(1)
+    fn index_of(&self, value: &Date<Z>) -> Option<usize> {
+        let ret = (value.clone() - self.0.clone()).num_days();
+        if ret < 0 {
+            return None;
+        }
+        Some(ret as usize)
+    }
+
+    fn from_index(&self, index: usize) -> Option<Date<Z>> {
+        Some(self.0.clone() + Duration::days(index as i64))
     }
 }
 
@@ -267,28 +273,39 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
 }
 
 impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
-    type RangeParameter = ();
-    fn get_range_parameter(&self) {}
-    fn next_value(this: &T, _: &()) -> T {
-        let mut year = this.date_ceil().year();
-        let mut month = this.date_ceil().month();
-        month += 1;
-        if month == 13 {
-            month = 1;
-            year += 1;
-        }
-        T::earliest_after_date(this.timezone().ymd(year, month, this.date_ceil().day()))
+    fn size(&self) -> usize {
+        let (start_year, start_month) = {
+            let ceil = self.0.start.date_ceil();
+            (ceil.year(), ceil.month())
+        };
+        let (end_year, end_month) = {
+            let floor = self.0.end.date_floor();
+            (floor.year(), floor.month())
+        };
+        ((end_year - start_year).max(0) * 12 + (start_month as i32) + (end_month as i32 - 1) + 1).max(0) as usize
     }
 
-    fn previous_value(this: &T, _: &()) -> T {
-        let mut year = this.clone().date_floor().year();
-        let mut month = this.clone().date_floor().month();
-        month -= 1;
-        if month == 0 {
-            month = 12;
-            year -= 1;
+    fn index_of(&self, value: &T) -> Option<usize> {
+        let this_year = value.date_floor().year();
+        let this_month = value.date_floor().month();
+
+        let start_year = self.0.start.date_ceil().year();
+        let start_month = self.0.start.date_ceil().month();
+
+        let ret = (this_year - start_year).max(0) * 12 + (1 - start_month as i32) + (this_month as i32 - 1);
+        if ret >= 0 {
+            return Some(ret as usize);
         }
-        T::earliest_after_date(this.timezone().ymd(year, month, this.date_floor().day()))
+        None
+    }
+
+    fn from_index(&self, index: usize) -> Option<T> {
+        let index_from_start_year = index + (self.0.start.date_ceil().month() - 1) as usize;
+        let year = self.0.start.date_ceil().year() + index_from_start_year as i32 / 12;
+        let month = index_from_start_year % 12;
+        Some(T::earliest_after_date(
+            self.0.start.timezone().ymd(year, month as u32, self.0.start.date_ceil().day())
+        ))
     }
 }
 
@@ -380,14 +397,29 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
 }
 
 impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
-    type RangeParameter = ();
-    fn get_range_parameter(&self) {}
-    fn next_value(this: &T, _: &()) -> T {
-        T::earliest_after_date(this.timezone().ymd(this.date_floor().year() + 1, 1, 1))
+    fn size(&self) -> usize {
+        let year_start = self.0.start.date_ceil().year();
+        let year_end = self.0.end.date_floor().year();
+        (year_end - year_start + 1) as usize
     }
 
-    fn previous_value(this: &T, _: &()) -> T {
-        T::earliest_after_date(this.timezone().ymd(this.date_ceil().year() - 1, 1, 1))
+    fn index_of(&self, value: &T) -> Option<usize> {
+        let year_start = self.0.start.date_ceil().year();
+        let year_value = value.date_floor().year();
+        let ret = year_value - year_start;
+        if ret < 0 {
+            return None;
+        }
+        Some(ret as usize)
+    }
+
+    fn from_index(&self, index: usize) -> Option<T> {
+        let year = self.0.start.date_ceil().year() + index as i32;
+        let ret = T::earliest_after_date(self.0.start.timezone().ymd(year, 1, 1));
+        if ret.date_ceil() <= self.0.start.date_floor() {
+            return Some(self.0.start.clone())
+        }
+        Some(ret)
     }
 }
 

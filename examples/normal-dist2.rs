@@ -6,6 +6,8 @@ use rand_xorshift::XorShiftRng;
 
 use num_traits::sign::Signed;
 
+fn main() {}
+#[cfg(feature = "disabled")]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sd = 0.60;
 
