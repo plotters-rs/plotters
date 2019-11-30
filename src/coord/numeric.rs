@@ -1,5 +1,5 @@
-use std::ops::Range;
 use std::convert::TryFrom;
+use std::ops::Range;
 
 use super::{AsRangedCoord, DiscreteRanged, Ranged, ReversibleRanged};
 
@@ -23,7 +23,7 @@ macro_rules! impl_discrete_trait {
             }
 
             fn from_index(&self, index: usize) -> Option<Self::ValueType> {
-                if let Ok(index) = Self::ValueType::try_from(index){
+                if let Ok(index) = Self::ValueType::try_from(index) {
                     return Some(self.0 + index);
                 }
                 None

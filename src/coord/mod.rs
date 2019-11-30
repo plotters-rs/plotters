@@ -25,10 +25,12 @@ use crate::drawing::backend::BackendCoord;
 mod category;
 #[cfg(feature = "chrono")]
 mod datetime;
+mod discrete;
+mod group_by;
 mod logarithmic;
 mod numeric;
+mod partial_axis;
 mod ranged;
-mod group_by;
 
 #[cfg(feature = "chrono")]
 pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
@@ -36,12 +38,11 @@ pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi128, RangedCoordi32, RangedCoordi64,
     RangedCoordu128, RangedCoordu32, RangedCoordu64,
 };
-pub use ranged::{
-    AsRangedCoord, DiscreteRanged, IntoCentric, IntoPartialAxis, MeshLine, Ranged, RangedCoord,
-    ReversibleRanged,
-};
+pub use ranged::{AsRangedCoord, MeshLine, Ranged, RangedCoord, ReversibleRanged};
 
-pub use ranged::make_partial_axis;
+pub use partial_axis::{make_partial_axis, IntoPartialAxis};
+
+pub use discrete::{DiscreteRanged, IntoCentric};
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
