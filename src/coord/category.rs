@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::Range;
 use std::rc::Rc;
 
-use super::{AsRangedCoord, Ranged};
+use super::Ranged;
 
 /// The category coordinate
 pub struct Category<T: PartialEq> {
@@ -170,11 +170,6 @@ impl<T: PartialEq> Ranged for Category<T> {
         }
         ret
     }
-}
-
-impl<T: PartialEq> AsRangedCoord for Category<T> {
-    type CoordDescType = Self;
-    type Value = Category<T>;
 }
 
 #[cfg(test)]

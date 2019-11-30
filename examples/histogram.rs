@@ -10,13 +10,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .margin(5)
         .caption("Histogram Test", ("sans-serif", 50.0).into_font())
-        .build_ranged(0u32..10u32, 0u32..10u32)?;
+        .build_ranged((0u32..10u32).into_centric(), 0u32..10u32)?;
 
     chart
         .configure_mesh()
         .disable_x_mesh()
         .line_style_1(&WHITE.mix(0.3))
-        .x_label_offset(30)
+        //.x_label_offset(30)
         .y_desc("Count")
         .x_desc("Bucket")
         .axis_desc_style(("sans-serif", 15).into_font())

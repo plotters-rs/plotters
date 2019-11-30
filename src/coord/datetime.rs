@@ -165,11 +165,6 @@ impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
 #[derive(Clone)]
 pub struct Monthly<T: TimeValue>(Range<T>);
 
-impl<T: TimeValue + Clone> AsRangedCoord for Monthly<T> {
-    type CoordDescType = Monthly<T>;
-    type Value = T;
-}
-
 impl<T: TimeValue + Clone> Ranged for Monthly<T> {
     type ValueType = T;
 
@@ -282,7 +277,8 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
             let floor = self.0.end.date_floor();
             (floor.year(), floor.month())
         };
-        ((end_year - start_year).max(0) * 12 + (start_month as i32) + (end_month as i32 - 1) + 1).max(0) as usize
+        ((end_year - start_year).max(0) * 12 + (start_month as i32) + (end_month as i32 - 1) + 1)
+            .max(0) as usize
     }
 
     fn index_of(&self, value: &T) -> Option<usize> {
@@ -292,7 +288,9 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
         let start_year = self.0.start.date_ceil().year();
         let start_month = self.0.start.date_ceil().month();
 
-        let ret = (this_year - start_year).max(0) * 12 + (1 - start_month as i32) + (this_month as i32 - 1);
+        let ret = (this_year - start_year).max(0) * 12
+            + (1 - start_month as i32)
+            + (this_month as i32 - 1);
         if ret >= 0 {
             return Some(ret as usize);
         }
@@ -303,20 +301,17 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
         let index_from_start_year = index + (self.0.start.date_ceil().month() - 1) as usize;
         let year = self.0.start.date_ceil().year() + index_from_start_year as i32 / 12;
         let month = index_from_start_year % 12;
-        Some(T::earliest_after_date(
-            self.0.start.timezone().ymd(year, month as u32, self.0.start.date_ceil().day())
-        ))
+        Some(T::earliest_after_date(self.0.start.timezone().ymd(
+            year,
+            month as u32,
+            self.0.start.date_ceil().day(),
+        )))
     }
 }
 
 /// Indicate the coord has a yearly granularity.
 #[derive(Clone)]
 pub struct Yearly<T: TimeValue>(Range<T>);
-
-impl<T: TimeValue + Clone> AsRangedCoord for Yearly<T> {
-    type CoordDescType = Yearly<T>;
-    type Value = T;
-}
 
 fn generate_yearly_keypoints<T: TimeValue>(
     max_points: usize,
@@ -417,7 +412,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
         let year = self.0.start.date_ceil().year() + index as i32;
         let ret = T::earliest_after_date(self.0.start.timezone().ymd(year, 1, 1));
         if ret.date_ceil() <= self.0.start.date_floor() {
-            return Some(self.0.start.clone())
+            return Some(self.0.start.clone());
         }
         Some(ret)
     }

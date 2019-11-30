@@ -84,10 +84,13 @@ where
     }
 
     /// Set the data iterator
-    pub fn data<I: IntoIterator<Item = (BR::ValueType, A)>>(mut self, iter: I) -> Self {
+    pub fn data<TB: Into<BR::ValueType>, I: IntoIterator<Item = (TB, A)>>(
+        mut self,
+        iter: I,
+    ) -> Self {
         let mut buffer = HashMap::<usize, A>::new();
         for (x, y) in iter.into_iter() {
-            if let Some(x) = self.br.index_of(&x) {
+            if let Some(x) = self.br.index_of(&x.into()) {
                 *buffer.entry(x).or_insert_with(Default::default) += y;
             }
         }
@@ -137,12 +140,16 @@ where
     type Item = Rectangle<(BR::ValueType, A)>;
     fn next(&mut self) -> Option<Self::Item> {
         while let Some((x, y)) = self.iter.next() {
-            if let Some((x, Some(nx))) = self.br.from_index(x).map(|v| (v, self.br.from_index(x + 1))) {
+            if let Some((x, Some(nx))) = self
+                .br
+                .from_index(x)
+                .map(|v| (v, self.br.from_index(x + 1)))
+            {
                 let base = (self.baseline)(&x);
                 let style = (self.style)(&x, &y);
                 let mut rect = Rectangle::new([(x, y), (nx, base)], style);
                 rect.set_margin(0, 0, self.margin, self.margin);
-                return Some(rect)
+                return Some(rect);
             }
         }
         None
@@ -157,10 +164,14 @@ where
     type Item = Rectangle<(A, BR::ValueType)>;
     fn next(&mut self) -> Option<Self::Item> {
         while let Some((y, x)) = self.iter.next() {
-            if let Some((y, Some(ny))) = self.br.from_index(y).map(|v| (v, self.br.from_index(y + 1))) {
+            if let Some((y, Some(ny))) = self
+                .br
+                .from_index(y)
+                .map(|v| (v, self.br.from_index(y + 1)))
+            {
                 let base = (self.baseline)(&y);
                 let style = (self.style)(&y, &x);
-                let mut rect = Rectangle::new([(x,y), (base, ny)], style);
+                let mut rect = Rectangle::new([(x, y), (base, ny)], style);
                 rect.set_margin(0, 0, self.margin, self.margin);
                 return Some(rect);
             }
