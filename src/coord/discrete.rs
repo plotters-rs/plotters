@@ -28,8 +28,9 @@ where
     /// Return a iterator that iterates over the all possible values
     ///
     /// - **returns** The value iterator
-    fn values(&self) -> DiscreteValueIter<'_, Self> 
-        where Self:Sized
+    fn values(&self) -> DiscreteValueIter<'_, Self>
+    where
+        Self: Sized,
     {
         DiscreteValueIter(self, 0, self.size())
     }
@@ -148,7 +149,7 @@ impl<T> From<T> for CentricValues<T> {
 
 pub struct DiscreteValueIter<'a, T: DiscreteRanged>(&'a T, usize, usize);
 
-impl <'a, T:DiscreteRanged> Iterator for DiscreteValueIter<'a, T> {
+impl<'a, T: DiscreteRanged> Iterator for DiscreteValueIter<'a, T> {
     type Item = T::ValueType;
     fn next(&mut self) -> Option<T::ValueType> {
         if self.1 >= self.2 {
@@ -165,14 +166,39 @@ mod test {
     use super::*;
     #[test]
     fn test_value_iter() {
-        let range:crate::coord::numeric::RangedCoordi32 = (-10..10).into();
+        let range: crate::coord::numeric::RangedCoordi32 = (-10..10).into();
 
-        let values:Vec<_> = range.values().collect();
+        let values: Vec<_> = range.values().collect();
 
         assert_eq!(21, values.len());
 
         for (expected, value) in (-10..=10).zip(values) {
             assert_eq!(expected, value)
         }
+    }
+
+    #[test]
+    fn test_centric_coord() {
+        let coord = (0..10).into_centric();
+
+        assert_eq!(coord.size(), 12);
+        for i in 0..=11 {
+            match coord.from_index(i as usize) {
+                Some(CentricValues::Exact(value)) => assert_eq!(i, value),
+                Some(CentricValues::Last) => assert_eq!(i, 11),
+                _ => panic!(),
+            }
+        }
+
+        for (kps, idx) in coord.key_points(20).into_iter().zip(0..) {
+            match kps {
+                CentricValues::CenterOf(value) if value <= 10 => assert_eq!(value, idx),
+                _ => panic!(),
+            }
+        }
+
+        assert_eq!(coord.map(&CentricValues::CenterOf(0), (0, 24)), 1);
+        assert_eq!(coord.map(&CentricValues::Exact(0), (0, 24)), 0);
+        assert_eq!(coord.map(&CentricValues::Exact(1), (0, 24)), 2);
     }
 }
