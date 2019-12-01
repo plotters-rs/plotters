@@ -2,7 +2,11 @@ use super::{AsRangedCoord, Ranged};
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::ops::Range;
 
-/// The trait indicates the coordinate is discrete, so that we can draw histogram on it
+/// The trait indicates the coordinate is discrete
+/// This means we can bidirectionally map the range value to 0 to N
+/// in which N is the number of distinct values of the range.
+///
+/// This is useful since for a histgoram, this is an abstraction of bucket.
 pub trait DiscreteRanged
 where
     Self: Ranged,
@@ -15,11 +19,17 @@ where
 
     /// Map a value to the index
     ///
+    /// Note: This function doesn't guareentee return None when the value is out of range.
+    /// The only way to confirm the value is in the range is to examing the return value isn't
+    /// larger than self.size.
+    ///
     /// - `value`: The value to map
     /// - **returns** The index of the value
     fn index_of(&self, value: &Self::ValueType) -> Option<usize>;
 
     /// Reverse map the index to the value
+    ///
+    /// Note: This function doesn't guareentee returning None when the index is out of range.
     ///
     /// - `value`: The index to map
     /// - **returns** The value
@@ -33,6 +43,42 @@ where
         Self: Sized,
     {
         DiscreteValueIter(self, 0, self.size())
+    }
+
+    /// Returns the previous value in this range
+    ///
+    /// Normally, it's based on the `from_index` and `index_of` function. But for
+    /// some of the coord spec, it's possible that we value faster implementation.
+    /// If this is the case, we can impelemnet the type specific impl for the `previous`
+    /// and `next`.
+    ///
+    /// - `value`: The current value
+    /// - **returns**: The value piror to current value
+    fn previous(&self, value: &Self::ValueType) -> Option<Self::ValueType> {
+        if let Some(idx) = self.index_of(value) {
+            if idx > 0 {
+                return self.from_index(idx - 1);
+            }
+        }
+        None
+    }
+
+    /// Returns the next value in this range
+    ///
+    /// Normally, it's based on the `from_index` and `index_of` function. But for
+    /// some of the coord spec, it's possible that we value faster implementation.
+    /// If this is the case, we can impelemnet the type specific impl for the `previous`
+    /// and `next`.
+    ///
+    /// - `value`: The current value
+    /// - **returns**: The value next to current value
+    fn next(&self, value: &Self::ValueType) -> Option<Self::ValueType> {
+        if let Some(idx) = self.index_of(value) {
+            if idx + 1 < self.size() {
+                return self.from_index(idx + 1);
+            }
+        }
+        None
     }
 }
 
@@ -173,8 +219,12 @@ mod test {
         assert_eq!(21, values.len());
 
         for (expected, value) in (-10..=10).zip(values) {
-            assert_eq!(expected, value)
+            assert_eq!(expected, value);
         }
+        assert_eq!(range.next(&5), Some(6));
+        assert_eq!(range.next(&10), None);
+        assert_eq!(range.previous(&-10), None);
+        assert_eq!(range.previous(&10), Some(9));
     }
 
     #[test]
