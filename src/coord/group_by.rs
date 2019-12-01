@@ -56,3 +56,17 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
             .collect()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_group_by() {
+        let coord = (0..100).group_by(10);
+        assert_eq!(coord.size(), 11);
+        for (idx, val) in (0..).zip(coord.values()) {
+            assert_eq!(val, idx * 10);
+            assert_eq!(coord.from_index(idx as usize), Some(val));
+        }
+    }
+}
