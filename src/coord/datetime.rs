@@ -136,7 +136,7 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
 
 impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
     fn size(&self) -> usize {
-        ((self.1.clone() - self.0.clone()).num_days().max(0) + 1) as usize
+        ((self.1.clone() - self.0.clone()).num_days().max(-1) + 1) as usize
     }
 
     fn index_of(&self, value: &Date<Z>) -> Option<usize> {
@@ -401,7 +401,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
     fn size(&self) -> usize {
         let year_start = self.0.start.date_ceil().year();
         let year_end = self.0.end.date_floor().year();
-        (year_end - year_start + 1) as usize
+        ((year_end - year_start).max(-1) + 1) as usize
     }
 
     fn index_of(&self, value: &T) -> Option<usize> {
