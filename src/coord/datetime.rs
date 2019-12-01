@@ -1002,6 +1002,10 @@ mod test {
 
         for i in 1..=12 {
             assert_eq!(coord1.from_index(i - 1).unwrap().month(), i as u32);
+            assert_eq!(
+                coord1.index_of(&coord1.from_index(i - 1).unwrap()).unwrap(),
+                i - 1
+            );
         }
     }
 
@@ -1012,6 +1016,7 @@ mod test {
 
         for i in 0..20 {
             assert_eq!(coord1.from_index(i).unwrap().year(), 2000 + i as i32);
+            assert_eq!(coord1.index_of(&coord1.from_index(i).unwrap()).unwrap(), i);
         }
     }
 }

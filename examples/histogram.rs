@@ -16,7 +16,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_mesh()
         .disable_x_mesh()
         .line_style_1(&WHITE.mix(0.3))
-        //.x_label_offset(30)
         .y_desc("Count")
         .x_desc("Bucket")
         .axis_desc_style(("sans-serif", 15).into_font())
