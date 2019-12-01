@@ -306,4 +306,12 @@ mod test {
         let _coord =
             RangedCoord::<RangedCoordu32, RangedCoordu32>::new(0..10, 0..10, (0..1024, 0..768));
     }
+
+    #[test]
+    fn test_coord_unmap() {
+        let coord: RangedCoordu32 = (0..20).into();
+        let pos = coord.map(&5, (1000, 2000));
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(5));
+    }
 }
