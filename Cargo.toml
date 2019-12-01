@@ -87,6 +87,3 @@ wasm-bindgen-test = "0.3.4"
 name = "benchmark"
 harness = false
 path = "benches/main.rs"
-
-[profile.bench]
-debug = true
