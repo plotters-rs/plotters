@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.2.11"
+version = "0.2.12"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"

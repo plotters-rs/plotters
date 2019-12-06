@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters latest (?)
+## Plotters 0.2.12 (2019-12-06)
 ### Added
 
 - BitMapBackend now is able to support different pixel format natively. Check our new minifb demo for details.
