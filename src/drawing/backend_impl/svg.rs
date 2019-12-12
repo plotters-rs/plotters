@@ -430,7 +430,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         let mut attrs = vec![
             ("x", format!("{}", x0)),
             ("y", format!("{}", y0)),
-            ("dy", format!("{}", dy)),
+            ("dy", dy.to_owned()),
             ("text-anchor", text_anchor.to_string()),
             ("font-family", font.get_name().to_string()),
             ("font-size", format!("{}", font.get_size() / 1.24)),
