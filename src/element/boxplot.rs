@@ -213,7 +213,7 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for Boxplot<K
             backend.draw_line(
                 start_whisker(points[0]),
                 end_whisker(points[0]),
-                &self.style.color,
+                &self.style,
             )?;
 
             // |---[   |  ]----|
@@ -226,22 +226,22 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for Boxplot<K
             let corner2 = end_bar(points[1]);
             let upper_left = (corner1.0.min(corner2.0), corner1.1.min(corner2.1));
             let bottom_right = (corner1.0.max(corner2.0), corner1.1.max(corner2.1));
-            backend.draw_rect(upper_left, bottom_right, &self.style.color, false)?;
+            backend.draw_rect(upper_left, bottom_right, &self.style, false)?;
 
             // |---[   |  ]----|
             // ________^________
-            backend.draw_line(start_bar(points[2]), end_bar(points[2]), &self.style.color)?;
+            backend.draw_line(start_bar(points[2]), end_bar(points[2]), &self.style)?;
 
             // |---[   |  ]----|
             // ____________^^^^_
-            backend.draw_line(moved(points[3]), moved(points[4]), &self.style.color)?;
+            backend.draw_line(moved(points[3]), moved(points[4]), &self.style)?;
 
             // |---[   |  ]----|
             // ________________^
             backend.draw_line(
                 start_whisker(points[4]),
                 end_whisker(points[4]),
-                &self.style.color,
+                &self.style,
             )?;
         }
         Ok(())
