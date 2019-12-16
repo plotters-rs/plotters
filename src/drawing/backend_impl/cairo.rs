@@ -347,7 +347,7 @@ mod test {
 
     fn draw_mesh_with_custom_ticks(tick_size: i32, test_name: &str) {
         let buffer: Vec<u8> = vec![];
-        let surface = cairo::PsSurface::for_stream(500.0, 500.0, buffer);
+        let surface = cairo::PsSurface::for_stream(500.0, 500.0, buffer).unwrap();
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (500, 500))
             .unwrap()
@@ -387,7 +387,7 @@ mod test {
     fn test_text_draw() {
         let buffer: Vec<u8> = vec![];
         let (width, height) = (1500, 800);
-        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer);
+        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer).unwrap();
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (width, height))
             .unwrap()
@@ -453,7 +453,7 @@ mod test {
     fn test_text_clipping() {
         let buffer: Vec<u8> = vec![];
         let (width, height) = (500_i32, 500_i32);
-        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer);
+        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer).unwrap();
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (width as u32, height as u32))
             .unwrap()
@@ -486,7 +486,7 @@ mod test {
     fn test_series_labels() {
         let buffer: Vec<u8> = vec![];
         let (width, height) = (500, 500);
-        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer);
+        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer).unwrap();
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (width, height))
             .unwrap()
@@ -548,7 +548,7 @@ mod test {
     fn test_draw_pixel_alphas() {
         let buffer: Vec<u8> = vec![];
         let (width, height) = (100_i32, 100_i32);
-        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer);
+        let surface = cairo::PsSurface::for_stream(width.into(), height.into(), buffer).unwrap();
         let cr = CairoContext::new(&surface);
         let root = CairoBackend::new(&cr, (width as u32, height as u32))
             .unwrap()
