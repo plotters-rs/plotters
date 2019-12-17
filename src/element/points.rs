@@ -44,8 +44,8 @@ impl<Coord, DB: DrawingBackend, Size: SizeDesc> Drawable<DB> for Cross<Coord, Si
             let size = self.size.in_pixels(&ps);
             let (x0, y0) = (x - size, y - size);
             let (x1, y1) = (x + size, y + size);
-            backend.draw_line((x0, y0), (x1, y1), &self.style.color)?;
-            backend.draw_line((x0, y1), (x1, y0), &self.style.color)?;
+            backend.draw_line((x0, y0), (x1, y1), &self.style)?;
+            backend.draw_line((x0, y1), (x1, y0), &self.style)?;
         }
         Ok(())
     }

@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.2.11"
+version = "0.2.12"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,21 +12,21 @@ readme = "README.md"
 exclude = ["doc-template/*"]
 
 [dependencies]
-num-traits = "^0.2"
-chrono = { version = "0.4.9", optional = true }
-gif = { version = "^0.10.3", optional = true }
+num-traits = "0.2.10"
+chrono = { version = "0.4.10", optional = true }
+gif = { version = "0.10.3", optional = true }
 
 [dependencies.palette]
-version = "^0.5"
+version = "0.5.0"
 default-features = false
 optional = true
 features = ["std"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rusttype = {version = "0.8.1", optional = true}
-lazy_static = {version = "^1.2", optional = true }
-font-kit = {version = "0.4.0", optional = true }
-piston_window = {version = "0.105.0", optional = true}
+rusttype = { version = "0.8.2", optional = true }
+lazy_static = { version = "1.4.0", optional = true }
+font-kit = { version = "0.5.0", optional = true }
+piston_window = { version = "0.105.0", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.22.3"
@@ -35,16 +35,16 @@ default-features = false
 features = ["jpeg", "png_codec", "bmp"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.cairo-rs]
-version = "0.7.1"
+version = "0.8.0"
 optional = true
 features = ["ps"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys= "0.3.29"
-wasm-bindgen = "0.2.52"
+js-sys= "0.3.32"
+wasm-bindgen = "0.2.55"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
-version = "0.3.29"
+version = "0.3.32"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
@@ -73,15 +73,15 @@ point_series = []
 
 
 [dev-dependencies]
-rand = "^0.7.2"
-itertools = "^0.8.0"
+rand = "0.7.2"
+itertools = "0.8.2"
 rand_distr = "0.2.2"
 criterion = "0.3.0"
-rayon = "1.2.0"
+rayon = "1.2.1"
 rand_xorshift = "0.2.0"
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.4"
+wasm-bindgen-test = "0.3.5"
 
 [[bench]]
 name = "benchmark"

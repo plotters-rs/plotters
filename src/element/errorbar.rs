@@ -117,20 +117,31 @@ impl<K, V, O: ErrorBarOrient<K, V>, DB: DrawingBackend> Drawable<DB> for ErrorBa
         let points: Vec<_> = points.take(3).collect();
 
         let (from, to) = O::ending_coord(points[0], self.width);
-        backend.draw_line(from, to, &self.style.color)?;
+        backend.draw_line(from, to, &self.style)?;
 
         let (from, to) = O::ending_coord(points[2], self.width);
-        backend.draw_line(from, to, &self.style.color)?;
+        backend.draw_line(from, to, &self.style)?;
 
-        backend.draw_line(points[0], points[2], &self.style.color)?;
+        backend.draw_line(points[0], points[2], &self.style)?;
 
-        backend.draw_circle(
-            points[1],
-            self.width / 2,
-            &self.style.color,
-            self.style.filled,
-        )?;
+        backend.draw_circle(points[1], self.width / 2, &self.style, self.style.filled)?;
 
         Ok(())
     }
+}
+
+#[cfg(test)]
+#[test]
+fn test_preserve_stroke_width() {
+    let v = ErrorBar::new_vertical(100, 20, 50, 70, WHITE.filled().stroke_width(5), 3);
+    let h = ErrorBar::new_horizontal(100, 20, 50, 70, WHITE.filled().stroke_width(5), 3);
+
+    use crate::prelude::*;
+    let da = crate::create_mocked_drawing_area(300, 300, |m| {
+        m.check_draw_line(|_, w, _, _| {
+            assert_eq!(w, 5);
+        });
+    });
+    da.draw(&h).expect("Drawing Failure");
+    da.draw(&v).expect("Drawing Failure");
 }

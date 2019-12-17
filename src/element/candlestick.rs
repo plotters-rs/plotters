@@ -87,13 +87,13 @@ impl<X, Y: PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<X, Y> {
                 self.width as i32 - self.width as i32 / 2,
             );
 
-            backend.draw_line(points[0], points[1], &self.style.color)?;
-            backend.draw_line(points[2], points[3], &self.style.color)?;
+            backend.draw_line(points[0], points[1], &self.style)?;
+            backend.draw_line(points[2], points[3], &self.style)?;
 
             points[0].0 -= l;
             points[3].0 += r;
 
-            backend.draw_rect(points[0], points[3], &self.style.color, fill)?;
+            backend.draw_rect(points[0], points[3], &self.style, fill)?;
         }
         Ok(())
     }
