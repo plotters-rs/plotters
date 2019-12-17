@@ -912,7 +912,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         let alpha = style.as_color().alpha();
         let (r, g, b) = style.as_color().rgb();
 
-        if from.0 == to.0 || from.1 == to.1 {
+        if (from.0 == to.0 || from.1 == to.1) && style.stroke_width() == 1 {
             if alpha >= 1.0 {
                 if from.1 == to.1 {
                     P::fill_rect_fast(self, from, to, r, g, b);
@@ -1316,6 +1316,22 @@ fn test_bitmap_bgrx_pixel_format() {
             );
         }
     }
+}
+#[cfg(test)]
+#[test]
+fn test_draw_simple_lines() {
+    use crate::prelude::*;
+    let mut buffer = vec![0; 1000 * 1000 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (1000, 1000));
+        back.draw_line((500, 0), (500, 1000), &WHITE.filled().stroke_width(5))
+            .unwrap();
+    }
+
+    let nz_count = buffer.into_iter().filter(|x| *x != 0).count();
+
+    assert_eq!(nz_count, 6 * 1000 * 3);
 }
 
 #[cfg(test)]
