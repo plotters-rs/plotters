@@ -565,7 +565,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 impl Drop for SVGBackend<'_> {
     fn drop(&mut self) {
         if !self.saved {
-            self.present().expect("Unable to save the SVG image");
+            // drop should not panic, so we ignore a failed present
+            let _ = self.present();
         }
     }
 }
