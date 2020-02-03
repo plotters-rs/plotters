@@ -1,4 +1,5 @@
 use super::color::{Color, RGBAColor};
+use crate::drawing::backend::{BackendColor, BackendStyle};
 
 /// Style for any of shape
 #[derive(Clone)]
@@ -34,5 +35,14 @@ impl<'a, T: Color> From<&'a T> for ShapeStyle {
             filled: false,
             stroke_width: 1,
         }
+    }
+}
+
+impl BackendStyle for ShapeStyle {
+    fn color(&self) -> BackendColor {
+        self.color.color()
+    }
+    fn stroke_width(&self) -> u32 {
+        self.stroke_width
     }
 }

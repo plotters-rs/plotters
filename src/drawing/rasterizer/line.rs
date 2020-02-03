@@ -1,15 +1,13 @@
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingErrorKind};
 use crate::drawing::DrawingBackend;
 
-use crate::style::Color;
-
 pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     back: &mut DB,
     mut from: BackendCoord,
     mut to: BackendCoord,
     style: &S,
 ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-    if style.as_color().alpha() == 0.0 {
+    if style.color().alpha == 0.0 {
         return Ok(());
     }
 
@@ -39,7 +37,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             trans.swap(0, 1);
         }
 
-        return back.fill_polygon(vertices, &style.as_color());
+        return back.fill_polygon(vertices, style);
     }
 
     if from.0 == to.0 {
@@ -47,7 +45,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for y in from.1..=to.1 {
-            check_result!(back.draw_pixel((from.0, y), &style.as_color()));
+            check_result!(back.draw_pixel((from.0, y), style.color()));
         }
         return Ok(());
     }
@@ -57,7 +55,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             std::mem::swap(&mut from, &mut to);
         }
         for x in from.0..=to.0 {
-            check_result!(back.draw_pixel((x, from.1), &style.as_color()));
+            check_result!(back.draw_pixel((x, from.1), style.color()));
         }
         return Ok(());
     }
@@ -85,9 +83,9 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
 
     let mut put_pixel = |(x, y): BackendCoord, b: f64| {
         if steep {
-            back.draw_pixel((y, x), &style.as_color().mix(b))
+            back.draw_pixel((y, x), style.color().mix(b))
         } else {
-            back.draw_pixel((x, y), &style.as_color().mix(b))
+            back.draw_pixel((x, y), style.color().mix(b))
         }
     };
 

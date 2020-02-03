@@ -2,6 +2,8 @@ use super::{FontData, FontDataInternal};
 use crate::style::text_anchor::Pos;
 use crate::style::{Color, TextStyle};
 
+use crate::drawing::backend::BackendStyle;
+
 use std::convert::From;
 
 /// The error type for the font implementation
@@ -241,7 +243,7 @@ impl<'a> FontDesc<'a> {
     pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
         TextStyle {
             font: self.clone(),
-            color: color.to_rgba(),
+            color: color.color(),
             pos: Pos::default(),
         }
     }

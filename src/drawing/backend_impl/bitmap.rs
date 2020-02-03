@@ -1,5 +1,6 @@
-use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, RGBAColor};
+use crate::drawing::backend::{
+    BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
+};
 use std::marker::PhantomData;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
@@ -895,14 +896,14 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
     fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &RGBAColor,
+        color: BackendColor,
     ) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
         if point.0 < 0 || point.1 < 0 {
             return Ok(());
         }
 
-        let alpha = color.alpha();
-        let rgb = color.rgb();
+        let alpha = color.alpha;
+        let rgb = color.rgb;
 
         P::draw_pixel(self, point, rgb, alpha);
 
@@ -915,8 +916,8 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         to: (i32, i32),
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let alpha = style.as_color().alpha();
-        let (r, g, b) = style.as_color().rgb();
+        let alpha = style.color().alpha;
+        let (r, g, b) = style.color().rgb;
 
         if (from.0 == to.0 || from.1 == to.1) && style.stroke_width() == 1 {
             if alpha >= 1.0 {
@@ -941,8 +942,8 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let alpha = style.as_color().alpha();
-        let (r, g, b) = style.as_color().rgb();
+        let alpha = style.color().alpha;
+        let (r, g, b) = style.color().rgb;
         if fill {
             if alpha >= 1.0 {
                 P::fill_rect_fast(self, upper_left, bottom_right, r, g, b);

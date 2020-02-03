@@ -1,6 +1,21 @@
 use crate::style::text_anchor::{HPos, VPos};
-use crate::style::{Color, FontDesc, FontError, RGBAColor, ShapeStyle, TextStyle};
+use crate::style::{FontDesc, FontError, TextStyle};
 use std::error::Error;
+
+#[derive(Clone, Copy)]
+pub struct BackendColor {
+    pub alpha: f64,
+    pub rgb: (u8, u8, u8),
+}
+
+impl BackendColor {
+    pub fn mix(&self, alpha: f64) -> Self {
+        Self {
+            alpha: self.alpha * alpha,
+            rgb: self.rgb,
+        }
+    }
+}
 
 /// A coordinate in the image
 pub type BackendCoord = (i32, i32);
@@ -30,32 +45,18 @@ impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
 
 /// The style data for the backend drawing API
 pub trait BackendStyle {
-    /// The underlying type represents the color for this style
-    type ColorType: Color;
+    /// Get the color of current style
+    fn color(&self) -> BackendColor;
 
-    /// Convert the style into the underlying color
-    fn as_color(&self) -> RGBAColor;
-
-    // TODO: In the future we should support stroke width, line shape, etc....
+    /// Get the stroke width of current style
     fn stroke_width(&self) -> u32 {
         1
     }
 }
 
-impl<T: Color> BackendStyle for T {
-    type ColorType = T;
-    fn as_color(&self) -> RGBAColor {
-        self.to_rgba()
-    }
-}
-
-impl BackendStyle for ShapeStyle {
-    type ColorType = RGBAColor;
-    fn as_color(&self) -> RGBAColor {
-        self.color.clone()
-    }
-    fn stroke_width(&self) -> u32 {
-        self.stroke_width
+impl BackendStyle for BackendColor {
+    fn color(&self) -> BackendColor {
+        *self
     }
 }
 
@@ -89,7 +90,7 @@ pub trait DrawingBackend: Sized {
     fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &RGBAColor,
+        color: BackendColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a line on the drawing backend
@@ -128,7 +129,7 @@ pub trait DrawingBackend: Sized {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
 
@@ -146,7 +147,7 @@ pub trait DrawingBackend: Sized {
         } else {
             let p: Vec<_> = path.into_iter().collect();
             let v = super::rasterizer::polygonize(&p[..], style.stroke_width());
-            return self.fill_polygon(v, &style.as_color());
+            return self.fill_polygon(v, &style.color());
         }
         Ok(())
     }
@@ -187,8 +188,8 @@ pub trait DrawingBackend: Sized {
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let font = &style.font;
-        let color = &style.color;
-        if color.alpha() == 0.0 {
+        let color = style.color;
+        if color.alpha == 0.0 {
             return Ok(());
         }
 
@@ -212,7 +213,7 @@ pub trait DrawingBackend: Sized {
             let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
-                self.draw_pixel((x, y), &color.mix(f64::from(v)))
+                self.draw_pixel((x, y), color.mix(f64::from(v)))
             } else {
                 Ok(())
             }

@@ -1,8 +1,6 @@
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingErrorKind};
 use crate::drawing::DrawingBackend;
 
-use crate::style::Color;
-
 pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
     b: &mut B,
     upper_left: BackendCoord,
@@ -10,7 +8,7 @@ pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
     style: &S,
     fill: bool,
 ) -> Result<(), DrawingErrorKind<B::ErrorType>> {
-    if style.as_color().alpha() == 0.0 {
+    if style.color().alpha == 0.0 {
         return Ok(());
     }
     let (upper_left, bottom_right) = (

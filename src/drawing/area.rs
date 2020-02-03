@@ -1,5 +1,5 @@
 /// The abstraction of a drawing area
-use super::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use super::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
@@ -293,7 +293,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         color: &ColorType,
     ) -> Result<(), DrawingAreaError<DB>> {
         let pos = self.coord.translate(&pos);
-        self.backend_ops(|b| b.draw_pixel(pos, &color.to_rgba()))
+        self.backend_ops(|b| b.draw_pixel(pos, color.color()))
     }
 
     /// Present all the pending changes to the backend
