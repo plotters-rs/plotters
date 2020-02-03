@@ -1,8 +1,6 @@
 use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingErrorKind};
 use crate::drawing::DrawingBackend;
 
-use crate::style::Color;
-
 pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
     b: &mut B,
     center: BackendCoord,
@@ -10,7 +8,7 @@ pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
     style: &S,
     fill: bool,
 ) -> Result<(), DrawingErrorKind<B::ErrorType>> {
-    if style.as_color().alpha() == 0.0 {
+    if style.color().alpha == 0.0 {
         return Ok(());
     }
 
@@ -46,21 +44,21 @@ pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
         let bottom = center.1 + lx.floor() as i32;
 
         if fill {
-            check_result!(b.draw_line((left, y), (right, y), &style.as_color()));
-            check_result!(b.draw_line((x, top), (x, up), &style.as_color()));
-            check_result!(b.draw_line((x, down), (x, bottom), &style.as_color()));
+            check_result!(b.draw_line((left, y), (right, y), &style.color()));
+            check_result!(b.draw_line((x, top), (x, up), &style.color()));
+            check_result!(b.draw_line((x, down), (x, bottom), &style.color()));
         } else {
-            check_result!(b.draw_pixel((left, y), &style.as_color().mix(1.0 - v)));
-            check_result!(b.draw_pixel((right, y), &style.as_color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((left, y), style.color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((right, y), style.color().mix(1.0 - v)));
 
-            check_result!(b.draw_pixel((x, top), &style.as_color().mix(1.0 - v)));
-            check_result!(b.draw_pixel((x, bottom), &style.as_color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((x, top), style.color().mix(1.0 - v)));
+            check_result!(b.draw_pixel((x, bottom), style.color().mix(1.0 - v)));
         }
 
-        check_result!(b.draw_pixel((left - 1, y), &style.as_color().mix(v)));
-        check_result!(b.draw_pixel((right + 1, y), &style.as_color().mix(v)));
-        check_result!(b.draw_pixel((x, top - 1), &style.as_color().mix(v)));
-        check_result!(b.draw_pixel((x, bottom + 1), &style.as_color().mix(v)));
+        check_result!(b.draw_pixel((left - 1, y), style.color().mix(v)));
+        check_result!(b.draw_pixel((right + 1, y), style.color().mix(v)));
+        check_result!(b.draw_pixel((x, top - 1), style.color().mix(v)));
+        check_result!(b.draw_pixel((x, bottom + 1), style.color().mix(v)));
     }
 
     Ok(())

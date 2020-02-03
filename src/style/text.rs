@@ -1,7 +1,8 @@
-use super::color::{Color, RGBAColor};
+use super::color::Color;
 use super::font::{FontDesc, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
+use crate::drawing::backend::{BackendColor, BackendStyle};
 
 /// Text anchor attributes are used to properly position the text.
 ///
@@ -93,7 +94,7 @@ pub struct TextStyle<'a> {
     /// The font description
     pub font: FontDesc<'a>,
     /// The text color
-    pub color: RGBAColor,
+    pub color: BackendColor,
     /// The anchor point position
     pub pos: text_anchor::Pos,
 }
@@ -158,7 +159,7 @@ impl<'a> TextStyle<'a> {
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         Self {
             font: self.font.clone(),
-            color: color.to_rgba(),
+            color: color.color(),
             pos: self.pos,
         }
     }
@@ -213,7 +214,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
     fn from(font: T) -> Self {
         Self {
             font: font.into(),
-            color: BLACK.to_rgba(),
+            color: BLACK.color(),
             pos: text_anchor::Pos::default(),
         }
     }

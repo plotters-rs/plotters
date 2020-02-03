@@ -1,6 +1,8 @@
 use super::palette::Palette;
 use super::ShapeStyle;
 
+use crate::drawing::backend::{BackendColor, BackendStyle};
+
 use std::marker::PhantomData;
 
 /// Any color representation
@@ -148,5 +150,14 @@ impl SimpleColor for HSLColor {
         };
 
         (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0))
+    }
+}
+
+impl<T: Color> BackendStyle for T {
+    fn color(&self) -> BackendColor {
+        BackendColor {
+            alpha: self.alpha(),
+            rgb: self.rgb(),
+        }
     }
 }

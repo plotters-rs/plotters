@@ -2,9 +2,11 @@
 The SVG image drawing backend
 */
 
-use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
+use crate::drawing::backend::{
+    BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
+};
 use crate::style::text_anchor::{HPos, VPos};
-use crate::style::{Color, FontStyle, FontTransform, RGBAColor, TextStyle};
+use crate::style::{FontStyle, FontTransform, TextStyle};
 
 use std::fs::File;
 #[allow(unused_imports)]
@@ -12,13 +14,13 @@ use std::io::Cursor;
 use std::io::{BufWriter, Error, Write};
 use std::path::Path;
 
-fn make_svg_color<C: Color>(color: &C) -> String {
-    let (r, g, b) = color.rgb();
+fn make_svg_color(color: BackendColor) -> String {
+    let (r, g, b) = color.rgb;
     return format!("#{:02X}{:02X}{:02X}", r, g, b);
 }
 
-fn make_svg_opacity<C: Color>(color: &C) -> String {
-    return format!("{}", color.alpha());
+fn make_svg_opacity(color: BackendColor) -> String {
+    return format!("{}", color.alpha);
 }
 
 enum Target<'a> {
@@ -213,9 +215,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &RGBAColor,
+        color: BackendColor,
     ) -> Result<(), DrawingErrorKind<Error>> {
-        if color.alpha() == 0.0 {
+        if color.alpha == 0.0 {
             return Ok(());
         }
         self.open_tag(
@@ -240,14 +242,14 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
         self.open_tag(
             SVGTag::Line,
             &[
-                ("opacity", &make_svg_opacity(&style.as_color())),
-                ("stroke", &make_svg_color(&style.as_color())),
+                ("opacity", &make_svg_opacity(style.color())),
+                ("stroke", &make_svg_color(style.color())),
                 ("stroke-width", &format!("{}", style.stroke_width())),
                 ("x1", &format!("{}", from.0)),
                 ("y1", &format!("{}", from.1)),
@@ -266,14 +268,14 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
 
         let (fill, stroke) = if !fill {
-            ("none".to_string(), make_svg_color(&style.as_color()))
+            ("none".to_string(), make_svg_color(style.color()))
         } else {
-            (make_svg_color(&style.as_color()), "none".to_string())
+            (make_svg_color(style.color()), "none".to_string())
         };
 
         self.open_tag(
@@ -283,7 +285,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 ("y", &format!("{}", upper_left.1)),
                 ("width", &format!("{}", bottom_right.0 - upper_left.0)),
                 ("height", &format!("{}", bottom_right.1 - upper_left.1)),
-                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("opacity", &make_svg_opacity(style.color())),
                 ("fill", &fill),
                 ("stroke", &stroke),
             ],
@@ -298,15 +300,15 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
         self.open_tag(
             SVGTag::Polyline,
             &[
                 ("fill", "none"),
-                ("opacity", &make_svg_opacity(&style.as_color())),
-                ("stroke", &make_svg_color(&style.as_color())),
+                ("opacity", &make_svg_opacity(style.color())),
+                ("stroke", &make_svg_color(style.color())),
                 ("stroke-width", &format!("{}", style.stroke_width())),
                 (
                     "points",
@@ -326,14 +328,14 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
         self.open_tag(
             SVGTag::Polygon,
             &[
-                ("opacity", &make_svg_opacity(&style.as_color())),
-                ("fill", &make_svg_color(&style.as_color())),
+                ("opacity", &make_svg_opacity(style.color())),
+                ("fill", &make_svg_color(style.color())),
                 (
                     "points",
                     &path.into_iter().fold(String::new(), |mut s, (x, y)| {
@@ -354,13 +356,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.as_color().alpha() == 0.0 {
+        if style.color().alpha == 0.0 {
             return Ok(());
         }
         let (stroke, fill) = if !fill {
-            (make_svg_color(&style.as_color()), "none".to_string())
+            (make_svg_color(style.color()), "none".to_string())
         } else {
-            ("none".to_string(), make_svg_color(&style.as_color()))
+            ("none".to_string(), make_svg_color(style.color()))
         };
         self.open_tag(
             SVGTag::Circle,
@@ -368,7 +370,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 ("cx", &format!("{}", center.0)),
                 ("cy", &format!("{}", center.1)),
                 ("r", &format!("{}", radius)),
-                ("opacity", &make_svg_opacity(&style.as_color())),
+                ("opacity", &make_svg_opacity(style.color())),
                 ("fill", &fill),
                 ("stroke", &stroke),
             ],
@@ -384,8 +386,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let font = &style.font;
-        let color = &style.color;
-        if color.alpha() == 0.0 {
+        let color = style.color;
+        if color.alpha == 0.0 {
             return Ok(());
         }
 

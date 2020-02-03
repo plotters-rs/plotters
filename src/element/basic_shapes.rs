@@ -1,5 +1,5 @@
 use super::{Drawable, PointCollection};
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, SizeDesc};
 
 /// An element of a single pixel
@@ -33,7 +33,7 @@ impl<Coord, DB: DrawingBackend> Drawable<DB> for Pixel<Coord> {
         _: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         if let Some((x, y)) = points.next() {
-            return backend.draw_pixel((x, y), &self.style.color);
+            return backend.draw_pixel((x, y), self.style.color());
         }
         Ok(())
     }
