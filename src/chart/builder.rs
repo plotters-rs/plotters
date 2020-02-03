@@ -335,7 +335,7 @@ mod test {
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
         assert_eq!(
-            chart.title.as_ref().unwrap().1.color.to_rgba(),
+            chart.title.as_ref().unwrap().1.color.into_rgba(),
             BLACK.to_rgba()
         );
 

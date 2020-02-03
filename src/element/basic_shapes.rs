@@ -200,7 +200,7 @@ fn test_rect_element() {
         });
         da.draw(&Rectangle::new(
             [(100, 101), (105, 107)],
-            BLUE.stroke_width(5),
+            Color::stroke_width(&BLUE, 5),
         ))
         .expect("Drawing Failure");
     }

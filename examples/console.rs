@@ -1,10 +1,9 @@
 use plotters::drawing::{
-    backend::{BackendStyle, DrawingErrorKind},
+    backend::{BackendColor, BackendStyle, DrawingErrorKind},
     DrawingBackend,
 };
 use plotters::prelude::*;
 use plotters::style::text_anchor::{HPos, VPos};
-use plotters::style::RGBAColor;
 use std::error::Error;
 
 #[derive(Copy, Clone)]
@@ -80,9 +79,9 @@ impl DrawingBackend for TextDrawingBackend {
     fn draw_pixel(
         &mut self,
         pos: (i32, i32),
-        color: &RGBAColor,
+        color: BackendColor,
     ) -> Result<(), DrawingErrorKind<std::io::Error>> {
-        if color.alpha() > 0.3 {
+        if color.alpha > 0.3 {
             self.0[(pos.1 * 100 + pos.0) as usize].update(PixelState::Pixel);
         }
         Ok(())

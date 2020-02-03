@@ -47,7 +47,7 @@ pub trait Color {
 /// The RGBA representation of the color, Plotters use RGBA as the internal representation
 /// of color
 #[derive(Clone, PartialEq, Debug)]
-pub struct RGBAColor(pub(super) u8, pub(super) u8, pub(super) u8, pub(super) f64);
+pub struct RGBAColor(pub(crate) u8, pub(crate) u8, pub(crate) u8, pub(crate) f64);
 
 impl Color for RGBAColor {
     #[inline(always)]
