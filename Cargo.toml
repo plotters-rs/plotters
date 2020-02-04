@@ -23,18 +23,12 @@ plotters-svg = {version = "0.1.*", optional = true}
 rusttype = { version = "0.8.2", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 font-kit = { version = "0.5.0", optional = true }
-piston_window = { version = "0.105.0", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.22.3"
 optional = true
 default-features = false
 features = ["jpeg", "png_codec", "bmp"]
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies.cairo-rs]
-version = "0.8.0"
-optional = true
-features = ["ps"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.wasm-bindgen]
 version = "0.2.55"
@@ -45,21 +39,24 @@ features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', '
 
 [features]
 default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items",  "ttf", "errorbar", "candlestick", "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
+# Tier 1 Backends
 bitmap-backend = ["plotters-bitmap", "ttf"]
 svg-backend = ["plotters-svg"]
-ttf = ["font-kit", "rusttype", "lazy_static"]
-datetime = ["chrono"]
-evcxr = ["svg-backend"]
-piston = ["piston_window", "ttf"]
-cairo = ["cairo-rs", "ttf"]
-deprecated_items = [] # Keep some of the deprecated items for backward compatibility
+# Elements 
 errorbar = []
 candlestick = []
 boxplot = []
+# Series 
 histogram = []
 area_series = []
 line_series = []
 point_series = []
+# Font implemnetation
+ttf = ["font-kit", "rusttype", "lazy_static"]
+# Misc 
+datetime = ["chrono"]
+evcxr = ["svg-backend"]
+deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 
 [dev-dependencies]

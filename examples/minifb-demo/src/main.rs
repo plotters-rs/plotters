@@ -1,5 +1,6 @@
 use minifb::{Key, KeyRepeat, Window, WindowOptions};
-use plotters::drawing::bitmap_pixel::BGRXPixel;
+use plotters_bitmap::bitmap_pixel::BGRXPixel;
+use plotters_bitmap::BitMapBackend;
 use plotters::prelude::*;
 use std::collections::VecDeque;
 use std::error::Error;

@@ -6,6 +6,7 @@ use gtk::DrawingArea;
 
 use cairo::Context;
 use plotters::prelude::*;
+use plotters_cairo::CairoBackend;
 
 fn build_ui(app: &gtk::Application) {
     drawable(app, 500, 500, |_, cr| {
