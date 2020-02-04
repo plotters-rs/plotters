@@ -703,7 +703,10 @@ pub use palette;
 
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
+    // Chart related types
     pub use crate::chart::{ChartBuilder, ChartContext, LabelAreaPosition, SeriesLabelPosition};
+
+    // Coordinates
     pub use crate::coord::{
         Category, CoordTranslate, GroupBy, IntoCentric, IntoPartialAxis, LogCoord, LogRange,
         LogScalable, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
@@ -713,9 +716,12 @@ pub mod prelude {
     #[cfg(feature = "chrono")]
     pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
 
+    // Re-export the backend for backward compatibility
     pub use plotters_backend::DrawingBackend;
 
     pub use crate::drawing::*;
+
+    // Series helpers
     #[cfg(feature = "area_series")]
     pub use crate::series::AreaSeries;
     #[cfg(feature = "histogram")]
@@ -725,6 +731,7 @@ pub mod prelude {
     #[cfg(feature = "point_series")]
     pub use crate::series::PointSeries;
 
+    // Styles
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle,
@@ -732,6 +739,7 @@ pub mod prelude {
     };
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
+    // Elements
     pub use crate::element::{
         Circle, Cross, DynElement, EmptyElement, IntoDynElement, MultiLineText, PathElement, Pixel,
         Polygon, Rectangle, Text, TriangleMarker,
@@ -747,6 +755,7 @@ pub mod prelude {
     #[cfg(feature = "bitmap-backend")]
     pub use crate::element::BitMapElement;
 
+    // Data
     pub use crate::data::Quartiles;
 
     // TODO: This should be deprecated and completely removed
@@ -763,4 +772,11 @@ pub mod prelude {
 
     #[cfg(feature = "evcxr")]
     pub use crate::evcxr::evcxr_figure;
+
+    // Re-export tier 1 backends for backward compatibility
+    #[cfg(feature = "bitmap-backend")]
+    pub use plotters_bitmap::BitMapBackend;
+    
+    #[cfg(feature = "svg-backend")]
+    pub use plotters_svg::SVGBackend;
 }
