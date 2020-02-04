@@ -13,3 +13,6 @@ plotters-backend = "0.0.*"
 
 [dev-dependencies]
 plotters = {path = "../plotters", default_features = false}
+
+[features]
+debug = []
