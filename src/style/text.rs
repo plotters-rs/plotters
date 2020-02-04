@@ -1,92 +1,9 @@
 use super::color::Color;
-use super::font::{FontDesc, FontFamily, FontStyle, FontTransform};
+use super::font::{FontDesc, FontError, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
-use crate::drawing::backend::{BackendColor, BackendStyle};
-
-/// Text anchor attributes are used to properly position the text.
-///
-/// # Examples
-///
-/// In the example below, the text anchor (X) position is `Pos::new(HPos::Right, VPos::Center)`.
-/// ```text
-///    ***** X
-/// ```
-/// The position is always relative to the text regardless of its rotation.
-/// In the example below, the text has style
-/// `style.transform(FontTransform::Rotate90).pos(Pos::new(HPos::Center, VPos::Top))`.
-/// ```text
-///        *
-///        *
-///        * X
-///        *
-///        *
-/// ```
-pub mod text_anchor {
-    /// The horizontal position of the anchor point relative to the text.
-    #[derive(Clone, Copy)]
-    pub enum HPos {
-        /// Anchor point is on the left side of the text
-        Left,
-        /// Anchor point is on the right side of the text
-        Right,
-        /// Anchor point is in the horizontal center of the text
-        Center,
-    }
-
-    /// The vertical position of the anchor point relative to the text.
-    #[derive(Clone, Copy)]
-    pub enum VPos {
-        /// Anchor point is on the top of the text
-        Top,
-        /// Anchor point is in the vertical center of the text
-        Center,
-        /// Anchor point is on the bottom of the text
-        Bottom,
-    }
-
-    /// The text anchor position.
-    #[derive(Clone, Copy)]
-    pub struct Pos {
-        /// The horizontal position of the anchor point
-        pub h_pos: HPos,
-        /// The vertical position of the anchor point
-        pub v_pos: VPos,
-    }
-
-    impl Pos {
-        /// Create a new text anchor position.
-        ///
-        /// - `h_pos`: The horizontal position of the anchor point
-        /// - `v_pos`: The vertical position of the anchor point
-        /// - **returns** The newly created text anchor position
-        ///
-        /// ```rust
-        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
-        ///
-        /// let pos = Pos::new(HPos::Left, VPos::Top);
-        /// ```
-        pub fn new(h_pos: HPos, v_pos: VPos) -> Self {
-            Pos { h_pos, v_pos }
-        }
-
-        /// Create a default text anchor position (top left).
-        ///
-        /// - **returns** The default text anchor position
-        ///
-        /// ```rust
-        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
-        ///
-        /// let pos = Pos::default();
-        /// ```
-        pub fn default() -> Self {
-            Pos {
-                h_pos: HPos::Left,
-                v_pos: VPos::Top,
-            }
-        }
-    }
-}
+pub use crate::drawing::backend::text_anchor;
+use crate::drawing::backend::{BackendColor, BackendCoord, BackendStyle, BackendTextStyle};
 
 /// Style of a text
 #[derive(Clone)]
@@ -217,5 +134,49 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
             color: BLACK.color(),
             pos: text_anchor::Pos::default(),
         }
+    }
+}
+
+impl<'a> BackendTextStyle for TextStyle<'a> {
+    type FontError = FontError;
+    fn color(&self) -> BackendColor {
+        self.color.color()
+    }
+
+    fn size(&self) -> f64 {
+        self.font.get_size()
+    }
+
+    fn transform(&self) -> FontTransform {
+        self.font.get_transform()
+    }
+
+    fn style(&self) -> FontStyle {
+        self.font.get_style()
+    }
+
+    fn layout_box(&self, text: &str) -> Result<((i32, i32), (i32, i32)), Self::FontError> {
+        self.font.layout_box(text)
+    }
+
+    fn anchor(&self) -> text_anchor::Pos {
+        self.pos.clone()
+    }
+
+    fn family(&self) -> FontFamily {
+        self.font.get_family()
+    }
+
+    fn draw<E, DrawFunc: FnMut(i32, i32, BackendColor) -> Result<(), E>>(
+        &self,
+        text: &str,
+        pos: BackendCoord,
+        mut draw: DrawFunc,
+    ) -> Result<Result<(), E>, Self::FontError> {
+        let color = self.color.color();
+        self.font.draw(text, pos, move |x, y, a| {
+            let mix_color = color.mix(a as f64);
+            draw(x, y, mix_color)
+        })
     }
 }

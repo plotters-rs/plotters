@@ -3,10 +3,10 @@ The SVG image drawing backend
 */
 
 use crate::drawing::backend::{
-    BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
+    text_anchor::{HPos, VPos},
+    BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
+    FontStyle, FontTransform,
 };
-use crate::style::text_anchor::{HPos, VPos};
-use crate::style::{FontStyle, FontTransform, TextStyle};
 
 use std::fs::File;
 #[allow(unused_imports)]
@@ -380,26 +380,25 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
-    fn draw_text(
+    fn draw_text<S: BackendTextStyle>(
         &mut self,
         text: &str,
-        style: &TextStyle,
+        style: &S,
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let font = &style.font;
-        let color = style.color;
+        let color = style.color();
         if color.alpha == 0.0 {
             return Ok(());
         }
 
         let (x0, y0) = pos;
-        let text_anchor = match style.pos.h_pos {
+        let text_anchor = match style.anchor().h_pos {
             HPos::Left => "start",
             HPos::Right => "end",
             HPos::Center => "middle",
         };
 
-        let dy = match style.pos.v_pos {
+        let dy = match style.anchor().v_pos {
             VPos::Top => "0.76em",
             VPos::Center => "0.5ex",
             VPos::Bottom => "-0.5ex",
@@ -409,12 +408,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         {
             let ((fx0, fy0), (fx1, fy1)) =
                 font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
-            let x0 = match style.pos.h_pos {
+            let x0 = match style.anchor().h_pos {
                 HPos::Left => x0,
                 HPos::Center => x0 - fx1 / 2 + fx0 / 2,
                 HPos::Right => x0 - fx1 + fx0,
             };
-            let y0 = match style.pos.v_pos {
+            let y0 = match style.anchor().v_pos {
                 VPos::Top => y0,
                 VPos::Center => y0 - fy1 / 2 + fy0 / 2,
                 VPos::Bottom => y0 - fy1 + fy0,
@@ -435,19 +434,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             ("y", format!("{}", y0)),
             ("dy", dy.to_owned()),
             ("text-anchor", text_anchor.to_string()),
-            ("font-family", font.get_name().to_string()),
-            ("font-size", format!("{}", font.get_size() / 1.24)),
+            ("font-family", style.family().as_str().to_string()),
+            ("font-size", format!("{}", style.size() / 1.24)),
             ("opacity", make_svg_opacity(color)),
             ("fill", make_svg_color(color)),
         ];
 
-        match font.get_style() {
+        match style.style() {
             FontStyle::Normal => {}
             FontStyle::Bold => attrs.push(("font-weight", "bold".to_string())),
             other_style => attrs.push(("font-style", other_style.as_str().to_string())),
         };
 
-        let trans = font.get_transform();
+        let trans = style.transform();
         match trans {
             FontTransform::Rotate90 => {
                 attrs.push(("transform", format!("rotate(90, {}, {})", x0, y0)))

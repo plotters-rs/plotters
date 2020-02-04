@@ -1,5 +1,5 @@
 use plotters::drawing::{
-    backend::{BackendColor, BackendStyle, DrawingErrorKind},
+    backend::{BackendColor, BackendStyle, BackendTextStyle, DrawingErrorKind},
     DrawingBackend,
 };
 use plotters::prelude::*;
@@ -116,28 +116,28 @@ impl DrawingBackend for TextDrawingBackend {
         plotters::drawing::rasterizer::draw_line(self, from, to, style)
     }
 
-    fn estimate_text_size<'a>(
+    fn estimate_text_size<S: BackendTextStyle>(
         &self,
         text: &str,
-        _font: &FontDesc<'a>,
+        _: &S,
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
         Ok((text.len() as u32, 1))
     }
 
-    fn draw_text(
+    fn draw_text<S: BackendTextStyle>(
         &mut self,
         text: &str,
-        style: &TextStyle,
+        style: &S,
         pos: (i32, i32),
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let (width, height) = self.estimate_text_size(text, &style.font)?;
+        let (width, height) = self.estimate_text_size(text, style)?;
         let (width, height) = (width as i32, height as i32);
-        let dx = match style.pos.h_pos {
+        let dx = match style.anchor().h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
             HPos::Center => -width / 2,
         };
-        let dy = match style.pos.v_pos {
+        let dy = match style.anchor().v_pos {
             VPos::Top => 0,
             VPos::Center => -height / 2,
             VPos::Bottom => -height,

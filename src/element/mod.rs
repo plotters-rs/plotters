@@ -49,7 +49,7 @@
             let color = RED.to_rgba();
             backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &color, false)?;
             let text_style = &("sans-serif", 20).into_text_style(backend).color(&color);
-            backend.draw_text("X", &text_style, pos)
+            backend.draw_text("X", text_style, pos)
         }
     }
 
