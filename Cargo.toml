@@ -65,6 +65,7 @@ rand_distr = "0.2.2"
 criterion = "0.3.0"
 rayon = "1.2.1"
 rand_xorshift = "0.2.0"
+plotters-bitmap = "0.1.*"
 
 [[bench]]
 name = "benchmark"
