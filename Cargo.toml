@@ -9,7 +9,7 @@ description = "Plotters SVG backend"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plotters-backend = {git = "https://github.com/plotters-rs/plotters-backend" }
+plotters-backend = "0.0.*"
 
 [dev-dependencies]
 plotters = {path = "../plotters", default_features = false}
