@@ -2,10 +2,10 @@
 use image::{DynamicImage, GenericImageView};
 
 use super::{Drawable, PointCollection};
-use crate::drawing::bitmap_pixel::{PixelFormat, RGBPixel};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_bitmap::bitmap_pixel::{PixelFormat, RGBPixel, BGRXPixel};
+use plotters_bitmap::BitMapBackend;
 
-use crate::drawing::BitMapBackend;
 use std::borrow::Borrow;
 use std::marker::PhantomData;
 
@@ -175,7 +175,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, RGBPixe
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 impl<'a, Coord> From<(Coord, DynamicImage)>
-    for BitMapElement<'a, Coord, crate::drawing::bitmap_pixel::BGRXPixel>
+    for BitMapElement<'a, Coord, BGRXPixel>
 {
     fn from((pos, image): (Coord, DynamicImage)) -> Self {
         let (w, h) = image.dimensions();

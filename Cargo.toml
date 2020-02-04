@@ -16,6 +16,8 @@ num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
 gif = { version = "0.10.3", optional = true }
 plotters-backend = "0.0.*"
+plotters-bitmap = {version = "0.1.*", optional = true}
+plotters-svg = {version = "0.1.*", optional = true}
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = { version = "0.8.2", optional = true }
@@ -43,15 +45,13 @@ version = "0.3.39"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["image_encoder", "svg", "chrono", "gif_backend", 
-		   "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", 
-		   "boxplot", "histogram", "area_series", "line_series", "point_series"]
+default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", 
+		   "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
+bitmap-backend = ["plotters-bitmap"]
+svg-backend = ["plotters-svg"]
 ttf = ["font-kit", "rusttype", "lazy_static"]
-image_encoder = ["image", "bitmap"]
-gif_backend = ["gif", "bitmap"]
 datetime = ["chrono"]
-svg = []
-evcxr = ["svg"]
+evcxr = ["svg-backend"]
 piston = ["piston_window", "ttf"]
 cairo = ["cairo-rs", "ttf"]
 bitmap = ["ttf"]
