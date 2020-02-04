@@ -1,5 +1,5 @@
 use super::{Drawable, PointCollection};
-use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 use std::borrow::Borrow;
 

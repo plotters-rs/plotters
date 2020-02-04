@@ -16,7 +16,7 @@ use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCol
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{AsRelative, ShapeStyle, SizeDesc, TextStyle};
 
-use crate::plotters_backend::{BackendCoord, DrawingBackend, FontTransform};
+use plotters_backend::{BackendCoord, DrawingBackend, FontTransform};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 /// When a series is drawn onto a drawing area, an series annotation object

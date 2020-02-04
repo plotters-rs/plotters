@@ -696,12 +696,10 @@ pub mod style;
 pub mod evcxr;
 
 #[cfg(test)]
-pub use crate::drawing::create_mocked_drawing_area;
+pub use crate::drawing::{create_mocked_drawing_area, check_color};
 
 #[cfg(feature = "palette_ext")]
 pub use palette;
-
-pub mod plotters_backend;
 
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
@@ -715,7 +713,7 @@ pub mod prelude {
     #[cfg(feature = "chrono")]
     pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
 
-    pub use crate::plotters_backend::DrawingBackend;
+    pub use plotters_backend::DrawingBackend;
 
     pub use crate::drawing::*;
     #[cfg(feature = "area_series")]
@@ -730,7 +728,7 @@ pub mod prelude {
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle,
-        SimpleColor, TextStyle,
+        TextStyle,
     };
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 

@@ -1,6 +1,6 @@
 use crate::coord::CoordTranslate;
 use crate::drawing::DrawingArea;
-use crate::plotters_backend::DrawingBackend;
+use plotters_backend::DrawingBackend;
 
 /// The trait indicates that the type has a dimensional data.
 /// This is the abstraction for the relative sizing model.
@@ -9,12 +9,6 @@ use crate::plotters_backend::DrawingBackend;
 pub trait HasDimension {
     /// Get the dimensional data for this object
     fn dim(&self) -> (u32, u32);
-}
-
-impl<T: DrawingBackend> HasDimension for T {
-    fn dim(&self) -> (u32, u32) {
-        self.get_size()
-    }
 }
 
 impl<D: DrawingBackend, C: CoordTranslate> HasDimension for DrawingArea<D, C> {

@@ -1,5 +1,5 @@
 use super::color::{Color, RGBAColor};
-use crate::plotters_backend::{BackendColor, BackendStyle};
+use plotters_backend::{BackendColor, BackendStyle};
 
 /// Style for any of shape
 #[derive(Clone)]

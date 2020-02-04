@@ -20,7 +20,7 @@ A ranged axis can be logarithmic and by applying an logarithmic axis, the figure
 Also, the ranged axis can be deserted, and this is required by the histogram series.
 
 */
-use crate::plotters_backend::BackendCoord;
+use plotters_backend::BackendCoord;
 
 mod category;
 #[cfg(feature = "chrono")]

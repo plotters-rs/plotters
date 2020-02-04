@@ -1,17 +1,23 @@
 use super::palette::Palette;
 use super::ShapeStyle;
 
-use crate::plotters_backend::{BackendColor, BackendStyle};
+use plotters_backend::{BackendColor, BackendStyle};
 
 use std::marker::PhantomData;
 
 /// Any color representation
-pub trait Color {
+pub trait Color : BackendStyle {
     /// Convert the RGB representation to the standard RGB tuple
-    fn rgb(&self) -> (u8, u8, u8);
+    #[inline(always)]
+    fn rgb(&self) -> (u8, u8, u8) {
+        self.color().rgb
+    }
 
     /// Get the alpha channel of the color
-    fn alpha(&self) -> f64;
+    #[inline(always)]
+    fn alpha(&self) -> f64 {
+        self.color().alpha
+    }
 
     /// Mix the color with given opacity
     fn mix(&self, value: f64) -> RGBAColor {
@@ -49,36 +55,16 @@ pub trait Color {
 #[derive(Clone, PartialEq, Debug)]
 pub struct RGBAColor(pub(crate) u8, pub(crate) u8, pub(crate) u8, pub(crate) f64);
 
-impl Color for RGBAColor {
+impl BackendStyle for RGBAColor {
     #[inline(always)]
-    fn rgb(&self) -> (u8, u8, u8) {
-        (self.0, self.1, self.2)
-    }
-
-    #[inline(always)]
-    fn alpha(&self) -> f64 {
-        self.3
-    }
-
-    fn to_rgba(&self) -> RGBAColor {
-        self.clone()
+    fn color(&self) -> BackendColor {
+        BackendColor {
+            rgb: (self.0, self.1, self.2),
+            alpha: self.3
+        }
     }
 }
-
-/// Color without alpha channel
-pub trait SimpleColor {
-    fn rgb(&self) -> (u8, u8, u8);
-}
-
-impl<T: SimpleColor> Color for T {
-    fn rgb(&self) -> (u8, u8, u8) {
-        SimpleColor::rgb(self)
-    }
-
-    fn alpha(&self) -> f64 {
-        1.0
-    }
-}
+impl Color for RGBAColor {}
 
 /// A color in the given palette
 pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
@@ -90,28 +76,42 @@ impl<P: Palette> PaletteColor<P> {
     }
 }
 
-impl<P: Palette> SimpleColor for PaletteColor<P> {
-    fn rgb(&self) -> (u8, u8, u8) {
-        P::COLORS[self.0]
+impl<P: Palette> BackendStyle for PaletteColor<P> {
+    #[inline(always)]
+    fn color(&self) -> BackendColor {
+        BackendColor {
+            rgb: P::COLORS[self.0],
+            alpha: 1.0,
+        }
     }
 }
+
+impl<P: Palette> Color for PaletteColor<P> {}
 
 /// The color described by its RGB value
 #[derive(Debug)]
 pub struct RGBColor(pub u8, pub u8, pub u8);
 
-impl SimpleColor for RGBColor {
-    fn rgb(&self) -> (u8, u8, u8) {
-        (self.0, self.1, self.2)
+impl BackendStyle for RGBColor {
+    #[inline(always)]
+    fn color(&self) -> BackendColor {
+        BackendColor {
+            rgb: (self.0, self.1, self.2),
+            alpha: 1.0,
+        }
     }
 }
+
+impl Color for RGBColor {}
+
 
 /// The color described by HSL color space
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
-impl SimpleColor for HSLColor {
+impl BackendStyle for HSLColor {
+    #[inline(always)]
     #[allow(clippy::many_single_char_names)]
-    fn rgb(&self) -> (u8, u8, u8) {
+    fn color(&self) -> BackendColor {
         let (h, s, l) = (
             self.0.min(1.0).max(0.0),
             self.1.min(1.0).max(0.0),
@@ -120,7 +120,10 @@ impl SimpleColor for HSLColor {
 
         if s == 0.0 {
             let value = (l * 255.0).round() as u8;
-            return (value, value, value);
+            return BackendColor{
+                rgb: (value, value, value),
+                alpha: 1.0
+            };
         }
 
         let q = if l < 0.5 {
@@ -149,15 +152,12 @@ impl SimpleColor for HSLColor {
             (value * 255.0).round() as u8
         };
 
-        (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0))
-    }
-}
-
-impl<T: Color> BackendStyle for T {
-    fn color(&self) -> BackendColor {
         BackendColor {
-            alpha: self.alpha(),
-            rgb: self.rgb(),
+            rgb: (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0)),
+            alpha: 1.0
         }
     }
 }
+
+impl Color for HSLColor {}
+

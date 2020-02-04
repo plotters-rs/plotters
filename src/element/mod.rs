@@ -21,7 +21,7 @@
     ```rust
     use std::iter::{Once, once};
     use plotters::element::{PointCollection, Drawable};
-    use plotters::plotters_backend::{BackendCoord, DrawingErrorKind};
+    use plotters_backend::{BackendCoord, DrawingErrorKind, BackendStyle};
     use plotters::style::IntoTextStyle;
     use plotters::prelude::*;
 
@@ -46,9 +46,8 @@
             _: (u32, u32),
         ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
             let pos = pos.next().unwrap();
-            let color = RED.to_rgba();
-            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &color, false)?;
-            let text_style = &("sans-serif", 20).into_text_style(backend).color(&color);
+            backend.draw_rect(pos, (pos.0 + 10, pos.1 + 12), &RED, false)?;
+            let text_style = &("sans-serif", 20).into_text_style(&backend.get_size()).color(&RED);
             backend.draw_text("X", text_style, pos)
         }
     }
@@ -155,7 +154,7 @@
     ```
     ![](https://plotters-rs.github.io/plotters-doc-data/element-3.png)
 */
-use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
 
 mod basic_shapes;
