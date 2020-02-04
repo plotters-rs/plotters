@@ -36,27 +36,23 @@ version = "0.8.0"
 optional = true
 features = ["ps"]
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys= "0.3.32"
-wasm-bindgen = "0.2.55"
+[target.'cfg(target_arch = "wasm32")'.dependencies.wasm-bindgen]
+version = "0.2.55"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.32"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", 
-		   "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
-bitmap-backend = ["plotters-bitmap"]
+default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items",  "ttf", "errorbar", "candlestick", "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
+bitmap-backend = ["plotters-bitmap", "ttf"]
 svg-backend = ["plotters-svg"]
 ttf = ["font-kit", "rusttype", "lazy_static"]
 datetime = ["chrono"]
 evcxr = ["svg-backend"]
 piston = ["piston_window", "ttf"]
 cairo = ["cairo-rs", "ttf"]
-bitmap = ["ttf"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
-debug = [] # Enable debugging code
 errorbar = []
 candlestick = []
 boxplot = []
@@ -73,9 +69,6 @@ rand_distr = "0.2.2"
 criterion = "0.3.0"
 rayon = "1.2.1"
 rand_xorshift = "0.2.0"
-
-[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.5"
 
 [[bench]]
 name = "benchmark"
