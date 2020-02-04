@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 
 use crate::data::Quartiles;
 use crate::element::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, BLACK};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// The boxplot orientation trait
 pub trait BoxplotOrient<K, V> {

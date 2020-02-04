@@ -6,7 +6,7 @@ use plotters_backend::{BackendColor, BackendStyle};
 use std::marker::PhantomData;
 
 /// Any color representation
-pub trait Color : BackendStyle {
+pub trait Color: BackendStyle {
     /// Convert the RGB representation to the standard RGB tuple
     #[inline(always)]
     fn rgb(&self) -> (u8, u8, u8) {
@@ -60,7 +60,7 @@ impl BackendStyle for RGBAColor {
     fn color(&self) -> BackendColor {
         BackendColor {
             rgb: (self.0, self.1, self.2),
-            alpha: self.3
+            alpha: self.3,
         }
     }
 }
@@ -104,7 +104,6 @@ impl BackendStyle for RGBColor {
 
 impl Color for RGBColor {}
 
-
 /// The color described by HSL color space
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
@@ -120,9 +119,9 @@ impl BackendStyle for HSLColor {
 
         if s == 0.0 {
             let value = (l * 255.0).round() as u8;
-            return BackendColor{
+            return BackendColor {
                 rgb: (value, value, value),
-                alpha: 1.0
+                alpha: 1.0,
             };
         }
 
@@ -154,10 +153,9 @@ impl BackendStyle for HSLColor {
 
         BackendColor {
             rgb: (cvt(h + 1.0 / 3.0), cvt(h), cvt(h - 1.0 / 3.0)),
-            alpha: 1.0
+            alpha: 1.0,
         }
     }
 }
 
 impl Color for HSLColor {}
-

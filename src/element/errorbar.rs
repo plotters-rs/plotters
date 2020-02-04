@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
 use crate::element::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 pub trait ErrorBarOrient<K, V> {
     type XType;

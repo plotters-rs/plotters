@@ -1,8 +1,8 @@
+use plotters::prelude::*;
+use plotters::style::text_anchor::{HPos, VPos};
 use plotters_backend::{
     BackendColor, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
 };
-use plotters::prelude::*;
-use plotters::style::text_anchor::{HPos, VPos};
 use std::error::Error;
 
 #[derive(Copy, Clone)]

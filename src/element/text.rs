@@ -2,8 +2,8 @@ use std::borrow::Borrow;
 use std::i32;
 
 use super::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{FontDesc, FontResult, LayoutBox, TextStyle};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// A single line text element. This can be owned or borrowed string, dependents on
 /// `String` or `str` moved into.

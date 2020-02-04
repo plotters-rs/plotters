@@ -6,6 +6,7 @@ edition = "2018"
 license = "MIT"
 description = "A Rust drawing library focus on data plotting for both WASM and native applications"
 repository = "https://github.com/38/plotters"
+homepage = "https://plotters-rs.github.io/"
 keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
 categories = ["visualization", "wasm"]
 readme = "README.md"
@@ -14,6 +15,8 @@ exclude = ["doc-template/*"]
 [dependencies]
 num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
+# Plotters backend deps 
+# TODO: Update the version when publish
 plotters-backend = "0.0.*"
 plotters-bitmap = {version = "0.1.*", optional = true}
 plotters-svg = {version = "0.1.*", optional = true}

@@ -1,7 +1,7 @@
 use super::*;
 use super::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, SizeDesc};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// The element that used to describe a point
 pub trait PointElement<Coord, Size: SizeDesc> {

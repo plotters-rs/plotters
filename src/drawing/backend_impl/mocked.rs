@@ -1,15 +1,18 @@
 use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
 use crate::drawing::DrawingArea;
+use crate::style::RGBAColor;
 use plotters_backend::{
     BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
 };
-use crate::style::RGBAColor;
 
 use std::collections::VecDeque;
 
 pub fn check_color(left: BackendColor, right: RGBAColor) {
-    assert_eq!(RGBAColor(left.rgb.0, left.rgb.1, left.rgb.2, left.alpha), right);
+    assert_eq!(
+        RGBAColor(left.rgb.0, left.rgb.1, left.rgb.2, left.alpha),
+        right
+    );
 }
 
 pub struct MockedBackend {
