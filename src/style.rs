@@ -5,6 +5,7 @@ pub struct BackendColor {
 }
 
 impl BackendColor {
+    #[inline(always)]
     pub fn mix(&self, alpha: f64) -> Self {
         Self {
             alpha: self.alpha * alpha,
