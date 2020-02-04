@@ -696,7 +696,7 @@ pub mod style;
 pub mod evcxr;
 
 #[cfg(test)]
-pub use crate::drawing::{create_mocked_drawing_area, check_color};
+pub use crate::drawing::{check_color, create_mocked_drawing_area};
 
 #[cfg(feature = "palette_ext")]
 pub use palette;
@@ -734,8 +734,7 @@ pub mod prelude {
     // Styles
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
-        Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle,
-        TextStyle,
+        Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor, ShapeStyle, TextStyle,
     };
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
@@ -776,7 +775,7 @@ pub mod prelude {
     // Re-export tier 1 backends for backward compatibility
     #[cfg(feature = "bitmap-backend")]
     pub use plotters_bitmap::BitMapBackend;
-    
+
     #[cfg(feature = "svg-backend")]
     pub use plotters_svg::SVGBackend;
 }

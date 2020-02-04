@@ -5,8 +5,8 @@
 use std::cmp::Ordering;
 
 use crate::element::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// The candlestick data point element
 pub struct CandleStick<X, Y: PartialOrd> {

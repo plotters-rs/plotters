@@ -5,8 +5,8 @@ use std::ops::AddAssign;
 use crate::chart::ChartContext;
 use crate::coord::{DiscreteRanged, Ranged, RangedCoord};
 use crate::element::Rectangle;
-use plotters_backend::DrawingBackend;
 use crate::style::{Color, ShapeStyle, GREEN};
+use plotters_backend::DrawingBackend;
 
 pub trait HistogramType {}
 pub struct Vertical;

@@ -3,7 +3,7 @@ use image::{DynamicImage, GenericImageView};
 
 use super::{Drawable, PointCollection};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use plotters_bitmap::bitmap_pixel::{PixelFormat, RGBPixel, BGRXPixel};
+use plotters_bitmap::bitmap_pixel::{BGRXPixel, PixelFormat, RGBPixel};
 use plotters_bitmap::BitMapBackend;
 
 use std::borrow::Borrow;
@@ -174,9 +174,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, RGBPixe
 }
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-impl<'a, Coord> From<(Coord, DynamicImage)>
-    for BitMapElement<'a, Coord, BGRXPixel>
-{
+impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, BGRXPixel> {
     fn from((pos, image): (Coord, DynamicImage)) -> Self {
         let (w, h) = image.dimensions();
         let rgb_image = image.to_bgra().into_raw();

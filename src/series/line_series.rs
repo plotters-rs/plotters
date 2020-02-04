@@ -1,6 +1,6 @@
 use crate::element::{Circle, DynElement, IntoDynElement, PathElement};
-use plotters_backend::DrawingBackend;
 use crate::style::ShapeStyle;
+use plotters_backend::DrawingBackend;
 use std::marker::PhantomData;
 
 /// The line series object, which takes an iterator of points in guest coordinate system

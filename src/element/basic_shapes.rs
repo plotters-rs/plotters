@@ -1,6 +1,6 @@
 use super::{Drawable, PointCollection};
-use plotters_backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, SizeDesc};
+use plotters_backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 
 /// An element of a single pixel
 pub struct Pixel<Coord> {

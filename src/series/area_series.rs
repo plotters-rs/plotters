@@ -1,7 +1,7 @@
 use crate::element::{DynElement, IntoDynElement, PathElement, Polygon};
-use plotters_backend::DrawingBackend;
 use crate::style::colors::TRANSPARENT;
 use crate::style::ShapeStyle;
+use plotters_backend::DrawingBackend;
 
 /// An area series is similar to a line series but use a filled polygon
 pub struct AreaSeries<DB: DrawingBackend, X: Clone, Y: Clone> {

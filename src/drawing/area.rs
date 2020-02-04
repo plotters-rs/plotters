@@ -1,9 +1,9 @@
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
-/// The abstraction of a drawing area
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{Color, SizeDesc, TextStyle};
+/// The abstraction of a drawing area
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;

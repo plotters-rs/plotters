@@ -335,10 +335,7 @@ mod test {
         assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
-        check_color(
-            chart.title.as_ref().unwrap().1.color,
-            BLACK.to_rgba()
-        );
+        check_color(chart.title.as_ref().unwrap().1.color, BLACK.to_rgba());
 
         chart.caption("This is a test case", ("serif", 10));
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");

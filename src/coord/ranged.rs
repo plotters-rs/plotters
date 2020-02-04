@@ -1,6 +1,6 @@
 use super::{CoordTranslate, ReverseCoordTranslate};
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 use std::ops::Range;
 
