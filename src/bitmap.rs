@@ -1378,12 +1378,12 @@ fn test_bitmap_blit() {
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 #[cfg(test)]
 mod test {
+    use crate::BitMapBackend;
+    use image::{ImageBuffer, Rgb};
     use plotters::prelude::*;
     use plotters::style::text_anchor::{HPos, Pos, VPos};
-    use image::{ImageBuffer, Rgb};
     use std::fs;
     use std::path::Path;
-    use crate::BitMapBackend;
 
     static DST_DIR: &str = "target/test/bitmap";
 
