@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 minifb = "0.13.0"
-plotters = { path = "../.." , default_features = false, features = ["bitmap"]}
+plotters = { path = "../.." , default_features = false, features = ["ttf"]}
+plotters-bitmap = {version = "0.1.*", default_features = false}
