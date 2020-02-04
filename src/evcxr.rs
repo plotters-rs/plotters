@@ -1,5 +1,6 @@
 use crate::coord::Shift;
-use crate::drawing::{DrawingArea, IntoDrawingArea, SVGBackend};
+use crate::drawing::{DrawingArea, IntoDrawingArea};
+use plotters_svg::SVGBackend;
 
 /// The wrapper for the generated SVG
 pub struct SVGWrapper(String, String);
