@@ -8,8 +8,9 @@ edition = "2018"
 crate-type=["cdylib"]
 
 [dependencies]
-plotters = {path = "../.."}
-wasm-bindgen = "0.2.62"
+plotters = {path = "../..", default_features = false, features = ["line_series"]  }
+plotters-canvas = "0.1.*"
+wasm-bindgen = "0.2"
 wee_alloc = "0.4.5"
 web-sys = { version = "0.3.39", features = ["HtmlCanvasElement"] }
 

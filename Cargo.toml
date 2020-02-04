@@ -45,18 +45,15 @@ version = "0.3.39"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", 
-		   "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
-bitmap-backend = ["plotters-bitmap"]
+default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items",  "ttf", "errorbar", "candlestick", "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
+bitmap-backend = ["plotters-bitmap", "ttf"]
 svg-backend = ["plotters-svg"]
 ttf = ["font-kit", "rusttype", "lazy_static"]
 datetime = ["chrono"]
 evcxr = ["svg-backend"]
 piston = ["piston_window", "ttf"]
 cairo = ["cairo-rs", "ttf"]
-bitmap = ["ttf"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
-debug = [] # Enable debugging code
 errorbar = []
 candlestick = []
 boxplot = []

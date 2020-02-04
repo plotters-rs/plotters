@@ -1,8 +1,3 @@
-#[cfg(target_arch = "wasm32")]
-mod canvas;
-#[cfg(target_arch = "wasm32")]
-pub use canvas::CanvasBackend;
-
 #[cfg(test)]
 mod mocked;
 #[cfg(test)]

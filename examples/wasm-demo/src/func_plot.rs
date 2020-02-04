@@ -1,5 +1,6 @@
 use crate::DrawResult;
 use plotters::prelude::*;
+use plotters_canvas::CanvasBackend;
 
 /// Draw power function f(x) = x^power.
 pub fn draw(canvas_id: &str, power: i32) -> DrawResult<impl Fn((i32, i32)) -> Option<(f32, f32)>> {
