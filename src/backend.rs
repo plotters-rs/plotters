@@ -1,24 +1,15 @@
 use std::error::Error;
 
-pub mod rasterizer;
-mod style;
-mod text;
-
-pub use style::{BackendColor, BackendStyle};
-pub use text::{text_anchor, BackendTextStyle, FontFamily, FontStyle, FontTransform};
-
-use text_anchor::{HPos, VPos};
-
-/// A coordinate in the image
-pub type BackendCoord = (i32, i32);
-
 /// The error produced by a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Error + Send + Sync> {
+pub enum DrawingErrorKind<E: Error + Send + Sync>
+where
+    FontError: Send + Sync,
+{
     /// A drawing backend error
     DrawingError(E),
     /// A font rendering error
-    FontError(Box<dyn Error + Send + Sync + 'static>),
+    FontError(FontError),
 }
 
 impl<E: Error + Send + Sync> std::fmt::Display for DrawingErrorKind<E> {
@@ -31,6 +22,21 @@ impl<E: Error + Send + Sync> std::fmt::Display for DrawingErrorKind<E> {
 }
 
 impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
+
+pub type BackendCoord = (i32, i32);
+
+pub trait BackendStyle {
+    /// The underlying type represents the color for this style
+    type ColorType: Color;
+
+    /// Convert the style into the underlying color
+    fn as_color(&self) -> RGBAColor;
+
+    // TODO: In the future we should support stroke width, line shape, etc....
+    fn stroke_width(&self) -> u32 {
+        1
+    }
+}
 
 ///  The drawing backend trait, which implements the low-level drawing APIs.
 ///  This trait has a set of default implementation. And the minimal requirement of
@@ -62,7 +68,7 @@ pub trait DrawingBackend: Sized {
     fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: BackendColor,
+        color: &RGBAColor,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>>;
 
     /// Draw a line on the drawing backend
@@ -75,7 +81,7 @@ pub trait DrawingBackend: Sized {
         to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        rasterizer::draw_line(self, from, to, style)
+        super::rasterizer::draw_line(self, from, to, style)
     }
 
     /// Draw a rectangle on the drawing backend
@@ -90,7 +96,7 @@ pub trait DrawingBackend: Sized {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
+        super::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
     /// Draw a path on the drawing backend
@@ -101,7 +107,7 @@ pub trait DrawingBackend: Sized {
         path: I,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        if style.color().alpha == 0.0 {
+        if style.as_color().alpha() == 0.0 {
             return Ok(());
         }
 
@@ -118,8 +124,8 @@ pub trait DrawingBackend: Sized {
             }
         } else {
             let p: Vec<_> = path.into_iter().collect();
-            let v = rasterizer::polygonize(&p[..], style.stroke_width());
-            return self.fill_polygon(v, &style.color());
+            let v = super::rasterizer::polygonize(&p[..], style.stroke_width());
+            return self.fill_polygon(v, &style.as_color());
         }
         Ok(())
     }
@@ -136,7 +142,7 @@ pub trait DrawingBackend: Sized {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        rasterizer::draw_circle(self, center, radius, style, fill)
+        super::rasterizer::draw_circle(self, center, radius, style, fill)
     }
 
     fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
@@ -146,53 +152,52 @@ pub trait DrawingBackend: Sized {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let vert_buf: Vec<_> = vert.into_iter().collect();
 
-        rasterizer::fill_polygon(self, &vert_buf[..], style)
+        super::rasterizer::fill_polygon(self, &vert_buf[..], style)
     }
 
     /// Draw a text on the drawing backend
     /// - `text`: The text to draw
     /// - `style`: The text style
     /// - `pos` : The text anchor point
-    fn draw_text<TStyle: BackendTextStyle>(
+    fn draw_text(
         &mut self,
         text: &str,
-        style: &TStyle,
+        style: &TextStyle,
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let color = style.color();
-        if color.alpha == 0.0 {
+        let font = &style.font;
+        let color = &style.color;
+        if color.alpha() == 0.0 {
             return Ok(());
         }
 
-        let layout = style
-            .layout_box(text)
-            .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
+        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
         let ((min_x, min_y), (max_x, max_y)) = layout;
         let width = (max_x - min_x) as i32;
         let height = (max_y - min_y) as i32;
-        let dx = match style.anchor().h_pos {
+        let dx = match style.pos.h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
             HPos::Center => -width / 2,
         };
-        let dy = match style.anchor().v_pos {
+        let dy = match style.pos.v_pos {
             VPos::Top => 0,
             VPos::Center => -height / 2,
             VPos::Bottom => -height,
         };
-        let trans = style.transform();
+        let trans = font.get_transform();
         let (w, h) = self.get_size();
-        match style.draw(text, (0, 0), |x, y, color| {
+        match font.draw(text, (0, 0), |x, y, v| {
             let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
-                self.draw_pixel((x, y), color)
+                self.draw_pixel((x, y), &color.mix(f64::from(v)))
             } else {
                 Ok(())
             }
         }) {
             Ok(drawing_result) => drawing_result,
-            Err(font_error) => Err(DrawingErrorKind::FontError(Box::new(font_error))),
+            Err(font_error) => Err(DrawingErrorKind::FontError(font_error)),
         }
     }
 
@@ -204,14 +209,12 @@ pub trait DrawingBackend: Sized {
     /// - `text`: The text to estimate
     /// - `font`: The font to estimate
     /// - *Returns* The estimated text size
-    fn estimate_text_size<TStyle: BackendTextStyle>(
+    fn estimate_text_size<'a>(
         &self,
         text: &str,
-        style: &TStyle,
+        font: &FontDesc<'a>,
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
-        let layout = style
-            .layout_box(text)
-            .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
+        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
         Ok((
             ((layout.1).0 - (layout.0).0) as u32,
             ((layout.1).1 - (layout.0).1) as u32,
@@ -246,11 +249,9 @@ pub trait DrawingBackend: Sized {
                 let r = src[(dx + dy * w) as usize * 3];
                 let g = src[(dx + dy * w) as usize * 3 + 1];
                 let b = src[(dx + dy * w) as usize * 3 + 2];
-                let color = BackendColor {
-                    alpha: 1.0,
-                    rgb: (r, g, b),
-                };
-                let result = self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), color);
+                let color = crate::style::RGBColor(r, g, b);
+                let result =
+                    self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), &color.to_rgba());
                 if result.is_err() {
                     return result;
                 }
