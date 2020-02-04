@@ -15,7 +15,7 @@ exclude = ["doc-template/*"]
 num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
 gif = { version = "0.10.3", optional = true }
-plotters-backend = { git = "https://github.com/plotters-rs/plotters-backend" }
+plotters-backend = "0.0.*"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = { version = "0.8.2", optional = true }
