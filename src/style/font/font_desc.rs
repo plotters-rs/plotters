@@ -2,44 +2,16 @@ use super::{FontData, FontDataInternal};
 use crate::style::text_anchor::Pos;
 use crate::style::{Color, TextStyle};
 
-use crate::drawing::backend::BackendStyle;
-
 use std::convert::From;
+
+use crate::drawing::backend::BackendStyle;
+pub use crate::drawing::backend::{FontFamily, FontStyle, FontTransform};
 
 /// The error type for the font implementation
 pub type FontError = <FontDataInternal as FontData>::ErrorType;
 
 /// The type we used to represent a result of any font operations
 pub type FontResult<T> = Result<T, FontError>;
-
-/// Specifying text transformations
-#[derive(Clone)]
-pub enum FontTransform {
-    /// Nothing to transform
-    None,
-    /// Rotating the text 90 degree clockwise
-    Rotate90,
-    /// Rotating the text 180 degree clockwise
-    Rotate180,
-    /// Rotating the text 270 degree clockwise
-    Rotate270,
-}
-
-impl FontTransform {
-    /// Transform the coordinate to perform the rotation
-    ///
-    /// - `x`: The x coordinate in pixels before transform
-    /// - `y`: The y coordinate in pixels before transform
-    /// - **returns**: The coordinate after transform
-    pub fn transform(&self, x: i32, y: i32) -> (i32, i32) {
-        match self {
-            FontTransform::None => (x, y),
-            FontTransform::Rotate90 => (-y, x),
-            FontTransform::Rotate180 => (-x, -y),
-            FontTransform::Rotate270 => (y, -x),
-        }
-    }
-}
 
 /// Describes a font
 #[derive(Clone)]
@@ -49,82 +21,6 @@ pub struct FontDesc<'a> {
     data: FontResult<FontDataInternal>,
     transform: FontTransform,
     style: FontStyle,
-}
-
-/// Describes font family.
-/// This can be either a specific font family name, such as "arial",
-/// or a general font family class, such as "serif" and "sans-serif"
-#[derive(Clone, Copy)]
-pub enum FontFamily<'a> {
-    /// The system default serif font family
-    Serif,
-    /// The system default sans-serif font family
-    SansSerif,
-    /// The system default monospace font
-    Monospace,
-    /// A specific font family name
-    Name(&'a str),
-}
-
-impl<'a> FontFamily<'a> {
-    /// Make a CSS compatible string for the font family name.
-    /// This can be used as the value of `font-family` attribute in SVG.
-    pub fn as_str(&self) -> &str {
-        match self {
-            FontFamily::Serif => "serif",
-            FontFamily::SansSerif => "sans-serif",
-            FontFamily::Monospace => "monospace",
-            FontFamily::Name(face) => face,
-        }
-    }
-}
-
-impl<'a> From<&'a str> for FontFamily<'a> {
-    fn from(from: &'a str) -> FontFamily<'a> {
-        match from.to_lowercase().as_str() {
-            "serif" => FontFamily::Serif,
-            "sans-serif" => FontFamily::SansSerif,
-            "monospace" => FontFamily::Monospace,
-            _ => FontFamily::Name(from),
-        }
-    }
-}
-
-/// Describes the font style. Such as Italic, Oblique, etc.
-#[derive(Clone, Copy)]
-pub enum FontStyle {
-    /// The normal style
-    Normal,
-    /// The oblique style
-    Oblique,
-    /// The italic style
-    Italic,
-    /// The bold style
-    Bold,
-}
-
-impl FontStyle {
-    /// Convert the font style into a CSS compatible string which can be used in `font-style` attribute.
-    pub fn as_str(&self) -> &str {
-        match self {
-            FontStyle::Normal => "normal",
-            FontStyle::Italic => "italic",
-            FontStyle::Oblique => "oblique",
-            FontStyle::Bold => "bold",
-        }
-    }
-}
-
-impl<'a> From<&'a str> for FontStyle {
-    fn from(from: &'a str) -> FontStyle {
-        match from.to_lowercase().as_str() {
-            "normal" => FontStyle::Normal,
-            "italic" => FontStyle::Italic,
-            "oblique" => FontStyle::Oblique,
-            "bold" => FontStyle::Bold,
-            _ => FontStyle::Normal,
-        }
-    }
 }
 
 impl<'a> From<&'a str> for FontDesc<'a> {
@@ -246,6 +142,10 @@ impl<'a> FontDesc<'a> {
             color: color.color(),
             pos: Pos::default(),
         }
+    }
+
+    pub fn get_family(&self) -> FontFamily {
+        self.family.clone()
     }
 
     /// Get the name of the font

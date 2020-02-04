@@ -1,35 +1,23 @@
 use crate::style::text_anchor::{HPos, VPos};
-use crate::style::{FontDesc, FontError, TextStyle};
 use std::error::Error;
+//use crate::style::{FontDesc, FontError, TextStyle};
 
-#[derive(Clone, Copy)]
-pub struct BackendColor {
-    pub alpha: f64,
-    pub rgb: (u8, u8, u8),
-}
+mod style;
+mod text;
 
-impl BackendColor {
-    pub fn mix(&self, alpha: f64) -> Self {
-        Self {
-            alpha: self.alpha * alpha,
-            rgb: self.rgb,
-        }
-    }
-}
+pub use style::{BackendColor, BackendStyle};
+pub use text::{text_anchor, BackendTextStyle, FontFamily, FontStyle, FontTransform};
 
 /// A coordinate in the image
 pub type BackendCoord = (i32, i32);
 
 /// The error produced by a drawing backend
 #[derive(Debug)]
-pub enum DrawingErrorKind<E: Error + Send + Sync>
-where
-    FontError: Send + Sync,
-{
+pub enum DrawingErrorKind<E: Error + Send + Sync> {
     /// A drawing backend error
     DrawingError(E),
     /// A font rendering error
-    FontError(FontError),
+    FontError(Box<dyn Error + Send + Sync + 'static>),
 }
 
 impl<E: Error + Send + Sync> std::fmt::Display for DrawingErrorKind<E> {
@@ -42,23 +30,6 @@ impl<E: Error + Send + Sync> std::fmt::Display for DrawingErrorKind<E> {
 }
 
 impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
-
-/// The style data for the backend drawing API
-pub trait BackendStyle {
-    /// Get the color of current style
-    fn color(&self) -> BackendColor;
-
-    /// Get the stroke width of current style
-    fn stroke_width(&self) -> u32 {
-        1
-    }
-}
-
-impl BackendStyle for BackendColor {
-    fn color(&self) -> BackendColor {
-        *self
-    }
-}
 
 ///  The drawing backend trait, which implements the low-level drawing APIs.
 ///  This trait has a set of default implementation. And the minimal requirement of
@@ -181,45 +152,46 @@ pub trait DrawingBackend: Sized {
     /// - `text`: The text to draw
     /// - `style`: The text style
     /// - `pos` : The text anchor point
-    fn draw_text(
+    fn draw_text<TStyle: BackendTextStyle>(
         &mut self,
         text: &str,
-        style: &TextStyle,
+        style: &TStyle,
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let font = &style.font;
-        let color = style.color;
+        let color = style.color();
         if color.alpha == 0.0 {
             return Ok(());
         }
 
-        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+        let layout = style
+            .layout_box(text)
+            .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
         let ((min_x, min_y), (max_x, max_y)) = layout;
         let width = (max_x - min_x) as i32;
         let height = (max_y - min_y) as i32;
-        let dx = match style.pos.h_pos {
+        let dx = match style.anchor().h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
             HPos::Center => -width / 2,
         };
-        let dy = match style.pos.v_pos {
+        let dy = match style.anchor().v_pos {
             VPos::Top => 0,
             VPos::Center => -height / 2,
             VPos::Bottom => -height,
         };
-        let trans = font.get_transform();
+        let trans = style.transform();
         let (w, h) = self.get_size();
-        match font.draw(text, (0, 0), |x, y, v| {
+        match style.draw(text, (0, 0), |x, y, color| {
             let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
-                self.draw_pixel((x, y), color.mix(f64::from(v)))
+                self.draw_pixel((x, y), color)
             } else {
                 Ok(())
             }
         }) {
             Ok(drawing_result) => drawing_result,
-            Err(font_error) => Err(DrawingErrorKind::FontError(font_error)),
+            Err(font_error) => Err(DrawingErrorKind::FontError(Box::new(font_error))),
         }
     }
 
@@ -231,12 +203,14 @@ pub trait DrawingBackend: Sized {
     /// - `text`: The text to estimate
     /// - `font`: The font to estimate
     /// - *Returns* The estimated text size
-    fn estimate_text_size<'a>(
+    fn estimate_text_size<TStyle: BackendTextStyle>(
         &self,
         text: &str,
-        font: &FontDesc<'a>,
+        style: &TStyle,
     ) -> Result<(u32, u32), DrawingErrorKind<Self::ErrorType>> {
-        let layout = font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
+        let layout = style
+            .layout_box(text)
+            .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
         Ok((
             ((layout.1).0 - (layout.0).0) as u32,
             ((layout.1).1 - (layout.0).1) as u32,

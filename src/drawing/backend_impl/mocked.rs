@@ -1,10 +1,10 @@
 use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
 use crate::drawing::backend::{
-    BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
+    BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
 };
 use crate::drawing::DrawingArea;
-use crate::style::{Color, RGBAColor, TextStyle};
+use crate::style::RGBAColor;
 
 use std::collections::VecDeque;
 
@@ -240,19 +240,17 @@ impl DrawingBackend for MockedBackend {
         Ok(())
     }
 
-    fn draw_text(
+    fn draw_text<S: BackendTextStyle>(
         &mut self,
         text: &str,
-        style: &TextStyle,
+        style: &S,
         pos: BackendCoord,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let font = &style.font;
-        let color = &style.color;
+        let color = style.color().into_rgba();
         self.check_before_draw();
         self.num_draw_text_call += 1;
-        let color = color.into_rgba();
         if let Some(mut checker) = self.check_draw_text.pop_front() {
-            checker(color, font.get_name(), font.get_size(), pos, text);
+            checker(color, style.family().as_str(), style.size(), pos, text);
 
             if self.check_draw_text.is_empty() {
                 self.check_draw_text.push_back(checker);

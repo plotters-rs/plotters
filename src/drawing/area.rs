@@ -3,7 +3,7 @@ use super::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKin
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
-use crate::style::{Color, FontDesc, SizeDesc, TextStyle};
+use crate::style::{Color, SizeDesc, TextStyle};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -330,9 +330,9 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn estimate_text_size(
         &self,
         text: &str,
-        font: &FontDesc,
+        style: &TextStyle,
     ) -> Result<(u32, u32), DrawingAreaError<DB>> {
-        self.backend_ops(move |b| b.estimate_text_size(text, font))
+        self.backend_ops(move |b| b.estimate_text_size(text, style))
     }
 }
 
@@ -475,7 +475,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
 
         let x_padding = (self.rect.x1 - self.rect.x0) / 2;
 
-        let (_, text_h) = self.estimate_text_size(text, &style.font)?;
+        let (_, text_h) = self.estimate_text_size(text, &style)?;
         let y_padding = (text_h / 2).min(5) as i32;
 
         let style = &style.pos(Pos::new(HPos::Center, VPos::Top));
@@ -483,7 +483,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         self.backend_ops(|b| {
             b.draw_text(
                 text,
-                &style,
+                style,
                 (self.rect.x0 + x_padding, self.rect.y0 + y_padding),
             )
         })?;
@@ -507,9 +507,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         style: &TextStyle,
         pos: BackendCoord,
     ) -> Result<(), DrawingAreaError<DB>> {
-        self.backend_ops(|b| {
-            b.draw_text(text, &style, (pos.0 + self.rect.x0, pos.1 + self.rect.y0))
-        })
+        self.backend_ops(|b| b.draw_text(text, style, (pos.0 + self.rect.x0, pos.1 + self.rect.y0)))
     }
 }
 

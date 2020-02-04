@@ -148,9 +148,9 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
             label_element.push_line(label_text);
         }
 
-        let (mut w, mut h) = label_element
-            .estimate_dimension()
-            .map_err(|e| DrawingAreaErrorKind::BackendError(DrawingErrorKind::FontError(e)))?;
+        let (mut w, mut h) = label_element.estimate_dimension().map_err(|e| {
+            DrawingAreaErrorKind::BackendError(DrawingErrorKind::FontError(Box::new(e)))
+        })?;
 
         let margin = self.margin as i32;
 
@@ -178,7 +178,9 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
 
         for (((_, y0), (_, y1)), make_elem) in label_element
             .compute_line_layout()
-            .map_err(|e| DrawingAreaErrorKind::BackendError(DrawingErrorKind::FontError(e)))?
+            .map_err(|e| {
+                DrawingAreaErrorKind::BackendError(DrawingErrorKind::FontError(Box::new(e)))
+            })?
             .into_iter()
             .zip(funcs.into_iter())
         {
