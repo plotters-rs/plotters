@@ -1,5 +1,5 @@
 use crate::element::{DynElement, IntoDynElement, PathElement, Polygon};
-use crate::plotters_backend::DrawingBackend;
+use plotters_backend::DrawingBackend;
 use crate::style::colors::TRANSPARENT;
 use crate::style::ShapeStyle;
 

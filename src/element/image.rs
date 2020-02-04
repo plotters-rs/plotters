@@ -3,7 +3,7 @@ use image::{DynamicImage, GenericImageView};
 
 use super::{Drawable, PointCollection};
 use crate::drawing::bitmap_pixel::{PixelFormat, RGBPixel};
-use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 use crate::drawing::BitMapBackend;
 use std::borrow::Borrow;

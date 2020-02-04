@@ -15,12 +15,7 @@ exclude = ["doc-template/*"]
 num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
 gif = { version = "0.10.3", optional = true }
-
-[dependencies.palette]
-version = "0.5.0"
-default-features = false
-optional = true
-features = ["std"]
+plotters-backend = { git = "https://github.com/plotters-rs/plotters-backend" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = { version = "0.8.2", optional = true }
@@ -48,12 +43,11 @@ version = "0.3.39"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["image_encoder", "svg", "chrono", "palette_ext", "gif_backend", 
+default = ["image_encoder", "svg", "chrono", "gif_backend", 
 		   "deprecated_items", "bitmap", "ttf", "errorbar", "candlestick", 
 		   "boxplot", "histogram", "area_series", "line_series", "point_series"]
 ttf = ["font-kit", "rusttype", "lazy_static"]
 image_encoder = ["image", "bitmap"]
-palette_ext = ["palette"]
 gif_backend = ["gif", "bitmap"]
 datetime = ["chrono"]
 svg = []

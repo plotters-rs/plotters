@@ -4,7 +4,7 @@ use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
 use crate::style::{IntoFont, IntoTextStyle, ShapeStyle, SizeDesc, TextStyle, TRANSPARENT};
 
-use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// Describes where we want to put the series label
 pub enum SeriesLabelPosition {

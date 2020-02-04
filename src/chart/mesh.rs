@@ -10,7 +10,7 @@ use crate::style::{
     SizeDesc, TextStyle,
 };
 
-use crate::plotters_backend::DrawingBackend;
+use plotters_backend::DrawingBackend;
 
 /// The style used to describe the mesh and axis for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {

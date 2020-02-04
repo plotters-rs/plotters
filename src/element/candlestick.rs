@@ -5,7 +5,7 @@
 use std::cmp::Ordering;
 
 use crate::element::{Drawable, PointCollection};
-use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
 
 /// The candlestick data point element

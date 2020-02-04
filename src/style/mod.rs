@@ -9,12 +9,9 @@ mod shape;
 mod size;
 mod text;
 
-#[cfg(feature = "palette_ext")]
-mod palette_ext;
-
 /// Definitions of palettes of accessibility
 pub use self::palette::*;
-pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor, SimpleColor};
+pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor};
 pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,

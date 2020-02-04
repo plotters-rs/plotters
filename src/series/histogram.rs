@@ -5,7 +5,7 @@ use std::ops::AddAssign;
 use crate::chart::ChartContext;
 use crate::coord::{DiscreteRanged, Ranged, RangedCoord};
 use crate::element::Rectangle;
-use crate::plotters_backend::DrawingBackend;
+use plotters_backend::DrawingBackend;
 use crate::style::{Color, ShapeStyle, GREEN};
 
 pub trait HistogramType {}

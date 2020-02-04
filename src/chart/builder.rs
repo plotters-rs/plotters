@@ -4,7 +4,7 @@ use crate::coord::{AsRangedCoord, RangedCoord, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
-use crate::plotters_backend::DrawingBackend;
+use plotters_backend::DrawingBackend;
 
 /// The enum used to specify the position of label area.
 /// This is used when we configure the label area size with the API `set_label_area_size`
@@ -335,8 +335,8 @@ mod test {
         assert_eq!(chart.title.as_ref().unwrap().0, "This is a test case");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_size(), 10.0);
-        assert_eq!(
-            chart.title.as_ref().unwrap().1.color.into_rgba(),
+        check_color(
+            chart.title.as_ref().unwrap().1.color,
             BLACK.to_rgba()
         );
 
