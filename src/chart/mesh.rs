@@ -4,12 +4,13 @@ use std::marker::PhantomData;
 use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
 use crate::coord::{MeshLine, Ranged, RangedCoord};
-use crate::drawing::backend::DrawingBackend;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
     AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
     SizeDesc, TextStyle,
 };
+
+use crate::plotters_backend::DrawingBackend;
 
 /// The style used to describe the mesh and axis for a secondary coordinate system.
 pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {

@@ -1,5 +1,5 @@
 use super::{CoordTranslate, ReverseCoordTranslate};
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::ShapeStyle;
 
 use std::ops::Range;

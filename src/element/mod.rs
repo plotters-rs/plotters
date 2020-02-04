@@ -21,7 +21,7 @@
     ```rust
     use std::iter::{Once, once};
     use plotters::element::{PointCollection, Drawable};
-    use plotters::drawing::backend::{BackendCoord, DrawingErrorKind};
+    use plotters::plotters_backend::{BackendCoord, DrawingErrorKind};
     use plotters::style::IntoTextStyle;
     use plotters::prelude::*;
 
@@ -155,7 +155,7 @@
     ```
     ![](https://plotters-rs.github.io/plotters-doc-data/element-3.png)
 */
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::borrow::Borrow;
 
 mod basic_shapes;

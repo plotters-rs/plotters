@@ -1,6 +1,6 @@
 use crate::coord::CoordTranslate;
 use crate::drawing::DrawingArea;
-use crate::drawing::DrawingBackend;
+use crate::plotters_backend::DrawingBackend;
 
 /// The trait indicates that the type has a dimensional data.
 /// This is the abstraction for the relative sizing model.

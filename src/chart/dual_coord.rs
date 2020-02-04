@@ -8,10 +8,11 @@ use super::context::{ChartContext, ChartState, SeriesAnno};
 use super::mesh::SecondaryMeshStyle;
 
 use crate::coord::{CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift};
-use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::DrawingArea;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{Drawable, PointCollection};
+
+use crate::plotters_backend::{BackendCoord, DrawingBackend};
 
 /// The chart context that has two coordinate system attached
 pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {

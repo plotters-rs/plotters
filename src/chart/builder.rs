@@ -1,9 +1,10 @@
 use super::context::ChartContext;
 
 use crate::coord::{AsRangedCoord, RangedCoord, Shift};
-use crate::drawing::backend::DrawingBackend;
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
+
+use crate::plotters_backend::DrawingBackend;
 
 /// The enum used to specify the position of label area.
 /// This is used when we configure the label area size with the API `set_label_area_size`

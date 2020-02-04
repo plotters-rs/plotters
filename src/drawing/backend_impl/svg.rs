@@ -2,7 +2,7 @@
 The SVG image drawing backend
 */
 
-use crate::drawing::backend::{
+use crate::plotters_backend::{
     text_anchor::{HPos, VPos},
     BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
     FontStyle, FontTransform,

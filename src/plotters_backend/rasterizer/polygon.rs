@@ -1,5 +1,5 @@
-use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingErrorKind};
-use crate::drawing::DrawingBackend;
+use crate::plotters_backend::DrawingBackend;
+use crate::plotters_backend::{BackendCoord, BackendStyle, DrawingErrorKind};
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 

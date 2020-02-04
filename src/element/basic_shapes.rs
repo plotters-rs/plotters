@@ -1,5 +1,5 @@
 use super::{Drawable, PointCollection};
-use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
+use crate::plotters_backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, SizeDesc};
 
 /// An element of a single pixel

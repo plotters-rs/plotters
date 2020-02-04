@@ -20,12 +20,6 @@ Currently we have following backend implemented:
 mod area;
 mod backend_impl;
 
-pub mod rasterizer;
-
-pub mod backend;
-
 pub use area::{DrawingArea, DrawingAreaErrorKind, IntoDrawingArea};
 
 pub use backend_impl::*;
-
-pub use backend::DrawingBackend;

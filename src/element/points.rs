@@ -1,6 +1,6 @@
 use super::*;
 use super::{Drawable, PointCollection};
-use crate::drawing::backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use crate::plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use crate::style::{ShapeStyle, SizeDesc};
 
 /// The element that used to describe a point
