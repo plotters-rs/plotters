@@ -1,5 +1,6 @@
 use criterion::{criterion_group, Criterion};
-use plotters::drawing::bitmap_pixel::BGRXPixel;
+use plotters_bitmap::bitmap_pixel::BGRXPixel;
+use plotters_backend::BackendStyle;
 use plotters::prelude::*;
 
 const W: u32 = 1000;
@@ -14,7 +15,7 @@ fn draw_pixel(c: &mut Criterion) {
             let mut root = BitMapBackend::with_buffer(&mut buffer, (W, H));
             for x in 0..W / 10 {
                 for y in 0..H / 10 {
-                    root.draw_pixel((x as i32, y as i32), &RGBColor(255, 0, 234).to_rgba())
+                    root.draw_pixel((x as i32, y as i32), RGBColor(255, 0, 234).color())
                         .unwrap();
                 }
             }
@@ -28,7 +29,7 @@ fn draw_pixel(c: &mut Criterion) {
                 BitMapBackend::<BGRXPixel>::with_buffer_and_format(&mut buffer, (W, H)).unwrap();
             for x in 0..W / 10 {
                 for y in 0..H / 10 {
-                    root.draw_pixel((x as i32, y as i32), &RGBColor(255, 0, 234).to_rgba())
+                    root.draw_pixel((x as i32, y as i32), RGBColor(255, 0, 234).color())
                         .unwrap();
                 }
             }
