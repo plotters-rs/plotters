@@ -1,5 +1,6 @@
-use crate::drawing::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
-use crate::style::{Color, RGBAColor};
+use plotters_backend::{
+    BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
+};
 use std::marker::PhantomData;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
@@ -889,14 +890,14 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
     fn draw_pixel(
         &mut self,
         point: BackendCoord,
-        color: &RGBAColor,
+        color: BackendColor,
     ) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
         if point.0 < 0 || point.1 < 0 {
             return Ok(());
         }
 
-        let alpha = color.alpha();
-        let rgb = color.rgb();
+        let alpha = color.alpha;
+        let rgb = color.rgb;
 
         P::draw_pixel(self, point, rgb, alpha);
 
@@ -909,8 +910,8 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         to: (i32, i32),
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let alpha = style.as_color().alpha();
-        let (r, g, b) = style.as_color().rgb();
+        let alpha = style.color().alpha;
+        let (r, g, b) = style.color().rgb;
 
         if (from.0 == to.0 || from.1 == to.1) && style.stroke_width() == 1 {
             if alpha >= 1.0 {
@@ -925,7 +926,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             return Ok(());
         }
 
-        crate::drawing::rasterizer::draw_line(self, from, to, style)
+        plotters_backend::rasterizer::draw_line(self, from, to, style)
     }
 
     fn draw_rect<S: BackendStyle>(
@@ -935,8 +936,8 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let alpha = style.as_color().alpha();
-        let (r, g, b) = style.as_color().rgb();
+        let alpha = style.color().alpha;
+        let (r, g, b) = style.color().rgb;
         if fill {
             if alpha >= 1.0 {
                 P::fill_rect_fast(self, upper_left, bottom_right, r, g, b);
@@ -945,7 +946,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             }
             return Ok(());
         }
-        crate::drawing::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
+        plotters_backend::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
     fn blit_bitmap<'b>(
@@ -1006,7 +1007,7 @@ impl<P: PixelFormat> Drop for BitMapBackend<'_, P> {
 #[cfg(test)]
 #[test]
 fn test_bitmap_backend() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
@@ -1034,7 +1035,7 @@ fn test_bitmap_backend() {
 #[cfg(test)]
 #[test]
 fn test_bitmap_backend_fill_half() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
@@ -1081,7 +1082,7 @@ fn test_bitmap_backend_fill_half() {
 #[cfg(test)]
 #[test]
 fn test_bitmap_backend_blend() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![255; 10 * 10 * 3];
 
     {
@@ -1113,7 +1114,7 @@ fn test_bitmap_backend_blend() {
 #[cfg(test)]
 #[test]
 fn test_bitmap_backend_split_and_fill() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![255; 10 * 10 * 3];
 
     {
@@ -1137,7 +1138,7 @@ fn test_bitmap_backend_split_and_fill() {
 #[cfg(test)]
 #[test]
 fn test_draw_rect_out_of_range() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 1099 * 1000 * 3];
 
     {
@@ -1163,7 +1164,7 @@ fn test_draw_rect_out_of_range() {
 #[cfg(test)]
 #[test]
 fn test_draw_line_out_of_range() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 1000 * 1000 * 3];
 
     {
@@ -1189,7 +1190,7 @@ fn test_draw_line_out_of_range() {
 #[cfg(test)]
 #[test]
 fn test_bitmap_blend_large() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 1000 * 1000 * 3];
 
     for fill_color in [RED, GREEN, BLUE].iter() {
@@ -1227,8 +1228,8 @@ fn test_bitmap_blend_large() {
 #[cfg(test)]
 #[test]
 fn test_bitmap_bgrx_pixel_format() {
-    use crate::drawing::bitmap_pixel::BGRXPixel;
-    use crate::prelude::*;
+    use crate::bitmap_pixel::BGRXPixel;
+    use plotters::prelude::*;
     let mut rgb_buffer = vec![0; 1000 * 1000 * 3];
     let mut bgrx_buffer = vec![0; 1000 * 1000 * 4];
 
@@ -1320,7 +1321,7 @@ fn test_bitmap_bgrx_pixel_format() {
 #[cfg(test)]
 #[test]
 fn test_draw_simple_lines() {
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 1000 * 1000 * 3];
 
     {
@@ -1342,7 +1343,7 @@ fn test_bitmap_blit() {
         .flatten()
         .collect();
 
-    use crate::prelude::*;
+    use plotters::prelude::*;
     let mut buffer = vec![0; 1000 * 1000 * 3];
 
     {
@@ -1377,11 +1378,12 @@ fn test_bitmap_blit() {
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 #[cfg(test)]
 mod test {
-    use crate::prelude::*;
-    use crate::style::text_anchor::{HPos, Pos, VPos};
+    use plotters::prelude::*;
+    use plotters::style::text_anchor::{HPos, Pos, VPos};
     use image::{ImageBuffer, Rgb};
     use std::fs;
     use std::path::Path;
+    use crate::BitMapBackend;
 
     static DST_DIR: &str = "target/test/bitmap";
 

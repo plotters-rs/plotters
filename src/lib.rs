@@ -1,7 +1,6 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+mod bitmap;
+pub use bitmap::BitMapBackend;
+
+pub mod bitmap_pixel {
+    pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
 }
