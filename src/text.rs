@@ -98,7 +98,7 @@ pub mod text_anchor {
         /// - **returns** The newly created text anchor position
         ///
         /// ```rust
-        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
+        /// use plotters_backend::text_anchor::{Pos, HPos, VPos};
         ///
         /// let pos = Pos::new(HPos::Left, VPos::Top);
         /// ```
@@ -111,7 +111,7 @@ pub mod text_anchor {
         /// - **returns** The default text anchor position
         ///
         /// ```rust
-        /// use plotters::style::text_anchor::{Pos, HPos, VPos};
+        /// use plotters_backend::text_anchor::{Pos, HPos, VPos};
         ///
         /// let pos = Pos::default();
         /// ```
