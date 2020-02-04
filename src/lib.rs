@@ -751,7 +751,7 @@ pub mod prelude {
     #[cfg(feature = "errorbar")]
     pub use crate::element::ErrorBar;
 
-    #[cfg(feature = "bitmap-backend")]
+    #[cfg(feature = "bitmap_backend")]
     pub use crate::element::BitMapElement;
 
     // Data
@@ -773,9 +773,9 @@ pub mod prelude {
     pub use crate::evcxr::evcxr_figure;
 
     // Re-export tier 1 backends for backward compatibility
-    #[cfg(feature = "bitmap-backend")]
+    #[cfg(feature = "bitmap_backend")]
     pub use plotters_bitmap::BitMapBackend;
 
-    #[cfg(feature = "svg-backend")]
+    #[cfg(feature = "svg_backend")]
     pub use plotters_svg::SVGBackend;
 }

@@ -184,9 +184,9 @@ mod boxplot;
 #[cfg(feature = "boxplot")]
 pub use boxplot::Boxplot;
 
-#[cfg(feature = "bitmap-backend")]
+#[cfg(feature = "bitmap_backend")]
 mod image;
-#[cfg(feature = "bitmap-backend")]
+#[cfg(feature = "bitmap_backend")]
 pub use self::image::BitMapElement;
 
 mod dynelem;

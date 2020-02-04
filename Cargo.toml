@@ -18,8 +18,12 @@ chrono = { version = "0.4.11", optional = true }
 # Plotters backend deps 
 # TODO: Update the version when publish
 plotters-backend = "0.0.*"
-plotters-bitmap = {version = "0.1.*", optional = true}
 plotters-svg = {version = "0.1.*", optional = true}
+
+[dependencies.plotters-bitmap]
+version = "0.1.*"
+optional = true
+default_features = false
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = { version = "0.8.2", optional = true }
@@ -40,10 +44,21 @@ version = "0.3.39"
 features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
 
 [features]
-default = ["bitmap-backend", "svg-backend", "chrono", "deprecated_items",  "ttf", "errorbar", "candlestick", "image", "boxplot", "histogram", "area_series", "line_series", "point_series"]
+default = [
+			"bitmap_backend", "bitmap_encoder", "bitmap_gif",
+			"svg_backend", 
+			"chrono", 
+			"ttf", 
+			"image",
+			"deprecated_items",  "all_series", "all_elements"
+		  ]
+all_series = ["area_series", "line_series", "point_series"]
+all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
 # Tier 1 Backends
-bitmap-backend = ["plotters-bitmap", "ttf"]
-svg-backend = ["plotters-svg"]
+bitmap_backend = ["plotters-bitmap", "ttf"]
+bitmap_encoder = ["plotters-bitmap/image_encoder"]
+bitmap_gif = ["plotters-bitmap/gif_backend"]
+svg_backend = ["plotters-svg"]
 # Elements 
 errorbar = []
 candlestick = []
@@ -57,7 +72,7 @@ point_series = []
 ttf = ["font-kit", "rusttype", "lazy_static"]
 # Misc 
 datetime = ["chrono"]
-evcxr = ["svg-backend"]
+evcxr = ["svg_backend"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 
