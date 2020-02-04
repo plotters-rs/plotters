@@ -574,9 +574,9 @@ impl Drop for SVGBackend<'_> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::element::Circle;
-    use crate::prelude::*;
-    use crate::style::text_anchor::{HPos, Pos, VPos};
+    use plotters::element::Circle;
+    use plotters::prelude::*;
+    use plotters::style::text_anchor::{HPos, Pos, VPos};
     use std::fs;
     use std::path::Path;
 

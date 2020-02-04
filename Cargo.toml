@@ -10,3 +10,6 @@ description = "Plotters SVG backend"
 
 [dependencies]
 plotters-backend = {git = "https://github.com/plotters-rs/plotters-backend" }
+
+[dev-dependencies]
+plotters = {path = "../plotters", default_features = false}
