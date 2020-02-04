@@ -1,4 +1,4 @@
-use crate::drawing::backend::BackendCoord;
+use crate::plotters_backend::BackendCoord;
 
 fn get_dir_vector(from: BackendCoord, to: BackendCoord, flag: bool) -> ((f64, f64), (f64, f64)) {
     let v = (i64::from(to.0 - from.0), i64::from(to.1 - from.1));

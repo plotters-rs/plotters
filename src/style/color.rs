@@ -1,7 +1,7 @@
 use super::palette::Palette;
 use super::ShapeStyle;
 
-use crate::drawing::backend::{BackendColor, BackendStyle};
+use crate::plotters_backend::{BackendColor, BackendStyle};
 
 use std::marker::PhantomData;
 

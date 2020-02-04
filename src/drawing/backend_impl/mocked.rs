@@ -1,9 +1,9 @@
 use crate::coord::Shift;
 use crate::drawing::area::IntoDrawingArea;
-use crate::drawing::backend::{
+use crate::drawing::DrawingArea;
+use crate::plotters_backend::{
     BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
 };
-use crate::drawing::DrawingArea;
 use crate::style::RGBAColor;
 
 use std::collections::VecDeque;

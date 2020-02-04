@@ -4,8 +4,8 @@ use crate::style::{Color, TextStyle};
 
 use std::convert::From;
 
-use crate::drawing::backend::BackendStyle;
-pub use crate::drawing::backend::{FontFamily, FontStyle, FontTransform};
+use crate::plotters_backend::BackendStyle;
+pub use crate::plotters_backend::{FontFamily, FontStyle, FontTransform};
 
 /// The error type for the font implementation
 pub type FontError = <FontDataInternal as FontData>::ErrorType;

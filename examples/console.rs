@@ -1,6 +1,5 @@
-use plotters::drawing::{
-    backend::{BackendColor, BackendStyle, BackendTextStyle, DrawingErrorKind},
-    DrawingBackend,
+use plotters::plotters_backend::{
+    BackendColor, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
 };
 use plotters::prelude::*;
 use plotters::style::text_anchor::{HPos, VPos};
@@ -113,7 +112,7 @@ impl DrawingBackend for TextDrawingBackend {
             return Ok(());
         }
 
-        plotters::drawing::rasterizer::draw_line(self, from, to, style)
+        plotters::plotters_backend::rasterizer::draw_line(self, from, to, style)
     }
 
     fn estimate_text_size<S: BackendTextStyle>(

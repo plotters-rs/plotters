@@ -1,4 +1,4 @@
-use crate::drawing::backend::{
+use crate::plotters_backend::{
     BackendColor, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
 };
 use std::marker::PhantomData;
@@ -926,7 +926,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             return Ok(());
         }
 
-        crate::drawing::rasterizer::draw_line(self, from, to, style)
+        crate::plotters_backend::rasterizer::draw_line(self, from, to, style)
     }
 
     fn draw_rect<S: BackendStyle>(
@@ -946,7 +946,7 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             }
             return Ok(());
         }
-        crate::drawing::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
+        crate::plotters_backend::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
     fn blit_bitmap<'b>(

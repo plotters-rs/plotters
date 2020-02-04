@@ -1,5 +1,5 @@
 use super::*;
-use crate::drawing::backend::DrawingBackend;
+use crate::plotters_backend::DrawingBackend;
 use std::borrow::Borrow;
 use std::iter::{once, Once};
 use std::marker::PhantomData;

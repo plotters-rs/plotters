@@ -701,6 +701,8 @@ pub use crate::drawing::create_mocked_drawing_area;
 #[cfg(feature = "palette_ext")]
 pub use palette;
 
+pub mod plotters_backend;
+
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
     pub use crate::chart::{ChartBuilder, ChartContext, LabelAreaPosition, SeriesLabelPosition};
@@ -712,6 +714,8 @@ pub mod prelude {
 
     #[cfg(feature = "chrono")]
     pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
+
+    pub use crate::plotters_backend::DrawingBackend;
 
     pub use crate::drawing::*;
     #[cfg(feature = "area_series")]

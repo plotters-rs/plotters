@@ -2,6 +2,7 @@ use crate::style::text_anchor::{HPos, VPos};
 use std::error::Error;
 //use crate::style::{FontDesc, FontError, TextStyle};
 
+pub mod rasterizer;
 mod style;
 mod text;
 
@@ -74,7 +75,7 @@ pub trait DrawingBackend: Sized {
         to: BackendCoord,
         style: &S,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        super::rasterizer::draw_line(self, from, to, style)
+        rasterizer::draw_line(self, from, to, style)
     }
 
     /// Draw a rectangle on the drawing backend
@@ -89,7 +90,7 @@ pub trait DrawingBackend: Sized {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        super::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
+        rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
     /// Draw a path on the drawing backend
@@ -117,7 +118,7 @@ pub trait DrawingBackend: Sized {
             }
         } else {
             let p: Vec<_> = path.into_iter().collect();
-            let v = super::rasterizer::polygonize(&p[..], style.stroke_width());
+            let v = rasterizer::polygonize(&p[..], style.stroke_width());
             return self.fill_polygon(v, &style.color());
         }
         Ok(())
@@ -135,7 +136,7 @@ pub trait DrawingBackend: Sized {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        super::rasterizer::draw_circle(self, center, radius, style, fill)
+        rasterizer::draw_circle(self, center, radius, style, fill)
     }
 
     fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
@@ -145,7 +146,7 @@ pub trait DrawingBackend: Sized {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let vert_buf: Vec<_> = vert.into_iter().collect();
 
-        super::rasterizer::fill_polygon(self, &vert_buf[..], style)
+        rasterizer::fill_polygon(self, &vert_buf[..], style)
     }
 
     /// Draw a text on the drawing backend

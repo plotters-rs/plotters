@@ -11,12 +11,12 @@ use super::series::SeriesLabelStyle;
 use crate::coord::{
     AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
 };
-use crate::drawing::backend::FontTransform;
-use crate::drawing::backend::{BackendCoord, DrawingBackend};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{AsRelative, ShapeStyle, SizeDesc, TextStyle};
+
+use crate::plotters_backend::{BackendCoord, DrawingBackend, FontTransform};
 
 /// The annotations (such as the label of the series, the legend element, etc)
 /// When a series is drawn onto a drawing area, an series annotation object

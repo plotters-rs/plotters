@@ -2,8 +2,8 @@ use super::color::Color;
 use super::font::{FontDesc, FontError, FontFamily, FontStyle, FontTransform};
 use super::size::{HasDimension, SizeDesc};
 use super::BLACK;
-pub use crate::drawing::backend::text_anchor;
-use crate::drawing::backend::{BackendColor, BackendCoord, BackendStyle, BackendTextStyle};
+pub use crate::plotters_backend::text_anchor;
+use crate::plotters_backend::{BackendColor, BackendCoord, BackendStyle, BackendTextStyle};
 
 /// Style of a text
 #[derive(Clone)]

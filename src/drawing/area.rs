@@ -1,7 +1,7 @@
-/// The abstraction of a drawing area
-use super::backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
+/// The abstraction of a drawing area
+use crate::plotters_backend::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{Color, SizeDesc, TextStyle};
 

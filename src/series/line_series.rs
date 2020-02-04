@@ -1,5 +1,5 @@
-use crate::drawing::DrawingBackend;
 use crate::element::{Circle, DynElement, IntoDynElement, PathElement};
+use crate::plotters_backend::DrawingBackend;
 use crate::style::ShapeStyle;
 use std::marker::PhantomData;
 
