@@ -744,7 +744,7 @@ pub mod prelude {
     #[cfg(feature = "errorbar")]
     pub use crate::element::ErrorBar;
 
-    #[cfg(feature = "bitmap")]
+    #[cfg(feature = "bitmap-backend")]
     pub use crate::element::BitMapElement;
 
     pub use crate::data::Quartiles;

@@ -1,18 +1,3 @@
-#[cfg(feature = "svg")]
-mod svg;
-#[cfg(feature = "svg")]
-pub use self::svg::SVGBackend;
-
-#[cfg(feature = "bitmap")]
-mod bitmap;
-#[cfg(feature = "bitmap")]
-pub use bitmap::BitMapBackend;
-
-#[cfg(feature = "bitmap")]
-pub mod bitmap_pixel {
-    pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
-}
-
 #[cfg(target_arch = "wasm32")]
 mod canvas;
 #[cfg(target_arch = "wasm32")]
