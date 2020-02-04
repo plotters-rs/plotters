@@ -14,7 +14,6 @@ exclude = ["doc-template/*"]
 [dependencies]
 num-traits = "0.2.10"
 chrono = { version = "0.4.10", optional = true }
-gif = { version = "0.10.3", optional = true }
 plotters-backend = "0.0.*"
 plotters-bitmap = {version = "0.1.*", optional = true}
 plotters-svg = {version = "0.1.*", optional = true}
