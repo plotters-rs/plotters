@@ -1,4 +1,4 @@
-use crate::{DrawingBackend, BackendCoord, BackendStyle, DrawingErrorKind};
+use crate::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 
 pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     back: &mut DB,

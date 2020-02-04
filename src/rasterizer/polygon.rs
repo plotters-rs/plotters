@@ -1,4 +1,4 @@
-use crate::{DrawingBackend, BackendCoord, BackendStyle, DrawingErrorKind};
+use crate::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 

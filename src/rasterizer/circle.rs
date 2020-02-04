@@ -1,4 +1,4 @@
-use crate::{DrawingBackend, BackendCoord, BackendStyle, DrawingErrorKind};
+use crate::{BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind};
 
 pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
     b: &mut B,
