@@ -27,6 +27,7 @@ mod datetime;
 mod discrete;
 mod group_by;
 mod logarithmic;
+mod nested;
 mod numeric;
 mod partial_axis;
 mod ranged;
@@ -49,6 +50,9 @@ pub use discrete::{CentricValues, DiscreteRanged, IntoCentric};
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
 pub use group_by::{GroupBy, ToGroupByRange};
+
+pub use nested::{BuildNestedCoord, NestedRange};
+
 use std::rc::Rc;
 use std::sync::Arc;
 
