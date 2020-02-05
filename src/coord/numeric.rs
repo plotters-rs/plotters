@@ -54,7 +54,14 @@ macro_rules! make_numeric_coord {
         impl Ranged for $name {
             type ValueType = $type;
             fn map(&self, v: &$type, limit: (i32, i32)) -> i32 {
+                // Corner case: If we have a range that have only one value,
+                // then we just assign everything to the only point
+                if self.1 == self.0 {
+                    return (limit.1 - limit.0) / 2;
+                }
+
                 let logic_length = (*v - self.0) as f64 / (self.1 - self.0) as f64;
+
                 let actual_length = limit.1 - limit.0;
 
                 if actual_length == 0 {
