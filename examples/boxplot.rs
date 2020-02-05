@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|(k, v)| (k.0.clone(), k.1.clone(), Quartiles::new(&v)))
         .collect();
 
-    let host_list:Vec<_> = dataset
+    let host_list: Vec<_> = dataset
         .iter()
         .unique_by(|x| x.0.clone())
         .sorted_by(|a, b| b.2.median().partial_cmp(&a.2.median()).unwrap())
@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Ping Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
             values_range.start - 1.0..values_range.end + 1.0,
-            host_list[..].into_centric()
+            host_list[..].into_centric(),
         )?;
 
     chart
@@ -110,9 +110,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         6.0, 7.0, 15.9, 36.9, 39.0, 40.0, 41.0, 42.0, 43.0, 47.0, 49.0,
     ]);
     let quartiles_b = Quartiles::new(&[16.0, 17.0, 50.0, 60.0, 40.2, 41.3, 42.7, 43.3, 47.0]);
-    
+
     let ab_axis = ["a", "b"];
-    
+
     let values_range = fitting_range(
         quartiles_a
             .values()
@@ -124,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .caption("Vertical Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
-            (&ab_axis[..]).into_centric(),
+            ab_axis[..].into_centric(),
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 
