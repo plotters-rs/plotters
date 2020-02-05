@@ -711,7 +711,7 @@ pub mod prelude {
         BuildNestedCoord, CentricValues, CoordTranslate, GroupBy, IntoCentric, IntoPartialAxis,
         LogCoord, LogRange, LogScalable, NestedRange, NestedValue, Ranged, RangedCoord,
         RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32,
-        RangedCoordu64, ToGroupByRange,
+        RangedCoordu64, ToGroupByRange, Linspace,
     };
 
     #[cfg(feature = "chrono")]

@@ -3,6 +3,7 @@ use super::{DiscreteRanged, Ranged};
 use num_traits::float::Float;
 use std::ops::Range;
 
+#[derive(Clone)]
 pub enum LinspaceRounding {
     Floor,
     Ceil,
@@ -20,6 +21,7 @@ impl LinspaceRounding {
 }
 
 /// A linspace coordinate system, which maps a float number on a descerete coordinate
+#[derive(Clone)]
 pub struct Linspace {
     start: f64,
     end: f64,
