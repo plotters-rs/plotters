@@ -2,14 +2,12 @@ use super::{AsRangedCoord, DiscreteRanged, Ranged};
 use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::ops::Range;
 
-/// Describe a value for a nested croodinate. The value may be two types:
-///
-/// - `NestedValue::Category` - Denotes a category
-/// - `NestedValue::Value` - Denotes an actual value
-///
+/// Describe a value for a nested croodinate
 #[derive(PartialEq, Eq, Clone)]
 pub enum NestedValue<C, V> {
+    /// Category value
     Category(C),
+    /// One exact nested value
     Value(C, V),
 }
 
@@ -25,6 +23,18 @@ impl<C, V> NestedValue<C, V> {
             NestedValue::Category(_) => None,
             NestedValue::Value(_, val) => Some(val),
         }
+    }
+}
+
+impl<C, V> From<(C, V)> for NestedValue<C, V> {
+    fn from((cat, val): (C, V)) -> NestedValue<C, V> {
+        NestedValue::Value(cat, val)
+    }
+}
+
+impl<C, V> From<C> for NestedValue<C, V> {
+    fn from(cat: C) -> NestedValue<C, V> {
+        NestedValue::Category(cat)
     }
 }
 

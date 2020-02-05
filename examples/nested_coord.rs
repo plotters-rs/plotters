@@ -24,14 +24,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart.draw_series(LineSeries::new(
         (0..10)
             .map(|x| x as f64 / 1.0)
-            .map(|x| (NestedValue::Value(&"Linear", x), x)),
+            .map(|x| ((&"Linear", x).into(), x)),
         &RED,
     ))?;
 
     chart.draw_series(LineSeries::new(
         (0..10)
             .map(|x| x as f64 / 1.0)
-            .map(|x| (NestedValue::Value(&"Quadratic", x), x * x / 10.0)),
+            .map(|x| ((&"Quadratic", x).into(), x * x / 10.0)),
         &RED,
     ))?;
 
