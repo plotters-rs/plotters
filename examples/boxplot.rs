@@ -113,7 +113,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         6.0, 7.0, 15.9, 36.9, 39.0, 40.0, 41.0, 42.0, 43.0, 47.0, 49.0,
     ]);
     let quartiles_b = Quartiles::new(&[16.0, 17.0, 50.0, 60.0, 40.2, 41.3, 42.7, 43.3, 47.0]);
-    let category_ab = Category::new("", vec!["a", "b"]);
+    
+    let ab_axis = ["a", "b"];
+    
     let values_range = fitting_range(
         quartiles_a
             .values()
@@ -125,14 +127,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .caption("Vertical Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
-            category_ab.clone(),
+            (&ab_axis[..]).into_centric(),
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;
     chart.draw_series(vec![
-        Boxplot::new_vertical(category_ab.get(&"a").unwrap(), &quartiles_a),
-        Boxplot::new_vertical(category_ab.get(&"b").unwrap(), &quartiles_b),
+        Boxplot::new_vertical(CentricValues::Exact(&"a"), &quartiles_a),
+        Boxplot::new_vertical(CentricValues::Exact(&"b"), &quartiles_b),
     ])?;
 
     let mut chart = ChartBuilder::on(&right)

@@ -710,7 +710,7 @@ pub mod prelude {
     pub use crate::coord::{
         Category, CoordTranslate, GroupBy, IntoCentric, IntoPartialAxis, LogCoord, LogRange,
         LogScalable, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
-        RangedCoordi64, RangedCoordu32, RangedCoordu64, ToGroupByRange,
+        RangedCoordi64, RangedCoordu32, RangedCoordu64, ToGroupByRange, CentricValues,
     };
 
     #[cfg(feature = "chrono")]
