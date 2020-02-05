@@ -1,12 +1,16 @@
 use super::{AsRangedCoord, DiscreteRanged, Ranged};
 use std::ops::Range;
 
+/// A range that is defined by a slice of values.
+///
+/// Please note: the behavior of constructing an empty range may cause panic
 pub struct RangedSlice<'a, T: PartialEq>(&'a [T]);
 
 impl<'a, T: PartialEq> Ranged for RangedSlice<'a, T> {
     type ValueType = &'a T;
 
     fn range(&self) -> Range<&'a T> {
+        // If inner slice is empty, we should always panic
         &self.0[0]..&self.0[self.0.len() - 1]
     }
 
