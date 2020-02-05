@@ -1,13 +1,53 @@
 use super::{AsRangedCoord, DiscreteRanged, Ranged};
+use std::fmt::{Debug, Formatter, Result as FmtResult};
 use std::ops::Range;
 
+/// Describe a value for a nested croodinate. The value may be two types:
+///
+/// - `NestedValue::Category` - Denotes a category
+/// - `NestedValue::Value` - Denotes an actual value
+///
+#[derive(PartialEq, Eq, Clone)]
+pub enum NestedValue<C, V> {
+    Category(C),
+    Value(C, V),
+}
+
+impl<C, V> NestedValue<C, V> {
+    pub fn category(&self) -> &C {
+        match self {
+            NestedValue::Category(cat) => cat,
+            NestedValue::Value(cat, _) => cat,
+        }
+    }
+    pub fn nested_value(&self) -> Option<&V> {
+        match self {
+            NestedValue::Category(_) => None,
+            NestedValue::Value(_, val) => Some(val),
+        }
+    }
+}
+
+impl<C: Debug, V: Debug> Debug for NestedValue<C, V> {
+    fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
+        match self {
+            NestedValue::Category(cat) => write!(formatter, "{:?}", cat),
+            NestedValue::Value(_, val) => write!(formatter, "{:?}", val),
+        }
+    }
+}
+
+/// A nested coordinate spec which is a discrete coordinate on the top level and
+/// for each value in discrete value, there is a secondary coordinate system.
+/// And the value is defined as a tuple of primary coordinate value and secondary
+/// coordinate value
 pub struct NestedRange<Primary: DiscreteRanged, Secondary: Ranged> {
     primary: Primary,
     secondary: Vec<Secondary>,
 }
 
 impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
-    type ValueType = (P::ValueType, Option<S::ValueType>);
+    type ValueType = NestedValue<P::ValueType, S::ValueType>;
 
     fn range(&self) -> Range<Self::ValueType> {
         let primary_range = self.primary.range();
@@ -15,11 +55,12 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
         let secondary_left = self.secondary[0].range().start;
         let secondary_right = self.secondary[self.primary.size() - 1].range().end;
 
-        (primary_range.start, Some(secondary_left))..(primary_range.end, Some(secondary_right))
+        NestedValue::Value(primary_range.start, secondary_left)
+            ..NestedValue::Value(primary_range.end, secondary_right)
     }
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        let idx = self.primary.index_of(&value.0).unwrap_or(0);
+        let idx = self.primary.index_of(value.category()).unwrap_or(0);
         let total = self.primary.size();
 
         let bucket_size = (limit.1 - limit.0) / total as i32;
@@ -33,7 +74,7 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
         let s_right =
             limit.0 + s_left + bucket_size + if (residual as usize) < idx { 1 } else { 0 };
 
-        if let Some(ref secondary_value) = value.1 {
+        if let Some(secondary_value) = value.nested_value() {
             self.secondary[idx].map(secondary_value, (s_left, s_right))
         } else {
             (s_left + s_right) / 2
@@ -47,7 +88,7 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
         self.primary
             .key_points(max_points)
             .into_iter()
-            .map(|x| (x, None))
+            .map(|x| NestedValue::Category(x))
             .collect()
     }
 }
@@ -58,8 +99,8 @@ impl<P: DiscreteRanged, S: DiscreteRanged> DiscreteRanged for NestedRange<P, S> 
     }
 
     fn index_of(&self, value: &Self::ValueType) -> Option<usize> {
-        let p_idx = self.primary.index_of(&value.0)?;
-        let s_idx = self.secondary[p_idx].index_of(value.1.as_ref()?)?;
+        let p_idx = self.primary.index_of(value.category())?;
+        let s_idx = self.secondary[p_idx].index_of(value.nested_value()?)?;
         Some(
             s_idx
                 + self.secondary[..p_idx]
@@ -72,9 +113,9 @@ impl<P: DiscreteRanged, S: DiscreteRanged> DiscreteRanged for NestedRange<P, S> 
     fn from_index(&self, mut index: usize) -> Option<Self::ValueType> {
         for (p_idx, snd) in self.secondary.iter().enumerate() {
             if snd.size() > index {
-                return Some((
+                return Some(NestedValue::Value(
                     self.primary.from_index(p_idx).unwrap(),
-                    snd.from_index(index),
+                    snd.from_index(index).unwrap(),
                 ));
             }
             index -= snd.size();
@@ -118,13 +159,13 @@ mod test {
 
         let range = coord.range();
 
-        assert_eq!((0, Some(0))..(10, Some(11)), range);
-        assert_eq!(coord.map(&(0, None), (0, 1100)), 50);
-        assert_eq!(coord.map(&(0, Some(0)), (0, 1100)), 0);
-        assert_eq!(coord.map(&(5, Some(4)), (0, 1100)), 567);
+        assert_eq!(NestedValue::Value(0, 0)..NestedValue::Value(10, 11), range);
+        assert_eq!(coord.map(&NestedValue::Category(0), (0, 1100)), 50);
+        assert_eq!(coord.map(&NestedValue::Value(0, 0), (0, 1100)), 0);
+        assert_eq!(coord.map(&NestedValue::Value(5, 4), (0, 1100)), 567);
 
         assert_eq!(coord.size(), (2 + 12) * 11 / 2);
-        assert_eq!(coord.index_of(&(5, Some(4))), Some(24));
-        assert_eq!(coord.from_index(24), Some((5, Some(4))));
+        assert_eq!(coord.index_of(&NestedValue::Value(5, 4)), Some(24));
+        assert_eq!(coord.from_index(24), Some(NestedValue::Value(5, 4)));
     }
 }
