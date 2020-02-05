@@ -177,7 +177,7 @@ impl<K, O: BoxplotOrient<K, f32>> Boxplot<K, O> {
     }
 }
 
-impl<'a, K: 'a + Clone, O: BoxplotOrient<K, f32>> PointCollection<'a, (O::XType, O::YType)>
+impl<'a, K: Clone, O: BoxplotOrient<K, f32>> PointCollection<'a, (O::XType, O::YType)>
     for &'a Boxplot<K, O>
 {
     type Borrow = (O::XType, O::YType);
