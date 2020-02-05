@@ -31,6 +31,9 @@ mod logarithmic;
 mod numeric;
 mod partial_axis;
 mod ranged;
+mod slice;
+
+pub use slice::RangedSlice;
 
 #[cfg(feature = "chrono")]
 pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
@@ -42,7 +45,7 @@ pub use ranged::{AsRangedCoord, MeshLine, Ranged, RangedCoord, ReversibleRanged}
 
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};
 
-pub use discrete::{DiscreteRanged, IntoCentric};
+pub use discrete::{DiscreteRanged, IntoCentric, CentricValues};
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 

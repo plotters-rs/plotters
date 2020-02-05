@@ -108,6 +108,7 @@ where
 impl<R: AsRangedCoord> IntoCentric for R where R::CoordDescType: DiscreteRanged {}
 
 /// The value that used by the centric coordinate
+#[derive(Clone)]
 pub enum CentricValues<T> {
     Exact(T),
     CenterOf(T),
