@@ -4,6 +4,7 @@ use std::ops::Range;
 /// A range that is defined by a slice of values.
 ///
 /// Please note: the behavior of constructing an empty range may cause panic
+#[derive(Clone)]
 pub struct RangedSlice<'a, T: PartialEq>(&'a [T]);
 
 impl<'a, T: PartialEq> Ranged for RangedSlice<'a, T> {
