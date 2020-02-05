@@ -94,7 +94,7 @@ impl<K, V> ErrorBar<K, V, ErrorBarOrientH<K, V>> {
     }
 }
 
-impl<'a, K: 'a + Clone, V: 'a + Clone, O: ErrorBarOrient<K, V>>
+impl<'a, K: Clone, V: Clone, O: ErrorBarOrient<K, V>>
     PointCollection<'a, (O::XType, O::YType)> for &'a ErrorBar<K, V, O>
 {
     type Borrow = (O::XType, O::YType);

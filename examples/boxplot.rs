@@ -42,15 +42,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|(k, v)| (k.0.clone(), k.1.clone(), Quartiles::new(&v)))
         .collect();
 
-    let category = Category::new(
-        "Host",
-        dataset
-            .iter()
-            .unique_by(|x| x.0.clone())
-            .sorted_by(|a, b| b.2.median().partial_cmp(&a.2.median()).unwrap())
-            .map(|x| x.0.clone())
-            .collect(),
-    );
+    let host_list:Vec<_> = dataset
+        .iter()
+        .unique_by(|x| x.0.clone())
+        .sorted_by(|a, b| b.2.median().partial_cmp(&a.2.median()).unwrap())
+        .map(|x| x.0.clone())
+        .collect();
 
     let mut colors = (0..).map(Palette99::pick);
     let mut offsets = (-12..).step_by(24);
@@ -75,21 +72,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Ping Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
             values_range.start - 1.0..values_range.end + 1.0,
-            category.range(),
+            host_list[..].into_centric()
         )?;
 
     chart
         .configure_mesh()
         .x_desc("Ping, ms")
-        .y_desc(category.name())
-        .y_labels(category.len())
+        .y_desc("Host")
+        .y_labels(host_list.len())
         .line_style_2(&WHITE)
         .draw()?;
 
     for (label, (values, style, offset)) in &series {
         chart
             .draw_series(values.iter().map(|x| {
-                Boxplot::new_horizontal(category.get(&x.0).unwrap(), &x.1)
+                Boxplot::new_horizontal(CentricValues::CenterOf(&x.0), &x.1)
                     .width(20)
                     .whisker_width(0.5)
                     .style(style)
@@ -133,8 +130,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;
     chart.draw_series(vec![
-        Boxplot::new_vertical(CentricValues::Exact(&"a"), &quartiles_a),
-        Boxplot::new_vertical(CentricValues::Exact(&"b"), &quartiles_b),
+        Boxplot::new_vertical(CentricValues::CenterOf(&"a"), &quartiles_a),
+        Boxplot::new_vertical(CentricValues::CenterOf(&"b"), &quartiles_b),
     ])?;
 
     let mut chart = ChartBuilder::on(&right)
