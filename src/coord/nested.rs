@@ -12,12 +12,14 @@ pub enum NestedValue<C, V> {
 }
 
 impl<C, V> NestedValue<C, V> {
+    /// Get the category of current nest value
     pub fn category(&self) -> &C {
         match self {
             NestedValue::Category(cat) => cat,
             NestedValue::Value(cat, _) => cat,
         }
     }
+    /// Get the nested value from this value
     pub fn nested_value(&self) -> Option<&V> {
         match self {
             NestedValue::Category(_) => None,
