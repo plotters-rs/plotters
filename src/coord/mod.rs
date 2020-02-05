@@ -51,7 +51,7 @@ pub use logarithmic::{LogCoord, LogRange, LogScalable};
 
 pub use group_by::{GroupBy, ToGroupByRange};
 
-pub use nested::{BuildNestedCoord, NestedRange};
+pub use nested::{BuildNestedCoord, NestedRange, NestedValue};
 
 use std::rc::Rc;
 use std::sync::Arc;
