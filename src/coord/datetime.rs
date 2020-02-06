@@ -1,22 +1,25 @@
 /// The datetime coordinates
-use chrono::{Date, DateTime, Datelike, Duration, NaiveTime, TimeZone, Timelike};
-use std::ops::Range;
+use chrono::{
+    Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike,
+};
+use std::ops::{Add, Range, Sub};
 
 use super::{AsRangedCoord, DiscreteRanged, Ranged};
 
 /// The trait that describe some time value
 pub trait TimeValue: Eq {
-    type Tz: TimeZone;
+    type DateType: Datelike + PartialOrd;
+
     /// Returns the date that is no later than the time
-    fn date_floor(&self) -> Date<Self::Tz>;
+    fn date_floor(&self) -> Self::DateType;
     /// Returns the date that is no earlier than the time
-    fn date_ceil(&self) -> Date<Self::Tz>;
+    fn date_ceil(&self) -> Self::DateType;
     /// Returns the maximum value that is earlier than the given date
-    fn earliest_after_date(date: Date<Self::Tz>) -> Self;
+    fn earliest_after_date(date: Self::DateType) -> Self;
     /// Returns the duration between two time value
     fn subtract(&self, other: &Self) -> Duration;
     /// Get the timezone information for current value
-    fn timezone(&self) -> Self::Tz;
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
 
     /// Map the coord
     fn map_coord(value: &Self, begin: &Self, end: &Self, limit: (i32, i32)) -> i32 {
@@ -40,8 +43,28 @@ pub trait TimeValue: Eq {
     }
 }
 
+impl TimeValue for NaiveDate {
+    type DateType = NaiveDate;
+    fn date_floor(&self) -> NaiveDate {
+        self.clone()
+    }
+    fn date_ceil(&self) -> NaiveDate {
+        self.clone()
+    }
+    fn earliest_after_date(date: NaiveDate) -> Self {
+        date
+    }
+    fn subtract(&self, other: &NaiveDate) -> Duration {
+        self.clone() - other.clone()
+    }
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        NaiveDate::from_ymd(year, month, date)
+    }
+}
+
 impl<Z: TimeZone> TimeValue for Date<Z> {
-    type Tz = Z;
+    type DateType = Date<Z>;
     fn date_floor(&self) -> Date<Z> {
         self.clone()
     }
@@ -54,13 +77,14 @@ impl<Z: TimeZone> TimeValue for Date<Z> {
     fn subtract(&self, other: &Date<Z>) -> Duration {
         self.clone() - other.clone()
     }
-    fn timezone(&self) -> Self::Tz {
-        self.timezone()
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        self.timezone().ymd(year, month, date)
     }
 }
 
 impl<Z: TimeZone> TimeValue for DateTime<Z> {
-    type Tz = Z;
+    type DateType = Date<Z>;
     fn date_floor(&self) -> Date<Z> {
         self.date()
     }
@@ -78,25 +102,54 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
     fn subtract(&self, other: &DateTime<Z>) -> Duration {
         self.clone() - other.clone()
     }
-    fn timezone(&self) -> Self::Tz {
-        self.timezone()
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        self.timezone().ymd(year, month, date)
+    }
+}
+
+impl TimeValue for NaiveDateTime {
+    type DateType = NaiveDate;
+    fn date_floor(&self) -> NaiveDate {
+        self.date()
+    }
+    fn date_ceil(&self) -> NaiveDate {
+        if self.time().num_seconds_from_midnight() > 0 {
+            self.date() + Duration::days(1)
+        } else {
+            self.date()
+        }
+    }
+    fn earliest_after_date(date: NaiveDate) -> NaiveDateTime {
+        date.and_hms(0, 0, 0)
+    }
+
+    fn subtract(&self, other: &NaiveDateTime) -> Duration {
+        self.clone() - other.clone()
+    }
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        NaiveDate::from_ymd(year, month, date)
     }
 }
 
 /// The ranged coordinate for date
 #[derive(Clone)]
-pub struct RangedDate<Z: TimeZone>(Date<Z>, Date<Z>);
+pub struct RangedDate<D: Datelike>(D, D);
 
-impl<Z: TimeZone> From<Range<Date<Z>>> for RangedDate<Z> {
-    fn from(range: Range<Date<Z>>) -> Self {
+impl<D: Datelike> From<Range<D>> for RangedDate<D> {
+    fn from(range: Range<D>) -> Self {
         Self(range.start, range.end)
     }
 }
 
-impl<Z: TimeZone> Ranged for RangedDate<Z> {
-    type ValueType = Date<Z>;
+impl<D> Ranged for RangedDate<D>
+where
+    D: Datelike + TimeValue + Sub<D, Output = Duration> + Add<Duration, Output = D> + Clone,
+{
+    type ValueType = D;
 
-    fn range(&self) -> Range<Date<Z>> {
+    fn range(&self) -> Range<D> {
         self.0.clone()..self.1.clone()
     }
 
@@ -134,12 +187,15 @@ impl<Z: TimeZone> Ranged for RangedDate<Z> {
     }
 }
 
-impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
+impl<D> DiscreteRanged for RangedDate<D>
+where
+    D: Datelike + TimeValue + Sub<D, Output = Duration> + Add<Duration, Output = D> + Clone,
+{
     fn size(&self) -> usize {
         ((self.1.clone() - self.0.clone()).num_days().max(-1) + 1) as usize
     }
 
-    fn index_of(&self, value: &Date<Z>) -> Option<usize> {
+    fn index_of(&self, value: &D) -> Option<usize> {
         let ret = (value.clone() - self.0.clone()).num_days();
         if ret < 0 {
             return None;
@@ -147,14 +203,19 @@ impl<Z: TimeZone> DiscreteRanged for RangedDate<Z> {
         Some(ret as usize)
     }
 
-    fn from_index(&self, index: usize) -> Option<Date<Z>> {
+    fn from_index(&self, index: usize) -> Option<D> {
         Some(self.0.clone() + Duration::days(index as i64))
     }
 }
 
 impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
-    type CoordDescType = RangedDate<Z>;
+    type CoordDescType = RangedDate<Date<Z>>;
     type Value = Date<Z>;
+}
+
+impl AsRangedCoord for Range<NaiveDate> {
+    type CoordDescType = RangedDate<NaiveDate>;
+    type Value = NaiveDate;
 }
 
 /// Indicates the coord has a monthly resolution
@@ -203,11 +264,11 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
             end_year: i32,
             end_month: i32,
             step: u32,
-            tz: T::Tz,
+            builder: &T,
         ) -> Vec<T> {
             let mut ret = vec![];
             while end_year > start_year || (end_year == start_year && end_month >= start_month) {
-                ret.push(T::earliest_after_date(tz.ymd(
+                ret.push(T::earliest_after_date(builder.ymd(
                     start_year,
                     start_month as u32,
                     1,
@@ -231,7 +292,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
                 end_year,
                 end_month as i32,
                 1,
-                self.0.start.timezone(),
+                &self.0.start,
             );
         } else if total_month as usize <= max_points * 3 {
             // Quarterly
@@ -241,7 +302,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
                 end_year,
                 end_month as i32,
                 3,
-                self.0.start.timezone(),
+                &self.0.start,
             );
         } else if total_month as usize <= max_points * 6 {
             // Biyearly
@@ -251,7 +312,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
                 end_year,
                 end_month as i32,
                 6,
-                self.0.start.timezone(),
+                &self.0.start,
             );
         }
 
@@ -262,7 +323,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
             start_month,
             end_year,
             end_month,
-            self.0.start.timezone(),
+            &self.0.start,
         )
     }
 }
@@ -307,7 +368,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
         let index_from_start_year = index + (self.0.start.date_ceil().month() - 1) as usize;
         let year = self.0.start.date_ceil().year() + index_from_start_year as i32 / 12;
         let month = index_from_start_year % 12;
-        Some(T::earliest_after_date(self.0.start.timezone().ymd(
+        Some(T::earliest_after_date(self.0.start.ymd(
             year,
             month as u32 + 1,
             1,
@@ -325,7 +386,7 @@ fn generate_yearly_keypoints<T: TimeValue>(
     start_month: u32,
     mut end_year: i32,
     end_month: u32,
-    tz: T::Tz,
+    builder: &T,
 ) -> Vec<T> {
     if start_month > end_month {
         end_year -= 1;
@@ -349,7 +410,11 @@ fn generate_yearly_keypoints<T: TimeValue>(
     let mut ret = vec![];
 
     while start_year <= end_year {
-        ret.push(T::earliest_after_date(tz.ymd(start_year, start_month, 1)));
+        ret.push(T::earliest_after_date(builder.ymd(
+            start_year,
+            start_month,
+            1,
+        )));
         start_year += freq as i32;
     }
 
@@ -392,7 +457,7 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
             start_month,
             end_year,
             end_month,
-            self.0.start.timezone(),
+            &self.0.start,
         )
     }
 }
@@ -416,7 +481,7 @@ impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
 
     fn from_index(&self, index: usize) -> Option<T> {
         let year = self.0.start.date_ceil().year() + index as i32;
-        let ret = T::earliest_after_date(self.0.start.timezone().ymd(year, 1, 1));
+        let ret = T::earliest_after_date(self.0.start.ymd(year, 1, 1));
         if ret.date_ceil() <= self.0.start.date_floor() {
             return Some(self.0.start.clone());
         }
