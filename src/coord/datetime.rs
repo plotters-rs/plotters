@@ -1,7 +1,5 @@
 /// The datetime coordinates
-use chrono::{
-    Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Timelike,
-};
+use chrono::{Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike};
 use std::ops::{Add, Range, Sub};
 
 use super::{AsRangedCoord, DiscreteRanged, Ranged};
@@ -20,6 +18,8 @@ pub trait TimeValue: Eq {
     fn subtract(&self, other: &Self) -> Duration;
     /// Get the timezone information for current value
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
+    /// Cast current date type into this type
+    fn from_date(date: Self::DateType) -> Self;
 
     /// Map the coord
     fn map_coord(value: &Self, begin: &Self, end: &Self, limit: (i32, i32)) -> i32 {
@@ -61,6 +61,10 @@ impl TimeValue for NaiveDate {
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         NaiveDate::from_ymd(year, month, date)
     }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date
+    }
 }
 
 impl<Z: TimeZone> TimeValue for Date<Z> {
@@ -80,6 +84,10 @@ impl<Z: TimeZone> TimeValue for Date<Z> {
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         self.timezone().ymd(year, month, date)
+    }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date
     }
 }
 
@@ -106,6 +114,10 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         self.timezone().ymd(year, month, date)
     }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date.and_hms(0, 0, 0)
+    }
 }
 
 impl TimeValue for NaiveDateTime {
@@ -130,6 +142,10 @@ impl TimeValue for NaiveDateTime {
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         NaiveDate::from_ymd(year, month, date)
+    }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date.and_hms(0, 0, 0)
     }
 }
 
@@ -513,23 +529,35 @@ impl<T: TimeValue> IntoYearly<T> for Range<T> {
 
 /// The ranged coordinate for the date and time
 #[derive(Clone)]
-pub struct RangedDateTime<Z: TimeZone>(DateTime<Z>, DateTime<Z>);
+pub struct RangedDateTime<DT: Datelike + Timelike + TimeValue>(DT, DT);
 
 impl<Z: TimeZone> AsRangedCoord for Range<DateTime<Z>> {
-    type CoordDescType = RangedDateTime<Z>;
+    type CoordDescType = RangedDateTime<DateTime<Z>>;
     type Value = DateTime<Z>;
 }
 
-impl<Z: TimeZone> From<Range<DateTime<Z>>> for RangedDateTime<Z> {
+impl<Z: TimeZone> From<Range<DateTime<Z>>> for RangedDateTime<DateTime<Z>> {
     fn from(range: Range<DateTime<Z>>) -> Self {
         Self(range.start, range.end)
     }
 }
 
-impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
-    type ValueType = DateTime<Z>;
+impl From<Range<NaiveDateTime>> for RangedDateTime<NaiveDateTime> {
+    fn from(range: Range<NaiveDateTime>) -> Self {
+        Self(range.start, range.end)
+    }
+}
 
-    fn range(&self) -> Range<DateTime<Z>> {
+impl<DT> Ranged for RangedDateTime<DT>
+where
+    DT: Datelike + Timelike + TimeValue + Clone + PartialOrd,
+    DT: Add<Duration, Output = DT>,
+    DT: Sub<DT, Output = Duration>,
+    RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
+{
+    type ValueType = DT;
+
+    fn range(&self) -> Range<DT> {
         self.0.clone()..self.1.clone()
     }
 
@@ -544,23 +572,15 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
             if let Some(actual_ns_per_point) =
                 compute_period_per_point(total_ns as u64, max_points, true)
             {
-                let start_time_ns = u64::from(self.0.time().num_seconds_from_midnight())
-                    * 1_000_000_000
-                    + u64::from(self.0.time().nanosecond());
+                let start_time_ns = u64::from(self.0.num_seconds_from_midnight()) * 1_000_000_000
+                    + u64::from(self.0.nanosecond());
 
-                let mut start_time = self
-                    .0
-                    .date_floor()
-                    .and_time(
-                        NaiveTime::from_hms(0, 0, 0)
-                            + Duration::nanoseconds(if start_time_ns % actual_ns_per_point > 0 {
-                                start_time_ns
-                                    + (actual_ns_per_point - start_time_ns % actual_ns_per_point)
-                            } else {
-                                start_time_ns
-                            } as i64),
-                    )
-                    .unwrap();
+                let mut start_time = DT::from_date(self.0.date_floor())
+                    + Duration::nanoseconds(if start_time_ns % actual_ns_per_point > 0 {
+                        start_time_ns + (actual_ns_per_point - start_time_ns % actual_ns_per_point)
+                    } else {
+                        start_time_ns
+                    } as i64);
 
                 let mut ret = vec![];
 
@@ -579,7 +599,7 @@ impl<Z: TimeZone> Ranged for RangedDateTime<Z> {
         date_range
             .key_points(max_points)
             .into_iter()
-            .map(|x| x.and_hms(0, 0, 0))
+            .map(|x| DT::from_date(x))
             .collect()
     }
 }
