@@ -86,9 +86,7 @@ where
 pub trait IntoLinspace: AsRangedCoord {
     fn step<S: Clone>(self, val: S) -> Linspace<<Self as AsRangedCoord>::CoordDescType, S>
     where
-        <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType: Add<S, Output = <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType>
-            + PartialOrd
-            + Clone,
+        Self::Value: Add<S, Output = Self::Value> + PartialOrd + Clone,
     {
         let mut ret = Linspace {
             step: val,
