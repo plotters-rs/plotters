@@ -3,11 +3,22 @@ use std::cmp::{Ordering, PartialOrd};
 use std::marker::PhantomData;
 use std::ops::{Add, Range, Sub};
 
-/// The type marker used to denote the rounding method
+/// The type marker used to denote the rounding method.
+/// Since we are mapping any range to a discrete range thus not all values are
+/// perfect mapped to the grid points. In this case, this type marker gives hints
+/// for the linspace coord for how to treat the non-grid-point values.
 pub trait LinspaceRoundingMethod<V> {
+    /// Search for the value within the given values array and rounding method
+    ///
+    /// - `values`: The values we want to search
+    /// - `target`: The target value
+    /// - `returns`: The index if we found the matching item, otherwise none
     fn search(values: &[V], target: &V) -> Option<usize>;
 }
 
+/// This type marker means linspace do the exact match for searching
+/// which means if there's no value strictly equals to the target, the coord spec
+/// reports not found result.
 #[derive(Clone)]
 pub struct Exact<V>(PhantomData<V>);
 
@@ -17,6 +28,8 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Exact<V> {
     }
 }
 
+/// This type marker means we round up the value. Which means we try to find a
+/// minimal value in the values array that is greater or equal to the target.
 #[derive(Clone)]
 pub struct Ceil<V>(PhantomData<V>);
 
@@ -48,6 +61,8 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Ceil<V> {
     }
 }
 
+/// This means we use the round down. Which means we try to find a
+/// maximum value in the values array that is less or equal to the target.
 #[derive(Clone)]
 pub struct Floor<V>(PhantomData<V>);
 
@@ -79,6 +94,8 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Floor<V> {
     }
 }
 
+/// This means we use the rounding. Which means we try to find the closet
+/// value in the array that matches the target
 #[derive(Clone)]
 pub struct Round<V, S>(PhantomData<(V, S)>);
 
@@ -132,6 +149,17 @@ where
     }
 }
 
+/// The linspace coordinate decorator, which allows the conversion from a continuous coordinate
+/// to a discrete coordinate by a giving step.
+///
+/// For example, range `0f32..100f32` is a continuous coordinate, thus this prevent us having a
+/// histogram on it. In this case, to get a histogram, we need to split the original range to a
+/// set of discrete buckets (for example, 0.5 per bucket).
+///
+/// The linspace decorate abstracting this method. For example, we can have a discrete coordinate:
+/// `(0f32..100f32).step(0.5)`.
+///
+/// Linspace also supports different types of bucket matching method: ceil, floor, round or exact.
 #[derive(Clone)]
 pub struct Linspace<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>>
 where
@@ -166,6 +194,9 @@ where
         }
     }
 
+    /// Set the linspace use the round up method for value matching
+    ///
+    /// - **returns**: The newly created linspace that uses new matching method
     pub fn use_ceil(self) -> Linspace<T, S, Ceil<T::ValueType>> {
         Linspace {
             step: self.step,
@@ -175,6 +206,9 @@ where
         }
     }
 
+    /// Set the linspace use the round down method for value matching
+    ///
+    /// - **returns**: The newly created linspace that uses new matching method
     pub fn use_floor(self) -> Linspace<T, S, Floor<T::ValueType>> {
         Linspace {
             step: self.step,
@@ -184,7 +218,26 @@ where
         }
     }
 
+    /// Set the linspace use the best match method for value matching
+    ///
+    /// - **returns**: The newly created linspace that uses new matching method
     pub fn use_round(self) -> Linspace<T, S, Round<T::ValueType, S>>
+    where
+        T::ValueType: Sub<T::ValueType, Output = S>,
+        S: PartialOrd,
+    {
+        Linspace {
+            step: self.step,
+            inner: self.inner,
+            grid_value: self.grid_value,
+            _phatom: PhantomData,
+        }
+    }
+
+    /// Set the linspace use the exact match method for value matching
+    ///
+    /// - **returns**: The newly created linspace that uses new matching method
+    pub fn use_exact(self) -> Linspace<T, S, Exact<T::ValueType, S>>
     where
         T::ValueType: Sub<T::ValueType, Output = S>,
         S: PartialOrd,
@@ -245,6 +298,11 @@ where
 }
 
 pub trait IntoLinspace: AsRangedCoord {
+    /// Set the step value, make a linspace coordinate from the given range.
+    /// By default the matching method use the exact match
+    ///
+    /// - `val`: The step value
+    /// - **returns*: The newly created linspace
     fn step<S: Clone>(self, val: S) -> Linspace<Self::CoordDescType, S, Exact<Self::Value>>
     where
         Self::Value: Add<S, Output = Self::Value> + PartialOrd + Clone,
