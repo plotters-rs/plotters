@@ -1,18 +1,144 @@
 use super::{numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, Ranged};
 use std::cmp::{Ordering, PartialOrd};
-use std::ops::{Add, Range};
+use std::marker::PhantomData;
+use std::ops::{Add, Range, Sub};
+
+/// The type marker used to denote the rounding method
+pub trait LinspaceRoundingMethod<V> {
+    fn search(values: &[V], target: &V) -> Option<usize>;
+}
+pub struct Exact<V>(PhantomData<V>);
+
+impl<V: PartialOrd> LinspaceRoundingMethod<V> for Exact<V> {
+    fn search(values: &[V], target: &V) -> Option<usize> {
+        values.iter().position(|x| target == x)
+    }
+}
+
+pub struct Ceil<V>(PhantomData<V>);
+
+impl<V: PartialOrd> LinspaceRoundingMethod<V> for Ceil<V> {
+    fn search(values: &[V], target: &V) -> Option<usize> {
+        let ascending = if values.len() < 2 {
+            true
+        } else {
+            values[0].partial_cmp(&values[1]) == Some(Ordering::Less)
+        };
+
+        match values.binary_search_by(|probe| {
+            if ascending {
+                probe.partial_cmp(target).unwrap()
+            } else {
+                target.partial_cmp(probe).unwrap()
+            }
+        }) {
+            Ok(idx) => Some(idx),
+            Err(idx) => {
+                let offset = if ascending { 0 } else { 1 };
+
+                if idx < offset || idx >= values.len() + offset {
+                    return None;
+                }
+                Some(idx - offset)
+            }
+        }
+    }
+}
+
+pub struct Floor<V>(PhantomData<V>);
+
+impl<V: PartialOrd> LinspaceRoundingMethod<V> for Floor<V> {
+    fn search(values: &[V], target: &V) -> Option<usize> {
+        let ascending = if values.len() < 2 {
+            true
+        } else {
+            values[0].partial_cmp(&values[1]) == Some(Ordering::Less)
+        };
+
+        match values.binary_search_by(|probe| {
+            if ascending {
+                probe.partial_cmp(target).unwrap()
+            } else {
+                target.partial_cmp(probe).unwrap()
+            }
+        }) {
+            Ok(idx) => Some(idx),
+            Err(idx) => {
+                let offset = if ascending { 1 } else { 0 };
+
+                if idx < offset || idx >= values.len() + offset {
+                    return None;
+                }
+                Some(idx - offset)
+            }
+        }
+    }
+}
+
+pub struct Round<V, S>(PhantomData<(V, S)>);
+
+impl<V, S> LinspaceRoundingMethod<V> for Round<V, S>
+where
+    V: Add<S, Output = V> + PartialOrd + Sub<V, Output = S> + Clone,
+    S: PartialOrd + Clone,
+{
+    fn search(values: &[V], target: &V) -> Option<usize> {
+        let ascending = if values.len() < 2 {
+            true
+        } else {
+            values[0].partial_cmp(&values[1]) == Some(Ordering::Less)
+        };
+
+        match values.binary_search_by(|probe| {
+            if ascending {
+                probe.partial_cmp(target).unwrap()
+            } else {
+                target.partial_cmp(probe).unwrap()
+            }
+        }) {
+            Ok(idx) => Some(idx),
+            Err(idx) => {
+                if idx == 0 {
+                    return Some(0);
+                }
+
+                if idx == values.len() {
+                    return Some(idx - 1);
+                }
+
+                let left_delta = if ascending {
+                    target.clone() - values[idx - 1].clone()
+                } else {
+                    values[idx - 1].clone() - target.clone()
+                };
+                let right_delta = if ascending {
+                    values[idx].clone() - target.clone()
+                } else {
+                    target.clone() - values[idx].clone()
+                };
+
+                if left_delta.partial_cmp(&right_delta) == Some(Ordering::Less) {
+                    Some(idx - 1)
+                } else {
+                    Some(idx)
+                }
+            }
+        }
+    }
+}
 
 #[derive(Clone)]
-pub struct Linspace<T: Ranged, S: Clone>
+pub struct Linspace<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>>
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
     step: S,
     inner: T,
     grid_value: Vec<T::ValueType>,
+    _phatom: PhantomData<R>,
 }
 
-impl<T: Ranged, S: Clone> Linspace<T, S>
+impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> Linspace<T, S, R>
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
@@ -34,9 +160,40 @@ where
             _ => (),
         }
     }
+
+    pub fn use_ceil(self) -> Linspace<T, S, Ceil<T::ValueType>> {
+        Linspace {
+            step: self.step,
+            inner: self.inner,
+            grid_value: self.grid_value,
+            _phatom: PhantomData,
+        }
+    }
+
+    pub fn use_floor(self) -> Linspace<T, S, Floor<T::ValueType>> {
+        Linspace {
+            step: self.step,
+            inner: self.inner,
+            grid_value: self.grid_value,
+            _phatom: PhantomData,
+        }
+    }
+
+    pub fn use_round(self) -> Linspace<T, S, Round<T::ValueType, S>>
+    where
+        T::ValueType: Sub<T::ValueType, Output = S>,
+        S: PartialOrd,
+    {
+        Linspace {
+            step: self.step,
+            inner: self.inner,
+            grid_value: self.grid_value,
+            _phatom: PhantomData,
+        }
+    }
 }
 
-impl<T: Ranged, S: Clone> Ranged for Linspace<T, S>
+impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> Ranged for Linspace<T, S, R>
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
@@ -64,7 +221,8 @@ where
     }
 }
 
-impl<T: Ranged, S: Clone> DiscreteRanged for Linspace<T, S>
+impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> DiscreteRanged
+    for Linspace<T, S, R>
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
@@ -73,9 +231,7 @@ where
     }
 
     fn index_of(&self, value: &T::ValueType) -> Option<usize> {
-        self.grid_value
-            .iter()
-            .position(|x| x.partial_cmp(value) == Some(Ordering::Equal))
+        R::search(self.grid_value.as_ref(), value)
     }
 
     fn from_index(&self, idx: usize) -> Option<T::ValueType> {
@@ -84,7 +240,7 @@ where
 }
 
 pub trait IntoLinspace: AsRangedCoord {
-    fn step<S: Clone>(self, val: S) -> Linspace<Self::CoordDescType, S>
+    fn step<S: Clone>(self, val: S) -> Linspace<Self::CoordDescType, S, Exact<Self::Value>>
     where
         Self::Value: Add<S, Output = Self::Value> + PartialOrd + Clone,
     {
@@ -92,6 +248,7 @@ pub trait IntoLinspace: AsRangedCoord {
             step: val,
             inner: self.into(),
             grid_value: vec![],
+            _phatom: PhantomData,
         };
 
         ret.compute_grid_values();
@@ -116,6 +273,63 @@ mod test {
         assert_eq!(coord.size(), 1001);
         assert_eq!(coord.index_of(&coord.from_index(230).unwrap()), Some(230));
         assert!((coord.from_index(230).unwrap() - 23.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_rounding_methods() {
+        let coord = (0.0f64..100.0f64).step(1.0);
+
+        assert_eq!(coord.index_of(&1.0), Some(1));
+        assert_eq!(coord.index_of(&1.2), None);
+
+        let coord = coord.use_floor();
+        assert_eq!(coord.index_of(&1.0), Some(1));
+        assert_eq!(coord.index_of(&1.2), Some(1));
+        assert_eq!(coord.index_of(&23.9), Some(23));
+        assert_eq!(coord.index_of(&10000.0), Some(99));
+        assert_eq!(coord.index_of(&-1.0), None);
+
+        let coord = coord.use_ceil();
+        assert_eq!(coord.index_of(&1.0), Some(1));
+        assert_eq!(coord.index_of(&1.2), Some(2));
+        assert_eq!(coord.index_of(&23.9), Some(24));
+        assert_eq!(coord.index_of(&10000.0), None);
+        assert_eq!(coord.index_of(&-1.0), Some(0));
+
+        let coord = coord.use_round();
+        assert_eq!(coord.index_of(&1.0), Some(1));
+        assert_eq!(coord.index_of(&1.2), Some(1));
+        assert_eq!(coord.index_of(&1.7), Some(2));
+        assert_eq!(coord.index_of(&23.9), Some(24));
+        assert_eq!(coord.index_of(&10000.0), Some(99));
+        assert_eq!(coord.index_of(&-1.0), Some(0));
+
+        let coord = (0.0f64..-100.0f64).step(-1.0);
+
+        assert_eq!(coord.index_of(&-1.0), Some(1));
+        assert_eq!(coord.index_of(&-1.2), None);
+
+        let coord = coord.use_floor();
+        assert_eq!(coord.index_of(&-1.0), Some(1));
+        assert_eq!(coord.index_of(&-1.2), Some(2));
+        assert_eq!(coord.index_of(&-23.9), Some(24));
+        assert_eq!(coord.index_of(&-10000.0), None);
+        assert_eq!(coord.index_of(&1.0), Some(0));
+
+        let coord = coord.use_ceil();
+        assert_eq!(coord.index_of(&-1.0), Some(1));
+        assert_eq!(coord.index_of(&-1.2), Some(1));
+        assert_eq!(coord.index_of(&-23.9), Some(23));
+        assert_eq!(coord.index_of(&-10000.0), Some(99));
+        assert_eq!(coord.index_of(&1.0), None);
+
+        let coord = coord.use_round();
+        assert_eq!(coord.index_of(&-1.0), Some(1));
+        assert_eq!(coord.index_of(&-1.2), Some(1));
+        assert_eq!(coord.index_of(&-1.7), Some(2));
+        assert_eq!(coord.index_of(&-23.9), Some(24));
+        assert_eq!(coord.index_of(&-10000.0), Some(99));
+        assert_eq!(coord.index_of(&1.0), Some(0));
     }
 
     #[cfg(feature = "chrono")]
