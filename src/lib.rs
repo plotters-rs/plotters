@@ -708,10 +708,10 @@ pub mod prelude {
 
     // Coordinates
     pub use crate::coord::{
-        BuildNestedCoord, CentricValues, CoordTranslate, GroupBy, IntoCentric, IntoPartialAxis,
-        LogCoord, LogRange, LogScalable, NestedRange, NestedValue, Ranged, RangedCoord,
-        RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64, RangedCoordu32,
-        RangedCoordu64, ToGroupByRange, Linspace,
+        BuildNestedCoord, CentricValues, CoordTranslate, DiscreteRanged, GroupBy, IntoCentric,
+        IntoLinspace, IntoPartialAxis, Linspace, LogCoord, LogRange, LogScalable, NestedRange,
+        NestedValue, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32,
+        RangedCoordi64, RangedCoordu32, RangedCoordu64, ToGroupByRange,
     };
 
     #[cfg(feature = "chrono")]
