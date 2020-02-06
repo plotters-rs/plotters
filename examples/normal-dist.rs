@@ -25,10 +25,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut x_hist_ctx = ChartBuilder::on(&areas[0])
         .y_label_area_size(40)
-        .build_ranged(0u32..100u32, 0f64..0.5f64)?;
+        .build_ranged((0.0..1.0).step(0.01).use_ceil(), 0..250)?;
     let mut y_hist_ctx = ChartBuilder::on(&areas[3])
         .x_label_area_size(40)
-        .build_ranged(0f64..0.5f64, 0..100u32)?;
+        .build_ranged(0..250, (0.0..1.0).step(0.01).use_ceil())?;
     let mut scatter_ctx = ChartBuilder::on(&areas[2])
         .x_label_area_size(40)
         .y_label_area_size(40)
@@ -46,19 +46,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x_hist = Histogram::vertical(&x_hist_ctx)
         .style(GREEN.filled())
         .margin(0)
-        .data(
-            random_points
-                .iter()
-                .map(|(x, _)| ((x * 100.0) as u32, 0.002)),
-        );
+        .data(random_points.iter().map(|(x, _)| (*x, 1)));
     let y_hist = Histogram::horizontal(&y_hist_ctx)
         .style(GREEN.filled())
         .margin(0)
-        .data(
-            random_points
-                .iter()
-                .map(|(_, y)| ((y * 100.0) as u32, 0.002)),
-        );
+        .data(random_points.iter().map(|(_, y)| (*y, 1)));
     x_hist_ctx.draw_series(x_hist)?;
     y_hist_ctx.draw_series(y_hist)?;
 
