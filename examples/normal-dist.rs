@@ -25,10 +25,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut x_hist_ctx = ChartBuilder::on(&areas[0])
         .y_label_area_size(40)
-        .build_ranged((0.0..1.0).step(0.01).use_ceil(), 0..250)?;
+        .build_ranged((0.0..1.0).step(0.01).use_round().into_centric(), 0..250)?;
     let mut y_hist_ctx = ChartBuilder::on(&areas[3])
         .x_label_area_size(40)
-        .build_ranged(0..250, (0.0..1.0).step(0.01).use_ceil())?;
+        .build_ranged(0..250, (0.0..1.0).step(0.01).use_round())?;
     let mut scatter_ctx = ChartBuilder::on(&areas[2])
         .x_label_area_size(40)
         .y_label_area_size(40)
