@@ -28,7 +28,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_label_area_size(LabelAreaPosition::Bottom, 60)
         .set_label_area_size(LabelAreaPosition::Right, 60)
         .build_ranged(-4f64..4f64, 0f64..0.1)?
-        .set_secondary_coord((-4f64..4f64).step(0.1).use_round(), 0u32..500u32);
+        .set_secondary_coord(
+            (-4f64..4f64).step(0.1).use_round().into_centric(),
+            0u32..500u32,
+        );
 
     chart
         .configure_mesh()
