@@ -84,7 +84,7 @@ where
 }
 
 pub trait IntoLinspace: AsRangedCoord {
-    fn step<S: Clone>(self, val: S) -> Linspace<<Self as AsRangedCoord>::CoordDescType, S>
+    fn step<S: Clone>(self, val: S) -> Linspace<Self::CoordDescType, S>
     where
         Self::Value: Add<S, Output = Self::Value> + PartialOrd + Clone,
     {
@@ -101,3 +101,33 @@ pub trait IntoLinspace: AsRangedCoord {
 }
 
 impl<T: AsRangedCoord> IntoLinspace for T {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_float_linspace() {
+        let coord = (0.0f64..100.0f64).step(0.1);
+
+        assert_eq!(coord.map(&23.12, (0, 10000)), 2312);
+        assert_eq!(coord.range(), 0.0..100.0);
+        assert_eq!(coord.key_points(100000).len(), 1001);
+        assert_eq!(coord.size(), 1001);
+        assert_eq!(coord.index_of(&coord.from_index(230).unwrap()), Some(230));
+        assert!((coord.from_index(230).unwrap() - 23.0).abs() < 1e-5);
+    }
+
+    #[cfg(feature = "chrono")]
+    #[test]
+    fn test_duration_linspace() {
+        use chrono::Duration;
+        let coord = (Duration::seconds(0)..Duration::seconds(100)).step(Duration::milliseconds(1));
+
+        assert_eq!(coord.size(), 100_000);
+        assert_eq!(coord.index_of(&coord.from_index(230).unwrap()), Some(230));
+        assert_eq!(coord.key_points(10000000).len(), 100_000);
+        assert_eq!(coord.range(), Duration::seconds(0)..Duration::seconds(100));
+        assert_eq!(coord.map(&Duration::seconds(25), (0, 100_000)), 25000);
+    }
+}
