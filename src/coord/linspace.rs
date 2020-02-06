@@ -237,7 +237,7 @@ where
     /// Set the linspace use the exact match method for value matching
     ///
     /// - **returns**: The newly created linspace that uses new matching method
-    pub fn use_exact(self) -> Linspace<T, S, Exact<T::ValueType, S>>
+    pub fn use_exact(self) -> Linspace<T, S, Exact<T::ValueType>>
     where
         T::ValueType: Sub<T::ValueType, Output = S>,
         S: PartialOrd,
