@@ -1072,7 +1072,7 @@ mod test {
 
     #[test]
     fn test_date_discrete() {
-        let coord: RangedDate<Utc> = (Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 12, 31)).into();
+        let coord: RangedDate<Date<_>> = (Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 12, 31)).into();
         assert_eq!(coord.size(), 365);
         assert_eq!(coord.index_of(&Utc.ymd(2019, 2, 28)), Some(31 + 28 - 1));
         assert_eq!(coord.from_index(364), Some(Utc.ymd(2019, 12, 31)));
