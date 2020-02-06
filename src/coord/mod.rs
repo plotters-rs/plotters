@@ -47,7 +47,7 @@ pub use ranged::{AsRangedCoord, MeshLine, Ranged, RangedCoord, ReversibleRanged}
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};
 
 pub use discrete::{CentricValues, DiscreteRanged, IntoCentric};
-pub use linspace::{Linspace, LinspaceRounding};
+pub use linspace::{IntoLinspace, Linspace};
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};
 

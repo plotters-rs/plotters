@@ -1,118 +1,105 @@
-use super::numeric::RangedCoordusize;
-use super::{DiscreteRanged, Ranged};
-use num_traits::float::Float;
-use std::ops::Range;
+use super::{numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, Ranged};
+use std::cmp::{Ordering, PartialOrd};
+use std::ops::{Add, Range};
 
 #[derive(Clone)]
-pub enum LinspaceRounding {
-    Floor,
-    Ceil,
-    Round,
+pub struct Linspace<T: Ranged, S: Clone>
+where
+    T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
+{
+    step: S,
+    inner: T,
+    grid_value: Vec<T::ValueType>,
 }
 
-impl LinspaceRounding {
-    fn get_index(&self, value: f64) -> usize {
-        match self {
-            Self::Floor => value.floor() as usize,
-            Self::Ceil => value.ceil() as usize,
-            Self::Round => value.round() as usize,
+impl<T: Ranged, S: Clone> Linspace<T, S>
+where
+    T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
+{
+    fn compute_grid_values(&mut self) {
+        let range = self.inner.range();
+
+        match (
+            range.start.partial_cmp(&range.end),
+            (range.start.clone() + self.step.clone()).partial_cmp(&range.end),
+        ) {
+            (Some(a), Some(b)) if a != b || a == Ordering::Equal || b == Ordering::Equal => (),
+            (Some(a), Some(_)) => {
+                let mut current = range.start;
+                while current.partial_cmp(&range.end) == Some(a) {
+                    self.grid_value.push(current.clone());
+                    current = current + self.step.clone();
+                }
+            }
+            _ => (),
         }
     }
 }
 
-/// A linspace coordinate system, which maps a float number on a descerete coordinate
-#[derive(Clone)]
-pub struct Linspace {
-    start: f64,
-    end: f64,
-    step: f64,
-    rounding: LinspaceRounding,
-    coord_mapping: RangedCoordusize,
-}
+impl<T: Ranged, S: Clone> Ranged for Linspace<T, S>
+where
+    T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
+{
+    type ValueType = T::ValueType;
 
-impl Linspace {
-    pub fn new<T: Float>(range: Range<T>) -> Self {
-        let start = range.start.to_f64().unwrap();
-        let end = range.end.to_f64().unwrap();
-        let step = if start == end {
-            1.0
-        } else {
-            (end - start) / 50.0
-        };
-        let coord_mapping = if start == end {
-            (0..0).into()
-        } else {
-            (0..50).into()
-        };
-        Self {
-            start,
-            end,
-            step,
-            rounding: LinspaceRounding::Round,
-            coord_mapping,
+    fn range(&self) -> Range<T::ValueType> {
+        self.inner.range()
+    }
+
+    fn map(&self, value: &T::ValueType, limit: (i32, i32)) -> i32 {
+        self.inner.map(value, limit)
+    }
+
+    fn key_points(&self, n: usize) -> Vec<T::ValueType> {
+        if self.grid_value.len() == 0 {
+            return vec![];
         }
-    }
+        let idx_range: RangedCoordusize = (0..(self.grid_value.len() - 1)).into();
 
-    pub fn num_values(mut self, n: usize) -> Self {
-        let idrange = self.coord_mapping.range();
-        if idrange.end == 0 {
-            return self;
-        } else if n == 0 {
-            self.step = 1.0;
-            self.coord_mapping = (0..0).into();
-            return self;
-        }
-        let new_step = (self.end - self.start) / n as f64;
-        self.step = new_step;
-        self.coord_mapping = (0..n).into();
-        self
-    }
-
-    pub fn step(mut self, step: f64) -> Self {
-        let idrange = self.coord_mapping.range();
-        if idrange.end == 0 {
-            return self;
-        }
-        let new_count = ((self.end - self.start) / step).floor() as usize;
-        self.step = step;
-        self.coord_mapping = (0..new_count).into();
-        self
-    }
-}
-
-impl Ranged for Linspace {
-    type ValueType = f64;
-    fn map(&self, &value: &f64, limit: (i32, i32)) -> i32 {
-        let index = self.rounding.get_index((value - self.start) / self.step);
-        self.coord_mapping.map(&index, limit)
-    }
-    fn range(&self) -> Range<f64> {
-        self.start..self.end
-    }
-    fn key_points(&self, max_points: usize) -> Vec<f64> {
-        self.coord_mapping
-            .key_points(max_points)
+        idx_range
+            .key_points(n)
             .into_iter()
-            .map(|value| value as f64 * self.step + self.start)
+            .map(|x| self.grid_value[x].clone())
             .collect()
     }
 }
 
-impl DiscreteRanged for Linspace {
+impl<T: Ranged, S: Clone> DiscreteRanged for Linspace<T, S>
+where
+    T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
+{
     fn size(&self) -> usize {
-        self.coord_mapping.size()
+        self.grid_value.len()
     }
 
-    fn index_of(&self, value: &Self::ValueType) -> Option<usize> {
-        let index = self.rounding.get_index((*value - self.start) / self.step);
-        Some(index)
+    fn index_of(&self, value: &T::ValueType) -> Option<usize> {
+        self.grid_value
+            .iter()
+            .position(|x| x.partial_cmp(value) == Some(Ordering::Equal))
     }
 
-    fn from_index(&self, idx: usize) -> Option<Self::ValueType> {
-        if idx >= self.size() {
-            return None;
-        }
-        Some(self.step as f64 * idx as f64 + self.start)
+    fn from_index(&self, idx: usize) -> Option<T::ValueType> {
+        self.grid_value.get(idx).map(Clone::clone)
     }
 }
 
+pub trait IntoLinspace: AsRangedCoord {
+    fn step<S: Clone>(self, val: S) -> Linspace<<Self as AsRangedCoord>::CoordDescType, S>
+    where
+        <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType: Add<S, Output = <<Self as AsRangedCoord>::CoordDescType as Ranged>::ValueType>
+            + PartialOrd
+            + Clone,
+    {
+        let mut ret = Linspace {
+            step: val,
+            inner: self.into(),
+            grid_value: vec![],
+        };
+
+        ret.compute_grid_values();
+
+        ret
+    }
+}
+
+impl<T: AsRangedCoord> IntoLinspace for T {}
