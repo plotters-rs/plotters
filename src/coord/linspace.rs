@@ -7,6 +7,8 @@ use std::ops::{Add, Range, Sub};
 pub trait LinspaceRoundingMethod<V> {
     fn search(values: &[V], target: &V) -> Option<usize>;
 }
+
+#[derive(Clone)]
 pub struct Exact<V>(PhantomData<V>);
 
 impl<V: PartialOrd> LinspaceRoundingMethod<V> for Exact<V> {
@@ -15,6 +17,7 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Exact<V> {
     }
 }
 
+#[derive(Clone)]
 pub struct Ceil<V>(PhantomData<V>);
 
 impl<V: PartialOrd> LinspaceRoundingMethod<V> for Ceil<V> {
@@ -45,6 +48,7 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Ceil<V> {
     }
 }
 
+#[derive(Clone)]
 pub struct Floor<V>(PhantomData<V>);
 
 impl<V: PartialOrd> LinspaceRoundingMethod<V> for Floor<V> {
@@ -75,6 +79,7 @@ impl<V: PartialOrd> LinspaceRoundingMethod<V> for Floor<V> {
     }
 }
 
+#[derive(Clone)]
 pub struct Round<V, S>(PhantomData<(V, S)>);
 
 impl<V, S> LinspaceRoundingMethod<V> for Round<V, S>
