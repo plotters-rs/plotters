@@ -1,5 +1,4 @@
-use super::{AsRangedCoord, Ranged};
-use std::fmt::{Debug, Formatter, Result as FmtResult};
+use super::{AsRangedCoord, Ranged, ValueFormatter};
 use std::ops::Range;
 
 /// The trait indicates the coordinate is discrete
@@ -108,25 +107,28 @@ where
 impl<R: AsRangedCoord> IntoCentric for R where R::CoordDescType: DiscreteRanged {}
 
 /// The value that used by the centric coordinate
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CentricValues<T> {
     Exact(T),
     CenterOf(T),
     Last,
 }
 
-impl<D: Debug> Debug for CentricValues<D> {
-    fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
-        match self {
-            CentricValues::Exact(value) => write!(formatter, "{:?}", value),
-            CentricValues::CenterOf(value) => write!(formatter, "{:?}", value),
-            CentricValues::Last => Ok(()),
+impl <T, D: DiscreteRanged + Ranged<ValueType = T>> ValueFormatter<CentricValues<T>> for CentricDiscreteRange<D> 
+where 
+    D: ValueFormatter<T>
+{
+    fn format(value: &CentricValues<T>) -> String {
+        match value {
+            CentricValues::Exact(ref value) => D::format(value),
+            CentricValues::CenterOf(ref value) => D::format(value),
+            _ => "".to_string()
         }
     }
 }
 
 impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D> {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = CentricValues<D::ValueType>;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
