@@ -67,3 +67,5 @@ fn get_data() -> Vec<(&'static str, f32, f32, f32, f32)> {
         ("2019-03-14", 114.5400, 115.2000, 114.3300, 114.5900),
     ];
 }
+#[test]
+fn entry_point() { main().unwrap() }

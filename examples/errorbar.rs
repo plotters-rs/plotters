@@ -88,3 +88,5 @@ fn down_sample(data: &[(f64, f64)]) -> Vec<(f64, f64, f64, f64)> {
         .collect();
     down_sampled
 }
+#[test]
+fn entry_point() { main().unwrap() }

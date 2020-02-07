@@ -31,3 +31,5 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart.draw_series(std::iter::once(elem))?;
     Ok(())
 }
+#[test]
+fn entry_point() { main().unwrap() }

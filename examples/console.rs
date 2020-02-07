@@ -191,3 +191,5 @@ fn main() -> Result<(), Box<dyn Error>> {
     draw_chart(b)?;
     Ok(())
 }
+#[test]
+fn entry_point() { main().unwrap() }
