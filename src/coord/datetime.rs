@@ -2,7 +2,7 @@
 use chrono::{Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike};
 use std::ops::{Add, Range, Sub};
 
-use super::{AsRangedCoord, DiscreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 
 /// The trait that describe some time value
 pub trait TimeValue: Eq {
@@ -163,6 +163,7 @@ impl<D> Ranged for RangedDate<D>
 where
     D: Datelike + TimeValue + Sub<D, Output = Duration> + Add<Duration, Output = D> + Clone,
 {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = D;
 
     fn range(&self) -> Range<D> {
@@ -242,7 +243,14 @@ impl AsRangedCoord for Range<NaiveDate> {
 #[derive(Clone)]
 pub struct Monthly<T: TimeValue>(Range<T>);
 
+impl<T: TimeValue + Datelike + Clone> ValueFormatter<T> for Monthly<T> {
+    fn format(value: &T) -> String {
+        format!("{}-{}", value.year(), value.month())
+    }
+}
+
 impl<T: TimeValue + Clone> Ranged for Monthly<T> {
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = T;
 
     fn range(&self) -> Range<T> {
@@ -437,7 +445,14 @@ fn generate_yearly_keypoints<T: TimeValue>(
     ret
 }
 
+impl<T: TimeValue + Datelike + Clone> ValueFormatter<T> for Yearly<T> {
+    fn format(value: &T) -> String {
+        format!("{}-{}", value.year(), value.month())
+    }
+}
+
 impl<T: TimeValue + Clone> Ranged for Yearly<T> {
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = T;
 
     fn range(&self) -> Range<T> {
@@ -555,6 +570,7 @@ where
     DT: Sub<DT, Output = Duration>,
     RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
 {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = DT;
 
     fn range(&self) -> Range<DT> {
@@ -620,6 +636,7 @@ impl From<Range<Duration>> for RangedDuration {
 }
 
 impl Ranged for RangedDuration {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = Duration;
 
     fn range(&self) -> Range<Duration> {

@@ -42,7 +42,10 @@ pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi128, RangedCoordi32, RangedCoordi64,
     RangedCoordu128, RangedCoordu32, RangedCoordu64,
 };
-pub use ranged::{AsRangedCoord, MeshLine, Ranged, RangedCoord, ReversibleRanged};
+pub use ranged::{
+    AsRangedCoord, DefaultFormatting, MeshLine, NoDefaultFormatting, Ranged, RangedCoord,
+    ReversibleRanged, ValueFormatter,
+};
 
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};
 

@@ -126,6 +126,7 @@ impl<D: Debug> Debug for CentricValues<D> {
 }
 
 impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D> {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = CentricValues<D::ValueType>;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {

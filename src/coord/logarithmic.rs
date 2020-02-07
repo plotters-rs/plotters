@@ -79,6 +79,7 @@ pub struct LogCoord<V: LogScalable> {
 }
 
 impl<V: LogScalable> Ranged for LogCoord<V> {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = V;
 
     fn map(&self, value: &V, limit: (i32, i32)) -> i32 {

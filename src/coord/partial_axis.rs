@@ -35,6 +35,7 @@ impl<R: Ranged> Ranged for PartialAxis<R>
 where
     R::ValueType: Clone,
 {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = R::ValueType;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {

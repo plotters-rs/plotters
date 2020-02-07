@@ -1,7 +1,7 @@
 use plotters::coord::IntoMonthly;
 use plotters::prelude::*;
 
-use chrono::{Datelike, TimeZone, Utc};
+use chrono::{TimeZone, Utc};
 
 use std::error::Error;
 
@@ -34,7 +34,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         .disable_x_mesh()
         .disable_y_mesh()
         .x_labels(30)
-        .x_label_formatter(&|d| format!("{}-{}", d.year(), d.month()))
         .y_desc("Average Temp (F)")
         .draw()?;
     chart

@@ -52,6 +52,7 @@ macro_rules! make_numeric_coord {
             }
         }
         impl Ranged for $name {
+            type FormatOption = crate::coord::ranged::DefaultFormatting;
             type ValueType = $type;
             fn map(&self, v: &$type, limit: (i32, i32)) -> i32 {
                 // Corner case: If we have a range that have only one value,

@@ -1,9 +1,8 @@
-use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
-use crate::coord::{MeshLine, Ranged, RangedCoord};
+use crate::coord::{MeshLine, Ranged, RangedCoord, ValueFormatter};
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
     AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
@@ -17,10 +16,11 @@ pub struct SecondaryMeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> 
     style: MeshStyle<'a, 'b, X, Y, DB>,
 }
 
-impl<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> SecondaryMeshStyle<'a, 'b, X, Y, DB>
+impl<'a, 'b, XT, YT, X: Ranged<ValueType = XT>, Y: Ranged<ValueType = YT>, DB: DrawingBackend>
+    SecondaryMeshStyle<'a, 'b, X, Y, DB>
 where
-    X::ValueType: Debug,
-    Y::ValueType: Debug,
+    X: ValueFormatter<XT>,
+    Y: ValueFormatter<YT>,
 {
     pub(super) fn new(target: &'b mut ChartContext<'a, DB, RangedCoord<X, Y>>) -> Self {
         let mut style = target.configure_mesh();
