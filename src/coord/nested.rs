@@ -1,9 +1,8 @@
-use super::{AsRangedCoord, DiscreteRanged, Ranged};
-use std::fmt::{Debug, Formatter, Result as FmtResult};
+use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 use std::ops::Range;
 
 /// Describe a value for a nested croodinate
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum NestedValue<C, V> {
     /// Category value
     Category(C),
@@ -40,15 +39,6 @@ impl<C, V> From<C> for NestedValue<C, V> {
     }
 }
 
-impl<C: Debug, V: Debug> Debug for NestedValue<C, V> {
-    fn fmt(&self, formatter: &mut Formatter) -> FmtResult {
-        match self {
-            NestedValue::Category(cat) => write!(formatter, "{:?}", cat),
-            NestedValue::Value(_, val) => write!(formatter, "{:?}", val),
-        }
-    }
-}
-
 /// A nested coordinate spec which is a discrete coordinate on the top level and
 /// for each value in discrete value, there is a secondary coordinate system.
 /// And the value is defined as a tuple of primary coordinate value and secondary
@@ -58,8 +48,23 @@ pub struct NestedRange<Primary: DiscreteRanged, Secondary: Ranged> {
     secondary: Vec<Secondary>,
 }
 
+impl <PT, ST, P, S> ValueFormatter<NestedValue<PT, ST>> for NestedRange<P, S>
+where
+    P: Ranged<ValueType = PT> + DiscreteRanged,
+    S: Ranged<ValueType = ST>,
+    P: ValueFormatter<PT>,
+    S: ValueFormatter<ST>,
+{
+    fn format(value: &NestedValue<PT, ST>) -> String{
+        match value {
+            NestedValue::Category(cat) => P::format(cat),
+            NestedValue::Value(_, val) => S::format(val),
+        }
+    }
+}
+
 impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = NestedValue<P::ValueType, S::ValueType>;
 
     fn range(&self) -> Range<Self::ValueType> {

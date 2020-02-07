@@ -1,4 +1,4 @@
-use super::{numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, Ranged};
+use super::{numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 use std::cmp::{Ordering, PartialOrd};
 use std::marker::PhantomData;
 use std::ops::{Add, Range, Sub};
@@ -251,11 +251,23 @@ where
     }
 }
 
+impl<T, R, S, RM> ValueFormatter<T> for Linspace<R, S, RM>
+where
+    R: Ranged<ValueType = T> + ValueFormatter<T>,
+    RM: LinspaceRoundingMethod<T>,
+    T: Add<S, Output = T> + PartialOrd + Clone,
+    S: Clone,
+{
+    fn format(value: &T) -> String {
+        R::format(value)
+    }
+}
+
 impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> Ranged for Linspace<T, S, R>
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = T::ValueType;
 
     fn range(&self) -> Range<T::ValueType> {

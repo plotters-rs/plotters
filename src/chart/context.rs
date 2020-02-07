@@ -274,7 +274,7 @@ impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT>
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Arc<RangedCoord<X, Y>>> {
     // TODO: All draw_series_impl is over strict on lifetime, because we don't have stable HKT,
     //       what we can ensure is for all lifetime 'b the element reference &'b E is a iterator
-    //       of points reference with the same lifetime. 
+    //       of points reference with the same lifetime.
     //       However, this doesn't work if the coordinate doesn't live longer than the backend,
     //       this is unneccessarily strct
     pub(super) fn draw_series_impl<E, R, S>(

@@ -1,5 +1,5 @@
 use super::numeric::RangedCoordusize;
-use super::{AsRangedCoord, DiscreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 use std::ops::Range;
 
 /// The ranged value spec that needs to be grouped.
@@ -37,8 +37,14 @@ impl<T: DiscreteRanged> DiscreteRanged for GroupBy<T> {
     }
 }
 
+impl<T, R: DiscreteRanged<ValueType = T> + ValueFormatter<T>> ValueFormatter<T> for GroupBy<R> {
+    fn format(value: &T) -> String {
+        R::format(value)
+    }
+}
+
 impl<T: DiscreteRanged> Ranged for GroupBy<T> {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = T::ValueType;
     fn map(&self, value: &T::ValueType, limit: (i32, i32)) -> i32 {
         self.0.map(value, limit)
