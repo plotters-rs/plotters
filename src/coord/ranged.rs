@@ -2,11 +2,39 @@ use super::{CoordTranslate, ReverseCoordTranslate};
 use crate::style::ShapeStyle;
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
+use std::fmt::Debug;
 use std::ops::Range;
+
+/// Since stable Rust doesn't have specialization, it's very hard to make our own trait that
+/// automatically implemented the value formatter. This trait uses as a marker indicates if we
+/// should automatically implement the default value formater based on it's `Debug` trait
+pub trait DefaultValueFormatOption {}
+
+/// This makes the ranged coord uses the default `Debug` based formatting
+pub struct DefaultFormatting;
+impl DefaultValueFormatOption for DefaultFormatting {}
+
+pub struct NoDefaultFormatting;
+impl DefaultValueFormatOption for NoDefaultFormatting {}
+
+pub trait ValueFormatter<V> {
+    fn format(value: &V) -> String;
+}
+
+impl<R: Ranged<FormatOption = DefaultFormatting>> ValueFormatter<R::ValueType> for R
+where
+    R::ValueType: Debug,
+{
+    fn format(value: &R::ValueType) -> String {
+        format!("{:?}", value)
+    }
+}
 
 /// The trait that indicates we have a ordered and ranged value
 /// Which is used to describe the axis
 pub trait Ranged {
+    type FormatOption: DefaultValueFormatOption;
+
     /// The type of this value
     type ValueType;
 

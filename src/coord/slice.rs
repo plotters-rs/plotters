@@ -8,6 +8,7 @@ use std::ops::Range;
 pub struct RangedSlice<'a, T: PartialEq>(&'a [T]);
 
 impl<'a, T: PartialEq> Ranged for RangedSlice<'a, T> {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = &'a T;
 
     fn range(&self) -> Range<&'a T> {

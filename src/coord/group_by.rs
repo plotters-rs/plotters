@@ -38,6 +38,7 @@ impl<T: DiscreteRanged> DiscreteRanged for GroupBy<T> {
 }
 
 impl<T: DiscreteRanged> Ranged for GroupBy<T> {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = T::ValueType;
     fn map(&self, value: &T::ValueType, limit: (i32, i32)) -> i32 {
         self.0.map(value, limit)

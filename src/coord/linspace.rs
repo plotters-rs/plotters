@@ -255,6 +255,7 @@ impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> Ranged for Li
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = T::ValueType;
 
     fn range(&self) -> Range<T::ValueType> {

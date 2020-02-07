@@ -1,13 +1,14 @@
 /// The dual coordinate system support
 use std::borrow::{Borrow, BorrowMut};
-use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
 use super::context::{ChartContext, ChartState, SeriesAnno};
 use super::mesh::SecondaryMeshStyle;
 
-use crate::coord::{CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift};
+use crate::coord::{
+    CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift, ValueFormatter,
+};
 use crate::drawing::DrawingArea;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{Drawable, PointCollection};
@@ -160,11 +161,18 @@ impl<'a, DB: DrawingBackend, CT1: ReverseCoordTranslate, CT2: ReverseCoordTransl
     }
 }
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, SX: Ranged, SY: Ranged>
-    DualCoordChartContext<'a, DB, CT1, RangedCoord<SX, SY>>
+impl<
+        'a,
+        DB: DrawingBackend,
+        CT1: CoordTranslate,
+        XT,
+        YT,
+        SX: Ranged<ValueType = XT>,
+        SY: Ranged<ValueType = YT>,
+    > DualCoordChartContext<'a, DB, CT1, RangedCoord<SX, SY>>
 where
-    SX::ValueType: Debug,
-    SY::ValueType: Debug,
+    SX: ValueFormatter<XT>,
+    SY: ValueFormatter<YT>,
 {
     /// Start configure the style for the secondary axes
     pub fn configure_secondary_axes<'b>(&'b mut self) -> SecondaryMeshStyle<'a, 'b, SX, SY, DB> {
@@ -174,11 +182,6 @@ where
 
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged, SX: Ranged, SY: Ranged>
     DualCoordChartContext<'a, DB, RangedCoord<X, Y>, RangedCoord<SX, SY>>
-where
-    X::ValueType: Debug,
-    Y::ValueType: Debug,
-    SX::ValueType: Debug,
-    SY::ValueType: Debug,
 {
     /// Draw a series use the secondary coordinate system
     /// - `series`: The series to draw

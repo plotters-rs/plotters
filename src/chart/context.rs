@@ -1,5 +1,4 @@
 use std::borrow::Borrow;
-use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Range;
 use std::sync::Arc;
@@ -10,6 +9,7 @@ use super::series::SeriesLabelStyle;
 
 use crate::coord::{
     AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
+    ValueFormatter,
 };
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
@@ -176,10 +176,10 @@ impl<CT: CoordTranslate> ChartState<CT> {
 impl<
         'a,
         DB: DrawingBackend,
-        XT: Debug,
-        YT: Debug,
-        X: Ranged<ValueType = XT>,
-        Y: Ranged<ValueType = YT>,
+        XT,
+        YT,
+        X: Ranged<ValueType = XT> + ValueFormatter<XT>,
+        Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
     > ChartContext<'a, DB, RangedCoord<X, Y>>
 {
     fn is_overlapping_drawing_area(&self, area: Option<&DrawingArea<DB, Shift>>) -> bool {
@@ -232,8 +232,8 @@ impl<
             line_style_2: None,
             x_label_style: None,
             y_label_style: None,
-            format_x: &|x| format!("{:?}", x),
-            format_y: &|y| format!("{:?}", y),
+            format_x: &X::format,
+            format_y: &Y::format,
             target: Some(self),
             _phantom_data: PhantomData,
             x_desc: None,

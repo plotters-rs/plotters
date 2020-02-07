@@ -59,6 +59,7 @@ pub struct NestedRange<Primary: DiscreteRanged, Secondary: Ranged> {
 }
 
 impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
+    type FormatOption = crate::coord::ranged::DefaultFormatting;
     type ValueType = NestedValue<P::ValueType, S::ValueType>;
 
     fn range(&self) -> Range<Self::ValueType> {
