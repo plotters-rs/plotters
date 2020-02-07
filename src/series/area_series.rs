@@ -4,16 +4,16 @@ use crate::style::ShapeStyle;
 use plotters_backend::DrawingBackend;
 
 /// An area series is similar to a line series but use a filled polygon
-pub struct AreaSeries<'a, DB: DrawingBackend, X: Clone + 'a, Y: Clone + 'a> {
+pub struct AreaSeries<DB: DrawingBackend, X: Clone, Y: Clone> {
     area_style: ShapeStyle,
     border_style: ShapeStyle,
     baseline: Y,
     data: Vec<(X, Y)>,
     state: u32,
-    _p: std::marker::PhantomData<&'a DB>,
+    _p: std::marker::PhantomData<DB>,
 }
 
-impl<'a, DB: DrawingBackend, X: Clone + 'a, Y: Clone + 'a> AreaSeries<'a, DB, X, Y> {
+impl<DB: DrawingBackend, X: Clone, Y: Clone> AreaSeries<DB, X, Y> {
     pub fn new<S: Into<ShapeStyle>, I: IntoIterator<Item = (X, Y)>>(
         iter: I,
         baseline: Y,
@@ -35,8 +35,8 @@ impl<'a, DB: DrawingBackend, X: Clone + 'a, Y: Clone + 'a> AreaSeries<'a, DB, X,
     }
 }
 
-impl<'a, DB: DrawingBackend, X: Clone + 'a, Y: Clone + 'a> Iterator for AreaSeries<'a, DB, X, Y> {
-    type Item = DynElement<'a, DB, (X, Y)>;
+impl<DB: DrawingBackend, X: Clone + 'static, Y: Clone + 'static> Iterator for AreaSeries<DB, X, Y> {
+    type Item = DynElement<'static, DB, (X, Y)>;
     fn next(&mut self) -> Option<Self::Item> {
         if self.state == 0 {
             let mut data: Vec<_> = self.data.clone();
