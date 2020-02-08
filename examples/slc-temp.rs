@@ -165,4 +165,6 @@ const DATA: [(i32, u32, f64); 12 * 9] = [
     (2018, 12, 33.6),
 ];
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}

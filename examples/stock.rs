@@ -68,4 +68,6 @@ fn get_data() -> Vec<(&'static str, f32, f32, f32, f32)> {
     ];
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}

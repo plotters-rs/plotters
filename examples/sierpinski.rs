@@ -32,4 +32,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     sierpinski_carpet(5, &root)
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}

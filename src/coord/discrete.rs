@@ -114,15 +114,16 @@ pub enum CentricValues<T> {
     Last,
 }
 
-impl <T, D: DiscreteRanged + Ranged<ValueType = T>> ValueFormatter<CentricValues<T>> for CentricDiscreteRange<D> 
-where 
-    D: ValueFormatter<T>
+impl<T, D: DiscreteRanged + Ranged<ValueType = T>> ValueFormatter<CentricValues<T>>
+    for CentricDiscreteRange<D>
+where
+    D: ValueFormatter<T>,
 {
     fn format(value: &CentricValues<T>) -> String {
         match value {
             CentricValues::Exact(ref value) => D::format(value),
             CentricValues::CenterOf(ref value) => D::format(value),
-            _ => "".to_string()
+            _ => "".to_string(),
         }
     }
 }

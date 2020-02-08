@@ -38,4 +38,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}
