@@ -192,4 +192,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}

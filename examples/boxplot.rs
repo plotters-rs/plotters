@@ -220,4 +220,6 @@ fn get_data() -> String {
     )
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}

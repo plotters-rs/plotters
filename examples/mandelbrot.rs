@@ -62,4 +62,6 @@ fn mandelbrot_set(
     });
 }
 #[test]
-fn entry_point() { main().unwrap() }
+fn entry_point() {
+    main().unwrap()
+}
