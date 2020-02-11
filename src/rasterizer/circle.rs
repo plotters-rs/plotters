@@ -221,7 +221,11 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
 
     let d_inner = ((radius.1 as f64) / (2f64).sqrt()) as i32;
     let d_outter = (((radius.0 as f64) / (2f64).sqrt()) as i32).min(radius.1 as i32 - 1);
-    let d_outter_actually = radius.1 as i32;
+    let d_outter_actually = (radius.1 as i32).min(
+        (radius.0 as f64 * radius.0 as f64 - radius.1 as f64 * radius.1 as f64 / 2.0)
+            .sqrt()
+            .ceil() as i32,
+    );
 
     check_result!(b.draw_line(
         (center.0 - d_inner, center.1 - d_inner),
