@@ -56,7 +56,7 @@ fn draw_part_c<
         let outter_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
         let inner_y0 = r as f64 - 1.0;
         let mut y1 = outter_y0.min(inner_y0);
-        let mut y0 = ((r as f64) * (r as f64) - x as f64 * x as f64).sqrt();
+        let y0 = ((r as f64) * (r as f64) - x as f64 * x as f64).sqrt();
 
         if y0 > y1 {
             y1 = y0.ceil();
@@ -68,7 +68,7 @@ fn draw_part_c<
         check_result!(draw(x, (y0, y1)));
     }
 
-    for x in (x1 + 1..r) {
+    for x in x1 + 1..r {
         let outter_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
         let inner_y0 = r as f64 - 1.0;
         let y0 = outter_y0.min(inner_y0);
@@ -129,7 +129,6 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
 ) -> Result<(), DrawingErrorKind<B::ErrorType>> {
     let a0 = ((radius.0 - radius.1) as f64).min(radius.0 as f64 * (1.0 - 1.0 / (2f64).sqrt()));
     let a1 = (radius.0 as f64 - a0 - radius.1 as f64).max(0.0);
-    let a2 = radius.0 as f64 - a0 - a1 - radius.1 as f64 / (2f64).sqrt();
 
     check_result!(draw_part_a::<B, _>(a0, radius.0, |p, r| draw_sweep_line(
         b,
@@ -220,7 +219,7 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
         |p, r| draw_sweep_line(b, style, center, (-1, 0), p, r)
     ));
 
-    let d_inner = (((radius.1 as f64) / (2f64).sqrt()) as i32);
+    let d_inner = ((radius.1 as f64) / (2f64).sqrt()) as i32;
     let d_outter = (((radius.0 as f64) / (2f64).sqrt()) as i32).min(radius.1 as i32 - 1);
     let d_outter_actually = radius.1 as i32;
 
