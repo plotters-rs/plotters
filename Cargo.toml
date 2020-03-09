@@ -74,7 +74,7 @@ point_series = []
 
 [dev-dependencies]
 rand = "0.7.2"
-itertools = "0.8.2"
+itertools = "0.9.0"
 rand_distr = "0.2.2"
 criterion = "0.3.0"
 rayon = "1.2.1"
