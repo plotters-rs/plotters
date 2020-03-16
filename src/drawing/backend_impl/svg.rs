@@ -124,6 +124,7 @@ impl<'a> SVGBackend<'a> {
             &[
                 ("width", &format!("{}", size.0)),
                 ("height", &format!("{}", size.1)),
+                ("viewBox", &format!("0 0 {} {}", size.0, size.1)),
                 ("xmlns", "http://www.w3.org/2000/svg"),
             ],
             false,
