@@ -267,9 +267,9 @@ pub trait DrawingBackend: Sized {
                     break;
                 }
                 // FIXME: This assume we have RGB image buffer
-                let r = src[(dx + dy * w) as usize * 3];
-                let g = src[(dx + dy * w) as usize * 3 + 1];
-                let b = src[(dx + dy * w) as usize * 3 + 2];
+                let r = src[(dx + dy * iw) as usize * 3];
+                let g = src[(dx + dy * iw) as usize * 3 + 1];
+                let b = src[(dx + dy * iw) as usize * 3 + 2];
                 let color = crate::style::RGBColor(r, g, b);
                 let result =
                     self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), &color.to_rgba());
