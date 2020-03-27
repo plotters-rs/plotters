@@ -187,9 +187,10 @@ where
 
 fn main() -> Result<(), Box<dyn Error>> {
     draw_chart(TextDrawingBackend(vec![PixelState::Empty; 5000]).into_drawing_area())?;
-    let b = BitMapBackend::new("plotters-doc-data/console-example.png", (1024, 768))
+    let b = BitMapBackend::new("./console-example.png", (1024, 768))
         .into_drawing_area();
     b.fill(&WHITE)?;
     draw_chart(b)?;
+    println!("PNG written to ./console-example.png");
     Ok(())
 }
