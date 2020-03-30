@@ -96,7 +96,9 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             let from = self.logic.start.as_f64().floor() as i32;
             let to = self.logic.end.as_f64().ceil() as i32;
             let mut ret = vec![];
-            { from..=to }.for_each(|i| ret.push(V::from_f64(f64::from(i))));
+            { from..=to }
+                .step_by(((to - from) / max_points).ceil())
+                .for_each(|i| ret.push(V::from_f64(f64::from(i))));
             return ret;
         }
         let tier_2_density = if max_points < tier_1 {
