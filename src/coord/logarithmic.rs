@@ -97,7 +97,7 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             let to = self.logic.end.as_f64().ceil() as i32;
             let mut ret = vec![];
             { from..=to }
-                .step_by(((to - from) / max_points).ceil())
+                .step_by((f64::from(to - from) / f64::from(max_points)).ceil() as i32)
                 .for_each(|i| ret.push(V::from_f64(f64::from(i))));
             return ret;
         }
