@@ -124,6 +124,7 @@ impl<'a> SVGBackend<'a> {
             &[
                 ("width", &format!("{}", size.0)),
                 ("height", &format!("{}", size.1)),
+                ("viewBox", &format!("0 0 {} {}", size.0, size.1)),
                 ("xmlns", "http://www.w3.org/2000/svg"),
             ],
             false,
@@ -565,7 +566,8 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 impl Drop for SVGBackend<'_> {
     fn drop(&mut self) {
         if !self.saved {
-            self.present().expect("Unable to save the SVG image");
+            // drop should not panic, so we ignore a failed present
+            let _ = self.present();
         }
     }
 }
