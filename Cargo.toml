@@ -25,7 +25,7 @@ features = ["std"]
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rusttype = { version = "0.8.2", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
-font-kit = { version = "0.5.0", optional = true }
+font-kit = { version = "0.6.0", optional = true }
 piston_window = { version = "0.105.0", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
