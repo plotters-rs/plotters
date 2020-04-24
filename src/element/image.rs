@@ -3,7 +3,12 @@ use image::{DynamicImage, GenericImageView};
 
 use super::{Drawable, PointCollection};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use plotters_bitmap::bitmap_pixel::{BGRXPixel, PixelFormat, RGBPixel};
+
+use plotters_bitmap::bitmap_pixel::PixelFormat;
+
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+use plotters_bitmap::bitmap_pixel::{BGRXPixel, RGBPixel};
+
 use plotters_bitmap::BitMapBackend;
 
 use std::borrow::Borrow;
