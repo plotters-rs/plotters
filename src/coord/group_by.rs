@@ -6,6 +6,7 @@ use std::ops::Range;
 /// This is useful, for example, when we have an X axis is a integer and denotes days.
 /// And we are expecting the tick mark denotes weeks, in this way we can make the range
 /// spec grouping by 7 elements.
+#[derive(Clone)]
 pub struct GroupBy<T: DiscreteRanged>(T, usize);
 
 /// The trait that provides method `Self::group_by` function which creates a
