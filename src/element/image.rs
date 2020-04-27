@@ -4,10 +4,10 @@ use image::{DynamicImage, GenericImageView};
 use super::{Drawable, PointCollection};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
-use plotters_bitmap::bitmap_pixel::PixelFormat;
+use plotters_bitmap::bitmap_pixel::{PixelFormat, RGBPixel};
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-use plotters_bitmap::bitmap_pixel::{BGRXPixel, RGBPixel};
+use plotters_bitmap::bitmap_pixel::{BGRXPixel};
 
 use plotters_bitmap::BitMapBackend;
 
