@@ -40,6 +40,11 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64) -> BackendCoord {
     let b1 = -b_t.1;
     let c1 = b_p.1 - a_p.1;
 
+    // This is the coner case that 
+    if (a0 * b1 - a1 * b0).abs() < 1e-10 {
+        return (a_p.0 as i32, a_p.1 as i32);
+    }
+
     let u = (c0 * b1 - c1 * b0) / (a0 * b1 - a1 * b0);
 
     let x = a_p.0 + u * a_t.0;
@@ -81,6 +86,7 @@ fn traverse_vertices<'a>(
         recent.swap(0, 1);
         recent.swap(1, 2);
         recent[2] = *p;
+
         op(compute_polygon_vertex(&recent, f64::from(width) / 2.0));
     }
 
