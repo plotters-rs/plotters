@@ -168,7 +168,7 @@ impl<'a, X: Ranged, Y: Ranged> MeshLine<'a, X, Y> {
             MeshLine::XMesh(a, b, _) => (a, b),
             MeshLine::YMesh(a, b, _) => (a, b),
         };
-        backend.draw_line(left, right, &style.color)
+        backend.draw_line(left, right, style)
     }
 }
 
