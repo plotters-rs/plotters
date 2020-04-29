@@ -91,19 +91,29 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         }
     };
 
-    let mut y = f64::from(from.1);
+    let y_step_limit =
+        (f64::from(to.1.min(size_limit.1 as i32 - 1).max(0) - from.1) / grad).floor() as i32;
 
-    let y_step_limit = (f64::from(to.1.min(size_limit.1 as i32 - 1) - from.1) / grad).ceil() as i32;
+    let batch_start = (f64::from(from.1.min(size_limit.1 as i32 - 2).max(0) - from.1) / grad)
+        .abs()
+        .ceil() as i32
+        + from.0;
 
-    for x in from.0..=to.0.min(size_limit.0 as i32 - 2).min(from.0 + y_step_limit) {
+    let batch_limit =
+        to.0.min(size_limit.0 as i32 - 2)
+            .min(from.0 + y_step_limit - 1);
+
+    let mut y = f64::from(from.1) + f64::from(batch_start - from.0) * grad;
+
+    for x in batch_start..=batch_limit {
         check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
         check_result!(put_pixel((x, y as i32 + 1), y - y.floor()));
 
         y += grad;
     }
 
-    if to.0 >= (size_limit.0 as i32) - 1 && y < f64::from(to.1) {
-        let x = size_limit.0 as i32 - 1;
+    if to.0 >= batch_limit + 1 && y < f64::from(to.1) {
+        let x = batch_limit as i32 + 1;
         if 1.0 + y.floor() - y > 1e-5 {
             check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
         }
