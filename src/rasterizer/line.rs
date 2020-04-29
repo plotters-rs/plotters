@@ -72,6 +72,12 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         (from, to)
     };
 
+    let mut size_limit = back.get_size();
+
+    if steep {
+        size_limit = (size_limit.1, size_limit.0);
+    }
+
     let grad = f64::from(to.1 - from.1) / f64::from(to.0 - from.0);
 
     let mut put_pixel = |(x, y): BackendCoord, b: f64| {
@@ -82,13 +88,35 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         }
     };
 
-    let mut y = f64::from(from.1);
+    let y_step_limit =
+        (f64::from(to.1.min(size_limit.1 as i32 - 1).max(0) - from.1) / grad).floor() as i32;
 
-    for x in from.0..=to.0 {
+    let batch_start = (f64::from(from.1.min(size_limit.1 as i32 - 2).max(0) - from.1) / grad)
+        .abs()
+        .ceil() as i32
+        + from.0;
+
+    let batch_limit =
+        to.0.min(size_limit.0 as i32 - 2)
+            .min(from.0 + y_step_limit - 1);
+
+    let mut y = f64::from(from.1) + f64::from(batch_start - from.0) * grad;
+
+    for x in batch_start..=batch_limit {
         check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
         check_result!(put_pixel((x, y as i32 + 1), y - y.floor()));
 
         y += grad;
+    }
+
+    if to.0 >= batch_limit + 1 && y < f64::from(to.1) {
+        let x = batch_limit as i32 + 1;
+        if 1.0 + y.floor() - y > 1e-5 {
+            check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
+        }
+        if y - y.floor() > 1e-5 && y + 1.0 < f64::from(to.1) {
+            check_result!(put_pixel((x, y as i32 + 1), y - y.floor()));
+        }
     }
 
     Ok(())
