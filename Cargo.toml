@@ -35,7 +35,7 @@ default-features = false
 features = ["jpeg", "png_codec", "bmp"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.cairo-rs]
-version = "0.8.0"
+version = "0.8.1"
 optional = true
 features = ["ps"]
 
