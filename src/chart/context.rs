@@ -29,7 +29,7 @@ pub struct SeriesAnno<'a, DB: DrawingBackend> {
 
 impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
     pub(crate) fn get_label(&self) -> &str {
-        self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
+        self.label.as_deref().map(|x| x).unwrap_or("")
     }
 
     pub(crate) fn get_draw_func(
