@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.2.12"
+version = "0.3.0-pre"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -15,7 +15,7 @@ exclude = ["doc-template/*"]
 [dependencies]
 num-traits = "0.2.11"
 chrono = { version = "0.4.10", optional = true }
-# Plotters backend deps 
+# Plotters backend deps
 # TODO: Update the version when publish
 plotters-backend = "0.0.*"
 plotters-svg = {version = "0.1.*", optional = true}
@@ -41,40 +41,53 @@ wasm-bindgen = "0.2.58"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3.35"
-features = ['Document', 'DomRect', 'Element', 'HtmlElement', 'Node', 'Window', 'HtmlCanvasElement', 'CanvasRenderingContext2d']
+features = [
+         "Document",
+         "DomRect",
+         "Element",
+         "HtmlElement",
+         "Node",
+         "Window",
+         "HtmlCanvasElement",
+         "CanvasRenderingContext2d",
+]
 
 [features]
 default = [
-			"bitmap_backend", "bitmap_encoder", "bitmap_gif",
-			"svg_backend", 
-			"chrono", 
-			"ttf", 
-			"image",
-			"deprecated_items",  "all_series", "all_elements"
-		  ]
+        "bitmap_backend", "bitmap_encoder", "bitmap_gif",
+        "svg_backend",
+        "chrono",
+        "ttf",
+        "image",
+        "deprecated_items",  "all_series", "all_elements"
+]
 all_series = ["area_series", "line_series", "point_series"]
 all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
+
 # Tier 1 Backends
 bitmap_backend = ["plotters-bitmap", "ttf"]
 bitmap_encoder = ["plotters-bitmap/image_encoder"]
 bitmap_gif = ["plotters-bitmap/gif_backend"]
 svg_backend = ["plotters-svg"]
-# Elements 
+
+# Elements
 errorbar = []
 candlestick = []
 boxplot = []
-# Series 
+
+# Series
 histogram = []
 area_series = []
 line_series = []
 point_series = []
+
 # Font implemnetation
 ttf = ["font-kit", "rusttype", "lazy_static"]
-# Misc 
+
+# Misc
 datetime = ["chrono"]
 evcxr = ["svg_backend"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
-
 
 [dev-dependencies]
 rand = "0.7.3"
