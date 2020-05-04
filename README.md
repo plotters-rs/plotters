@@ -143,7 +143,7 @@ To view the source code for each example, please click on the example image.
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^0.2.12"
+plotters = "^0.2.13"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
@@ -191,7 +191,7 @@ The feature `evcxr` should be enabled when including Plotters to Jupyter Noteboo
 The following code shows a minimal example of this.
 
 ```text
-:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr", "line_series"] }
+:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
 extern crate plotters;
 use plotters::prelude::*;
 

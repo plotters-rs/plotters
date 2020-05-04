@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters latest (?)
+## Plotters 0.2.13 (2020-05-04)
 ### Added
 
 - Line width is supported for SVG 
