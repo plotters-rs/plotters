@@ -1,5 +1,16 @@
 # Changelog
 
+## Plotters ? (latest)
+### Added
+
+- Line width is supported for SVG 
+
+### Fixed
+
+- Updated dependencies
+- Default rasterizer causing bitmap backend draw out-of-range pixels
+- Depdendicy fix
+
 ## Plotters 0.2.12 (2019-12-06)
 ### Added
 
