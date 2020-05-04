@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters ? (latest)
+## Plotters latest (?)
 ### Added
 
 - Line width is supported for SVG 

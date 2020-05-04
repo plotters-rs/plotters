@@ -14,7 +14,7 @@ fi
 if [ "${CONFIG}" = "release" ]
 then
     wasm-pack build
-else
+else 
     wasm-pack build --release
 fi
 

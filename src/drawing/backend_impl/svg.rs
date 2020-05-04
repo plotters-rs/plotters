@@ -493,7 +493,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
             let encoder = PNGEncoder::new(cursor);
 
-            let color = image::ColorType::RGB(8);
+            let color = image::ColorType::Rgb8;
 
             encoder.encode(src, w, h, color).map_err(|e| {
                 DrawingErrorKind::DrawingError(Error::new(

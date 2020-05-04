@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 
-use image::{FilterType, ImageFormat};
+use image::{imageops::FilterType, ImageFormat};
 
 use std::fs::File;
 use std::io::BufReader;
@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (w, h) = chart.plotting_area().dim_in_pixel();
     let image = image::load(
         BufReader::new(File::open("plotters-doc-data/cat.png")?),
-        ImageFormat::PNG,
+        ImageFormat::Png,
     )?
     .resize_exact(w - w / 10, h - h / 10, FilterType::Nearest);
 

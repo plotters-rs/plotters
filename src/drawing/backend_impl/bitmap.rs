@@ -863,7 +863,13 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
             Target::File(path) => {
                 if let Some(img) = BorrowedImage::from_raw(w, h, self.buffer.borrow_buffer()) {
                     img.save(&path).map_err(|x| {
-                        DrawingErrorKind::DrawingError(BitMapBackendError::IOError(x))
+                        DrawingErrorKind::DrawingError(match x {
+                            ImageError::IoError(x) => BitMapBackendError::IOError(x),
+                            whatever => BitMapBackendError::IOError(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                format!("{}", whatever),
+                            )),
+                        })
                     })?;
                     self.saved = true;
                     Ok(())
