@@ -15,7 +15,7 @@ jobs:
           override: true
     - uses: actions-rs/cargo@v1
       with:
-          command: test
+          command: build
           args: --verbose
   build_and_test:
     runs-on: ${{ matrix.os }}
