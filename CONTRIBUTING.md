@@ -105,6 +105,11 @@ cargo test --lib --target wasm32-unknown-unknown
 
 For the debugging you could set the `NO_HEADLESS=1` environment variable to run the tests using the local server instead of the headless browser.
 
+### Minimal Supported Compiler Version
+
+Currently we should make sure Plotters is compatible with rustc 1.36.0.
+Before making a PR, please check if the code compile with 1.36.0
+
 ### Code Coverage
 
 For for the code coverage information you may want to use [cargo-tarpaulin](https://crates.io/crates/cargo-tarpaulin). Please note that it works with x86_64 GNU/Linux only, and the doc tests coverage require nightly Rust.
@@ -122,3 +127,5 @@ Usage:
 cargo tarpaulin --all-features --run-types Tests Doctests -o Xml --output-dir target/test
 pycobertura show target/test/cobertura.xml
 ```
+
+

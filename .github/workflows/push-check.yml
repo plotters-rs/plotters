@@ -3,6 +3,20 @@ name: Push Check
 on: [push]
 
 jobs:
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+          submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: 1.36.0
+          override: true
+    - uses: actions-rs/cargo@v1
+      with:
+          command: test
+          args: --verbose --all-features
   build_and_test:
     runs-on: ${{ matrix.os }}
     strategy:

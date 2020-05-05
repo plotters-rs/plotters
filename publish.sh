@@ -34,6 +34,12 @@ git add -u .
 git commit -m "Bump version number from ${OLD_VERSION} to ${NEW_VERSION}"
 git tag -a "v${NEW_VERSION}" -m "Plotters ${NEW_VERSION} release"
 
+# Verify MSRV
+rustup install $(cat ${ROOT}/doc-template/msrv.txt)
+rustup default $(cat ${ROOT}/doc-template/msrv.txt)
+cargo build
+rustup default stable
+
 cargo publish
 git push origin
 git push origin "v${NEW_VERSION}"
