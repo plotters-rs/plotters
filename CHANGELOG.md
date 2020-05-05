@@ -1,6 +1,6 @@
 # Changelog
 
-## Plotters latest (?)
+## Plotters 0.2.14 (2020-05-05)
 ### Fixed
 
 - Compile error with older rustc which causing breaks
