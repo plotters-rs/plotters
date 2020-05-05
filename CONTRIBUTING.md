@@ -108,7 +108,7 @@ For the debugging you could set the `NO_HEADLESS=1` environment variable to run 
 ### Minimal Supported Compiler Version
 
 Currently we should make sure Plotters is compatible with rustc 1.36.0.
-Before making a PR, please check if the code compile with 1.36.0
+Before making a PR, please check if the code compile with 1.36.0 (with default features).
 
 ### Code Coverage
 

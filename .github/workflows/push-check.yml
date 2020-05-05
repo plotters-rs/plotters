@@ -16,7 +16,7 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
           command: test
-          args: --verbose --all-features
+          args: --verbose
   build_and_test:
     runs-on: ${{ matrix.os }}
     strategy:
