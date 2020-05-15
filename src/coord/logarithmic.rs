@@ -88,7 +88,7 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
-        let mut tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
+        let tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
             .log10()
             .abs()
             .floor()
@@ -134,5 +134,15 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
 
     fn range(&self) -> Range<V> {
         self.logic.clone()
+    }
+}
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn regression_test_issue_143() {
+        let range: LogCoord<f64> = LogRange(1.0..5.0).into();
+
+        range.key_points(100);
     }
 }
