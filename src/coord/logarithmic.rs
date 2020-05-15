@@ -88,10 +88,12 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
     }
 
     fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
-        let tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
+        let mut tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
             .log10()
             .abs()
-            .floor() as usize;
+            .floor()
+            .max(1.0) as usize;
+            
         let tier_2_density = if max_points < tier_1 {
             0
         } else {
