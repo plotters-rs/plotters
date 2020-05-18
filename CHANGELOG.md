@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest (?)
+### Fixed
+
+- Division by zero with logarithmic coord (issue #143)
+- Update dependencies
+
 ## Plotters 0.2.14 (2020-05-05)
 ### Fixed
 
