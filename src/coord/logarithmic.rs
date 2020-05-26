@@ -93,7 +93,7 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
             .abs()
             .floor()
             .max(1.0) as usize;
-            
+
         let tier_2_density = if max_points < tier_1 {
             0
         } else {
