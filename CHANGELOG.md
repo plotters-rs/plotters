@@ -1,5 +1,10 @@
 # Changelog
 
+## Plotters latest (?)
+### Fixed
+
+- Adjust Canvas backend size with DPR (Thanks to Marius-Mueller)
+
 ## Plotters 0.2.15 (2020-05-26)
 ### Fixed
 
