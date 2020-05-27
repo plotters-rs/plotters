@@ -81,39 +81,38 @@ where
     }
 }
 
-/// For any discrete ranged coordiante, one possible transformation is instead of using the exact point to represent the value
-/// We are now using an interval [value, value + 1) as the representation of that value.
-/// A good example for this transformation is histogram's bucket, each bucket is actually represented by a interval instead of a single point.
-/// In addition to that, all the labels should be appreas in the middle of the representing intervals.
-///
-/// The `CentricDiscreteRange` decorator that makes key-point in the center of the value range
-/// This is useful when we draw a histogram, since we want the axis value label
-/// to be shown in the middle of the range rather than exactly the location where
-/// the value mapped to.
-pub struct CentricDiscreteRange<D: DiscreteRanged>(D);
+/// A `SegmentedCoord` is a decorator on any discrete coordinate specification.
+/// This decorator will convert the discrete coordiante in two ways:
+/// - Add an extra dummy element after all the values in origianl discrete coordinate
+/// - Logically each value `v` from original coordinate system is mapped into an segment `[v, v+1)` where `v+1` denotes the sucessor of the `v`
+/// - Introduce two types of values `SegmentValue::Exact(value)` which denotes the left end of value's segment and `SegmentValue::CenterOf(value)` which refers the center of the segment.
+/// This is used in histogram types, which uses a discrete coordinate as the buckets. The segmented coord always emits `CenterOf(value)` key points, thus it allows all the label and tick marks
+/// of the coordinate rendered in the middle of each segment.
+/// The coresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
+pub struct SegmentedCoord<D: DiscreteRanged>(D);
 
-impl<D: DiscreteRanged + Clone> Clone for CentricDiscreteRange<D> {
+impl<D: DiscreteRanged + Clone> Clone for SegmentedCoord<D> {
     fn clone(&self) -> Self {
-        CentricDiscreteRange(self.0.clone())
+        SegmentedCoord(self.0.clone())
     }
 }
 
-/// The trait for types that can decorated by `CentricDiscreteRange` decorator. See [struct CentricDiscreteRange](struct.CentricDiscreteRange.html) for details.
-pub trait IntoCentric: AsRangedCoord
+/// The trait for types that can decorated by [SegmentedCoord](struct.SegmentedCoord.html) decorator.
+pub trait IntoSegmentedCoord: AsRangedCoord
 where
     Self::CoordDescType: DiscreteRanged,
 {
-    /// Convert current ranged value into a centric ranged value
-    fn into_centric(self) -> CentricDiscreteRange<Self::CoordDescType> {
-        CentricDiscreteRange(self.into())
+    /// Convert current ranged value into a segmented coordinate
+    fn into_segmented(self) -> SegmentedCoord<Self::CoordDescType> {
+        SegmentedCoord(self.into())
     }
 }
 
-impl<R: AsRangedCoord> IntoCentric for R where R::CoordDescType: DiscreteRanged {}
+impl<R: AsRangedCoord> IntoSegmentedCoord for R where R::CoordDescType: DiscreteRanged {}
 
-/// The value that used by the centric coordinate.
+/// The value that used by the segmented coordinate.
 #[derive(Clone, Debug)]
-pub enum CentricValues<T> {
+pub enum SegmentValue<T> {
     /// Means we are referring the exact position of value `T`
     Exact(T),
     /// Means we are referring the center of position `T` and the successor of `T`
@@ -122,30 +121,30 @@ pub enum CentricValues<T> {
     Last,
 }
 
-impl<T, D: DiscreteRanged + Ranged<ValueType = T>> ValueFormatter<CentricValues<T>>
-    for CentricDiscreteRange<D>
+impl<T, D: DiscreteRanged + Ranged<ValueType = T>> ValueFormatter<SegmentValue<T>>
+    for SegmentedCoord<D>
 where
     D: ValueFormatter<T>,
 {
-    fn format(value: &CentricValues<T>) -> String {
+    fn format(value: &SegmentValue<T>) -> String {
         match value {
-            CentricValues::Exact(ref value) => D::format(value),
-            CentricValues::CenterOf(ref value) => D::format(value),
+            SegmentValue::Exact(ref value) => D::format(value),
+            SegmentValue::CenterOf(ref value) => D::format(value),
             _ => "".to_string(),
         }
     }
 }
 
-impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D> {
+impl<D: DiscreteRanged> Ranged for SegmentedCoord<D> {
     type FormatOption = crate::coord::ranged::NoDefaultFormatting;
-    type ValueType = CentricValues<D::ValueType>;
+    type ValueType = SegmentValue<D::ValueType>;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
         let margin = ((limit.1 - limit.0) as f32 / self.0.size() as f32).round() as i32;
 
         match value {
-            CentricValues::Exact(coord) => self.0.map(coord, (limit.0, limit.1 - margin)),
-            CentricValues::CenterOf(coord) => {
+            SegmentValue::Exact(coord) => self.0.map(coord, (limit.0, limit.1 - margin)),
+            SegmentValue::CenterOf(coord) => {
                 let left = self.0.map(coord, (limit.0, limit.1 - margin));
                 if let Some(idx) = self.0.index_of(coord) {
                     if idx + 1 < self.0.size() {
@@ -158,7 +157,7 @@ impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D> {
                 }
                 left + margin / 2
             }
-            CentricValues::Last => limit.1,
+            SegmentValue::Last => limit.1,
         }
     }
 
@@ -166,43 +165,43 @@ impl<D: DiscreteRanged> Ranged for CentricDiscreteRange<D> {
         self.0
             .key_points(max_points)
             .into_iter()
-            .map(CentricValues::CenterOf)
+            .map(SegmentValue::CenterOf)
             .collect()
     }
 
     fn range(&self) -> Range<Self::ValueType> {
         let range = self.0.range();
-        CentricValues::Exact(range.start)..CentricValues::Exact(range.end)
+        SegmentValue::Exact(range.start)..SegmentValue::Exact(range.end)
     }
 }
 
-impl<D: DiscreteRanged> DiscreteRanged for CentricDiscreteRange<D> {
+impl<D: DiscreteRanged> DiscreteRanged for SegmentedCoord<D> {
     fn size(&self) -> usize {
         self.0.size() + 1
     }
 
     fn index_of(&self, value: &Self::ValueType) -> Option<usize> {
         match value {
-            CentricValues::Exact(value) => self.0.index_of(value),
-            CentricValues::CenterOf(value) => self.0.index_of(value),
-            CentricValues::Last => Some(self.0.size()),
+            SegmentValue::Exact(value) => self.0.index_of(value),
+            SegmentValue::CenterOf(value) => self.0.index_of(value),
+            SegmentValue::Last => Some(self.0.size()),
         }
     }
 
     fn from_index(&self, idx: usize) -> Option<Self::ValueType> {
         if idx < self.0.size() {
-            self.0.from_index(idx).map(|x| CentricValues::Exact(x))
+            self.0.from_index(idx).map(|x| SegmentValue::Exact(x))
         } else if idx == self.0.size() {
-            Some(CentricValues::Last)
+            Some(SegmentValue::Last)
         } else {
             None
         }
     }
 }
 
-impl<T> From<T> for CentricValues<T> {
-    fn from(this: T) -> CentricValues<T> {
-        CentricValues::Exact(this)
+impl<T> From<T> for SegmentValue<T> {
+    fn from(this: T) -> SegmentValue<T> {
+        SegmentValue::Exact(this)
     }
 }
 
@@ -243,26 +242,26 @@ mod test {
 
     #[test]
     fn test_centric_coord() {
-        let coord = (0..10).into_centric();
+        let coord = (0..10).into_segmented();
 
         assert_eq!(coord.size(), 12);
         for i in 0..=11 {
             match coord.from_index(i as usize) {
-                Some(CentricValues::Exact(value)) => assert_eq!(i, value),
-                Some(CentricValues::Last) => assert_eq!(i, 11),
+                Some(SegmentValue::Exact(value)) => assert_eq!(i, value),
+                Some(SegmentValue::Last) => assert_eq!(i, 11),
                 _ => panic!(),
             }
         }
 
         for (kps, idx) in coord.key_points(20).into_iter().zip(0..) {
             match kps {
-                CentricValues::CenterOf(value) if value <= 10 => assert_eq!(value, idx),
+                SegmentValue::CenterOf(value) if value <= 10 => assert_eq!(value, idx),
                 _ => panic!(),
             }
         }
 
-        assert_eq!(coord.map(&CentricValues::CenterOf(0), (0, 24)), 1);
-        assert_eq!(coord.map(&CentricValues::Exact(0), (0, 24)), 0);
-        assert_eq!(coord.map(&CentricValues::Exact(1), (0, 24)), 2);
+        assert_eq!(coord.map(&SegmentValue::CenterOf(0), (0, 24)), 1);
+        assert_eq!(coord.map(&SegmentValue::Exact(0), (0, 24)), 0);
+        assert_eq!(coord.map(&SegmentValue::Exact(1), (0, 24)), 2);
     }
 }

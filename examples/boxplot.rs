@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Ping Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
             values_range.start - 1.0..values_range.end + 1.0,
-            host_list[..].into_centric(),
+            host_list[..].into_segmented(),
         )?;
 
     chart
@@ -86,7 +86,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (label, (values, style, offset)) in &series {
         chart
             .draw_series(values.iter().map(|x| {
-                Boxplot::new_horizontal(CentricValues::CenterOf(&x.0), &x.1)
+                Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), &x.1)
                     .width(20)
                     .whisker_width(0.5)
                     .style(style)
@@ -124,14 +124,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .caption("Vertical Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(
-            ab_axis[..].into_centric(),
+            ab_axis[..].into_segmented(),
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 
     chart.configure_mesh().line_style_2(&WHITE).draw()?;
     chart.draw_series(vec![
-        Boxplot::new_vertical(CentricValues::CenterOf(&"a"), &quartiles_a),
-        Boxplot::new_vertical(CentricValues::CenterOf(&"b"), &quartiles_b),
+        Boxplot::new_vertical(SegmentValue::CenterOf(&"a"), &quartiles_a),
+        Boxplot::new_vertical(SegmentValue::CenterOf(&"b"), &quartiles_b),
     ])?;
 
     let mut chart = ChartBuilder::on(&right)
