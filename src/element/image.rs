@@ -7,7 +7,7 @@ use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use plotters_bitmap::bitmap_pixel::{PixelFormat, RGBPixel};
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-use plotters_bitmap::bitmap_pixel::{BGRXPixel};
+use plotters_bitmap::bitmap_pixel::BGRXPixel;
 
 use plotters_bitmap::BitMapBackend;
 

@@ -81,7 +81,12 @@ where
     }
 }
 
-/// The axis decorator that makes key-point in the center of the value range
+/// For any discrete ranged coordiante, one possible transformation is instead of using the exact point to represent the value
+/// We are now using an interval [value, value + 1) as the representation of that value.
+/// A good example for this transformation is histogram's bucket, each bucket is actually represented by a interval instead of a single point.
+/// In addition to that, all the labels should be appreas in the middle of the representing intervals.
+///
+/// The `CentricDiscreteRange` decorator that makes key-point in the center of the value range
 /// This is useful when we draw a histogram, since we want the axis value label
 /// to be shown in the middle of the range rather than exactly the location where
 /// the value mapped to.
@@ -93,7 +98,7 @@ impl<D: DiscreteRanged + Clone> Clone for CentricDiscreteRange<D> {
     }
 }
 
-/// The trait for types that can decorated by `CentricDiscreteRange` decorator
+/// The trait for types that can decorated by `CentricDiscreteRange` decorator. See [struct CentricDiscreteRange](struct.CentricDiscreteRange.html) for details.
 pub trait IntoCentric: AsRangedCoord
 where
     Self::CoordDescType: DiscreteRanged,
@@ -106,11 +111,14 @@ where
 
 impl<R: AsRangedCoord> IntoCentric for R where R::CoordDescType: DiscreteRanged {}
 
-/// The value that used by the centric coordinate
+/// The value that used by the centric coordinate.
 #[derive(Clone, Debug)]
 pub enum CentricValues<T> {
+    /// Means we are referring the exact position of value `T`
     Exact(T),
+    /// Means we are referring the center of position `T` and the successor of `T`
     CenterOf(T),
+    /// Referring the last dummy element
     Last,
 }
 
@@ -198,6 +206,7 @@ impl<T> From<T> for CentricValues<T> {
     }
 }
 
+/// The iterator that can be used to iterate all the values defined by a discrete coordinate
 pub struct DiscreteValueIter<'a, T: DiscreteRanged>(&'a T, usize, usize);
 
 impl<'a, T: DiscreteRanged> Iterator for DiscreteValueIter<'a, T> {

@@ -14,13 +14,17 @@ pub trait DefaultValueFormatOption {}
 pub struct DefaultFormatting;
 impl DefaultValueFormatOption for DefaultFormatting {}
 
+/// This markers prevent Plotters to implement the default `Debug` based formatting
 pub struct NoDefaultFormatting;
 impl DefaultValueFormatOption for NoDefaultFormatting {}
 
+/// Determine how we can format a value in a coordinate system by default
 pub trait ValueFormatter<V> {
+    /// Format the value
     fn format(value: &V) -> String;
 }
 
+// By default the value is formatted by the debug trait
 impl<R: Ranged<FormatOption = DefaultFormatting>> ValueFormatter<R::ValueType> for R
 where
     R::ValueType: Debug,

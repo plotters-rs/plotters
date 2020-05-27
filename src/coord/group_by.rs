@@ -53,6 +53,7 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
     fn range(&self) -> Range<T::ValueType> {
         self.0.range()
     }
+    // TODO: See issue #88
     fn key_points(&self, max_points: usize) -> Vec<T::ValueType> {
         let range = 0..(self.0.size() + self.1 - 1) / self.1;
         let logic_range: RangedCoordusize = range.into();

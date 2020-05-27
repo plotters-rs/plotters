@@ -4,7 +4,8 @@ use std::ops::{Add, Range, Sub};
 
 use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 
-/// The trait that describe some time value
+/// The trait that describe some time value. This is the uniformed abstraction that works
+/// for both Date, DateTime and Duration, etc.
 pub trait TimeValue: Eq {
     type DateType: Datelike + PartialOrd;
 
@@ -16,12 +17,12 @@ pub trait TimeValue: Eq {
     fn earliest_after_date(date: Self::DateType) -> Self;
     /// Returns the duration between two time value
     fn subtract(&self, other: &Self) -> Duration;
-    /// Get the timezone information for current value
+    /// Instantiate a date type for current time value;
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
     /// Cast current date type into this type
     fn from_date(date: Self::DateType) -> Self;
 
-    /// Map the coord
+    /// Map the coord spec
     fn map_coord(value: &Self, begin: &Self, end: &Self, limit: (i32, i32)) -> i32 {
         let total_span = end.subtract(begin);
         let value_span = value.subtract(begin);
@@ -34,6 +35,7 @@ pub trait TimeValue: Eq {
             }
         }
 
+        // Yes, converting them to floating point may lose precision, but this is Ok.
         // If it overflows, it means we have a time span nearly 300 years, we are safe to ignore the
         // portion less than 1 day.
         let total_days = total_span.num_days() as f64;

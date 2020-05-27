@@ -37,7 +37,8 @@ where
     }
 
     /// The offset of x labels. This is used when we want to place the label in the middle of
-    /// the grid. This is useful if we are drawing a histogram
+    /// the grid. This is used to adjust label position for histograms, but since plotters 0.3, this
+    /// use case is deprecated, see [CentricDiscreteRanged coord decorator](../coord/trait.IntoCentric.html) for more details
     /// - `value`: The offset in pixel
     pub fn x_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.style.x_label_offset(value);
@@ -45,7 +46,8 @@ where
     }
 
     /// The offset of y labels. This is used when we want to place the label in the middle of
-    /// the grid. This is useful if we are drawing a histogram
+    /// the grid. This is used to adjust label position for histograms, but since plotters 0.3, this
+    /// use case is deprecated, see [CentricDiscreteRanged coord decorator](../coord/trait.IntoCentric.html) for more details
     /// - `value`: The offset in pixel
     pub fn y_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.style.y_label_offset(value);
@@ -202,7 +204,8 @@ where
     }
 
     /// The offset of x labels. This is used when we want to place the label in the middle of
-    /// the grid. This is useful if we are drawing a histogram
+    /// the grid. This is used to adjust label position for histograms, but since plotters 0.3, this
+    /// use case is deprecated, see [CentricDiscreteRanged coord decorator](../coord/trait.IntoCentric.html) for more details
     /// - `value`: The offset in pixel
     pub fn x_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.x_label_offset = value.in_pixels(&self.parent_size);
@@ -210,7 +213,8 @@ where
     }
 
     /// The offset of y labels. This is used when we want to place the label in the middle of
-    /// the grid. This is useful if we are drawing a histogram
+    /// the grid. This is used to adjust label position for histograms, but since plotters 0.3, this
+    /// use case is deprecated, see [CentricDiscreteRanged coord decorator](../coord/trait.IntoCentric.html) for more details
     /// - `value`: The offset in pixel
     pub fn y_label_offset<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.y_label_offset = value.in_pixels(&self.parent_size);

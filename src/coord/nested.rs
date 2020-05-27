@@ -1,7 +1,7 @@
 use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
 use std::ops::Range;
 
-/// Describe a value for a nested croodinate
+/// Describe a value for a nested coordinate
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum NestedValue<C, V> {
     /// Category value

@@ -84,6 +84,26 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
 ///
 /// For each frame, instead of updating the entire backend, we are able to keep the keep the figure
 /// component like axis, labels untouched and make updates only in the plotting drawing area.
+/// This is very useful for incremental render.
+/// ```rust
+///   use plotters::prelude::*;
+///    let mut buffer = vec![0u8;1024*768*3];
+///    let area = BitMapBackend::with_buffer(&mut buffer[..], (1024, 768))
+///        .into_drawing_area()
+///        .split_evenly((1,2));
+///    let chart = ChartBuilder::on(&area[0])
+///        .caption("Incremental Example", ("sans-serif", 20))
+///        .set_all_label_area_size(30)
+///        .build_ranged(0..10, 0..10)
+///        .expect("Unable to build ChartContext");
+///    // Draw the first frame at this point
+///    area[0].present().expect("Present");
+///    let state = chart.into_chart_state();
+///    // Let's draw the second frame
+///    let chart = state.restore(&area[0]);
+///    chart.plotting_area().fill(&WHITE).unwrap(); // Clear the previously drawn graph
+///    // At this point, you are able to draw next frame
+///```
 pub struct ChartState<CT: CoordTranslate> {
     drawing_area_pos: (i32, i32),
     drawing_area_size: (u32, u32),
@@ -112,7 +132,7 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> 
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Convert a chart context into a chart state, by doing so, the chart context is consumed and
-    /// a saved chart state is created for later use.
+    /// a saved chart state is created for later use. This is typically used in incrmental rendering. See documentation of `ChartState` for more detailed example.
     pub fn into_chart_state(self) -> ChartState<CT> {
         self.into()
     }
@@ -201,7 +221,7 @@ impl<
     }
 
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
-    /// the function `MeshStyle::draw`
+    /// the function `MeshStyle::draw`.
     pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
         let base_tick_size = (5u32).percent().max(5).in_pixels(&self.drawing_area);
 
@@ -258,6 +278,7 @@ impl<'a, DB: DrawingBackend + 'a, CT: CoordTranslate> ChartContext<'a, DB, CT> {
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    /// Cast the reference to a chart context to a reference to underlying coordinate specification.
     pub fn as_coord_spec(&self) -> &CT {
         self.drawing_area.as_coord_spec()
     }
@@ -354,7 +375,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         &mut self.series_anno[idx]
     }
 
-    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
+    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements.
+    /// - **Returns**: Either drawing error or a series annotation object thus we can put annotation to current series (e.g. legend)
     pub fn draw_series<E, R, S>(
         &mut self,
         series: S,
@@ -724,7 +746,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
         Ok(())
     }
 
-    /// Convert this chart context into a dual axis chart context
+    /// Convert this chart context into a dual axis chart context and attach a second coordinate spec
+    /// on the chart context. For more detailed information, see documentation for [struct DualCoordChartContext](struct.DualCoordChartContext.html)
     ///
     /// - `x_coord`: The coordinate spec for the X axis
     /// - `y_coord`: The coordinate spec for the Y axis

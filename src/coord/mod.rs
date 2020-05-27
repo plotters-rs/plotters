@@ -49,7 +49,7 @@ pub use ranged::{
 
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};
 
-pub use discrete::{CentricValues, DiscreteRanged, IntoCentric};
+pub use discrete::{CentricDiscreteRange, CentricValues, DiscreteRanged, IntoCentric};
 pub use linspace::{IntoLinspace, Linspace};
 
 pub use logarithmic::{LogCoord, LogRange, LogScalable};

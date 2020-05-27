@@ -15,14 +15,22 @@ use crate::element::{Drawable, PointCollection};
 
 use plotters_backend::{BackendCoord, DrawingBackend};
 
-/// The chart context that has two coordinate system attached
+/// The chart context that has two coordinate system attached.
+/// This situation is quite common, for example, we with two different coodinate system.
+/// For instance this example <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png"></img>
+/// This is done by attaching  a second coordinate system to ChartContext by method [ChartContext::set_secondary_coord](struct.ChartContext.html#method.set_secondary_coord).
+/// For instance of dual coordinate charts, see [this example](https://github.com/38/plotters/blob/master/examples/two-scales.rs#L15).
+/// Note: `DualCoordChartContext` is always deref to the chart context.
+/// - If you want to configure the secondary axis, method [DualCoordChartContext::configure_secondary_axes](struct.DualCoordChartContext.html#method.configure_secondary_axes)
+/// - If you want to draw a series using secondary coordinate system, use [DualCoordChartContext::draw_secondary_series](struct.DualCoordChartContext.html#method.draw_secondary_series). And method [ChartContext::draw_series](struct.ChartContext.html#method.draw_series) will always use primary coordinate spec.
 pub struct DualCoordChartContext<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate> {
     pub(super) primary: ChartContext<'a, DB, CT1>,
     pub(super) secondary: ChartContext<'a, DB, CT2>,
 }
 
 /// The chart state for a dual coord chart, see the detailed description for `ChartState` for more
-/// information about the purpose of a chart state
+/// information about the purpose of a chart state.
+/// Similar to [ChartState](struct.ChartState.html), but used for the dual coordinate charts.
 pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
     primary: ChartState<CT1>,
     secondary: ChartState<CT2>,
@@ -31,7 +39,7 @@ pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
 impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     DualCoordChartContext<'a, DB, CT1, CT2>
 {
-    /// Convert the chart context into a chart state
+    /// Convert the chart context into a chart state, similar to [ChartContext::into_chart_state](struct.ChartContext.html#method.into_chart_state)
     pub fn into_chart_state(self) -> DualCoordChartState<CT1, CT2> {
         DualCoordChartState {
             primary: self.primary.into(),
@@ -39,7 +47,7 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
         }
     }
 
-    /// Convert the chart context into a sharable chart state
+    /// Convert the chart context into a sharable chart state.
     pub fn into_shared_chart_state(self) -> DualCoordChartState<Arc<CT1>, Arc<CT2>> {
         DualCoordChartState {
             primary: self.primary.into_shared_chart_state(),
@@ -54,7 +62,7 @@ where
     CT1: Clone,
     CT2: Clone,
 {
-    /// Copy the coordinate specs and make the chart state
+    /// Copy the coordinate specs and make a chart state
     pub fn to_chart_state(&self) -> DualCoordChartState<CT1, CT2> {
         DualCoordChartState {
             primary: self.primary.to_chart_state(),
@@ -183,7 +191,7 @@ where
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged, SX: Ranged, SY: Ranged>
     DualCoordChartContext<'a, DB, RangedCoord<X, Y>, RangedCoord<SX, SY>>
 {
-    /// Draw a series use the secondary coordinate system
+    /// Draw a series use the secondary coordinate system.
     /// - `series`: The series to draw
     /// - `Returns` the series annotation object or error code
     pub fn draw_secondary_series<E, R, S>(

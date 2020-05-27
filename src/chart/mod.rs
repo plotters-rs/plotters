@@ -21,5 +21,5 @@ mod series;
 pub use builder::{ChartBuilder, LabelAreaPosition};
 pub use context::{ChartContext, ChartState, SeriesAnno};
 pub use dual_coord::{DualCoordChartContext, DualCoordChartState};
-pub use mesh::MeshStyle;
+pub use mesh::{MeshStyle, SecondaryMeshStyle};
 pub use series::{SeriesLabelPosition, SeriesLabelStyle};
