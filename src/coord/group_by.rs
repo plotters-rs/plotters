@@ -6,6 +6,15 @@ use std::ops::Range;
 /// This is useful, for example, when we have an X axis is a integer and denotes days.
 /// And we are expecting the tick mark denotes weeks, in this way we can make the range
 /// spec grouping by 7 elements.
+/// With the help of the GroupBy decorator, this can be archived quite easily: 
+///```rust
+///use plotters::prelude::*;
+///let mut buf = vec![0;1024*768*3];
+///let area = BitMapBackend::with_buffer(buf.as_mut(), (1024, 768)).into_drawing_area();
+///let chart = ChartBuilder::on(&area)
+///    .build_ranged((0..100).group_by(7), 0..100)
+///    .unwrap();
+///```
 #[derive(Clone)]
 pub struct GroupBy<T: DiscreteRanged>(T, usize);
 

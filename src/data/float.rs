@@ -1,5 +1,4 @@
 // The code that is related to float number handling
-
 fn find_minimal_repr(n: f64, eps: f64) -> (f64, usize) {
     if eps >= 1.0 {
         return (n, 0);
