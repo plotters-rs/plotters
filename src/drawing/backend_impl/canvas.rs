@@ -74,10 +74,11 @@ impl DrawingBackend for CanvasBackend {
 
     fn get_size(&self) -> (u32, u32) {
         // Getting just canvas.width gives poor results on HighDPI screens.
-        let window = window()?;
+        let window = window().unwrap();
         let mut dpr = window.device_pixel_ratio();
-        dpr = if dpr == 0 { 1 } else { dpr };
-        ((canvas.width() as f64 / dpr) as u32, (canvas.height() as f64 / dpr) as u32)
+        dpr = if dpr == 0.0 { 1.0 } else { dpr };
+        ((self.canvas.width() as f64 / dpr) as u32,
+         (self.canvas.height() as f64 / dpr) as u32)
     }
 
     fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<CanvasError>> {
