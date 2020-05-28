@@ -153,13 +153,19 @@ where
 /// to a discrete coordinate by a giving step.
 ///
 /// For example, range `0f32..100f32` is a continuous coordinate, thus this prevent us having a
-/// histogram on it. In this case, to get a histogram, we need to split the original range to a
+/// histogram on it since Plotters doesn't know how to segment the range into buckets.
+/// In this case, to get a histogram, we need to split the original range to a
 /// set of discrete buckets (for example, 0.5 per bucket).
 ///
 /// The linspace decorate abstracting this method. For example, we can have a discrete coordinate:
 /// `(0f32..100f32).step(0.5)`.
 ///
-/// Linspace also supports different types of bucket matching method: ceil, floor, round or exact.
+/// Linspace also supports different types of bucket matching method - This configuration alters the behavior of
+/// [DiscreteCoord::index_of](../trait.DiscreteCoord.html#tymethod.index_of) for Linspace coord spec
+/// - **Flooring**, the value falls into the nearst bucket smaller than it. See [Linspace::use_floor](struct.Linspace.html#method.use_floor)
+/// - **Round**,   the value falls into the nearst bucket. See [Linearspace::use_round](struct.Linspace.html#method.use_round)
+/// - **Ceiling**, the value falls into the nearst bucket larger than itself. See [Linspace::use_ceil](struct.Linspace.html#method.use_ceil)
+/// - **Exact Matchting**, the value must be exactly same as the butcket value.  See [Linspace::use_exact](struct.Linspace.html#method.use_exact)
 #[derive(Clone)]
 pub struct Linspace<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>>
 where

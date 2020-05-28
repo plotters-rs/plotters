@@ -40,7 +40,21 @@ macro_rules! impl_ranged_type_trait {
         }
     };
 }
+macro_rules! impl_reverse_mapping_trait {
+    ($type:ty, $name: ident) => {
+        impl ReversibleRanged for $name {
+            fn unmap(&self, p: i32, (min, max): (i32, i32)) -> Option<$type> {
+                if p < min.min(max) || p > max.max(min) || min == max {
+                    return None;
+                }
 
+                let logical_offset = f64::from(p - min) / f64::from(max - min);
+
+                return Some(((self.1 - self.0) as f64 * logical_offset + self.0 as f64) as $type);
+            }
+        }
+    };
+}
 macro_rules! make_numeric_coord {
     ($type:ty, $name:ident, $key_points:ident, $doc: expr) => {
         #[doc = $doc]
@@ -76,18 +90,6 @@ macro_rules! make_numeric_coord {
             }
             fn range(&self) -> Range<$type> {
                 return self.0..self.1;
-            }
-        }
-
-        impl ReversibleRanged for $name {
-            fn unmap(&self, p:i32, (min,max): (i32, i32)) -> Option<$type> {
-                if p < min.min(max) || p > max.max(min) {
-                    return None;
-                }
-
-                let logical_offset = (p - min) as f64 / (max - min) as f64;
-
-                return Some(((self.1 - self.0) as f64 * logical_offset + self.0 as f64) as $type);
             }
         }
     };
@@ -204,12 +206,14 @@ make_numeric_coord!(
     compute_f32_key_points,
     "The ranged coordinate for type f32"
 );
+impl_reverse_mapping_trait!(f32, RangedCoordf32);
 make_numeric_coord!(
     f64,
     RangedCoordf64,
     compute_f64_key_points,
     "The ranged coordinate for type f64"
 );
+impl_reverse_mapping_trait!(f64, RangedCoordf64);
 make_numeric_coord!(
     u32,
     RangedCoordu32,

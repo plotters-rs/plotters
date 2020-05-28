@@ -6,7 +6,7 @@ use std::ops::Range;
 /// This is useful, for example, when we have an X axis is a integer and denotes days.
 /// And we are expecting the tick mark denotes weeks, in this way we can make the range
 /// spec grouping by 7 elements.
-/// With the help of the GroupBy decorator, this can be archived quite easily: 
+/// With the help of the GroupBy decorator, this can be archived quite easily:
 ///```rust
 ///use plotters::prelude::*;
 ///let mut buf = vec![0;1024*768*3];

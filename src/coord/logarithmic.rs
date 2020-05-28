@@ -2,7 +2,8 @@ use super::{AsRangedCoord, Ranged, RangedCoordf64};
 use std::marker::PhantomData;
 use std::ops::Range;
 
-/// The trait for the type that is able to be presented in the log scale
+/// The trait for the type that is able to be presented in the log scale.
+/// This trait is primarily used by [LogRange](struct.LogRange.html).
 pub trait LogScalable: Clone {
     /// Make the conversion from the type to the floating point number
     fn as_f64(&self) -> f64;
@@ -47,7 +48,8 @@ impl_log_scalable!(i, u64);
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
 
-/// The decorator type for a range of a log-scaled value
+/// The logarithmic coodinate decorator.
+/// This decorator is used to make the axis rendered as logarithmically.
 pub struct LogRange<V: LogScalable>(pub Range<V>);
 
 impl<V: LogScalable + Clone> Clone for LogRange<V> {

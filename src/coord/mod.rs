@@ -18,7 +18,6 @@ for a interactive figure.
 `RangedCoord` is the 2D cartesian coordinate system that has two `Ranged` axis.
 A ranged axis can be logarithmic and by applying an logarithmic axis, the figure is logarithmic scale.
 Also, the ranged axis can be deserted, and this is required by the histogram series.
-
 */
 use plotters_backend::BackendCoord;
 
@@ -37,7 +36,9 @@ mod slice;
 pub use slice::RangedSlice;
 
 #[cfg(feature = "chrono")]
-pub use datetime::{IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration};
+pub use datetime::{
+    IntoMonthly, IntoYearly, Monthly, RangedDate, RangedDateTime, RangedDuration, Yearly,
+};
 pub use numeric::{
     RangedCoordf32, RangedCoordf64, RangedCoordi128, RangedCoordi32, RangedCoordi64,
     RangedCoordu128, RangedCoordu32, RangedCoordu64,
