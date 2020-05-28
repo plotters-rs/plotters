@@ -252,19 +252,8 @@ impl<T: TimeValue + Datelike + Clone> ValueFormatter<T> for Monthly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> Ranged for Monthly<T> {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
-    type ValueType = T;
-
-    fn range(&self) -> Range<T> {
-        self.0.start.clone()..self.0.end.clone()
-    }
-
-    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
-        T::map_coord(value, &self.0.start, &self.0.end, limit)
-    }
-
-    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+impl<T: TimeValue + Clone> Monthly<T> {
+    fn bold_key_points<H: KeyPointHint>(&self, hint: &H) -> Vec<T> {
         let max_points = hint.max_num_points();
         let start_date = self.0.start.date_ceil();
         let end_date = self.0.end.date_floor();
@@ -356,7 +345,35 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T> {
+impl<T: TimeValue + Clone> Ranged for Monthly<T>
+where
+    Range<T>: AsRangedCoord<Value = T>,
+{
+    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type ValueType = T;
+
+    fn range(&self) -> Range<T> {
+        self.0.start.clone()..self.0.end.clone()
+    }
+
+    fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
+        T::map_coord(value, &self.0.start, &self.0.end, limit)
+    }
+
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        if hint.weight().allow_light_points() && self.size() <= hint.bold_points() * 2 {
+            let coord: <Range<T> as AsRangedCoord>::CoordDescType = self.0.clone().into();
+            let normal = coord.key_points(hint.max_num_points());
+            return normal;
+        }
+        self.bold_key_points(&hint)
+    }
+}
+
+impl<T: TimeValue + Clone> DiscreteRanged for Monthly<T>
+where
+    Range<T>: AsRangedCoord<Value = T>,
+{
     fn size(&self) -> usize {
         let (start_year, start_month) = {
             let ceil = self.0.start.date_ceil();
@@ -455,7 +472,10 @@ impl<T: TimeValue + Datelike + Clone> ValueFormatter<T> for Yearly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> Ranged for Yearly<T> {
+impl<T: TimeValue + Clone> Ranged for Yearly<T>
+where
+    Range<T>: AsRangedCoord<Value = T>,
+{
     type FormatOption = crate::coord::ranged::NoDefaultFormatting;
     type ValueType = T;
 
@@ -468,6 +488,9 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
     }
 
     fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        if hint.weight().allow_light_points() && self.size() <= hint.bold_points() * 2 {
+            return Monthly(self.0.clone()).key_points(hint);
+        }
         let max_points = hint.max_num_points();
         let start_date = self.0.start.date_ceil();
         let end_date = self.0.end.date_floor();
@@ -498,7 +521,10 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
     }
 }
 
-impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T> {
+impl<T: TimeValue + Clone> DiscreteRanged for Yearly<T>
+where
+    Range<T>: AsRangedCoord<Value = T>,
+{
     fn size(&self) -> usize {
         let year_start = self.0.start.date_ceil().year();
         let year_end = self.0.end.date_floor().year();
@@ -883,6 +909,7 @@ mod test {
 
     #[test]
     fn test_yearly_date_range() {
+        use crate::coord::BoldPoints;
         let range = Utc.ymd(1000, 8, 5)..Utc.ymd(2999, 1, 1);
         let ranged_coord = range.yearly();
 
@@ -910,7 +937,7 @@ mod test {
 
         let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
         let ranged_coord = range.yearly();
-        let kps = ranged_coord.key_points(23);
+        let kps = ranged_coord.key_points(BoldPoints(23));
         assert!(kps.len() == 1);
     }
 
@@ -919,13 +946,15 @@ mod test {
         let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 9, 1);
         let ranged_coord = range.monthly();
 
-        let kps = ranged_coord.key_points(15);
+        use crate::coord::BoldPoints;
+
+        let kps = ranged_coord.key_points(BoldPoints(15));
 
         assert!(kps.len() <= 15);
         assert!(kps.iter().all(|x| x.day() == 1));
         assert!(kps.into_iter().any(|x| x.month() != 9));
 
-        let kps = ranged_coord.key_points(5);
+        let kps = ranged_coord.key_points(BoldPoints(5));
         assert!(kps.len() <= 5);
         assert!(kps.iter().all(|x| x.day() == 1));
         let kps: Vec<_> = kps.into_iter().map(|x| x.month()).collect();

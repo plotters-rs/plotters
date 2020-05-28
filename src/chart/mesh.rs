@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
-use crate::coord::{BoldPoints, MeshLine, Ranged, RangedCoord, ValueFormatter};
+use crate::coord::{BoldPoints, LightPoints, MeshLine, Ranged, RangedCoord, ValueFormatter};
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
     AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
@@ -156,8 +156,8 @@ where
     pub(super) axis_desc_style: Option<TextStyle<'b>>,
     pub(super) x_desc: Option<String>,
     pub(super) y_desc: Option<String>,
-    pub(super) line_style_1: Option<ShapeStyle>,
-    pub(super) line_style_2: Option<ShapeStyle>,
+    pub(super) bold_line_style: Option<ShapeStyle>,
+    pub(super) light_line_style: Option<ShapeStyle>,
     pub(super) axis_style: Option<ShapeStyle>,
     pub(super) x_label_style: Option<TextStyle<'b>>,
     pub(super) y_label_style: Option<TextStyle<'b>>,
@@ -277,15 +277,15 @@ where
 
     /// Set the style for the coarse grind grid
     /// - `style`: This is the coarse grind grid style
-    pub fn line_style_1<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
-        self.line_style_1 = Some(style.into());
+    pub fn bold_line_style<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
+        self.bold_line_style = Some(style.into());
         self
     }
 
     /// Set the style for the fine grind grid
     /// - `style`: The fine grind grid style
-    pub fn line_style_2<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
-        self.line_style_2 = Some(style.into());
+    pub fn light_line_style<T: Into<ShapeStyle>>(&mut self, style: T) -> &mut Self {
+        self.light_line_style = Some(style.into());
         self
     }
 
@@ -362,12 +362,12 @@ where
             FontStyle::Normal,
         );
 
-        let mesh_style_1 = self
-            .line_style_1
+        let bold_style = self
+            .bold_line_style
             .clone()
             .unwrap_or_else(|| (&default_mesh_color_1).into());
-        let mesh_style_2 = self
-            .line_style_2
+        let light_style = self
+            .light_line_style
             .clone()
             .unwrap_or_else(|| (&default_mesh_color_2).into());
         let axis_style = self
@@ -391,8 +391,11 @@ where
             .unwrap_or_else(|| x_label_style.clone());
 
         target.draw_mesh(
-            (self.n_y_labels * 10, self.n_x_labels * 10),
-            &mesh_style_2,
+            (
+                LightPoints::new(self.n_y_labels, self.n_y_labels * 10),
+                LightPoints::new(self.n_x_labels, self.n_x_labels * 10),
+            ),
+            &light_style,
             &x_label_style,
             &y_label_style,
             |_| None,
@@ -412,7 +415,7 @@ where
 
         target.draw_mesh(
             (BoldPoints(self.n_y_labels), BoldPoints(self.n_x_labels)),
-            &mesh_style_1,
+            &bold_style,
             &x_label_style,
             &y_label_style,
             |m| match m {

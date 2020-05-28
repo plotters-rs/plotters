@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .disable_x_mesh()
-        .line_style_1(&WHITE.mix(0.3))
+        .bold_line_style(&WHITE.mix(0.3))
         .y_desc("Count")
         .x_desc("Bucket")
         .axis_desc_style(("sans-serif", 15).into_font())

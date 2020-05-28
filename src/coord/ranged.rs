@@ -42,9 +42,21 @@ pub enum KeyPointWeight {
     Any,
 }
 
+impl KeyPointWeight {
+    pub fn allow_light_points(&self) -> bool {
+        match self {
+            Self::Bold => false,
+            Self::Any => true,
+        }
+    }
+}
+
 pub trait KeyPointHint {
     fn max_num_points(&self) -> usize;
     fn weight(&self) -> KeyPointWeight;
+    fn bold_points(&self) -> usize {
+        self.max_num_points()
+    }
 }
 
 impl KeyPointHint for usize {
@@ -66,6 +78,34 @@ impl KeyPointHint for BoldPoints {
 
     fn weight(&self) -> KeyPointWeight {
         KeyPointWeight::Bold
+    }
+}
+
+pub struct LightPoints {
+    bold_points_num: usize,
+    light_limit: usize,
+}
+
+impl LightPoints {
+    pub fn new(bold_count: usize, requested: usize) -> Self {
+        Self {
+            bold_points_num: bold_count,
+            light_limit: requested,
+        }
+    }
+}
+
+impl KeyPointHint for LightPoints {
+    fn max_num_points(&self) -> usize {
+        self.light_limit
+    }
+
+    fn bold_points(&self) -> usize {
+        self.bold_points_num
+    }
+
+    fn weight(&self) -> KeyPointWeight {
+        KeyPointWeight::Any
     }
 }
 

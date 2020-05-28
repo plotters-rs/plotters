@@ -80,7 +80,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_desc("Ping, ms")
         .y_desc("Host")
         .y_labels(host_list.len())
-        .line_style_2(&WHITE)
+        .light_line_style(&WHITE)
         .draw()?;
 
     for (label, (values, style, offset)) in &series {
@@ -128,7 +128,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 
-    chart.configure_mesh().line_style_2(&WHITE).draw()?;
+    chart.configure_mesh().light_line_style(&WHITE).draw()?;
     chart.draw_series(vec![
         Boxplot::new_vertical(SegmentValue::CenterOf(&"a"), &quartiles_a),
         Boxplot::new_vertical(SegmentValue::CenterOf(&"b"), &quartiles_b),
@@ -140,7 +140,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Horizontal Boxplot", ("sans-serif", 20).into_font())
         .build_ranged(-30f32..90f32, 0..3)?;
 
-    chart.configure_mesh().line_style_2(&WHITE).draw()?;
+    chart.configure_mesh().light_line_style(&WHITE).draw()?;
     chart.draw_series(vec![
         Boxplot::new_horizontal(1, &quartiles_a),
         Boxplot::new_horizontal(2, &Quartiles::new(&[30])),
