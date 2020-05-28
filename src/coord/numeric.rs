@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 use std::ops::Range;
 
-use super::{AsRangedCoord, DiscreteRanged, Ranged, ReversibleRanged};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ReversibleRanged};
 
 macro_rules! impl_discrete_trait {
     ($name:ident) => {
@@ -85,8 +85,8 @@ macro_rules! make_numeric_coord {
 
                 return limit.0 + (actual_length as f64 * logic_length + 1e-3).floor() as i32;
             }
-            fn key_points(&self, max_points: usize) -> Vec<$type> {
-                $key_points((self.0, self.1), max_points)
+            fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<$type> {
+                $key_points((self.0, self.1), hint.max_num_points())
             }
             fn range(&self) -> Range<$type> {
                 return self.0..self.1;

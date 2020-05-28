@@ -1,4 +1,6 @@
-use super::{numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
+use super::{
+    numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter,
+};
 use std::cmp::{Ordering, PartialOrd};
 use std::marker::PhantomData;
 use std::ops::{Add, Range, Sub};
@@ -284,14 +286,14 @@ where
         self.inner.map(value, limit)
     }
 
-    fn key_points(&self, n: usize) -> Vec<T::ValueType> {
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<T::ValueType> {
         if self.grid_value.len() == 0 {
             return vec![];
         }
         let idx_range: RangedCoordusize = (0..(self.grid_value.len() - 1)).into();
 
         idx_range
-            .key_points(n)
+            .key_points(hint)
             .into_iter()
             .map(|x| self.grid_value[x].clone())
             .collect()

@@ -1,5 +1,5 @@
 use super::numeric::RangedCoordusize;
-use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
 use std::ops::Range;
 
 /// The ranged value spec that needs to be grouped.
@@ -62,13 +62,13 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
     fn range(&self) -> Range<T::ValueType> {
         self.0.range()
     }
-    // TODO: See issue #88
-    fn key_points(&self, max_points: usize) -> Vec<T::ValueType> {
+    // TODO: See issue issue #88
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<T::ValueType> {
         let range = 0..(self.0.size() + self.1 - 1) / self.1;
         let logic_range: RangedCoordusize = range.into();
 
         logic_range
-            .key_points(max_points)
+            .key_points(hint)
             .into_iter()
             .map(|x| self.0.from_index(x * self.1).unwrap())
             .collect()

@@ -1,4 +1,4 @@
-use super::{AsRangedCoord, DiscreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
 use std::ops::Range;
 
 /// A range that is defined by a slice of values.
@@ -30,7 +30,8 @@ impl<'a, T: PartialEq> Ranged for RangedSlice<'a, T> {
         }
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let mut ret = vec![];
         let intervals = (self.0.len() - 1) as f64;
         let step = (intervals / max_points as f64 + 1.0) as usize;

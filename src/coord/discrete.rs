@@ -1,4 +1,4 @@
-use super::{AsRangedCoord, Ranged, ReversibleRanged, ValueFormatter};
+use super::{AsRangedCoord, KeyPointHint, Ranged, ReversibleRanged, ValueFormatter};
 use std::ops::Range;
 
 /// The trait indicates the coordinate is discrete
@@ -161,9 +161,9 @@ impl<D: DiscreteRanged> Ranged for SegmentedCoord<D> {
         }
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
         self.0
-            .key_points(max_points)
+            .key_points(hint)
             .into_iter()
             .map(SegmentValue::CenterOf)
             .collect()

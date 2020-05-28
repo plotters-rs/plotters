@@ -8,8 +8,8 @@ use super::mesh::MeshStyle;
 use super::series::SeriesLabelStyle;
 
 use crate::coord::{
-    AsRangedCoord, CoordTranslate, MeshLine, Ranged, RangedCoord, ReverseCoordTranslate, Shift,
-    ValueFormatter,
+    AsRangedCoord, CoordTranslate, KeyPointHint, MeshLine, Ranged, RangedCoord,
+    ReverseCoordTranslate, Shift, ValueFormatter,
 };
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
@@ -394,9 +394,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
     /// The actual function that draws the mesh lines.
     /// It also returns the label that suppose to be there.
     #[allow(clippy::type_complexity)]
-    fn draw_mesh_lines<FmtLabel>(
+    fn draw_mesh_lines<FmtLabel, YH: KeyPointHint, XH: KeyPointHint>(
         &mut self,
-        (r, c): (usize, usize),
+        (r, c): (YH, XH),
         (x_mesh, y_mesh): (bool, bool),
         mesh_line_style: &ShapeStyle,
         mut fmt_label: FmtLabel,
@@ -693,9 +693,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub(super) fn draw_mesh<FmtLabel>(
+    pub(super) fn draw_mesh<FmtLabel, YH: KeyPointHint, XH: KeyPointHint>(
         &mut self,
-        (r, c): (usize, usize),
+        (r, c): (YH, XH),
         mesh_line_style: &ShapeStyle,
         x_label_style: &TextStyle,
         y_label_style: &TextStyle,

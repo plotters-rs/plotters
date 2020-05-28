@@ -1,4 +1,4 @@
-use super::{AsRangedCoord, DiscreteRanged, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
 use std::ops::Range;
 
 /// This axis decorator will make the axis partially display on the axis.
@@ -42,8 +42,8 @@ where
         self.0.map(value, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
-        self.0.key_points(max_points)
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType> {
+        self.0.key_points(hint)
     }
 
     fn range(&self) -> Range<Self::ValueType> {

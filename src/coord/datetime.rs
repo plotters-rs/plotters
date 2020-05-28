@@ -2,7 +2,7 @@
 use chrono::{Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike};
 use std::ops::{Add, Range, Sub};
 
-use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
 
 /// The trait that describe some time value. This is the uniformed abstraction that works
 /// for both Date, DateTime and Duration, etc.
@@ -176,7 +176,8 @@ where
         TimeValue::map_coord(value, &self.0, &self.1, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let mut ret = vec![];
 
         let total_days = (self.1.clone() - self.0.clone()).num_days();
@@ -263,7 +264,8 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T> {
         T::map_coord(value, &self.0.start, &self.0.end, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let start_date = self.0.start.date_ceil();
         let end_date = self.0.end.date_floor();
 
@@ -465,7 +467,8 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T> {
         T::map_coord(value, &self.0.start, &self.0.end, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let start_date = self.0.start.date_ceil();
         let end_date = self.0.end.date_floor();
 
@@ -583,7 +586,8 @@ where
         TimeValue::map_coord(value, &self.0, &self.1, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let total_span = self.1.clone() - self.0.clone();
 
         if let Some(total_ns) = total_span.num_nanoseconds() {
@@ -665,7 +669,8 @@ impl Ranged for RangedDuration {
             + (f64::from(limit.1 - limit.0) * value_days as f64 / total_days as f64 + 1e-10) as i32
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let total_span = self.1 - self.0;
 
         if let Some(total_ns) = total_span.num_nanoseconds() {

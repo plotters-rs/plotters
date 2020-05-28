@@ -1,4 +1,4 @@
-use super::{AsRangedCoord, DiscreteRanged, Ranged, ValueFormatter};
+use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
 use std::ops::Range;
 
 /// Describe a value for a nested coordinate
@@ -99,12 +99,12 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
         }
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType> {
         // TODO: Currently it's tricky to control the labels.
         // The problem is if we need to emit the nested keypoint in this vector?
         // Once we introduce the additional metadata on the key points, we probably have better way to handle this.
         self.primary
-            .key_points(max_points)
+            .key_points(hint)
             .into_iter()
             .map(|x| NestedValue::Category(x))
             .collect()

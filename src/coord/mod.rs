@@ -44,8 +44,8 @@ pub use numeric::{
     RangedCoordu128, RangedCoordu32, RangedCoordu64,
 };
 pub use ranged::{
-    AsRangedCoord, DefaultFormatting, MeshLine, NoDefaultFormatting, Ranged, RangedCoord,
-    ReversibleRanged, ValueFormatter,
+    AsRangedCoord, BoldPoints, DefaultFormatting, KeyPointHint, KeyPointWeight, MeshLine,
+    NoDefaultFormatting, Ranged, RangedCoord, ReversibleRanged, ValueFormatter,
 };
 
 pub use partial_axis::{make_partial_axis, IntoPartialAxis};

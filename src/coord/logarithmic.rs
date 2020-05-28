@@ -1,4 +1,4 @@
-use super::{AsRangedCoord, Ranged, RangedCoordf64};
+use super::{AsRangedCoord, KeyPointHint, Ranged, RangedCoordf64};
 use std::marker::PhantomData;
 use std::ops::Range;
 
@@ -90,7 +90,8 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
         self.linear.map(&value, limit)
     }
 
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType> {
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType> {
+        let max_points = hint.max_num_points();
         let tier_1 = (self.logic.end.as_f64() / self.logic.start.as_f64())
             .log10()
             .abs()

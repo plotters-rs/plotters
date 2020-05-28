@@ -1,7 +1,8 @@
-use crate::coord::{CoordTranslate, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::{CoordTranslate, KeyPointHint, MeshLine, Ranged, RangedCoord, Shift};
 use crate::element::{Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{Color, SizeDesc, TextStyle};
+
 /// The abstraction of a drawing area
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
@@ -183,11 +184,11 @@ impl<T: DrawingBackend> IntoDrawingArea for T {
 
 impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>> {
     /// Draw the mesh on a area
-    pub fn draw_mesh<DrawFunc>(
+    pub fn draw_mesh<DrawFunc, YH: KeyPointHint, XH: KeyPointHint>(
         &self,
         mut draw_func: DrawFunc,
-        y_count_max: usize,
-        x_count_max: usize,
+        y_count_max: YH,
+        x_count_max: XH,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
         DrawFunc: FnMut(&mut DB, MeshLine<X, Y>) -> Result<(), DrawingErrorKind<DB::ErrorType>>,

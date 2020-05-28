@@ -34,6 +34,41 @@ where
     }
 }
 
+/// Specify the weight of key points.
+pub enum KeyPointWeight {
+    // Allows only bold key points
+    Bold,
+    // Allows any key points
+    Any,
+}
+
+pub trait KeyPointHint {
+    fn max_num_points(&self) -> usize;
+    fn weight(&self) -> KeyPointWeight;
+}
+
+impl KeyPointHint for usize {
+    fn max_num_points(&self) -> usize {
+        *self
+    }
+
+    fn weight(&self) -> KeyPointWeight {
+        KeyPointWeight::Any
+    }
+}
+
+pub struct BoldPoints(pub usize);
+
+impl KeyPointHint for BoldPoints {
+    fn max_num_points(&self) -> usize {
+        self.0
+    }
+
+    fn weight(&self) -> KeyPointWeight {
+        KeyPointWeight::Bold
+    }
+}
+
 /// The trait that indicates we have a ordered and ranged value
 /// Which is used to describe the axis
 pub trait Ranged {
@@ -46,7 +81,7 @@ pub trait Ranged {
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32;
 
     /// This function gives the key points that we can draw a grid based on this
-    fn key_points(&self, max_points: usize) -> Vec<Self::ValueType>;
+    fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType>;
 
     /// Get the range of this value
     fn range(&self) -> Range<Self::ValueType>;
@@ -104,10 +139,15 @@ impl<X: Ranged, Y: Ranged> RangedCoord<X, Y> {
     }
 
     /// Draw the mesh for the coordinate system
-    pub fn draw_mesh<E, DrawMesh: FnMut(MeshLine<X, Y>) -> Result<(), E>>(
+    pub fn draw_mesh<
+        E,
+        DrawMesh: FnMut(MeshLine<X, Y>) -> Result<(), E>,
+        XH: KeyPointHint,
+        YH: KeyPointHint,
+    >(
         &self,
-        h_limit: usize,
-        v_limit: usize,
+        h_limit: YH,
+        v_limit: XH,
         mut draw_mesh: DrawMesh,
     ) -> Result<(), E> {
         let (xkp, ykp) = (

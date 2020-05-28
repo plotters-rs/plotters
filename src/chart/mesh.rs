@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
-use crate::coord::{MeshLine, Ranged, RangedCoord, ValueFormatter};
+use crate::coord::{BoldPoints, MeshLine, Ranged, RangedCoord, ValueFormatter};
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
     AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
@@ -411,7 +411,7 @@ where
         )?;
 
         target.draw_mesh(
-            (self.n_y_labels, self.n_x_labels),
+            (BoldPoints(self.n_y_labels), BoldPoints(self.n_x_labels)),
             &mesh_style_1,
             &x_label_style,
             &y_label_style,
