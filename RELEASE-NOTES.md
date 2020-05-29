@@ -33,16 +33,20 @@ After this update, you should do the following code instead:
 
 ```rust
 use plotters::prelude::*;
-use plotter_bitmap::BitMapBackend;
+use plotter_bitmap::BitMapBackend; // <= This extra import is used to plug the backend to Plotters
 
-//...
+fn main() {
+	let backend = BitMapBackend::new(...)
+}
 
 ```
 
 ### Backward compatibility
 
-Plotters v0.3 now have a concept of tier 1 backends, which is the most supported. Currently we have two tier 1 backends: `plotters-bitmap` and 
-`plotters-svg`. Tier 1 backends are used by most of the people. 
+Plotters 0.3 has introduced concept of tier 1 backends, which is the most supported. 
+All tier 1 backends could be imported automatically with the core crate (But can be opt-out as well). 
+Currently we have two tier 1 backends: `plotters-bitmap` and `plotters-svg`. 
+These are used by most of the people. 
 
 To ease the upgrade for tier 1 backends, we still keep feature options in the core crate that can opt in those crates. And this is enabled by default.
 
@@ -61,3 +65,17 @@ plotters-cairo = "0.3" # We should import the cairo backend in this way.
 ```
 
 And in your code, instead of import `plotters::prelude::CairoBackend`, you should import `plotters_cairo::CairoBackend`
+
+## Enhanced Coordinate System Abstraction
+
+### Details
+
+Plotters 0.3 ships with tons of improvement made in the coordinate abstraction and support much more kinds of coordinate. 
+
+* `chrono::NaiveDate` and `chrono::NaiveDateTime` are now supported 
+* Better abstraction of discrete coordinates 
+* Linspace coordinate, which can be used converting a continous coorindate into a discrete buckets
+* Nested coordinate
+* Slices can now be used as cooradnite specification, which allows people define an axis of category.
+
+## Fix bugs and improve testing
