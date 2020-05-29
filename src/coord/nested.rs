@@ -89,8 +89,7 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
         }
 
         let s_left = limit.0 + bucket_size * idx as i32 + residual.min(idx as i32);
-        let s_right =
-            limit.0 + s_left + bucket_size + if (residual as usize) < idx { 1 } else { 0 };
+        let s_right = s_left + bucket_size + if (residual as usize) < idx { 1 } else { 0 };
 
         if let Some(secondary_value) = value.nested_value() {
             self.secondary[idx].map(secondary_value, (s_left, s_right))
@@ -100,14 +99,31 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
     }
 
     fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<Self::ValueType> {
-        // TODO: Currently it's tricky to control the labels.
-        // The problem is if we need to emit the nested keypoint in this vector?
-        // Once we introduce the additional metadata on the key points, we probably have better way to handle this.
-        self.primary
-            .key_points(hint)
-            .into_iter()
-            .map(|x| NestedValue::Category(x))
-            .collect()
+        if !hint.weight().allow_light_points() || hint.max_num_points() < self.primary.size() * 2 {
+            self.primary
+                .key_points(hint)
+                .into_iter()
+                .map(|x| NestedValue::Category(x))
+                .collect()
+        } else {
+            let secondary_size =
+                (hint.max_num_points() - self.primary.size()) / self.primary.size();
+            self.primary
+                .values()
+                .enumerate()
+                .map(|(idx, val)| {
+                    std::iter::once(NestedValue::Category(val)).chain(
+                        self.secondary[idx]
+                            .key_points(secondary_size)
+                            .into_iter()
+                            .map(move |v| {
+                                NestedValue::Value(self.primary.from_index(idx).unwrap(), v)
+                            }),
+                    )
+                })
+                .flatten()
+                .collect()
+        }
     }
 }
 

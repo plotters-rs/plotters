@@ -1,4 +1,3 @@
-use super::numeric::RangedCoordusize;
 use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
 use std::ops::Range;
 
@@ -64,11 +63,35 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
     }
     // TODO: See issue issue #88
     fn key_points<HintType: KeyPointHint>(&self, hint: HintType) -> Vec<T::ValueType> {
-        let range = 0..(self.0.size() + self.1 - 1) / self.1;
-        let logic_range: RangedCoordusize = range.into();
+        let range = 0..(self.0.size() + self.1) / self.1;
+        //let logic_range: RangedCoordusize = range.into();
 
-        logic_range
-            .key_points(hint)
+        let interval =
+            ((range.end - range.start + hint.bold_points() - 1) / hint.bold_points()).max(1);
+        let count = (range.end - range.start) / interval;
+
+        let idx_iter = (0..hint.bold_points()).map(|x| x * interval);
+
+        if hint.weight().allow_light_points() && count < hint.bold_points() * 2 {
+            let outter_ticks = idx_iter;
+            let outter_tick_size = interval * self.1;
+            let inner_ticks_per_group = hint.max_num_points() / outter_ticks.len();
+            let inner_ticks =
+                (outter_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
+            let inner_ticks: Vec<_> = (0..(outter_tick_size / inner_ticks))
+                .map(move |x| x * inner_ticks)
+                .collect();
+            let size = self.0.size();
+            return outter_ticks
+                .into_iter()
+                .map(|base| inner_ticks.iter().map(move |&ofs| base * self.1 + ofs))
+                .flatten()
+                .take_while(|&idx| idx < size)
+                .map(|x| self.0.from_index(x).unwrap())
+                .collect();
+        }
+
+        idx_iter
             .into_iter()
             .map(|x| self.0.from_index(x * self.1).unwrap())
             .collect()
