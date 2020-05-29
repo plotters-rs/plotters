@@ -6,10 +6,10 @@ use std::ops::Range;
 use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
 
 /// The coordinate decorator that binds a key point vector.
-/// Normally, all the ranged coordinate implements its own keypoint algorithm 
-/// to determine how to render the tick mark and mesh grid. 
-/// This decorator allows customized tick mark specifiied by vector. 
-/// See [BindKeyPoints::with_key_points](trait.BindKeyPoints.html#tymethod.with_key_points) 
+/// Normally, all the ranged coordinate implements its own keypoint algorithm
+/// to determine how to render the tick mark and mesh grid.
+/// This decorator allows customized tick mark specifiied by vector.
+/// See [BindKeyPoints::with_key_points](trait.BindKeyPoints.html#tymethod.with_key_points)
 /// for details.
 /// Note: For any coordinate spec wrapped by this decorator, the maxium number of labels configured by
 /// MeshStyle will be ignored and the key point function will always returns the entire vector
@@ -208,5 +208,59 @@ impl<R: DiscreteRanged> DiscreteRanged for WithKeyPointMethod<R> {
     }
     fn from_index(&self, index: usize) -> Option<Self::ValueType> {
         self.inner.from_index(index)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::coord::{BoldPoints, LightPoints};
+    #[test]
+    fn test_with_key_points() {
+        let range = (0..100).with_key_points(vec![1, 2, 3]);
+        assert_eq!(range.map(&3, (0, 1000)), 30);
+        assert_eq!(range.range(), 0..100);
+        assert_eq!(range.key_points(BoldPoints(100)), vec![1, 2, 3]);
+        assert_eq!(range.key_points(LightPoints::new(100, 100)), vec![]);
+        let range = range.with_light_points(5..10);
+        assert_eq!(range.key_points(BoldPoints(10)), vec![1, 2, 3]);
+        assert_eq!(
+            range.key_points(LightPoints::new(10, 10)),
+            (5..10).collect::<Vec<_>>()
+        );
+
+        assert_eq!(range.size(), 101);
+        assert_eq!(range.index_of(&10), Some(10));
+        assert_eq!(range.from_index(10), Some(10));
+
+        assert_eq!(range.axis_pixel_range((0, 1000)), 0..1000);
+
+        let mut range = range;
+
+        assert_eq!(range.light_points().len(), 5);
+        assert_eq!(range.light_points_mut().len(), 5);
+        assert_eq!(range.bold_points().len(), 3);
+        assert_eq!(range.bold_points_mut().len(), 3);
+    }
+
+    #[test]
+    fn test_with_key_point_method() {
+        let range = (0..100).with_key_point_func(|_| vec![1, 2, 3]);
+        assert_eq!(range.map(&3, (0, 1000)), 30);
+        assert_eq!(range.range(), 0..100);
+        assert_eq!(range.key_points(BoldPoints(100)), vec![1, 2, 3]);
+        assert_eq!(range.key_points(LightPoints::new(100, 100)), vec![]);
+        let range = range.with_light_point_func(|_| (5..10).collect());
+        assert_eq!(range.key_points(BoldPoints(10)), vec![1, 2, 3]);
+        assert_eq!(
+            range.key_points(LightPoints::new(10, 10)),
+            (5..10).collect::<Vec<_>>()
+        );
+
+        assert_eq!(range.size(), 101);
+        assert_eq!(range.index_of(&10), Some(10));
+        assert_eq!(range.from_index(10), Some(10));
+
+        assert_eq!(range.axis_pixel_range((0, 1000)), 0..1000);
     }
 }
