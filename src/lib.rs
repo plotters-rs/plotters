@@ -708,14 +708,17 @@ pub mod prelude {
 
     // Coordinates
     pub use crate::coord::{
-        BuildNestedCoord, CoordTranslate, DiscreteRanged, GroupBy, IntoLinspace, IntoPartialAxis,
-        IntoSegmentedCoord, Linspace, LogCoord, LogRange, LogScalable, NestedRange, NestedValue,
-        Ranged, RangedCoord, RangedCoordf32, RangedCoordf64, RangedCoordi32, RangedCoordi64,
-        RangedCoordu32, RangedCoordu64, SegmentValue, ToGroupByRange,
+        BindKeyPointMethod, BindKeyPoints, BuildNestedCoord, CoordTranslate, DiscreteRanged,
+        GroupBy, IntoLinspace, IntoPartialAxis, IntoSegmentedCoord, Linspace, LogCoord, LogRange,
+        LogScalable, NestedRange, NestedValue, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64,
+        RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64, SegmentValue,
+        ToGroupByRange,
     };
 
     #[cfg(feature = "chrono")]
-    pub use crate::coord::{make_partial_axis, RangedDate, RangedDateTime, RangedDuration};
+    pub use crate::coord::{
+        make_partial_axis, IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration,
+    };
 
     // Re-export the backend for backward compatibility
     pub use plotters_backend::DrawingBackend;

@@ -21,6 +21,7 @@ Also, the ranged axis can be deserted, and this is required by the histogram ser
 */
 use plotters_backend::BackendCoord;
 
+mod ckps;
 #[cfg(feature = "chrono")]
 mod datetime;
 mod discrete;
@@ -58,6 +59,8 @@ pub use logarithmic::{LogCoord, LogRange, LogScalable};
 pub use group_by::{GroupBy, ToGroupByRange};
 
 pub use nested::{BuildNestedCoord, NestedRange, NestedValue};
+
+pub use ckps::{BindKeyPointMethod, BindKeyPoints, WithKeyPointMethod, WithKeyPoints};
 
 use std::rc::Rc;
 use std::sync::Arc;
