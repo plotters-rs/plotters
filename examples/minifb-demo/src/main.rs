@@ -90,8 +90,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             chart
                 .configure_mesh()
-                .line_style_1(&GREEN.mix(0.2))
-                .line_style_2(&TRANSPARENT)
+                .bold_line_style(&GREEN.mix(0.2))
+                .light_line_style(&TRANSPARENT)
                 .draw()?;
 
             chart.draw_series(data.iter().zip(data.iter().skip(1)).map(

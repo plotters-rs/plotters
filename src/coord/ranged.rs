@@ -46,8 +46,8 @@ impl KeyPointWeight {
     /// Check if this key point weight setting allows light point
     pub fn allow_light_points(&self) -> bool {
         match self {
-            Self::Bold => false,
-            Self::Any => true,
+            KeyPointWeight::Bold => false,
+            KeyPointWeight::Any => true,
         }
     }
 }
