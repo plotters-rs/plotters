@@ -32,7 +32,7 @@ pub trait BackendStyle {
     /// Convert the style into the underlying color
     fn as_color(&self) -> RGBAColor;
 
-    // TODO: In the future we should support stroke width, line shape, etc....
+    /// Get the stroke width of this backend style
     fn stroke_width(&self) -> u32 {
         1
     }
