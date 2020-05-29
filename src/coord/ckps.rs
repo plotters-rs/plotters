@@ -5,6 +5,14 @@ use std::ops::Range;
 
 use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
 
+/// The coordinate decorator that binds a key point vector.
+/// Normally, all the ranged coordinate implements its own keypoint algorithm 
+/// to determine how to render the tick mark and mesh grid. 
+/// This decorator allows customized tick mark specifiied by vector. 
+/// See [BindKeyPoints::with_key_points](trait.BindKeyPoints.html#tymethod.with_key_points) 
+/// for details.
+/// Note: For any coordinate spec wrapped by this decorator, the maxium number of labels configured by
+/// MeshStyle will be ignored and the key point function will always returns the entire vector
 pub struct WithKeyPoints<Inner: Ranged> {
     inner: Inner,
     bold_points: Vec<Inner::ValueType>,
@@ -12,24 +20,29 @@ pub struct WithKeyPoints<Inner: Ranged> {
 }
 
 impl<I: Ranged> WithKeyPoints<I> {
+    /// Specify the light key points, which is used to render the light mesh line
     pub fn with_light_points<T: IntoIterator<Item = I::ValueType>>(mut self, iter: T) -> Self {
         self.light_points.clear();
         self.light_points.extend(iter);
         self
     }
 
+    /// Get a reference to the bold points
     pub fn bold_points(&self) -> &[I::ValueType] {
         self.bold_points.as_ref()
     }
 
+    /// Get a mut reference to the bold points
     pub fn bold_points_mut(&mut self) -> &mut [I::ValueType] {
         self.bold_points.as_mut()
     }
 
+    /// Get a reference to light key points
     pub fn light_points(&self) -> &[I::ValueType] {
         self.light_points.as_ref()
     }
 
+    /// Get a mut reference to the light key points
     pub fn light_points_mut(&mut self) -> &mut [I::ValueType] {
         self.light_points.as_mut()
     }
@@ -82,6 +95,20 @@ pub trait BindKeyPoints
 where
     Self: AsRangedCoord,
 {
+    /// Bind a existing coordinate spec with a given key points vector. See [WithKeyPoints](struct.WithKeyPoints.html ) for more details.
+    /// Example:
+    /// ```
+    ///use plotters::prelude::*;
+    ///use plotters_bitmap::BitMapBackend;
+    ///let mut buffer = vec![0;1024*768*3];
+    /// let root = BitMapBackend::with_buffer(&mut buffer, (1024, 768)).into_drawing_area();
+    /// let mut chart = ChartBuilder::on(&root)
+    ///    .build_ranged(
+    ///        (0..100).with_key_points(vec![1,20,50,90]),   // <= This line will make the plot shows 4 tick marks at 1, 20, 50, 90
+    ///        0..10
+    /// ).unwrap();
+    /// chart.configure_mesh().draw().unwrap();
+    ///```
     fn with_key_points(self, points: Vec<Self::Value>) -> WithKeyPoints<Self::CoordDescType> {
         WithKeyPoints {
             inner: self.into(),
@@ -93,6 +120,11 @@ where
 
 impl<T: AsRangedCoord> BindKeyPoints for T {}
 
+/// The coordinate decorator that allows customized keypoint algorithms.
+/// Normally, all the coordinate spec implements its own key point algorith
+/// But this decorator allows you override the pre-defined key point algorithm.
+///
+/// To use this decorator, see [BindKeyPointMethod::with_key_point_func](trait.BindKeyPointMethod.html#tymethod.with_key_point_func)
 pub struct WithKeyPointMethod<R: Ranged> {
     inner: R,
     bold_func: Box<dyn Fn(usize) -> Vec<R::ValueType>>,
@@ -103,6 +135,20 @@ pub trait BindKeyPointMethod
 where
     Self: AsRangedCoord,
 {
+    /// Bind a existing coordinate spec with a given key points algorithm. See [WithKeyPointMethod](struct.WithKeyMethod.html ) for more details.
+    /// Example:
+    /// ```
+    ///use plotters::prelude::*;
+    ///use plotters_bitmap::BitMapBackend;
+    ///let mut buffer = vec![0;1024*768*3];
+    /// let root = BitMapBackend::with_buffer(&mut buffer, (1024, 768)).into_drawing_area();
+    /// let mut chart = ChartBuilder::on(&root)
+    ///    .build_ranged(
+    ///        (0..100).with_key_point_func(|n| (0..100 / n as i32).map(|x| x * 100 / n as i32).collect()),
+    ///        0..10
+    /// ).unwrap();
+    /// chart.configure_mesh().draw().unwrap();
+    ///```
     fn with_key_point_func<F: Fn(usize) -> Vec<Self::Value> + 'static>(
         self,
         func: F,
@@ -118,6 +164,7 @@ where
 impl<T: AsRangedCoord> BindKeyPointMethod for T {}
 
 impl<R: Ranged> WithKeyPointMethod<R> {
+    /// Define the light key point algorithm, by default this returns an empty set
     pub fn with_light_point_func<F: Fn(usize) -> Vec<R::ValueType> + 'static>(
         mut self,
         func: F,

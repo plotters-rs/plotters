@@ -43,6 +43,7 @@ pub enum KeyPointWeight {
 }
 
 impl KeyPointWeight {
+    /// Check if this key point weight setting allows light point
     pub fn allow_light_points(&self) -> bool {
         match self {
             Self::Bold => false,
@@ -51,9 +52,16 @@ impl KeyPointWeight {
     }
 }
 
+/// The trait for a hint provided to the key point algorithm used by the coordinate specs.
+/// The most important constraint is the `max_num_points` which means the algorithm could emit no more than specific number of key points
+/// `weight` is used to determine if this is used as a bold grid line or light grid line
+/// `bold_points` returns the max number of coresponding bold grid lines
 pub trait KeyPointHint {
+    /// Returns the max number of key points
     fn max_num_points(&self) -> usize;
+    /// Returns the weight for this hint
     fn weight(&self) -> KeyPointWeight;
+    /// Returns the point number constraint for the bold points
     fn bold_points(&self) -> usize {
         self.max_num_points()
     }
@@ -69,6 +77,7 @@ impl KeyPointHint for usize {
     }
 }
 
+///  The key point hint indicates we only need key point for the bold grid lines
 pub struct BoldPoints(pub usize);
 
 impl KeyPointHint for BoldPoints {
@@ -81,12 +90,14 @@ impl KeyPointHint for BoldPoints {
     }
 }
 
+/// The key point hint indicates that we are using the key points for the light grid lines
 pub struct LightPoints {
     bold_points_num: usize,
     light_limit: usize,
 }
 
 impl LightPoints {
+    /// Create a new light key point hind
     pub fn new(bold_count: usize, requested: usize) -> Self {
         Self {
             bold_points_num: bold_count,

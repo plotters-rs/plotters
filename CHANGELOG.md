@@ -5,6 +5,11 @@
 
 - Adjust Canvas backend size with DPR (Thanks to Marius-Mueller)
 
+### Improvement
+
+- Enhanced key point algorithms: New key point hint trait are used for key point algorithms && many improvment on key point algorithms for different types
+- Renamed `MeshStyle::line\_style\_1\ and `MeshStyle::line\_style\_2` to `bold\_line\_style` and `light\_line\_style`
+
 ## Plotters 0.2.15 (2020-05-26)
 ### Fixed
 
