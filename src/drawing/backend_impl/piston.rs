@@ -150,7 +150,11 @@ impl<'a, 'b> DrawingBackend for PistonBackend<'a, 'b> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let rect = circle(center.0 as f64, center.1 as f64, radius as f64);
+        let rect = circle(
+            center.0 as f64 * self.scale,
+            center.1 as f64 * self.scale,
+            radius as f64 * self.scale,
+        );
         if fill {
             ellipse(
                 make_piston_rgba(&style.as_color()),
