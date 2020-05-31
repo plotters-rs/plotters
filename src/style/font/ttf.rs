@@ -2,10 +2,10 @@ use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
 use std::i32;
 use std::io::Read;
-use std::sync::{Arc, RwLock};
+use std::sync::RwLock;
 
 use lazy_static::lazy_static;
-use rusttype::{point, Error, Font, FontCollection, Scale, SharedBytes};
+use rusttype::{point, Font, Scale};
 
 use font_kit::family_name::FamilyName;
 use font_kit::handle::Handle;
@@ -20,7 +20,7 @@ type FontResult<T> = Result<T, FontError>;
 pub enum FontError {
     LockError,
     NoSuchFont(String, String),
-    FontLoadError(Arc<Error>),
+    FontLoadError,
 }
 
 impl std::fmt::Display for FontError {
@@ -30,7 +30,7 @@ impl std::fmt::Display for FontError {
             FontError::NoSuchFont(family, style) => {
                 write!(fmt, "No such font: {} {}", family, style)
             }
-            FontError::FontLoadError(e) => write!(fmt, "Font loading error: {}", e),
+            FontError::FontLoadError => write!(fmt, "Font loading error"),
         }
     }
 }
@@ -100,10 +100,8 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<Font<'static
         };
         // TODO: font-kit actually have rasterizer, so consider remove dependency for rusttype as
         // well
-        let result = FontCollection::from_bytes(Into::<SharedBytes>::into(data))
-            .map_err(|err| FontError::FontLoadError(Arc::new(err)))?
-            .font_at(id.max(0) as usize)
-            .map_err(|err| FontError::FontLoadError(Arc::new(err)));
+        let result = Font::try_from_vec_and_index(data, id.max(0))
+            .ok_or(FontError::FontLoadError);
 
         CACHE
             .write()
