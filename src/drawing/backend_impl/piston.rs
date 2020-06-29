@@ -34,6 +34,14 @@ fn make_point_pair(a: BackendCoord, b: BackendCoord, scale: f64) -> [f64; 4] {
     ]
 }
 
+fn make_circle(center: BackendCoord, radius: u32, scale: f64) -> [f64; 4] {
+    circle(
+        center.0 as f64 * scale,
+        center.1 as f64 * scale,
+        radius as f64 * scale,
+    )
+}
+
 impl<'a, 'b> PistonBackend<'a, 'b> {
     pub fn new(size: (u32, u32), scale: f64, context: Context, graphics: &'b mut G2d<'a>) -> Self {
         Self {
@@ -150,7 +158,7 @@ impl<'a, 'b> DrawingBackend for PistonBackend<'a, 'b> {
         style: &S,
         fill: bool,
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        let rect = circle(center.0 as f64, center.1 as f64, radius as f64);
+        let rect = make_circle(center, radius, self.scale);
         if fill {
             ellipse(
                 make_piston_rgba(&style.as_color()),
@@ -203,4 +211,14 @@ pub fn draw_piston_window<F: FnOnce(PistonBackend) -> Result<(), Box<dyn std::er
         return Some(event);
     }
     None
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn test_make_circle() {
+        assert_eq!(make_circle((1, 1), 0, 1.0), [1.0, 1.0, 0.0, 0.0]);
+        assert_eq!(make_circle((1, 2), 3, 4.0), [-8.0, -4.0, 24.0, 24.0]);
+    }
 }
