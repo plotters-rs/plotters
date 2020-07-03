@@ -84,9 +84,10 @@ impl DrawingBackend for CanvasBackend {
         let window = window().unwrap();
         let mut dpr = window.device_pixel_ratio();
         dpr = if dpr == 0.0 { 1.0 } else { dpr };
+        let rect = self.canvas.get_bounding_client_rect();
         (
-            (self.canvas.width() as f64 / dpr) as u32,
-            (self.canvas.height() as f64 / dpr) as u32,
+            (rect.width() as f64 * dpr) as u32,
+            (rect.height() as f64 * dpr) as u32,
         )
     }
 
