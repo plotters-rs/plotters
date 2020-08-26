@@ -1,10 +1,56 @@
 use super::ChartContext;
 use crate::coord::CoordTranslate;
 use crate::drawing::DrawingAreaErrorKind;
-use crate::element::{EmptyElement, IntoDynElement, MultiLineText, Rectangle};
+use crate::element::{DynElement, EmptyElement, IntoDynElement, MultiLineText, Rectangle};
 use crate::style::{IntoFont, IntoTextStyle, ShapeStyle, SizeDesc, TextStyle, TRANSPARENT};
 
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+
+type SeriesAnnoDrawFn<'a, DB> = dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord> + 'a;
+
+/// The annotations (such as the label of the series, the legend element, etc)
+/// When a series is drawn onto a drawing area, an series annotation object
+/// is created and a mutable reference is returned.
+pub struct SeriesAnno<'a, DB: DrawingBackend> {
+    label: Option<String>,
+    draw_func: Option<Box<SeriesAnnoDrawFn<'a, DB>>>,
+}
+
+impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
+    pub(crate) fn get_label(&self) -> &str {
+        self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
+    }
+
+    pub(crate) fn get_draw_func(&self) -> Option<&SeriesAnnoDrawFn<DB>> {
+        self.draw_func.as_ref().map(|x| x.as_ref())
+    }
+
+    pub(crate) fn new() -> Self {
+        Self {
+            label: None,
+            draw_func: None,
+        }
+    }
+
+    /// Set the series label
+    /// - `label`: The string would be use as label for current series
+    pub fn label<L: Into<String>>(&mut self, label: L) -> &mut Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    /// Set the legend element creator function
+    /// - `func`: The function use to create the element
+    /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
+    /// point (0,0) to the mid-right point of the shape
+    pub fn legend<E: IntoDynElement<'a, DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'a>(
+        &mut self,
+        func: T,
+    ) -> &mut Self {
+        self.draw_func = Some(Box::new(move |p| func(p).into_dyn()));
+        self
+    }
+}
 
 /// Describes where we want to put the series label
 pub enum SeriesLabelPosition {

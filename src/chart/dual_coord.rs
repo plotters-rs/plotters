@@ -3,8 +3,8 @@ use std::borrow::{Borrow, BorrowMut};
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
-use super::context::{ChartContext, ChartState, SeriesAnno};
 use super::mesh::SecondaryMeshStyle;
+use super::{ChartContext, ChartState, SeriesAnno};
 
 use crate::coord::{
     CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift, ValueFormatter,

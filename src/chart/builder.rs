@@ -206,6 +206,18 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             actual_drawing_area_pos[idx] += split_point;
         }
 
+        // Now the root drawing area is to be split into
+        //
+        // +----------+------------------------------+------+
+        // |    0     |    1 (Top Label Area)        |   2  |
+        // +----------+------------------------------+------+
+        // |    3     |                              |   5  |
+        // |  Left    |       4 (Plotting Area)      | Right|
+        // |  Labels  |                              | Label|
+        // +----------+------------------------------+------+
+        // |    6     |        7 (Bottom Labels)     |   8  |
+        // +----------+------------------------------+------+
+
         let mut split: Vec<_> = drawing_area
             .split_by_breakpoints(
                 &actual_drawing_area_pos[2..4],
@@ -215,8 +227,11 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             .map(Some)
             .collect();
 
+        // Take out the plotting area
         std::mem::swap(&mut drawing_area, split[4].as_mut().unwrap());
 
+        // Initialize the label areas - since the label area might be overlapping
+        // with the plotting area, in this case, we need handle them differently
         for (src_idx, dst_idx) in [1, 7, 3, 5].iter().zip(0..4) {
             if !self.overlap_plotting_area[dst_idx] {
                 let (h, w) = split[*src_idx].as_ref().unwrap().dim_in_pixel();

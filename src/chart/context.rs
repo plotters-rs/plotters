@@ -1,75 +1,26 @@
 use std::borrow::Borrow;
-use std::marker::PhantomData;
 use std::ops::Range;
-use std::sync::Arc;
 
-use super::dual_coord::DualCoordChartContext;
-use super::mesh::MeshStyle;
-use super::series::SeriesLabelStyle;
+use super::{DualCoordChartContext, MeshStyle, SeriesAnno, SeriesLabelStyle};
 
 use crate::coord::{
     AsRangedCoord, CoordTranslate, KeyPointHint, MeshLine, Ranged, RangedCoord,
     ReverseCoordTranslate, Shift, ValueFormatter,
 };
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, DynElement, IntoDynElement, PathElement, PointCollection};
+use crate::element::{Drawable, PathElement, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
-use crate::style::{AsRelative, ShapeStyle, SizeDesc, TextStyle};
+use crate::style::{ShapeStyle, TextStyle};
 
 use plotters_backend::{BackendCoord, DrawingBackend, FontTransform};
-
-/// The annotations (such as the label of the series, the legend element, etc)
-/// When a series is drawn onto a drawing area, an series annotation object
-/// is created and a mutable reference is returned.
-#[allow(clippy::type_complexity)]
-pub struct SeriesAnno<'a, DB: DrawingBackend> {
-    label: Option<String>,
-    draw_func: Option<Box<dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord> + 'a>>,
-    phantom_data: PhantomData<DB>,
-}
-
-impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
-    pub(crate) fn get_label(&self) -> &str {
-        self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
-    }
-
-    pub(crate) fn get_draw_func(
-        &self,
-    ) -> Option<&dyn Fn(BackendCoord) -> DynElement<'a, DB, BackendCoord>> {
-        self.draw_func.as_ref().map(|x| x.borrow())
-    }
-
-    fn new() -> Self {
-        Self {
-            label: None,
-            draw_func: None,
-            phantom_data: PhantomData,
-        }
-    }
-
-    /// Set the series label
-    /// - `label`: The string would be use as label for current series
-    pub fn label<L: Into<String>>(&mut self, label: L) -> &mut Self {
-        self.label = Some(label.into());
-        self
-    }
-
-    /// Set the legend element creator function
-    /// - `func`: The function use to create the element
-    /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
-    /// point (0,0) to the mid-right point of the shape
-    pub fn legend<E: IntoDynElement<'a, DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'a>(
-        &mut self,
-        func: T,
-    ) -> &mut Self {
-        self.draw_func = Some(Box::new(move |p| func(p).into_dyn()));
-        self
-    }
-}
 
 /// The context of the chart. This is the core object of Plotters.
 /// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
 /// context.
+///
+/// - To draw a series on a chart context, use [ChartContext::draw_series](struct.ChartContext.html#method.draw_series)
+/// - To draw a single element to the chart, you may want to use [ChartContext::plotting_area](struct.ChartContext.html#method.plotting_area)
+///
 pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) x_label_area: [Option<DrawingArea<DB, Shift>>; 2],
     pub(super) y_label_area: [Option<DrawingArea<DB, Shift>>; 2],
@@ -78,131 +29,16 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) drawing_area_pos: (i32, i32),
 }
 
-/// A chart context state - This is the data that is needed to reconstruct the chart context
-/// without actually drawing the chart. This is useful when we want to do realtime rendering and
-/// want to incrementally update the chart.
-///
-/// For each frame, instead of updating the entire backend, we are able to keep the keep the figure
-/// component like axis, labels untouched and make updates only in the plotting drawing area.
-/// This is very useful for incremental render.
-/// ```rust
-///   use plotters::prelude::*;
-///    let mut buffer = vec![0u8;1024*768*3];
-///    let area = BitMapBackend::with_buffer(&mut buffer[..], (1024, 768))
-///        .into_drawing_area()
-///        .split_evenly((1,2));
-///    let chart = ChartBuilder::on(&area[0])
-///        .caption("Incremental Example", ("sans-serif", 20))
-///        .set_all_label_area_size(30)
-///        .build_ranged(0..10, 0..10)
-///        .expect("Unable to build ChartContext");
-///    // Draw the first frame at this point
-///    area[0].present().expect("Present");
-///    let state = chart.into_chart_state();
-///    // Let's draw the second frame
-///    let chart = state.restore(&area[0]);
-///    chart.plotting_area().fill(&WHITE).unwrap(); // Clear the previously drawn graph
-///    // At this point, you are able to draw next frame
-///```
-pub struct ChartState<CT: CoordTranslate> {
-    drawing_area_pos: (i32, i32),
-    drawing_area_size: (u32, u32),
-    coord: CT,
-}
-
-impl<'a, CT: CoordTranslate + Clone> Clone for ChartState<CT> {
-    fn clone(&self) -> Self {
-        Self {
-            drawing_area_size: self.drawing_area_size,
-            drawing_area_pos: self.drawing_area_pos,
-            coord: self.coord.clone(),
-        }
-    }
-}
-
-impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> for ChartState<CT> {
-    fn from(chart: ChartContext<'a, DB, CT>) -> ChartState<CT> {
-        ChartState {
-            drawing_area_pos: chart.drawing_area_pos,
-            drawing_area_size: chart.drawing_area.dim_in_pixel(),
-            coord: chart.drawing_area.into_coord_spec(),
-        }
-    }
-}
-
-impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
-    /// Convert a chart context into a chart state, by doing so, the chart context is consumed and
-    /// a saved chart state is created for later use. This is typically used in incrmental rendering. See documentation of `ChartState` for more detailed example.
-    pub fn into_chart_state(self) -> ChartState<CT> {
-        self.into()
-    }
-
-    /// Convert the chart context into a sharable chart state.
-    /// Normally a chart state can not be clone, since the coordinate spec may not be able to be
-    /// cloned. In this case, we can use an `Arc` get the coordinate wrapped thus the state can be
-    /// cloned and shared by multiple chart context
-    pub fn into_shared_chart_state(self) -> ChartState<Arc<CT>> {
-        ChartState {
-            drawing_area_pos: self.drawing_area_pos,
-            drawing_area_size: self.drawing_area.dim_in_pixel(),
-            coord: Arc::new(self.drawing_area.into_coord_spec()),
-        }
-    }
-}
-
-impl<'a, 'b, DB, CT> From<&ChartContext<'a, DB, CT>> for ChartState<CT>
+impl<'a, DB, XT, YT, X, Y> ChartContext<'a, DB, RangedCoord<X, Y>>
 where
     DB: DrawingBackend,
-    CT: CoordTranslate + Clone,
+    X: Ranged<ValueType = XT> + ValueFormatter<XT>,
+    Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
 {
-    fn from(chart: &ChartContext<'a, DB, CT>) -> ChartState<CT> {
-        ChartState {
-            drawing_area_pos: chart.drawing_area_pos,
-            drawing_area_size: chart.drawing_area.dim_in_pixel(),
-            coord: chart.drawing_area.as_coord_spec().clone(),
-        }
-    }
-}
-
-impl<'a, DB: DrawingBackend, CT: CoordTranslate + Clone> ChartContext<'a, DB, CT> {
-    /// Make the chart context, do not consume the chart context and clone the coordinate spec
-    pub fn to_chart_state(&self) -> ChartState<CT> {
-        self.into()
-    }
-}
-
-impl<CT: CoordTranslate> ChartState<CT> {
-    /// Restore the chart context on the given drawing area
-    ///
-    /// - `area`: The given drawing area where we want to restore the chart context
-    /// - **returns** The newly created chart context
-    pub fn restore<'a, DB: DrawingBackend>(
-        self,
-        area: &DrawingArea<DB, Shift>,
-    ) -> ChartContext<'a, DB, CT> {
-        let area = area
-            .clone()
-            .shrink(self.drawing_area_pos, self.drawing_area_size);
-        ChartContext {
-            x_label_area: [None, None],
-            y_label_area: [None, None],
-            drawing_area: area.apply_coord_spec(self.coord),
-            series_anno: vec![],
-            drawing_area_pos: self.drawing_area_pos,
-        }
-    }
-}
-
-impl<
-        'a,
-        DB: DrawingBackend,
-        XT,
-        YT,
-        X: Ranged<ValueType = XT> + ValueFormatter<XT>,
-        Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
-    > ChartContext<'a, DB, RangedCoord<X, Y>>
-{
-    fn is_overlapping_drawing_area(&self, area: Option<&DrawingArea<DB, Shift>>) -> bool {
+    pub(crate) fn is_overlapping_drawing_area(
+        &self,
+        area: Option<&DrawingArea<DB, Shift>>,
+    ) -> bool {
         if let Some(area) = area {
             let (x0, y0) = area.get_base_pixel();
             let (w, h) = area.dim_in_pixel();
@@ -222,52 +58,17 @@ impl<
 
     /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
     /// the function `MeshStyle::draw`.
-    pub fn configure_mesh<'b>(&'b mut self) -> MeshStyle<'a, 'b, X, Y, DB> {
-        let base_tick_size = (5u32).percent().max(5).in_pixels(&self.drawing_area);
-
-        let mut x_tick_size = [base_tick_size, base_tick_size];
-        let mut y_tick_size = [base_tick_size, base_tick_size];
-
-        for idx in 0..2 {
-            if self.is_overlapping_drawing_area(self.x_label_area[idx].as_ref()) {
-                x_tick_size[idx] = -x_tick_size[idx];
-            }
-            if self.is_overlapping_drawing_area(self.y_label_area[idx].as_ref()) {
-                y_tick_size[idx] = -y_tick_size[idx];
-            }
-        }
-
-        MeshStyle {
-            parent_size: self.drawing_area.dim_in_pixel(),
-            axis_style: None,
-            x_label_offset: 0,
-            y_label_offset: 0,
-            draw_x_mesh: true,
-            draw_y_mesh: true,
-            draw_x_axis: true,
-            draw_y_axis: true,
-            n_x_labels: 10,
-            n_y_labels: 10,
-            bold_line_style: None,
-            light_line_style: None,
-            x_label_style: None,
-            y_label_style: None,
-            format_x: &X::format,
-            format_y: &Y::format,
-            target: Some(self),
-            _phantom_data: PhantomData,
-            x_desc: None,
-            y_desc: None,
-            axis_desc_style: None,
-            x_tick_size,
-            y_tick_size,
-        }
+    pub fn configure_mesh(&mut self) -> MeshStyle<'a, '_, X, Y, DB> {
+        MeshStyle::new(self)
     }
 }
 
-impl<'a, DB: DrawingBackend + 'a, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Configure the styles for drawing series labels in the chart
-    pub fn configure_series_labels<'b>(&'b mut self) -> SeriesLabelStyle<'a, 'b, DB, CT> {
+    pub fn configure_series_labels<'b>(&'b mut self) -> SeriesLabelStyle<'a, 'b, DB, CT>
+    where
+        DB: 'a,
+    {
         SeriesLabelStyle::new(self)
     }
 
@@ -292,18 +93,18 @@ impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT>
     }
 }
 
-impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Arc<RangedCoord<X, Y>>> {
-    // TODO: All draw_series_impl is over strict on lifetime, because we don't have stable HKT,
+impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
+    // TODO: All draw_series_impl is overly strict about lifetime, because we don't have stable HKT,
     //       what we can ensure is for all lifetime 'b the element reference &'b E is a iterator
     //       of points reference with the same lifetime.
     //       However, this doesn't work if the coordinate doesn't live longer than the backend,
-    //       this is unneccessarily strct
+    //       this is unnecessarily strict
     pub(super) fn draw_series_impl<E, R, S>(
         &mut self,
         series: S,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
-        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        for<'b> &'b E: PointCollection<'b, CT::From>,
         E: Drawable<DB>,
         R: Borrow<E>,
         S: IntoIterator<Item = R>,
@@ -326,7 +127,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Arc<Rang
         series: S,
     ) -> Result<&mut SeriesAnno<'a, DB>, DrawingAreaErrorKind<DB::ErrorType>>
     where
-        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
+        for<'b> &'b E: PointCollection<'b, CT::From>,
         E: Drawable<DB>,
         R: Borrow<E>,
         S: IntoIterator<Item = R>,
@@ -351,44 +152,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
     /// with an interactive chart.
     pub fn backend_coord(&self, coord: &(X::ValueType, Y::ValueType)) -> BackendCoord {
         self.drawing_area.map_coordinate(coord)
-    }
-
-    pub(super) fn draw_series_impl<E, R, S>(
-        &mut self,
-        series: S,
-    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
-    where
-        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
-        E: Drawable<DB>,
-        R: Borrow<E>,
-        S: IntoIterator<Item = R>,
-    {
-        for element in series {
-            self.drawing_area.draw(element.borrow())?;
-        }
-        Ok(())
-    }
-
-    pub(super) fn alloc_series_anno(&mut self) -> &mut SeriesAnno<'a, DB> {
-        let idx = self.series_anno.len();
-        self.series_anno.push(SeriesAnno::new());
-        &mut self.series_anno[idx]
-    }
-
-    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements.
-    /// - **Returns**: Either drawing error or a series annotation object thus we can put annotation to current series (e.g. legend)
-    pub fn draw_series<E, R, S>(
-        &mut self,
-        series: S,
-    ) -> Result<&mut SeriesAnno<'a, DB>, DrawingAreaErrorKind<DB::ErrorType>>
-    where
-        for<'b> &'b E: PointCollection<'b, (X::ValueType, Y::ValueType)>,
-        E: Drawable<DB>,
-        R: Borrow<E>,
-        S: IntoIterator<Item = R>,
-    {
-        self.draw_series_impl(series)?;
-        Ok(self.alloc_series_anno())
     }
 
     /// The actual function that draws the mesh lines.
