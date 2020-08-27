@@ -230,7 +230,6 @@ pub trait PointCollection<'a, Coord> {
     /// framework to do the coordinate mapping
     fn point_iter(self) -> Self::IntoIter;
 }
-
 /// The trait indicates we are able to draw it on a drawing area
 pub trait Drawable<DB: DrawingBackend> {
     /// Actually draws the element. The key points is already translated into the

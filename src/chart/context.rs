@@ -63,6 +63,14 @@ where
     }
 }
 
+impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
+    /// Convert the chart context into an closure that can be used for coordinate translation
+    pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
+        let coord_spec = self.drawing_area.into_coord_spec();
+        move |coord| coord_spec.reverse_translate(coord)
+    }
+}
+
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Configure the styles for drawing series labels in the chart
     pub fn configure_series_labels<'b>(&'b mut self) -> SeriesLabelStyle<'a, 'b, DB, CT>
@@ -76,24 +84,12 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     pub fn plotting_area(&self) -> &DrawingArea<DB, CT> {
         &self.drawing_area
     }
-}
 
-impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Cast the reference to a chart context to a reference to underlying coordinate specification.
     pub fn as_coord_spec(&self) -> &CT {
         self.drawing_area.as_coord_spec()
     }
-}
 
-impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
-    /// Convert the chart context into an closure that can be used for coordinate translation
-    pub fn into_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT::From> {
-        let coord_spec = self.drawing_area.into_coord_spec();
-        move |coord| coord_spec.reverse_translate(coord)
-    }
-}
-
-impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     // TODO: All draw_series_impl is overly strict about lifetime, because we don't have stable HKT,
     //       what we can ensure is for all lifetime 'b the element reference &'b E is a iterator
     //       of points reference with the same lifetime.
