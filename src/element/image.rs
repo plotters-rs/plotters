@@ -193,7 +193,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, BGRXPix
 }
 
 impl<'a, 'b, Coord> PointCollection<'a, Coord> for &'a BitMapElement<'b, Coord> {
-    type Borrow = &'a Coord;
+    type Point = &'a Coord;
     type IntoIter = std::iter::Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
         std::iter::once(&self.pos)

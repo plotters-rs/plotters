@@ -36,7 +36,7 @@ where
 impl<'a, 'b: 'a, DB: DrawingBackend, Coord: Clone> PointCollection<'a, Coord>
     for &'a DynElement<'b, DB, Coord>
 {
-    type Borrow = &'a Coord;
+    type Point = &'a Coord;
     type IntoIter = &'a Vec<Coord>;
     fn point_iter(self) -> Self::IntoIter {
         &self.points

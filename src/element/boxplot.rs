@@ -180,8 +180,8 @@ impl<K, O: BoxplotOrient<K, f32>> Boxplot<K, O> {
 impl<'a, K: Clone, O: BoxplotOrient<K, f32>> PointCollection<'a, (O::XType, O::YType)>
     for &'a Boxplot<K, O>
 {
-    type Borrow = (O::XType, O::YType);
-    type IntoIter = Vec<Self::Borrow>;
+    type Point = (O::XType, O::YType);
+    type IntoIter = Vec<Self::Point>;
     fn point_iter(self) -> Self::IntoIter {
         self.values
             .iter()

@@ -36,7 +36,7 @@ where
 }
 
 impl<'a, Coord, DB: DrawingBackend> PointCollection<'a, Coord> for &'a EmptyElement<Coord, DB> {
-    type Borrow = &'a Coord;
+    type Point = &'a Coord;
     type IntoIter = Once<&'a Coord>;
     fn point_iter(self) -> Self::IntoIter {
         once(&self.coord)
@@ -64,7 +64,7 @@ pub struct BoxedElement<Coord, DB: DrawingBackend, A: Drawable<DB>> {
 impl<'b, Coord, DB: DrawingBackend, A: Drawable<DB>> PointCollection<'b, Coord>
     for &'b BoxedElement<Coord, DB, A>
 {
-    type Borrow = &'b Coord;
+    type Point = &'b Coord;
     type IntoIter = Once<&'b Coord>;
     fn point_iter(self) -> Self::IntoIter {
         once(&self.offset)
@@ -132,7 +132,7 @@ where
     A: Drawable<DB>,
     B: Drawable<DB>,
 {
-    type Borrow = &'b Coord;
+    type Point = &'b Coord;
     type IntoIter = Once<&'b Coord>;
     fn point_iter(self) -> Self::IntoIter {
         once(&self.offset)

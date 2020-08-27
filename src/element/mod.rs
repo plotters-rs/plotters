@@ -30,7 +30,7 @@
 
     // For any reference to RedX, we can convert it into an iterator of points
     impl <'a> PointCollection<'a, (i32, i32)> for &'a RedBoxedX {
-        type Borrow = &'a (i32, i32);
+        type Point = &'a (i32, i32);
         type IntoIter = Once<&'a (i32, i32)>;
         fn point_iter(self) -> Self::IntoIter {
             once(&self.0)
@@ -192,13 +192,40 @@ pub use self::image::BitMapElement;
 mod dynelem;
 pub use dynelem::{DynElement, IntoDynElement};
 
-/// A type which is logically a collection of points, under any given coordinate system
+/// A type which is logically a collection of points, under any given coordinate system.
+/// Note: Ideally, a point collection trait should be any type of which coordinate elements can be
+/// iterated. This is similar to `iter` method of many collection types in std.
+///
+/// ```ignore
+/// trait PointCollection<Coord> {
+///     type PointIter<'a> : Iterator<Item = &'a Coord>;
+///     fn iter(&self) -> PointIter<'a>;
+/// }
+/// ```
+///
+/// However,
+/// [Generic Associated Types](https://github.com/rust-lang/rfcs/blob/master/text/1598-generic_associated_types.md)
+/// is far away from stablize.
+/// So currently we have the following workaround:
+///
+/// Instead of implement the PointCollection trait on the element type itself, it implements on the
+/// reference to the element. By doing so, we now have a well-defined lifetime for the iterator.
+///
+/// In addition, for some element, the coordinate is computed on the fly, thus we can't hard-code
+/// the iterator's return type is `&'a Coord`.
+/// `Borrow` trait seems to strict in this case, since we don't need the order and hash
+/// preservation properties at this point. However, `AsRef` doesn't work with `Coord`
+///
+/// This workaround also leads overly strict lifetime bound on `ChartContext::draw_series`.
+///
+/// TODO: Once GAT is ready on stable Rust, we should simplify the design.
+///
 pub trait PointCollection<'a, Coord> {
     /// The item in point iterator
-    type Borrow: Borrow<Coord>;
+    type Point: Borrow<Coord> + 'a;
 
     /// The point iterator
-    type IntoIter: IntoIterator<Item = Self::Borrow>;
+    type IntoIter: IntoIterator<Item = Self::Point>;
 
     /// framework to do the coordinate mapping
     fn point_iter(self) -> Self::IntoIter;
