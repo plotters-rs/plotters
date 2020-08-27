@@ -36,8 +36,8 @@ pub struct DualCoordChartState<CT1: CoordTranslate, CT2: CoordTranslate> {
     secondary: ChartState<CT2>,
 }
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
-    DualCoordChartContext<'a, DB, CT1, CT2>
+impl<DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    DualCoordChartContext<'_, DB, CT1, CT2>
 {
     /// Convert the chart context into a chart state, similar to [ChartContext::into_chart_state](struct.ChartContext.html#method.into_chart_state)
     pub fn into_chart_state(self) -> DualCoordChartState<CT1, CT2> {
@@ -54,16 +54,13 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
             secondary: self.secondary.into_shared_chart_state(),
         }
     }
-}
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
-    DualCoordChartContext<'a, DB, CT1, CT2>
-where
-    CT1: Clone,
-    CT2: Clone,
-{
     /// Copy the coordinate specs and make a chart state
-    pub fn to_chart_state(&self) -> DualCoordChartState<CT1, CT2> {
+    pub fn to_chart_state(&self) -> DualCoordChartState<CT1, CT2>
+    where
+        CT1: Clone,
+        CT2: Clone,
+    {
         DualCoordChartState {
             primary: self.primary.to_chart_state(),
             secondary: self.secondary.to_chart_state(),
@@ -73,10 +70,10 @@ where
 
 impl<CT1: CoordTranslate, CT2: CoordTranslate> DualCoordChartState<CT1, CT2> {
     /// Restore the chart state on the given drawing area
-    pub fn restore<'a, DB: DrawingBackend + 'a>(
+    pub fn restore<DB: DrawingBackend>(
         self,
         area: &DrawingArea<DB, Shift>,
-    ) -> DualCoordChartContext<'a, DB, CT1, CT2> {
+    ) -> DualCoordChartContext<'_, DB, CT1, CT2> {
         let primary = self.primary.restore(area);
         let secondary = self
             .secondary
@@ -85,18 +82,18 @@ impl<CT1: CoordTranslate, CT2: CoordTranslate> DualCoordChartState<CT1, CT2> {
     }
 }
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
-    From<DualCoordChartContext<'a, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
+impl<DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
+    From<DualCoordChartContext<'_, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
 {
-    fn from(chart: DualCoordChartContext<'a, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
+    fn from(chart: DualCoordChartContext<'_, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
         chart.into_chart_state()
     }
 }
 
-impl<'a, 'b, DB: DrawingBackend, CT1: CoordTranslate + Clone, CT2: CoordTranslate + Clone>
-    From<&'b DualCoordChartContext<'a, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
+impl<'b, DB: DrawingBackend, CT1: CoordTranslate + Clone, CT2: CoordTranslate + Clone>
+    From<&'b DualCoordChartContext<'_, DB, CT1, CT2>> for DualCoordChartState<CT1, CT2>
 {
-    fn from(chart: &'b DualCoordChartContext<'a, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
+    fn from(chart: &'b DualCoordChartContext<'_, DB, CT1, CT2>) -> DualCoordChartState<CT1, CT2> {
         chart.to_chart_state()
     }
 }
@@ -139,8 +136,8 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
     }
 }
 
-impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
-    DualCoordChartContext<'a, DB, CT1, CT2>
+impl<DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
+    DualCoordChartContext<'_, DB, CT1, CT2>
 {
     /// Convert the chart context into the secondary coordinate translation function
     pub fn into_secondary_coord_trans(self) -> impl Fn(BackendCoord) -> Option<CT2::From> {
@@ -149,8 +146,8 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: ReverseCoordTranslate>
     }
 }
 
-impl<'a, DB: DrawingBackend, CT1: ReverseCoordTranslate, CT2: ReverseCoordTranslate>
-    DualCoordChartContext<'a, DB, CT1, CT2>
+impl<DB: DrawingBackend, CT1: ReverseCoordTranslate, CT2: ReverseCoordTranslate>
+    DualCoordChartContext<'_, DB, CT1, CT2>
 {
     /// Convert the chart context into a pair of closures that maps the pixel coordinate into the
     /// logical coordinate for both primary coordinate system and secondary coordinate system.
