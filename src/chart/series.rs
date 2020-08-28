@@ -21,7 +21,7 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
         self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
     }
 
-    pub(crate) fn get_draw_func(&self) -> Option<&SeriesAnnoDrawFn<DB>> {
+    pub(crate) fn get_draw_func(&self) -> Option<&SeriesAnnoDrawFn<'a, DB>> {
         self.draw_func.as_ref().map(|x| x.as_ref())
     }
 
