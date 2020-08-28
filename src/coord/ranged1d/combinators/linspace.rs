@@ -1,5 +1,6 @@
-use super::{
-    numeric::RangedCoordusize, AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter,
+use crate::coord::ranged1d::types::RangedCoordusize;
+use crate::coord::ranged1d::{
+    AsRangedCoord, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged, ValueFormatter,
 };
 use std::cmp::{Ordering, PartialOrd};
 use std::marker::PhantomData;
@@ -151,7 +152,7 @@ where
     }
 }
 
-/// The linspace coordinate decorator, which allows the conversion from a continuous coordinate
+/// The coordinate combinator that transform a continous coordinate to a discrete coordinate
 /// to a discrete coordinate by a giving step.
 ///
 /// For example, range `0f32..100f32` is a continuous coordinate, thus this prevent us having a
@@ -275,7 +276,7 @@ impl<T: Ranged, S: Clone, R: LinspaceRoundingMethod<T::ValueType>> Ranged for Li
 where
     T::ValueType: Add<S, Output = T::ValueType> + PartialOrd + Clone,
 {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = T::ValueType;
 
     fn range(&self) -> Range<T::ValueType> {

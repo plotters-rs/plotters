@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 format!("Koch's Snowflake (n_iter = {})", i),
                 ("sans-serif", 50),
             )
-            .build_ranged(-2.0..2.0, -1.5..1.5)?;
+            .build_cartesian_2d(-2.0..2.0, -1.5..1.5)?;
 
         let mut snowflake_vertices = {
             let mut current: Vec<(f64, f64)> = vec![

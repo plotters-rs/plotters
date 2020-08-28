@@ -3,7 +3,8 @@ use std::marker::PhantomData;
 use std::ops::AddAssign;
 
 use crate::chart::ChartContext;
-use crate::coord::{DiscreteRanged, Ranged, RangedCoord};
+use crate::coord::cartesian::Cartesian2d;
+use crate::coord::ranged1d::{DiscreteRanged, Ranged};
 use crate::element::Rectangle;
 use crate::style::{Color, ShapeStyle, GREEN};
 use plotters_backend::DrawingBackend;
@@ -105,7 +106,7 @@ where
     A: AddAssign<A> + Default + 'a,
 {
     pub fn vertical<ACoord, DB: DrawingBackend + 'a>(
-        parent: &ChartContext<DB, RangedCoord<BR, ACoord>>,
+        parent: &ChartContext<DB, Cartesian2d<BR, ACoord>>,
     ) -> Self
     where
         ACoord: Ranged<ValueType = A>,
@@ -122,7 +123,7 @@ where
     A: AddAssign<A> + Default + 'a,
 {
     pub fn horizontal<ACoord, DB: DrawingBackend>(
-        parent: &ChartContext<DB, RangedCoord<ACoord, BR>>,
+        parent: &ChartContext<DB, Cartesian2d<ACoord, BR>>,
     ) -> Self
     where
         ACoord: Ranged<ValueType = A>,

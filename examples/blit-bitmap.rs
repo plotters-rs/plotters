@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(5)
         .set_label_area_size(LabelAreaPosition::Left, 40)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
-        .build_ranged(0.0..1.0, 0.0..1.0)?;
+        .build_cartesian_2d(0.0..1.0, 0.0..1.0)?;
 
     chart.configure_mesh().disable_mesh().draw()?;
 

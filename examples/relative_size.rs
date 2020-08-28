@@ -10,7 +10,7 @@ fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(),
         .x_label_area_size((10).percent_height())
         .y_label_area_size((10).percent_width())
         .margin(5)
-        .build_ranged(-5.0..5.0, -1.0..1.0)?;
+        .build_cartesian_2d(-5.0..5.0, -1.0..1.0)?;
 
     chart
         .configure_mesh()

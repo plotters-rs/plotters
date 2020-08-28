@@ -1,7 +1,14 @@
-use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::ranged1d::{
+    AsRangedCoord, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged, ValueFormatter,
+};
 use std::ops::Range;
 
-/// The ranged value spec that needs to be grouped.
+/// Grouping the value in the coordinate specification.
+///
+/// This combinator doesn't change the coordinate mapping behavior. But it changes how
+/// the key point is generated, this coordinate specification will enforce that only the first value in each group
+/// can be emitted as the bold key points.
+///
 /// This is useful, for example, when we have an X axis is a integer and denotes days.
 /// And we are expecting the tick mark denotes weeks, in this way we can make the range
 /// spec grouping by 7 elements.
@@ -14,6 +21,8 @@ use std::ops::Range;
 ///    .build_ranged((0..100).group_by(7), 0..100)
 ///    .unwrap();
 ///```
+///
+/// To apply this combinator, call [ToGroupByRange::group_by](trait.ToGroupByRange.html#tymethod.group_by) method on any discrete coordinate spec.
 #[derive(Clone)]
 pub struct GroupBy<T: DiscreteRanged>(T, usize);
 
@@ -53,7 +62,7 @@ impl<T, R: DiscreteRanged<ValueType = T> + ValueFormatter<T>> ValueFormatter<T> 
 }
 
 impl<T: DiscreteRanged> Ranged for GroupBy<T> {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = T::ValueType;
     fn map(&self, value: &T::ValueType, limit: (i32, i32)) -> i32 {
         self.0.map(value, limit)

@@ -1,7 +1,9 @@
 use std::convert::TryFrom;
 use std::ops::Range;
 
-use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ReversibleRanged};
+use crate::coord::ranged1d::{
+    AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, Ranged, ReversibleRanged,
+};
 
 macro_rules! impl_discrete_trait {
     ($name:ident) => {
@@ -66,7 +68,7 @@ macro_rules! make_numeric_coord {
             }
         }
         impl Ranged for $name {
-            type FormatOption = crate::coord::ranged::DefaultFormatting;
+            type FormatOption = DefaultFormatting;
             type ValueType = $type;
             fn map(&self, v: &$type, limit: (i32, i32)) -> i32 {
                 // Corner case: If we have a range that have only one value,
@@ -286,7 +288,6 @@ impl_ranged_type_trait!(usize, RangedCoordusize);
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::coord::*;
     #[test]
     fn test_key_points() {
         let kp = compute_i32_key_points((0, 999), 28);
@@ -316,7 +317,11 @@ mod test {
     #[test]
     fn test_linear_coord_system() {
         let _coord =
-            RangedCoord::<RangedCoordu32, RangedCoordu32>::new(0..10, 0..10, (0..1024, 0..768));
+            crate::coord::ranged2d::cartesian::Cartesian2d::<RangedCoordu32, RangedCoordu32>::new(
+                0..10,
+                0..10,
+                (0..1024, 0..768),
+            );
     }
 
     #[test]

@@ -708,16 +708,19 @@ pub mod prelude {
 
     // Coordinates
     pub use crate::coord::{
-        BindKeyPointMethod, BindKeyPoints, BuildNestedCoord, CoordTranslate, DiscreteRanged,
-        GroupBy, IntoLinspace, IntoPartialAxis, IntoSegmentedCoord, Linspace, LogCoord, LogRange,
-        LogScalable, NestedRange, NestedValue, Ranged, RangedCoord, RangedCoordf32, RangedCoordf64,
-        RangedCoordi32, RangedCoordi64, RangedCoordu32, RangedCoordu64, SegmentValue,
-        ToGroupByRange,
+        cartesian::Cartesian2d,
+        combinators::{
+            make_partial_axis, BindKeyPointMethod, BindKeyPoints, BuildNestedCoord, GroupBy,
+            IntoLinspace, IntoPartialAxis, Linspace, LogCoord, LogRange, LogScalable, NestedRange,
+            NestedValue, ToGroupByRange,
+        },
+        ranged1d::{DiscreteRanged, IntoSegmentedCoord, Ranged, SegmentValue},
+        CoordTranslate,
     };
 
     #[cfg(feature = "chrono")]
-    pub use crate::coord::{
-        make_partial_axis, IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration,
+    pub use crate::coord::types::{
+        IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration,
     };
 
     // Re-export the backend for backward compatibility

@@ -1,4 +1,3 @@
-use plotters::coord::IntoMonthly;
 use plotters::prelude::*;
 
 use chrono::{TimeZone, Utc};
@@ -20,7 +19,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .set_label_area_size(LabelAreaPosition::Left, 60)
         .set_label_area_size(LabelAreaPosition::Right, 60)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
-        .build_ranged(
+        .build_cartesian_2d(
             (Utc.ymd(2010, 1, 1)..Utc.ymd(2018, 12, 1)).monthly(),
             14.0..104.0,
         )?

@@ -6,9 +6,10 @@ use std::sync::Arc;
 use super::mesh::SecondaryMeshStyle;
 use super::{ChartContext, ChartState, SeriesAnno};
 
-use crate::coord::{
-    CoordTranslate, Ranged, RangedCoord, ReverseCoordTranslate, Shift, ValueFormatter,
-};
+use crate::coord::cartesian::Cartesian2d;
+use crate::coord::ranged1d::{Ranged, ValueFormatter};
+use crate::coord::{CoordTranslate, ReverseCoordTranslate, Shift};
+
 use crate::drawing::DrawingArea;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{Drawable, PointCollection};
@@ -174,7 +175,7 @@ impl<
         YT,
         SX: Ranged<ValueType = XT>,
         SY: Ranged<ValueType = YT>,
-    > DualCoordChartContext<'a, DB, CT1, RangedCoord<SX, SY>>
+    > DualCoordChartContext<'a, DB, CT1, Cartesian2d<SX, SY>>
 where
     SX: ValueFormatter<XT>,
     SY: ValueFormatter<YT>,
@@ -186,7 +187,7 @@ where
 }
 
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged, SX: Ranged, SY: Ranged>
-    DualCoordChartContext<'a, DB, RangedCoord<X, Y>, RangedCoord<SX, SY>>
+    DualCoordChartContext<'a, DB, Cartesian2d<X, Y>, Cartesian2d<SX, SY>>
 {
     /// Draw a series use the secondary coordinate system.
     /// - `series`: The series to draw

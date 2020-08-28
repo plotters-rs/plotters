@@ -2,7 +2,10 @@
 use chrono::{Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike};
 use std::ops::{Add, Range, Sub};
 
-use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::ranged1d::{
+    AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
+    ValueFormatter,
+};
 
 /// The trait that describe some time value. This is the uniformed abstraction that works
 /// for both Date, DateTime and Duration, etc.
@@ -165,7 +168,7 @@ impl<D> Ranged for RangedDate<D>
 where
     D: Datelike + TimeValue + Sub<D, Output = Duration> + Add<Duration, Output = D> + Clone,
 {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = DefaultFormatting;
     type ValueType = D;
 
     fn range(&self) -> Range<D> {
@@ -349,7 +352,7 @@ impl<T: TimeValue + Clone> Ranged for Monthly<T>
 where
     Range<T>: AsRangedCoord<Value = T>,
 {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = T;
 
     fn range(&self) -> Range<T> {
@@ -476,7 +479,7 @@ impl<T: TimeValue + Clone> Ranged for Yearly<T>
 where
     Range<T>: AsRangedCoord<Value = T>,
 {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = T;
 
     fn range(&self) -> Range<T> {
@@ -601,7 +604,7 @@ where
     DT: Sub<DT, Output = Duration>,
     RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
 {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = DefaultFormatting;
     type ValueType = DT;
 
     fn range(&self) -> Range<DT> {
@@ -668,7 +671,7 @@ impl From<Range<Duration>> for RangedDuration {
 }
 
 impl Ranged for RangedDuration {
-    type FormatOption = crate::coord::ranged::DefaultFormatting;
+    type FormatOption = DefaultFormatting;
     type ValueType = Duration;
 
     fn range(&self) -> Range<Duration> {
@@ -909,7 +912,7 @@ mod test {
 
     #[test]
     fn test_yearly_date_range() {
-        use crate::coord::BoldPoints;
+        use crate::coord::ranged1d::BoldPoints;
         let range = Utc.ymd(1000, 8, 5)..Utc.ymd(2999, 1, 1);
         let ranged_coord = range.yearly();
 
@@ -946,7 +949,7 @@ mod test {
         let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 9, 1);
         let ranged_coord = range.monthly();
 
-        use crate::coord::BoldPoints;
+        use crate::coord::ranged1d::BoldPoints;
 
         let kps = ranged_coord.key_points(BoldPoints(15));
 

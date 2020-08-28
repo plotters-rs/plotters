@@ -1,6 +1,9 @@
 use super::context::ChartContext;
 
-use crate::coord::{AsRangedCoord, RangedCoord, Shift};
+use crate::coord::cartesian::Cartesian2d;
+use crate::coord::ranged1d::AsRangedCoord;
+use crate::coord::Shift;
+
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
@@ -152,18 +155,32 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
+    #[deprecated(
+        note = "`build_ranged` has been renamed to `build_cartesian_2d` and is to be removed in the future."
+    )]
+    pub fn build_ranged<X: AsRangedCoord, Y: AsRangedCoord>(
+        &mut self,
+        x_spec: X,
+        y_spec: Y,
+    ) -> Result<
+        ChartContext<'a, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
+        DrawingAreaErrorKind<DB::ErrorType>,
+    > {
+        self.build_cartesian_2d(x_spec, y_spec)
+    }
+
     /// Build the chart with a 2D Cartesian coordinate system. The function will returns a chart
     /// context, where data series can be rendered on.
     /// - `x_spec`: The specification of X axis
     /// - `y_spec`: The specification of Y axis
     /// - Returns: A chart context
     #[allow(clippy::type_complexity)]
-    pub fn build_ranged<X: AsRangedCoord, Y: AsRangedCoord>(
+    pub fn build_cartesian_2d<X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
     ) -> Result<
-        ChartContext<'a, DB, RangedCoord<X::CoordDescType, Y::CoordDescType>>,
+        ChartContext<'a, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
         let mut label_areas = [None, None, None, None];
@@ -276,7 +293,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         Ok(ChartContext {
             x_label_area,
             y_label_area,
-            drawing_area: drawing_area.apply_coord_spec(RangedCoord::new(
+            drawing_area: drawing_area.apply_coord_spec(Cartesian2d::new(
                 x_spec,
                 y_spec,
                 pixel_range,

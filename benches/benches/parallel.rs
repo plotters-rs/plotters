@@ -9,7 +9,7 @@ const SIZES: &'static [u32] = &[100, 400, 800, 1000, 2000];
 fn draw_plot(root: &DrawingArea<BitMapBackend, Shift>, pow: f64) {
     let mut chart = ChartBuilder::on(root)
         .caption(format!("y = x^{}", pow), ("Arial", 30))
-        .build_ranged(-1.0..1.0, -1.0..1.0)
+        .build_cartesian_2d(-1.0..1.0, -1.0..1.0)
         .unwrap();
 
     chart.configure_mesh().draw().unwrap();

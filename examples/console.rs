@@ -160,7 +160,7 @@ where
         .caption("Sine and Cosine", ("sans-serif", (10).percent_height()))
         .set_label_area_size(LabelAreaPosition::Left, (5i32).percent_width())
         .set_label_area_size(LabelAreaPosition::Bottom, (10i32).percent_height())
-        .build_ranged(-std::f64::consts::PI..std::f64::consts::PI, -1.2..1.2)?;
+        .build_cartesian_2d(-std::f64::consts::PI..std::f64::consts::PI, -1.2..1.2)?;
 
     chart
         .configure_mesh()
