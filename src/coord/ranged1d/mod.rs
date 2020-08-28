@@ -1,3 +1,55 @@
+/*!
+  The one-dimensional coordinate system abstraction.
+
+  Plotters build complex coordinate system with a combinator pattern and all the coordinate system is
+  built from the one dimensional coordinate system. This module defines the fundamental types used by
+  the one-dimensional coordinate system.
+
+  The key trait for a one dimensional coordinate is [Ranged](trait.Ranged.html). This trait describes a
+  set of values which served as the 1D coordinate system in Plotters. In order to extend the coordinate system,
+  the new coordinate spec must implement this trait.
+
+  The following example demonstrate how to make a customized coordinate specification
+  ```
+use plotters::coord::ranged1d::{Ranged, DefaultFormatting, KeyPointHint};
+use std::ops::Range;
+
+struct ZeroToOne;
+
+impl Ranged for ZeroToOne {
+    type ValueType = f64;
+    type FormatOption = DefaultFormatting;
+
+    fn map(&self, &v: &f64, pixel_range: (i32, i32)) -> i32 {
+       let size = pixel_range.1 - pixel_range.0;
+       let v = v.min(1.0).max(0.0);
+       ((size as f64) * v).round() as i32
+    }
+
+    fn key_points<Hint:KeyPointHint>(&self, hint: Hint) -> Vec<f64> {
+        if hint.max_num_points() < 3 {
+            vec![]
+        } else {
+            vec![0.0, 0.5, 1.0]
+        }
+    }
+
+    fn range(&self) -> Range<f64> {
+        0.0..1.0
+    }
+}
+
+use plotters::prelude::*;
+
+let mut buffer = vec![0; 1024 * 768 * 3];
+let root = BitMapBackend::with_buffer(&mut buffer, (1024, 768)).into_drawing_area();
+
+let chart = ChartBuilder::on(&root)
+    .build_cartesian_2d(ZeroToOne, ZeroToOne)
+    .unwrap();
+
+  ```
+*/
 use std::fmt::Debug;
 use std::ops::Range;
 

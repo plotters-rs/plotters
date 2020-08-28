@@ -12,6 +12,16 @@ easily.
 Another important trait is [ReverseCoordTranslate](trait.ReverseCoordTranslate.html). This trait allows some coordinate
 retrieve the logic value based on the pixel-based backend coordinate. This is particularly interesting for interactive plots.
 
+Plotters contains a set of pre-defined coordinate specifications that fulfills the most common use. See documentation for
+module [types](types/index.html) for details about the basic 1D types.
+
+The coordinate system also can be tweaked by the coordinate combinators, such as logarithmic coordinate, nested coordinate, etc.
+See documentation for module [combinators](combinators/index.html)  for details.
+
+Currently we support the following 2D coordinate system:
+
+- 2-dimensional Cartesian Coordinate: This is done by the combinator [Cartesian2d](cartesian/struct.Cartesian2d.html).
+
 */
 
 use plotters_backend::BackendCoord;
