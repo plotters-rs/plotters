@@ -94,7 +94,7 @@ impl<'a> TextStyle<'a> {
     pub fn transform(&self, trans: FontTransform) -> Self {
         Self {
             font: self.font.clone().transform(trans),
-            color: self.color.clone(),
+            color: self.color,
             pos: self.pos,
         }
     }
@@ -114,7 +114,7 @@ impl<'a> TextStyle<'a> {
     pub fn pos(&self, pos: text_anchor::Pos) -> Self {
         Self {
             font: self.font.clone(),
-            color: self.color.clone(),
+            color: self.color,
             pos,
         }
     }
@@ -155,12 +155,13 @@ impl<'a> BackendTextStyle for TextStyle<'a> {
         self.font.get_style()
     }
 
+    #[allow(clippy::type_complexity)]
     fn layout_box(&self, text: &str) -> Result<((i32, i32), (i32, i32)), Self::FontError> {
         self.font.layout_box(text)
     }
 
     fn anchor(&self) -> text_anchor::Pos {
-        self.pos.clone()
+        self.pos
     }
 
     fn family(&self) -> FontFamily {

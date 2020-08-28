@@ -91,13 +91,8 @@ where
 /// This is used in histogram types, which uses a discrete coordinate as the buckets. The segmented coord always emits `CenterOf(value)` key points, thus it allows all the label and tick marks
 /// of the coordinate rendered in the middle of each segment.
 /// The coresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
+#[derive(Clone)]
 pub struct SegmentedCoord<D: DiscreteRanged>(D);
-
-impl<D: DiscreteRanged + Clone> Clone for SegmentedCoord<D> {
-    fn clone(&self) -> Self {
-        SegmentedCoord(self.0.clone())
-    }
-}
 
 /// The trait for types that can decorated by [SegmentedCoord](struct.SegmentedCoord.html) decorator.
 pub trait IntoSegmentedCoord: AsRangedCoord
@@ -191,12 +186,10 @@ impl<D: DiscreteRanged> DiscreteRanged for SegmentedCoord<D> {
     }
 
     fn from_index(&self, idx: usize) -> Option<Self::ValueType> {
-        if idx < self.0.size() {
-            self.0.from_index(idx).map(|x| SegmentValue::Exact(x))
-        } else if idx == self.0.size() {
-            Some(SegmentValue::Last)
-        } else {
-            None
+        match idx {
+            idx if idx < self.0.size() => self.0.from_index(idx).map(SegmentValue::Exact),
+            idx if idx == self.0.size() => Some(SegmentValue::Last),
+            _ => None,
         }
     }
 }

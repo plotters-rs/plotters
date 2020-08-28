@@ -6,6 +6,7 @@ use std::ops::Range;
 /// This axis decorator will make the axis partially display on the axis.
 /// At some time, we want the axis only covers some part of the value.
 /// This decorator will have an additional display range defined.
+#[derive(Clone)]
 pub struct PartialAxis<R: Ranged>(R, Range<R::ValueType>);
 
 /// The trait for the types that can be converted into a partial axis
@@ -23,15 +24,6 @@ pub trait IntoPartialAxis: AsRangedCoord {
 }
 
 impl<R: AsRangedCoord> IntoPartialAxis for R {}
-
-impl<R: Ranged + Clone> Clone for PartialAxis<R>
-where
-    <R as Ranged>::ValueType: Clone,
-{
-    fn clone(&self) -> Self {
-        PartialAxis(self.0.clone(), self.1.clone())
-    }
-}
 
 impl<R: Ranged> Ranged for PartialAxis<R>
 where

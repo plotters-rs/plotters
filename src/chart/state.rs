@@ -31,20 +31,11 @@ use plotters_backend::DrawingBackend;
 ///    chart.plotting_area().fill(&WHITE).unwrap(); // Clear the previously drawn graph
 ///    // At this point, you are able to draw next frame
 ///```
+///#[derive(Clone)]
 pub struct ChartState<CT: CoordTranslate> {
     drawing_area_pos: (i32, i32),
     drawing_area_size: (u32, u32),
     coord: CT,
-}
-
-impl<'a, CT: CoordTranslate + Clone> Clone for ChartState<CT> {
-    fn clone(&self) -> Self {
-        Self {
-            drawing_area_size: self.drawing_area_size,
-            drawing_area_pos: self.drawing_area_pos,
-            coord: self.coord.clone(),
-        }
-    }
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> for ChartState<CT> {

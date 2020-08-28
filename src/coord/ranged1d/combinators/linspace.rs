@@ -288,7 +288,7 @@ where
     }
 
     fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<T::ValueType> {
-        if self.grid_value.len() == 0 {
+        if self.grid_value.is_empty() {
             return vec![];
         }
         let idx_range: RangedCoordusize = (0..(self.grid_value.len() - 1)).into();

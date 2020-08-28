@@ -51,16 +51,16 @@ pub trait TimeValue: Eq {
 impl TimeValue for NaiveDate {
     type DateType = NaiveDate;
     fn date_floor(&self) -> NaiveDate {
-        self.clone()
+        *self
     }
     fn date_ceil(&self) -> NaiveDate {
-        self.clone()
+        *self
     }
     fn earliest_after_date(date: NaiveDate) -> Self {
         date
     }
     fn subtract(&self, other: &NaiveDate) -> Duration {
-        self.clone() - other.clone()
+        *self - *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -142,7 +142,7 @@ impl TimeValue for NaiveDateTime {
     }
 
     fn subtract(&self, other: &NaiveDateTime) -> Duration {
-        self.clone() - other.clone()
+        *self - *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -650,7 +650,7 @@ where
         date_range
             .key_points(max_points)
             .into_iter()
-            .map(|x| DT::from_date(x))
+            .map(DT::from_date)
             .collect()
     }
 }

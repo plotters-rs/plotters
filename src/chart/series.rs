@@ -17,7 +17,9 @@ pub struct SeriesAnno<'a, DB: DrawingBackend> {
 }
 
 impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
+    #[allow(clippy::option_as_ref_deref)]
     pub(crate) fn get_label(&self) -> &str {
+        // TODO: Change this when we bump the MSRV
         self.label.as_ref().map(|x| x.as_str()).unwrap_or("")
     }
 

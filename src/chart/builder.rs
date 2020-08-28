@@ -155,6 +155,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
+    #[allow(clippy::type_complexity)]
     #[deprecated(
         note = "`build_ranged` has been renamed to `build_cartesian_2d` and is to be removed in the future."
     )]

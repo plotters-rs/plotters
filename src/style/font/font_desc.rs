@@ -144,7 +144,7 @@ impl<'a> FontDesc<'a> {
     }
 
     pub fn get_family(&self) -> FontFamily {
-        self.family.clone()
+        self.family
     }
 
     /// Get the name of the font

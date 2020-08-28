@@ -123,7 +123,7 @@ pub struct DrawingArea<DB: DrawingBackend, CT: CoordTranslate> {
 impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, CT> {
     fn clone(&self) -> Self {
         Self {
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             rect: self.rect.clone(),
             coord: self.coord.clone(),
         }
@@ -230,7 +230,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     pub fn strip_coord_spec(&self) -> DrawingArea<DB, Shift> {
         DrawingArea {
             rect: self.rect.clone(),
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: Shift((self.rect.x0, self.rect.y0)),
         }
     }
@@ -256,11 +256,6 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     /// Get the pixel range of this area
     pub fn get_pixel_range(&self) -> (Range<i32>, Range<i32>) {
         (self.rect.x0..self.rect.x1, self.rect.y0..self.rect.y1)
-    }
-
-    /// Copy the drawing context
-    fn copy_backend_ref(&self) -> Rc<RefCell<DB>> {
-        self.backend.clone()
     }
 
     /// Perform operation on the drawing backend
@@ -377,7 +372,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
     pub fn apply_coord_spec<CT: CoordTranslate>(&self, coord_spec: CT) -> DrawingArea<DB, CT> {
         DrawingArea {
             rect: self.rect.clone(),
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: coord_spec,
         }
     }
@@ -401,7 +396,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 x1: self.rect.x1 - right,
                 y1: self.rect.y1 - bottom,
             },
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: Shift((self.rect.x0 + left, self.rect.y0 + top)),
         }
     }
@@ -412,7 +407,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         let split_point = [y + self.rect.y0];
         let mut ret = self.rect.split(split_point.iter(), true).map(|rect| Self {
             rect: rect.clone(),
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: Shift((rect.x0, rect.y0)),
         });
 
@@ -425,7 +420,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
         let split_point = [x + self.rect.x0];
         let mut ret = self.rect.split(split_point.iter(), false).map(|rect| Self {
             rect: rect.clone(),
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: Shift((rect.x0, rect.y0)),
         });
 
@@ -438,7 +433,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             .split_evenly((row, col))
             .map(|rect| Self {
                 rect: rect.clone(),
-                backend: self.copy_backend_ref(),
+                backend: self.backend.clone(),
                 coord: Shift((rect.x0, rect.y0)),
             })
             .collect()
@@ -462,7 +457,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             )
             .map(|rect| Self {
                 rect: rect.clone(),
-                backend: self.copy_backend_ref(),
+                backend: self.backend.clone(),
                 coord: Shift((rect.x0, rect.y0)),
             })
             .collect()
@@ -498,7 +493,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 x1: self.rect.x1,
                 y1: self.rect.y1,
             },
-            backend: self.copy_backend_ref(),
+            backend: self.backend.clone(),
             coord: Shift((self.rect.x0, self.rect.y0 + y_padding * 2 + text_h as i32)),
         })
     }

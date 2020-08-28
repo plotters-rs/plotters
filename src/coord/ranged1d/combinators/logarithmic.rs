@@ -49,15 +49,22 @@ impl_log_scalable!(i, u64);
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
 
-/// The logarithmic coodinate decorator.
-/// This decorator is used to make the axis rendered as logarithmically.
-pub struct LogRange<V: LogScalable>(pub Range<V>);
+pub trait IntoLogRange {
+    type ValueType: LogScalable;
+    fn log_scale(self) -> LogRange<Self::ValueType>;
+}
 
-impl<V: LogScalable + Clone> Clone for LogRange<V> {
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
+impl<T: LogScalable> IntoLogRange for Range<T> {
+    type ValueType = T;
+    fn log_scale(self) -> LogRange<T> {
+        LogRange(self)
     }
 }
+
+/// The logarithmic coodinate decorator.
+/// This decorator is used to make the axis rendered as logarithmically.
+#[derive(Clone)]
+pub struct LogRange<V: LogScalable>(pub Range<V>);
 
 impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
     fn from(range: LogRange<V>) -> LogCoord<V> {

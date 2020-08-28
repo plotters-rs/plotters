@@ -92,7 +92,6 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
                 .collect();
             let size = self.0.size();
             return outter_ticks
-                .into_iter()
                 .map(|base| inner_ticks.iter().map(move |&ofs| base * self.1 + ofs))
                 .flatten()
                 .take_while(|&idx| idx < size)
@@ -101,7 +100,6 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
         }
 
         idx_iter
-            .into_iter()
             .map(|x| self.0.from_index(x * self.1).unwrap())
             .collect()
     }

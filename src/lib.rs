@@ -712,8 +712,8 @@ pub mod prelude {
         cartesian::Cartesian2d,
         combinators::{
             make_partial_axis, BindKeyPointMethod, BindKeyPoints, BuildNestedCoord, GroupBy,
-            IntoLinspace, IntoPartialAxis, Linspace, LogCoord, LogRange, LogScalable, NestedRange,
-            NestedValue, ToGroupByRange,
+            IntoLinspace, IntoLogRange, IntoPartialAxis, Linspace, LogCoord, LogRange, LogScalable,
+            NestedRange, NestedValue, ToGroupByRange,
         },
         ranged1d::{DiscreteRanged, IntoSegmentedCoord, Ranged, SegmentValue},
         CoordTranslate,

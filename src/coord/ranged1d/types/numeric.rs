@@ -70,6 +70,7 @@ macro_rules! make_numeric_coord {
         impl Ranged for $name {
             type FormatOption = DefaultFormatting;
             type ValueType = $type;
+            #[allow(clippy::float_cmp)]
             fn map(&self, v: &$type, limit: (i32, i32)) -> i32 {
                 // Corner case: If we have a range that have only one value,
                 // then we just assign everything to the only point

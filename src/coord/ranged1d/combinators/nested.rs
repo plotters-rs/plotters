@@ -105,7 +105,7 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
             self.primary
                 .key_points(hint)
                 .into_iter()
-                .map(|x| NestedValue::Category(x))
+                .map(NestedValue::Category)
                 .collect()
         } else {
             let secondary_size =
@@ -176,10 +176,7 @@ where
             .map(|value| builder(value).into())
             .collect();
 
-        NestedRange {
-            primary,
-            secondary: secondary,
-        }
+        NestedRange { primary, secondary }
     }
 }
 
