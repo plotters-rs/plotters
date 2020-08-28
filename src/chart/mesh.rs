@@ -2,7 +2,8 @@ use std::marker::PhantomData;
 
 use super::builder::LabelAreaPosition;
 use super::context::ChartContext;
-use crate::coord::{BoldPoints, LightPoints, MeshLine, Ranged, RangedCoord, ValueFormatter};
+use crate::coord::cartesian::{Cartesian2d, MeshLine};
+use crate::coord::ranged1d::{BoldPoints, LightPoints, Ranged, ValueFormatter};
 use crate::drawing::DrawingAreaErrorKind;
 use crate::style::{
     AsRelative, Color, FontDesc, FontFamily, FontStyle, IntoTextStyle, RGBColor, ShapeStyle,
@@ -22,7 +23,7 @@ where
     X: ValueFormatter<XT>,
     Y: ValueFormatter<YT>,
 {
-    pub(super) fn new(target: &'b mut ChartContext<'a, DB, RangedCoord<X, Y>>) -> Self {
+    pub(super) fn new(target: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
         let mut style = target.configure_mesh();
         style.draw_x_mesh = false;
         style.draw_y_mesh = false;
@@ -160,7 +161,7 @@ pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
     pub(super) y_label_style: Option<TextStyle<'b>>,
     pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
     pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
-    pub(super) target: Option<&'b mut ChartContext<'a, DB, RangedCoord<X, Y>>>,
+    pub(super) target: Option<&'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>>,
     pub(super) _phantom_data: PhantomData<(X, Y)>,
     pub(super) x_tick_size: [i32; 2],
     pub(super) y_tick_size: [i32; 2],
@@ -172,7 +173,7 @@ where
     Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
     DB: DrawingBackend,
 {
-    pub(crate) fn new(chart: &'b mut ChartContext<'a, DB, RangedCoord<X, Y>>) -> Self {
+    pub(crate) fn new(chart: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
         let base_tick_size = (5u32).percent().max(5).in_pixels(chart.plotting_area());
 
         let mut x_tick_size = [base_tick_size, base_tick_size];

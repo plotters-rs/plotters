@@ -257,7 +257,7 @@ mod test {
     fn test_draw_v() {
         let root = MockedBackend::new(1024, 768).into_drawing_area();
         let chart = ChartBuilder::on(&root)
-            .build_ranged(0..2, 0f32..100f32)
+            .build_cartesian_2d(0..2, 0f32..100f32)
             .unwrap();
 
         let values = Quartiles::new(&[6]);
@@ -271,7 +271,7 @@ mod test {
     fn test_draw_h() {
         let root = MockedBackend::new(1024, 768).into_drawing_area();
         let chart = ChartBuilder::on(&root)
-            .build_ranged(0f32..100f32, 0..2)
+            .build_cartesian_2d(0f32..100f32, 0..2)
             .unwrap();
 
         let values = Quartiles::new(&[6]);

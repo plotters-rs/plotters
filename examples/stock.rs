@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(40)
         .y_label_area_size(40)
         .caption("MSFT Stock Price", ("sans-serif", 50.0).into_font())
-        .build_ranged(from_date..to_date, 110f32..135f32)?;
+        .build_cartesian_2d(from_date..to_date, 110f32..135f32)?;
 
     chart.configure_mesh().light_line_style(&WHITE).draw()?;
 

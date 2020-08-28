@@ -1,4 +1,6 @@
-use crate::coord::{CoordTranslate, KeyPointHint, MeshLine, Ranged, RangedCoord, Shift};
+use crate::coord::cartesian::{Cartesian2d, MeshLine};
+use crate::coord::ranged1d::{KeyPointHint, Ranged};
+use crate::coord::{CoordTranslate, Shift};
 use crate::element::{Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{Color, SizeDesc, TextStyle};
@@ -182,7 +184,7 @@ impl<T: DrawingBackend> IntoDrawingArea for T {
     }
 }
 
-impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, RangedCoord<X, Y>> {
+impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, Cartesian2d<X, Y>> {
     /// Draw the mesh on a area
     pub fn draw_mesh<DrawFunc, YH: KeyPointHint, XH: KeyPointHint>(
         &self,
@@ -747,15 +749,11 @@ mod drawing_area_tests {
 
     #[test]
     fn test_ranges() {
-        let drawing_area =
-            create_mocked_drawing_area(1024, 768, |_m| {}).apply_coord_spec(RangedCoord::<
-                RangedCoordi32,
-                RangedCoordu32,
-            >::new(
-                -100..100,
-                0..200,
-                (0..1024, 0..768),
-            ));
+        let drawing_area = create_mocked_drawing_area(1024, 768, |_m| {})
+            .apply_coord_spec(Cartesian2d::<
+            crate::coord::types::RangedCoordi32,
+            crate::coord::types::RangedCoordu32,
+        >::new(-100..100, 0..200, (0..1024, 0..768)));
 
         let x_range = drawing_area.get_x_range();
         assert_eq!(x_range, -100..100);

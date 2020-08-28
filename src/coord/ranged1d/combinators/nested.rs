@@ -1,4 +1,6 @@
-use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::ranged1d::{
+    AsRangedCoord, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged, ValueFormatter,
+};
 use std::ops::Range;
 
 /// Describe a value for a nested coordinate
@@ -64,7 +66,7 @@ where
 }
 
 impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = NestedValue<P::ValueType, S::ValueType>;
 
     fn range(&self) -> Range<Self::ValueType> {

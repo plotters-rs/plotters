@@ -1,9 +1,9 @@
-// The customized coordinate decorators.
-// This file contains a set of coorindate decorators that allows you determine the
+// The customized coordinate combinators.
+// This file contains a set of coorindate combinators that allows you determine the
 // keypoint by your own code.
 use std::ops::Range;
 
-use super::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
+use crate::coord::ranged1d::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged};
 
 /// The coordinate decorator that binds a key point vector.
 /// Normally, all the ranged coordinate implements its own keypoint algorithm
@@ -214,7 +214,7 @@ impl<R: DiscreteRanged> DiscreteRanged for WithKeyPointMethod<R> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::coord::{BoldPoints, LightPoints};
+    use crate::coord::ranged1d::{BoldPoints, LightPoints};
     #[test]
     fn test_with_key_points() {
         let range = (0..100).with_key_points(vec![1, 2, 3]);

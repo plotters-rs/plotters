@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(5)
         .set_all_label_area_size(50)
         .caption("Sine and Cosine", ("sans-serif", 40).into_font())
-        .build_ranged(x_axis.clone(), -1.2f32..1.2f32)?;
+        .build_cartesian_2d(x_axis.clone(), -1.2f32..1.2f32)?;
 
     cc.configure_mesh()
         .x_labels(20)
@@ -74,7 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 format!("y = x^{}", 1 + 2 * idx),
                 ("sans-serif", 40).into_font(),
             )
-            .build_ranged(-1f32..1f32, -1f32..1f32)?;
+            .build_cartesian_2d(-1f32..1f32, -1f32..1f32)?;
         cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
 
         cc.draw_series(LineSeries::new(

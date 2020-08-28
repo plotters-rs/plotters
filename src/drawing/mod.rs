@@ -1,21 +1,14 @@
 /*!
-The drawing utils for Plotter. Which handles the both low-level and high-level
-drawing.
+The drawing utils for Plotters. In Plotters, we have two set of drawing APIs: low-level API and
+high-level API.
 
-For the low-level drawing abstraction, the module defines the `DrawingBackend` trait,
-which handles low-level drawing of different shapes, such as, pixels, lines, rectangles, etc.
+The low-level drawing abstraction, the module defines the `DrawingBackend` trait from the `plotters-backend` create.
+It exposes a set of functions which allows basic shape, such as pixels, lines, rectangles, circles, to be drawn on the screen.
+The low-level API uses the pixel based coordinate.
 
-On the top of drawing backend, one or more drawing area can be defined and different coordinate
-system can be applied to the drawing areas. And the drawing area implement the high-level drawing
-interface, which draws an element.
-
-Currently we have following backend implemented:
-
-- `BitMapBackend`: The backend that creates bitmap, this is based on `image` crate
-- `SVGBackend`: The backend that creates SVG image, based on `svg` crate.
-- `PistonBackend`: The backend that uses Piston Window for real time rendering. Disabled by default, use feature `piston` to turn on.
-- `CanvasBackend`: The backend that operates HTML5 Canvas, this is available when `Plotters` is targeting WASM.
-
+The high-level API is built on the top of high-level API. The `DrawingArea` type exposes the high-level drawing API to the remianing part
+of Plotters. The basic drawing blocks are composable elements, which can be defined in logic coordinate. To learn more details
+about the [coordinate abstraction](../coord/index.html) and [element system](../element/index.html).
 */
 mod area;
 mod backend_impl;

@@ -73,7 +73,7 @@ mod test {
         });
 
         let mut chart = ChartBuilder::on(&drawing_area)
-            .build_ranged(0..100, 0..100)
+            .build_cartesian_2d(0..100, 0..100)
             .expect("Build chart error");
 
         chart

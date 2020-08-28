@@ -3,10 +3,10 @@ use std::ops::Range;
 
 use super::{DualCoordChartContext, MeshStyle, SeriesAnno, SeriesLabelStyle};
 
-use crate::coord::{
-    AsRangedCoord, CoordTranslate, KeyPointHint, MeshLine, Ranged, RangedCoord,
-    ReverseCoordTranslate, Shift, ValueFormatter,
-};
+use crate::coord::cartesian::{Cartesian2d, MeshLine};
+use crate::coord::ranged1d::{AsRangedCoord, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::{CoordTranslate, ReverseCoordTranslate, Shift};
+
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::{Drawable, PathElement, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
@@ -29,7 +29,7 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(super) drawing_area_pos: (i32, i32),
 }
 
-impl<'a, DB, XT, YT, X, Y> ChartContext<'a, DB, RangedCoord<X, Y>>
+impl<'a, DB, XT, YT, X, Y> ChartContext<'a, DB, Cartesian2d<X, Y>>
 where
     DB: DrawingBackend,
     X: Ranged<ValueType = XT> + ValueFormatter<XT>,
@@ -133,7 +133,7 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     }
 }
 
-impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCoord<X, Y>> {
+impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesian2d<X, Y>> {
     /// Get the range of X axis
     pub fn x_range(&self) -> Range<X::ValueType> {
         self.drawing_area.get_x_range()
@@ -519,13 +519,13 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, RangedCo
     ) -> DualCoordChartContext<
         'a,
         DB,
-        RangedCoord<X, Y>,
-        RangedCoord<SX::CoordDescType, SY::CoordDescType>,
+        Cartesian2d<X, Y>,
+        Cartesian2d<SX::CoordDescType, SY::CoordDescType>,
     > {
         let mut pixel_range = self.drawing_area.get_pixel_range();
         pixel_range.1 = pixel_range.1.end..pixel_range.1.start;
 
-        DualCoordChartContext::new(self, RangedCoord::new(x_coord, y_coord, pixel_range))
+        DualCoordChartContext::new(self, Cartesian2d::new(x_coord, y_coord, pixel_range))
     }
 }
 
@@ -545,7 +545,7 @@ mod test {
             .y_label_area_size(20)
             .set_label_area_size(LabelAreaPosition::Top, 20)
             .set_label_area_size(LabelAreaPosition::Right, 20)
-            .build_ranged(0..10, 0..10)
+            .build_cartesian_2d(0..10, 0..10)
             .expect("Create chart")
             .set_secondary_coord(0.0..1.0, 0.0..1.0);
 

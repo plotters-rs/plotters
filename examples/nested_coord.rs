@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .y_label_area_size(40)
         .margin(5)
         .caption("Nested Coord", ("sans-serif", 50.0).into_font())
-        .build_ranged(
+        .build_cartesian_2d(
             ["Linear", "Quadratic"].nested_coord(|_| 0.0..10.0),
             0.0..10.0,
         )?;

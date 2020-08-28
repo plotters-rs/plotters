@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_label_area_size(LabelAreaPosition::Left, 60)
         .set_label_area_size(LabelAreaPosition::Bottom, 60)
         .caption("Area Chart Demo", ("sans-serif", 40))
-        .build_ranged(0..(data.len() - 1), 0.0..1500.0)?;
+        .build_cartesian_2d(0..(data.len() - 1), 0.0..1500.0)?;
 
     chart
         .configure_mesh()

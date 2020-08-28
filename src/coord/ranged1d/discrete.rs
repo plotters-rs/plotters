@@ -1,4 +1,6 @@
-use super::{AsRangedCoord, KeyPointHint, Ranged, ReversibleRanged, ValueFormatter};
+use crate::coord::ranged1d::{
+    AsRangedCoord, KeyPointHint, NoDefaultFormatting, Ranged, ReversibleRanged, ValueFormatter,
+};
 use std::ops::Range;
 
 /// The trait indicates the coordinate is discrete
@@ -136,7 +138,7 @@ where
 }
 
 impl<D: DiscreteRanged> Ranged for SegmentedCoord<D> {
-    type FormatOption = crate::coord::ranged::NoDefaultFormatting;
+    type FormatOption = NoDefaultFormatting;
     type ValueType = SegmentValue<D::ValueType>;
 
     fn map(&self, value: &Self::ValueType, limit: (i32, i32)) -> i32 {
@@ -233,7 +235,7 @@ mod test {
     use super::*;
     #[test]
     fn test_value_iter() {
-        let range: crate::coord::numeric::RangedCoordi32 = (-10..10).into();
+        let range: crate::coord::ranged1d::types::RangedCoordi32 = (-10..10).into();
 
         let values: Vec<_> = range.values().collect();
 
