@@ -1,8 +1,7 @@
 use crate::DrawResult;
+use plotters::prelude::*;
 use std::ops::Range;
 use web_sys::HtmlCanvasElement;
-
-use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
 
 /// Draw Mandelbrot set
@@ -16,7 +15,7 @@ pub fn draw(element: HtmlCanvasElement) -> DrawResult<impl Fn((i32, i32)) -> Opt
         .margin(20)
         .x_label_area_size(10)
         .y_label_area_size(10)
-        .build_ranged(-2.1..0.6, -1.2..1.2)?;
+        .build_cartesian_2d(-2.1..0.6, -1.2..1.2)?;
 
     chart
         .configure_mesh()

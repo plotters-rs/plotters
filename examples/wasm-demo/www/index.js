@@ -30,24 +30,31 @@ function setupUI() {
 
 /** Setup canvas to properly handle high DPI and redraw current plot. */
 function setupCanvas() {
-    const dpr = window.devicePixelRatio || 1;
+	const dpr = window.devicePixelRatio || 1.0;
     const aspectRatio = canvas.width / canvas.height;
-    const size = Math.min(canvas.width, canvas.parentNode.offsetWidth);
+    const size = canvas.parentNode.offsetWidth * 0.8;
     canvas.style.width = size + "px";
     canvas.style.height = size / aspectRatio + "px";
-    canvas.width = size * dpr;
-    canvas.height = size / aspectRatio * dpr;
-    canvas.getContext("2d").scale(dpr, dpr);
+    canvas.width = size;
+    canvas.height = size / aspectRatio;
     updatePlot();
 }
 
 /** Update displayed coordinates. */
 function onMouseMove(event) {
     if (chart) {
-        const point = chart.coord(event.offsetX, event.offsetY);
-        coord.innerText = (point)
-            ? `(${point.x.toFixed(3)}, ${point.y.toFixed(3)})`
-            : "Mouse pointer is out of range";
+		var text = "Mouse pointer is out of range";
+
+		if(event.target == canvas) {
+			let actualRect = canvas.getBoundingClientRect();
+			let logicX = event.offsetX * canvas.width / actualRect.width;
+			let logicY = event.offsetY * canvas.height / actualRect.height;
+			const point = chart.coord(logicX, logicY);
+			text = (point) 
+				? `(${point.x.toFixed(3)}, ${point.y.toFixed(3)})`
+				: text;
+		}
+        coord.innerText = text;
     }
 }
 
