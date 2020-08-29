@@ -4,5 +4,5 @@ wasm-pack build --release
 if errorlevel 1 cargo install wasm-pack
 wasm-pack build --release
 cd www
-npm install
+call npm install
 npm start
