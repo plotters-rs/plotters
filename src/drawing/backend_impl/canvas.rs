@@ -73,7 +73,6 @@ impl DrawingBackend for CanvasBackend {
     type ErrorType = CanvasError;
 
     fn get_size(&self) -> (u32, u32) {
-        let window = window().unwrap();
         (self.canvas.width(), self.canvas.height())
     }
 
