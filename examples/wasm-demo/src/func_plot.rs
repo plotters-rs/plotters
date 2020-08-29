@@ -10,6 +10,7 @@ pub fn draw(canvas_id: &str, power: i32) -> DrawResult<impl Fn((i32, i32)) -> Op
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
+        .margin(20)
         .caption(format!("y=x^{}", power), font)
         .x_label_area_size(30)
         .y_label_area_size(30)

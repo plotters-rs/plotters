@@ -30,14 +30,13 @@ function setupUI() {
 
 /** Setup canvas to properly handle high DPI and redraw current plot. */
 function setupCanvas() {
-    const dpr = window.devicePixelRatio || 1;
+	const dpr = window.devicePixelRatio || 1.0;
     const aspectRatio = canvas.width / canvas.height;
-    const size = Math.min(canvas.width, canvas.parentNode.offsetWidth);
-    canvas.style.width = size + "px";
-    canvas.style.height = size / aspectRatio + "px";
-    canvas.width = size * dpr;
-    canvas.height = size / aspectRatio * dpr;
-    canvas.getContext("2d").scale(dpr, dpr);
+    const size = canvas.parentNode.offsetWidth * 0.8;
+    canvas.style.width = size * dpr + "px";
+    canvas.style.height = size * dpr / aspectRatio + "px";
+    canvas.width = size;
+    canvas.height = size / aspectRatio;
     updatePlot();
 }
 
