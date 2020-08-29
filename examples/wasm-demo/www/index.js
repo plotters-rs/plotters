@@ -33,8 +33,8 @@ function setupCanvas() {
 	const dpr = window.devicePixelRatio || 1.0;
     const aspectRatio = canvas.width / canvas.height;
     const size = canvas.parentNode.offsetWidth * 0.8;
-    canvas.style.width = size * dpr + "px";
-    canvas.style.height = size * dpr / aspectRatio + "px";
+    canvas.style.width = size + "px";
+    canvas.style.height = size / aspectRatio + "px";
     canvas.width = size;
     canvas.height = size / aspectRatio;
     updatePlot();
