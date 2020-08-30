@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::Range;
 use std::rc::Rc;
 
-use super::{AsRangedCoord, Ranged};
+use super::{AsRangedCoord, DiscreteRanged, Ranged};
 
 /// The category coordinate
 pub struct Category<T: PartialEq> {
@@ -22,10 +22,33 @@ impl<T: PartialEq> Clone for Category<T> {
     }
 }
 
+impl<T: PartialEq> std::cmp::PartialEq for Category<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.elements == other.elements && self.idx == other.idx
+    }
+}
+
+impl<T: std::hash::Hash + Eq> std::hash::Hash for Category<T> {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        self.name.hash(state);
+        self.idx.hash(state);
+        self.elements.iter().for_each(|ele| ele.hash(state));
+    }
+}
+
+impl<T: Eq> std::cmp::Eq for Category<T> {}
+
 impl<T: PartialEq + fmt::Display> fmt::Debug for Category<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let element = &self.elements[self.idx as usize];
-        write!(f, "{}", element)
+        if self.idx < 0 {
+            write!(f, "{}", "NO VALUE")
+        } else {
+            let element = &self.elements[self.idx as usize];
+            write!(f, "{}", element)
+        }
     }
 }
 
@@ -169,6 +192,37 @@ impl<T: PartialEq> Ranged for Category<T> {
             });
         }
         ret
+    }
+}
+
+impl<T: PartialEq> DiscreteRanged for Category<T> {
+    type RangeParameter = ();
+
+    fn get_range_parameter(&self) {}
+
+    /// Get the smallest value that is larger than the `this` value
+    fn next_value(this: &Self::ValueType, _param: &()) -> Self::ValueType {
+        let mut out = this.clone();
+        out.idx = match out.idx {
+            // Any negative number (ie. -1) should return 0 (the start)
+            idx if idx < 0 => 0,
+            // If we've hit the end of the range, start again
+            idx if idx as usize >= out.elements.len() => 0,
+            // Otherwise just increase idx
+            idx => idx + 1,
+        };
+        out
+    }
+
+    /// Get the largest value that is smaller than `this` value
+    fn previous_value(this: &Self::ValueType, _param: &()) -> Self::ValueType {
+        let mut out = this.clone();
+        out.idx -= 1;
+        if out.idx < 0 {
+            // If we need to wrap around
+            out.idx = (out.elements.len() - 1) as i32;
+        }
+        out
     }
 }
 
