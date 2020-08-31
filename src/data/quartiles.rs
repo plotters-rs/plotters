@@ -62,6 +62,33 @@ impl Quartiles {
         }
     }
 
+    /// Create a new quartiles struct with pre-calculated values.
+    ///
+    /// - `s`: The array of the original values
+    /// - **returns** The newly created quartiles
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let quartiles = Quartiles::new_from_values(&[2, 24, 31, 39, 45]);
+    /// assert_eq!(quartiles.values(), [2.0, 24.0, 31.0, 39.0, 45.0]);
+    /// ```
+    pub fn new_from_values<T: Into<f64> + Copy + PartialOrd>(s: &[T; 5]) -> Self {
+        let s = s.to_owned();
+        assert!(s[0] <= s[1]);
+        assert!(s[1] <= s[2]);
+        assert!(s[2] <= s[3]);
+        assert!(s[3] <= s[4]);
+
+        Self {
+            lower_fence: s[0].into(),
+            lower: s[1].into(),
+            median: s[2].into(),
+            upper: s[3].into(),
+            upper_fence: s[4].into(),
+        }
+    }
+
     /// Get the quartiles values.
     ///
     /// - **returns** The array [lower fence, lower quartile, median, upper quartile, upper fence]
