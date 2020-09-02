@@ -547,19 +547,19 @@ pub(super) enum Coord3D<X, Y, Z> {
 impl<X, Y, Z> Coord3D<X, Y, Z> {
     fn get_x(&self) -> &X {
         match self {
-            Self::X(ret) => ret,
+            Coord3D::X(ret) => ret,
             _ => panic!("Invalid call!"),
         }
     }
     fn get_y(&self) -> &Y {
         match self {
-            Self::Y(ret) => ret,
+            Coord3D::Y(ret) => ret,
             _ => panic!("Invalid call!"),
         }
     }
     fn get_z(&self) -> &Z {
         match self {
-            Self::Z(ret) => ret,
+            Coord3D::Z(ret) => ret,
             _ => panic!("Invalid call!"),
         }
     }
