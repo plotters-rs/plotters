@@ -1,6 +1,6 @@
 use super::context::ChartContext;
 
-use crate::coord::cartesian::Cartesian2d;
+use crate::coord::cartesian::{Cartesian2d, Cartesian3d};
 use crate::coord::ranged1d::AsRangedCoord;
 use crate::coord::Shift;
 
@@ -303,6 +303,54 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             drawing_area_pos: (
                 actual_drawing_area_pos[2] + title_dx + self.margin[2] as i32,
                 actual_drawing_area_pos[0] + title_dy + self.margin[0] as i32,
+            ),
+        })
+    }
+
+    pub fn build_cartesian_3d<X: AsRangedCoord, Y: AsRangedCoord, Z: AsRangedCoord>(
+        &mut self,
+        x_spec: X,
+        y_spec: Y,
+        z_spec: Z,
+    ) -> Result<
+        ChartContext<'a, DB, Cartesian3d<X::CoordDescType, Y::CoordDescType, Z::CoordDescType>>,
+        DrawingAreaErrorKind<DB::ErrorType>,
+    > {
+        let mut drawing_area = DrawingArea::clone(self.root_area);
+
+        if *self.margin.iter().max().unwrap_or(&0) > 0 {
+            drawing_area = drawing_area.margin(
+                self.margin[0] as i32,
+                self.margin[1] as i32,
+                self.margin[2] as i32,
+                self.margin[3] as i32,
+            );
+        }
+
+        let (title_dx, title_dy) = if let Some((ref title, ref style)) = self.title {
+            let (origin_dx, origin_dy) = drawing_area.get_base_pixel();
+            drawing_area = drawing_area.titled(title, style.clone())?;
+            let (current_dx, current_dy) = drawing_area.get_base_pixel();
+            (current_dx - origin_dx, current_dy - origin_dy)
+        } else {
+            (0, 0)
+        };
+
+        let pixel_range = drawing_area.get_pixel_range();
+
+        Ok(ChartContext {
+            x_label_area: [None, None],
+            y_label_area: [None, None],
+            drawing_area: drawing_area.apply_coord_spec(Cartesian3d::new(
+                x_spec,
+                y_spec,
+                z_spec,
+                pixel_range,
+            )),
+            series_anno: vec![],
+            drawing_area_pos: (
+                title_dx + self.margin[2] as i32,
+                title_dy + self.margin[0] as i32,
             ),
         })
     }
