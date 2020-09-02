@@ -18,6 +18,8 @@ mod histogram;
 mod line_series;
 #[cfg(feature = "point_series")]
 mod point_series;
+#[cfg(feature = "surface_series")]
+mod surface;
 
 #[cfg(feature = "area_series")]
 pub use area_series::AreaSeries;
@@ -27,3 +29,5 @@ pub use histogram::Histogram;
 pub use line_series::LineSeries;
 #[cfg(feature = "point_series")]
 pub use point_series::PointSeries;
+#[cfg(feature = "surface_series")]
+pub use surface::SurfaceSeries;

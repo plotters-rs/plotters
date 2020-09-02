@@ -738,6 +738,8 @@ pub mod prelude {
     pub use crate::series::LineSeries;
     #[cfg(feature = "point_series")]
     pub use crate::series::PointSeries;
+    #[cfg(feature = "surface_series")]
+    pub use crate::series::SurfaceSeries;
 
     // Styles
     pub use crate::style::{

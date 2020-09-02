@@ -17,7 +17,11 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
     fn compute_default_size(actual_x: Range<i32>, actual_y: Range<i32>) -> i32 {
         (actual_x.end - actual_x.start).min(actual_y.end - actual_y.start) * 4 / 5
     }
-    fn create_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(actual_x: Range<i32>, actual_y: Range<i32>, f: F) -> ProjectionMatrix {
+    fn create_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
+        actual_x: Range<i32>,
+        actual_y: Range<i32>,
+        f: F,
+    ) -> ProjectionMatrix {
         let default_size = Self::compute_default_size(actual_x.clone(), actual_y.clone());
         let center_3d = (default_size / 2, default_size / 2, default_size / 2);
         let center_2d = (
@@ -28,7 +32,12 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         pb.set_pivot(center_3d, center_2d);
         f(pb)
     }
-    pub fn with_projection<SX: Into<X>, SY: Into<Y>, SZ: Into<Z>, F: FnOnce(ProjectionMatrixBuilder)-> ProjectionMatrix>(
+    pub fn with_projection<
+        SX: Into<X>,
+        SY: Into<Y>,
+        SZ: Into<Z>,
+        F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix,
+    >(
         logic_x: SX,
         logic_y: SY,
         logic_z: SZ,
@@ -44,7 +53,12 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
             projection: Self::create_projection(actual_x, actual_y, build_projection_matrix),
         }
     }
-    pub fn set_projection<F:FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(&mut self, actual_x: Range<i32>, actual_y: Range<i32>, f: F) -> &mut Self {
+    pub fn set_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
+        &mut self,
+        actual_x: Range<i32>,
+        actual_y: Range<i32>,
+        f: F,
+    ) -> &mut Self {
         self.projection = Self::create_projection(actual_x, actual_y, f);
         self
     }
@@ -55,7 +69,9 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         logic_z: SZ,
         (actual_x, actual_y): (Range<i32>, Range<i32>),
     ) -> Self {
-        Self::with_projection(logic_x, logic_y, logic_z, (actual_x, actual_y), |pb| pb.into_matrix())
+        Self::with_projection(logic_x, logic_y, logic_z, (actual_x, actual_y), |pb| {
+            pb.into_matrix()
+        })
     }
     pub fn projection(&self) -> &ProjectionMatrix {
         &self.projection

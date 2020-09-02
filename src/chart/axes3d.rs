@@ -46,18 +46,18 @@ where
         self.n_labels[0] = n;
         self
     }
-    
+
     pub fn y_labels(&mut self, n: usize) -> &mut Self {
         self.n_labels[1] = n;
         self
     }
-    
+
     pub fn z_labels(&mut self, n: usize) -> &mut Self {
         self.n_labels[2] = n;
         self
     }
 
-    pub fn axis_panel_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self{
+    pub fn axis_panel_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.axis_panel_style = style.into();
         self
     }
@@ -66,12 +66,12 @@ where
         self.bold_line_style = style.into();
         self
     }
-    
+
     pub fn light_grid_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.light_line_style = style.into();
         self
     }
-    
+
     pub fn label_style<S: Into<TextStyle<'b>>>(&mut self, style: S) -> &mut Self {
         self.label_style = style.into();
         self
@@ -81,12 +81,12 @@ where
         self.format_x = f;
         self
     }
-    
+
     pub fn y_formatter<F: Fn(&Y::ValueType) -> String>(&mut self, f: &'b F) -> &mut Self {
         self.format_y = f;
         self
     }
-    
+
     pub fn z_formatter<F: Fn(&Z::ValueType) -> String>(&mut self, f: &'b F) -> &mut Self {
         self.format_z = f;
         self
@@ -99,7 +99,7 @@ where
         Self {
             parent_size,
             tick_size,
-             n_labels: [10, 10, 10],
+            n_labels: [10, 10, 10],
             bold_line_style: Into::<ShapeStyle>::into(&BLACK.mix(0.2)),
             light_line_style: Into::<ShapeStyle>::into(&TRANSPARENT),
             axis_panel_style: Into::<ShapeStyle>::into(&BLACK.mix(0.1)),
@@ -141,26 +141,44 @@ where
         for i in 0..3 {
             let axis = chart.draw_axis(i, &panels, self.axis_style.clone())?;
             let labels: Vec<_> = match i {
-                0 => kps_bold.x_points.iter().map(|x| {
-                    let x_text = (self.format_x)(x);
-                    let mut p = axis[0].clone();
-                    p[0] = Coord3D::X(x.clone());
-                    (p, x_text)
-                }).collect(),
-                1 => kps_bold.y_points.iter().map(|y| {
-                    let y_text = (self.format_y)(y);
-                    let mut p = axis[0].clone();
-                    p[1] = Coord3D::Y(y.clone());
-                    (p, y_text)
-                }).collect(),
-                _ => kps_bold.z_points.iter().map(|z| {
-                    let z_text = (self.format_z)(z);
-                    let mut p = axis[0].clone();
-                    p[2] = Coord3D::Z(z.clone());
-                    (p, z_text)
-                }).collect(),
+                0 => kps_bold
+                    .x_points
+                    .iter()
+                    .map(|x| {
+                        let x_text = (self.format_x)(x);
+                        let mut p = axis[0].clone();
+                        p[0] = Coord3D::X(x.clone());
+                        (p, x_text)
+                    })
+                    .collect(),
+                1 => kps_bold
+                    .y_points
+                    .iter()
+                    .map(|y| {
+                        let y_text = (self.format_y)(y);
+                        let mut p = axis[0].clone();
+                        p[1] = Coord3D::Y(y.clone());
+                        (p, y_text)
+                    })
+                    .collect(),
+                _ => kps_bold
+                    .z_points
+                    .iter()
+                    .map(|z| {
+                        let z_text = (self.format_z)(z);
+                        let mut p = axis[0].clone();
+                        p[2] = Coord3D::Z(z.clone());
+                        (p, z_text)
+                    })
+                    .collect(),
             };
-            chart.draw_axis_ticks(axis, &labels[..], self.tick_size, self.axis_style.clone(), self.label_style.clone())?;
+            chart.draw_axis_ticks(
+                axis,
+                &labels[..],
+                self.tick_size,
+                self.axis_style.clone(),
+                self.label_style.clone(),
+            )?;
         }
 
         Ok(())

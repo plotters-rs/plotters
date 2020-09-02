@@ -5,12 +5,12 @@ use super::axes3d::Axes3dStyle;
 use super::{DualCoordChartContext, MeshStyle, SeriesAnno, SeriesLabelStyle};
 
 use crate::coord::cartesian::{Cartesian2d, Cartesian3d, MeshLine};
-use crate::coord::ranged3d::{ProjectionMatrix, ProjectionMatrixBuilder};
 use crate::coord::ranged1d::{AsRangedCoord, KeyPointHint, Ranged, ValueFormatter};
+use crate::coord::ranged3d::{ProjectionMatrix, ProjectionMatrixBuilder};
 use crate::coord::{CoordTranslate, ReverseCoordTranslate, Shift};
 
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{Drawable, PathElement, PointCollection, Polygon, Text, EmptyElement};
+use crate::element::{Drawable, EmptyElement, PathElement, PointCollection, Polygon, Text};
 use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{ShapeStyle, TextStyle};
 
@@ -586,12 +586,18 @@ where
 }
 impl<'a, DB, X: Ranged, Y: Ranged, Z: Ranged> ChartContext<'a, DB, Cartesian3d<X, Y, Z>>
 where
-    DB: DrawingBackend, {
-        pub fn with_projection<P: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(&mut self, pf: P) -> &mut Self {
-            let (actual_x, actual_y) = self.drawing_area.get_pixel_range();
-            self.drawing_area.as_coord_spec_mut().set_projection(actual_x, actual_y, pf);
-            self
-        }
+    DB: DrawingBackend,
+{
+    pub fn with_projection<P: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
+        &mut self,
+        pf: P,
+    ) -> &mut Self {
+        let (actual_x, actual_y) = self.drawing_area.get_pixel_range();
+        self.drawing_area
+            .as_coord_spec_mut()
+            .set_projection(actual_x, actual_y, pf);
+        self
+    }
 }
 
 impl<'a, DB, X: Ranged, Y: Ranged, Z: Ranged> ChartContext<'a, DB, Cartesian3d<X, Y, Z>>
@@ -619,15 +625,26 @@ where
     }
     pub(super) fn draw_axis_ticks(
         &mut self,
-        axis: [[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>;3];2],
-        labels: &[([Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3], String)],
+        axis: [[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3]; 2],
+        labels: &[(
+            [Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3],
+            String,
+        )],
         tick_size: i32,
         style: ShapeStyle,
-        font: TextStyle
+        font: TextStyle,
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let coord = self.plotting_area().as_coord_spec();
-        let begin = coord.translate(&Coord3D::build_coord([&axis[0][0], &axis[0][1], &axis[0][2]]));
-        let end = coord.translate(&Coord3D::build_coord([&axis[1][0], &axis[1][1], &axis[1][2]]));
+        let begin = coord.translate(&Coord3D::build_coord([
+            &axis[0][0],
+            &axis[0][1],
+            &axis[0][2],
+        ]));
+        let end = coord.translate(&Coord3D::build_coord([
+            &axis[1][0],
+            &axis[1][1],
+            &axis[1][2],
+        ]));
         let axis_dir = (end.0 - begin.0, end.1 - begin.1);
         let (x_range, y_range) = self.plotting_area().get_pixel_range();
         let x_mid = (x_range.start + x_range.end) / 2;
@@ -648,11 +665,7 @@ where
         let x_score = (x_dir.0 * axis_dir.0 + x_dir.1 * axis_dir.1).abs();
         let y_score = (y_dir.0 * axis_dir.0 + y_dir.1 * axis_dir.1).abs();
 
-        let dir = if x_score < y_score {
-            x_dir
-        } else {
-            y_dir
-        };
+        let dir = if x_score < y_score { x_dir } else { y_dir };
 
         for (pos, text) in labels {
             let logic_pos = Coord3D::build_coord([&pos[0], &pos[1], &pos[2]]);
@@ -668,8 +681,8 @@ where
                 font.pos = Pos::new(HPos::Center, VPos::Top);
             };
             let element = EmptyElement::at(logic_pos)
-                + PathElement::new(vec![(0,0), dir], style.clone())
-                + Text::new(text.to_string(), (dir.0 * 2 , dir.1 * 2), font.clone());
+                + PathElement::new(vec![(0, 0), dir], style.clone())
+                + Text::new(text.to_string(), (dir.0 * 2, dir.1 * 2), font.clone());
             self.plotting_area().draw(&element)?;
         }
         Ok(())
@@ -679,7 +692,10 @@ where
         idx: usize,
         panels: &[[[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3]; 2]; 3],
         style: ShapeStyle,
-    ) -> Result<[[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>;3];2], DrawingAreaErrorKind<DB::ErrorType>> {
+    ) -> Result<
+        [[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3]; 2],
+        DrawingAreaErrorKind<DB::ErrorType>,
+    > {
         let coord = self.plotting_area().as_coord_spec();
         let x_range = coord.logic_x.range();
         let y_range = coord.logic_y.range();
@@ -808,20 +824,21 @@ where
             n[(idx + 2) % 3] = b[(idx + 2) % 3];
 
             (
-                    vec![
-                        Coord3D::build_coord(a),
-                        Coord3D::build_coord(m),
-                        Coord3D::build_coord(b),
-                        Coord3D::build_coord(n),
-                    ],
+                vec![
+                    Coord3D::build_coord(a),
+                    Coord3D::build_coord(m),
+                    Coord3D::build_coord(b),
+                    Coord3D::build_coord(n),
+                ],
                 a,
                 b,
             )
         };
-        self.plotting_area().draw(&Polygon::new(panel.clone(), panel_style.clone()))?;
+        self.plotting_area()
+            .draw(&Polygon::new(panel.clone(), panel_style.clone()))?;
         panel.push(panel[0].clone());
-        self.plotting_area().draw(&PathElement::new(panel, bold_grid_style.clone()))?;
-
+        self.plotting_area()
+            .draw(&PathElement::new(panel, bold_grid_style.clone()))?;
 
         for (kps, style) in vec![
             (light_points, light_grid_style),
