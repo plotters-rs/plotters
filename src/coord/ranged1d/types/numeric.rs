@@ -2,7 +2,8 @@ use std::convert::TryFrom;
 use std::ops::Range;
 
 use crate::coord::ranged1d::{
-    AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, Ranged, ReversibleRanged,
+    AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
+    ReversibleRanged, ValueFormatter,
 };
 
 macro_rules! impl_discrete_trait {
@@ -58,7 +59,7 @@ macro_rules! impl_reverse_mapping_trait {
     };
 }
 macro_rules! make_numeric_coord {
-    ($type:ty, $name:ident, $key_points:ident, $doc: expr) => {
+    ($type:ty, $name:ident, $key_points:ident, $doc: expr, $fmt: ident) => {
         #[doc = $doc]
         #[derive(Clone)]
         pub struct $name($type, $type);
@@ -68,7 +69,7 @@ macro_rules! make_numeric_coord {
             }
         }
         impl Ranged for $name {
-            type FormatOption = DefaultFormatting;
+            type FormatOption = $fmt;
             type ValueType = $type;
             #[allow(clippy::float_cmp)]
             fn map(&self, v: &$type, limit: (i32, i32)) -> i32 {
@@ -96,6 +97,9 @@ macro_rules! make_numeric_coord {
             }
         }
     };
+    ($type:ty, $name:ident, $key_points:ident, $doc: expr) => {
+        make_numeric_coord!($type, $name, $key_points, $doc, DefaultFormatting);
+    }
 }
 
 macro_rules! gen_key_points_comp {
@@ -207,16 +211,28 @@ make_numeric_coord!(
     f32,
     RangedCoordf32,
     compute_f32_key_points,
-    "The ranged coordinate for type f32"
+    "The ranged coordinate for type f32",
+    NoDefaultFormatting
 );
 impl_reverse_mapping_trait!(f32, RangedCoordf32);
+impl ValueFormatter<f32> for RangedCoordf32 {
+    fn format(value: &f32) -> String {
+        crate::data::float::pretty_print_float(*value as f64, false)
+    }
+}
 make_numeric_coord!(
     f64,
     RangedCoordf64,
     compute_f64_key_points,
-    "The ranged coordinate for type f64"
+    "The ranged coordinate for type f64",
+    NoDefaultFormatting
 );
 impl_reverse_mapping_trait!(f64, RangedCoordf64);
+impl ValueFormatter<f64> for RangedCoordf64 {
+    fn format(value: &f64) -> String {
+        crate::data::float::pretty_print_float(*value, false)
+    }
+}
 make_numeric_coord!(
     u32,
     RangedCoordu32,
