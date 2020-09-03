@@ -1,3 +1,4 @@
+/// The color type that is used by all the backend
 #[derive(Clone, Copy)]
 pub struct BackendColor {
     pub alpha: f64,

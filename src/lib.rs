@@ -1,3 +1,66 @@
+/*!
+  The Plotters backend API crate. This is a part of Plotters, the Rust drawing and plotting library, for more details regarding the entire
+  Plotters project, please check the [main crate](https://crates.io/crates/plotters).
+
+  This is the crate that used as the connector between Plotters and different backend crates. Since Plotters 0.3, all the backends has been
+  hosted as seperate crates for the usability and maintainability reasons.
+
+  At the same time, Plotters is now supporting third-party backends and all the backends are now supports "plug-and-play":
+  To use a external backend, just depends on both the Plotters main crate and the third-party backend crate.
+
+  # Notes for implementing Backend for Plotters
+
+  To create a new Plotters backend, this crate should be imported to the crate and the trait [DrawingBackend](trait.DrawingBackend.html) should
+  be implemented. It's highly recommended that the third-party backend uses `plotters-backend` by version specification `^x.y.*`.
+  For more details, see the [compatibility note](#compatibility-note).
+
+  If the backend only implements [DrawingBackend::draw_pixel](trait.DrawingBackend.html#tymethod.draw_pixel), the default CPU rasterizer will be
+  used to give your backend ability of drawing different shapes. For those backend that supports advanced drawing instructions, such as, GPU
+  acelerated shape drawing, all the provided trait method can be overriden from the specific backend code.
+
+  If your backend have text rendering ability, you may want to override the [DrawingBackend::estimate_text_size](trait.DrawingBackend.html#tymethod.estimate_text_size)
+  to avoid wrong spacing, since the Plotters default text handling code may behaves differently from the backend in terms of text rendering.
+
+  ## Animated or Realtime Rendering
+  Backend might render the image realtimely/animated, for example, a GTK backend for realtime display or a GIF image rendering. To support these
+  features, you need to play with `ensure_prepared` and `present` method. The following figure illustrates how Plotters operates a drawing backend.
+
+  - `ensure_prepared` - Called before each time when plotters want to draw. This function should initialize the backend for current frame, if the backend is already prepared
+     for a frame, this function should simply do nothing.
+  - `present` - Called when plotters want to finish current frame drawing
+
+
+  ```text
+                                        .ensure_prepared() &&
+    +-------------+    +-------------+    .draw_pixels()             +--------------+   drop
+    |Start drwaing|--->|Ready to draw| ------------------------+---->|Finish 1 frame| --------->
+    +-------------+    +-------------+                         |     +--------------+
+           ^                  ^                                |            |
+           |                  +------------------------------- +            |
+           |                            continue drawing                    |
+           +----------------------------------------------------------------+
+                                start render the next frame
+                                        .present()
+  ```
+  - For both animated and static drawing, `DrawingBackend::present` indicates current frame should be flushed.
+  - For both animated and static drawing, `DrawingBackend::ensure_prepared` is called every time when plotters need to draw.
+  - For static drawing, the `DrawingBackend::present` is only called once manually, or from the Drop impl for the backend.
+  - For dynamic drawing, frames are defined by invocation of `DrawingBackend::present`, everything prior the invocation should belongs to previous frame
+
+  # Compatibility Note
+  Since Plotters v0.3, plotters use the "plug-and-play" schema to import backends, this requires both Plotters and the backend crates depdens on a
+  same version of `plotters-backend` crate. This crate (`plotters-backend`) will enforce that any revision (means the last number in a version number)
+  won't contains breaking change - both on the Plotters side and backend side.
+
+  Plotters main crate is always importing the backend crate with version specification `plotters-backend = "^<major>.<minor>*"`.
+  It's highly recommended that all the external crates follows the same rule to import `plotters-backend` depdendency, to avoid protential breaking
+  caused by `plotters-backend` crates gets a revision update.
+
+  We also impose a versioning rule with `plotters` and some backends:
+  The compatible main crate (`plotters`) and this crate (`plotters-backend`) are always use the same major and minor version number.
+  All the plotters main crate and second-party backends with version "x.y.*" should be compatible, and they should depens on the latest version of `plotters-backend x.y.*`
+
+*/
 use std::error::Error;
 
 pub mod rasterizer;
@@ -9,10 +72,11 @@ pub use text::{text_anchor, BackendTextStyle, FontFamily, FontStyle, FontTransfo
 
 use text_anchor::{HPos, VPos};
 
-/// A coordinate in the image
+/// A coordinate in the pixel-based backend. The coordinate follows the framebuffer's convention,
+/// which defines the top-left point as (0, 0).
 pub type BackendCoord = (i32, i32);
 
-/// The error produced by a drawing backend
+/// The error produced by a drawing backend.
 #[derive(Debug)]
 pub enum DrawingErrorKind<E: Error + Send + Sync> {
     /// A drawing backend error

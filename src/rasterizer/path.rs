@@ -100,6 +100,7 @@ fn traverse_vertices<'a>(
     ));
 }
 
+/// Covert a path with >1px stroke width into polygon.
 pub fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCoord> {
     if vertices.len() < 2 {
         return vec![];

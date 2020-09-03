@@ -1,8 +1,10 @@
-///! # The built-in rasterizers.
-///!
-///! Plotters make a minimal backend ability assumption - which is drawing a pixel on
-///! backend. And this is the rasterizer that utilize this minimal ability to build a
-///! fully functioning backend.
+/*! # The built-in rasterizers.
+
+  Plotters make a minimal backend ability assumption - which is drawing a pixel on
+  backend. And this is the rasterizer that utilize this minimal ability to build a
+  fully functioning backend.
+
+*/
 
 // TODO: ? operator is very slow. See issue #58 for details
 macro_rules! check_result {
