@@ -1,6 +1,6 @@
 [package]
 name = "plotters-backend"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"

@@ -1,9 +1,8 @@
-# plotters-backend - The Backend API Crate for Plotters
+# plotters-backend - The base crate for implementing a backend for Plotters
 
-This crate defines a stable interface between the Plotters core code and backend implementations.
 This is a part of plotters project. For more details, please check the following links:
 
-- [Plotters repo](https://github.com/38/plotters.git)
-- [Homepage](https://plotters-rs.github.io)
-
-
+- For high-level intro of Plotters, see: [Plotters on crates.io](https://crates.io/crates/plotters)
+- Check the main repo at [Plotters repo](https://github.com/38/plotters.git)
+- For detailed documentation about this crate, check [plotters-backend on docs.rs](https://docs.rs/plotters-backend/)
+- You can also visit Plotters [Homepage](https://plotters-rs.github.io)
