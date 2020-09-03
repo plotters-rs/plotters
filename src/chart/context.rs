@@ -920,4 +920,35 @@ mod test {
             .draw()
             .expect("Drawing error");
     }
+
+
+    #[test]
+    fn test_chart_context_3d() {
+        let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
+
+        drawing_area.fill(&WHITE).expect("Fill");
+
+        let mut chart = ChartBuilder::on(&drawing_area)
+            .caption("Test Title", ("serif", 10))
+            .x_label_area_size(20)
+            .y_label_area_size(20)
+            .set_label_area_size(LabelAreaPosition::Top, 20)
+            .set_label_area_size(LabelAreaPosition::Right, 20)
+            .build_cartesian_3d(0..10, 0..10, 0..10)
+            .expect("Create chart");
+        
+        chart.with_projection(|mut pb| {
+            pb.yaw = 0.5;
+            pb.pitch = 0.5;
+            pb.scale = 0.5;
+            pb.into_matrix()
+        });
+
+        chart.configure_axes().draw().expect("Drawing axes");
+
+
+        chart
+            .draw_series(std::iter::once(Circle::new((5, 5, 5), 5, &RED)))
+            .expect("Drawing error");
+    }
 }
