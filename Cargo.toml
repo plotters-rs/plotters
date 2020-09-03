@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.3.0-pre"
+version = "0.2.15"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -17,11 +17,11 @@ num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
 # Plotters backend deps
 # TODO: Update the version when publish
-plotters-backend = "0.0.*"
-plotters-svg = {version = "0.1.*", optional = true}
+plotters-backend = "^0.2.*"
+plotters-svg = {version = "^0.2.*", optional = true}
 
 [dependencies.plotters-bitmap]
-version = "0.1.*"
+version = "^0.2.*"
 optional = true
 default_features = false
 
@@ -96,7 +96,7 @@ rand_distr = "0.2.2"
 criterion = "0.3.2"
 rayon = "1.3.0"
 rand_xorshift = "0.2.0"
-plotters-bitmap = "0.1.*"
+plotters-bitmap = "^0.2.*"
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3.12"

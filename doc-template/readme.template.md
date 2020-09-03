@@ -252,15 +252,13 @@ By doing so, you can minimize the number of dependencies down to only `itertools
 
 The following list is a complete list of features that can be opt in and out.
 
-- Drawing backends related features
+- Tier 1 drawing backends
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| image\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
-| svg     | Enable `SVGBackend` Support | None | Yes |
-| gif\_backend| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
-| piston | Enable `PistonWindowBackend` | piston\_window, rusttype, font-kit | No |
-| cairo | Enable `CairoBackend` | cairo-rs, rusttype, font-kit | No |
+| bitmap\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
+| svg\_backend     | Enable `SVGBackend` Support | None | Yes |
+| bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
 - Font manipulation features
 
