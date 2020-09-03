@@ -3,7 +3,7 @@ use plotters::prelude::*;
 use plotters_canvas::CanvasBackend;
 use web_sys::HtmlCanvasElement;
 
-pub fn draw(canvas: HtmlCanvasElement, yaw: f64) -> DrawResult<()> {
+pub fn draw(canvas: HtmlCanvasElement, pitch: f64, yaw: f64) -> DrawResult<()> {
     let area = CanvasBackend::with_canvas_object(canvas)
         .unwrap()
         .into_drawing_area();
@@ -17,7 +17,8 @@ pub fn draw(canvas: HtmlCanvasElement, yaw: f64) -> DrawResult<()> {
 
     chart.with_projection(|mut pb| {
         pb.yaw = yaw;
-        pb.scale = 0.8;
+        pb.pitch = pitch;
+        pb.scale = 0.7;
         pb.into_matrix()
     });
 

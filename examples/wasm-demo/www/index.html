@@ -15,17 +15,21 @@
         <canvas id="canvas" width="600" height="400"></canvas>
 	    <div id="status">Loading WebAssembly...</div>
 	    <div id="control">
-		<label for="plot-type">Demo: </label>
-		<select id="plot-type">
-		    <option value="0">Graph of y=1</option>
-		    <option value="1">Graph of y=x</option>
-		    <option value="2">Graph of y=x^2</option>
-		    <option value="3">Graph of y=x^3</option>
-		    <option value="4">Graph of y=x^4</option>
-		    <option value="5">Graph of y=x^5</option>
-		    <option value="mandelbrot">Mandelbrot Set</option>
-		    <option value="3d-plot">3D Plot Demo</option>
-		</select>
+			<label for="plot-type">Demo: </label>
+			<select id="plot-type">
+				<option value="0">Graph of y=1</option>
+				<option value="1">Graph of y=x</option>
+				<option value="2">Graph of y=x^2</option>
+				<option value="3">Graph of y=x^3</option>
+				<option value="4">Graph of y=x^4</option>
+				<option value="5">Graph of y=x^5</option>
+				<option value="mandelbrot">Mandelbrot Set</option>
+				<option value="3d-plot">3D Plot Demo</option>
+			</select>
+			<div id="3d-control" class="hide">
+				<label for="pitch">Pitch: </label> <input type="range" min="0" max="157" id="pitch" value="10"> <br/>
+				<label for="yaw">Yaw: </label> <input type="range" min="0" max="314" id="yaw" value="50">
+			</div>
 	    </div>
 	</main>
 	<footer>
