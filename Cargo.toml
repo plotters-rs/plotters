@@ -1,6 +1,6 @@
 [package]
 name = "plotters-svg"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,10 +12,7 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plotters-backend = "^0.2.*"
-
-[dev-dependencies]
-plotters = {path = "../plotters", default_features = false}
+plotters-backend = "^0.3.*"
 
 [features]
 debug = []
