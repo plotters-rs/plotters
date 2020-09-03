@@ -1,8 +1,8 @@
 use crate::DrawResult;
 use plotters::prelude::*;
+use plotters_canvas::CanvasBackend;
 use std::ops::Range;
 use web_sys::HtmlCanvasElement;
-use plotters_canvas::CanvasBackend;
 
 /// Draw Mandelbrot set
 pub fn draw(element: HtmlCanvasElement) -> DrawResult<impl Fn((i32, i32)) -> Option<(f64, f64)>> {

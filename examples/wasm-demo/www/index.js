@@ -64,9 +64,26 @@ function updatePlot() {
     status.innerText = `Rendering ${selected.innerText}...`;
     chart = null;
     const start = performance.now();
-    chart = (selected.value == "mandelbrot")
-        ? Chart.mandelbrot(canvas)
-        : Chart.power("canvas", Number(selected.value));
+	switch(selected.value) {
+		case "mandelbrot":
+			chart = Chart.mandelbrot(canvas);
+			break;
+		case "3d-plot": {
+				var yaw = 0;
+				var update = function() {
+					if(plotType.selectedOptions[0].value != "3d-plot")
+						return;
+					Chart.plot3d(canvas, yaw);
+					yaw += 3.14 / 200;
+					setTimeout(update, 50);
+				};
+				update();
+			}
+			break;
+		default:
+			Chart.power("canvas", Number(selected.value))
+	}
+
     const end = performance.now();
     status.innerText = `Rendered ${selected.innerText} in ${Math.ceil(end - start)}ms`;
 }

@@ -3,6 +3,7 @@ use web_sys::HtmlCanvasElement;
 
 mod func_plot;
 mod mandelbrot;
+mod plot3d;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -42,6 +43,11 @@ impl Chart {
         Ok(Chart {
             convert: Box::new(map_coord),
         })
+    }
+
+    pub fn plot3d(canvas: HtmlCanvasElement, yaw: f64) -> Result<(), JsValue> {
+        plot3d::draw(canvas, yaw).map_err(|err| err.to_string())?;
+        Ok(())
     }
 
     /// This function can be used to convert screen coordinates to
