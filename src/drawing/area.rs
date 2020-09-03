@@ -235,6 +235,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         }
     }
 
+    pub fn use_screen_coord(&self) -> DrawingArea<DB, Shift> {
+        DrawingArea {
+            rect: self.rect.clone(),
+            backend: self.backend.clone(),
+            coord: Shift((0, 0)),
+        }
+    }
+
     /// Get the area dimension in pixel
     pub fn dim_in_pixel(&self) -> (u32, u32) {
         (
@@ -516,6 +524,10 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
     pub fn as_coord_spec(&self) -> &CT {
         &self.coord
+    }
+
+    pub fn as_coord_spec_mut(&mut self) -> &mut CT {
+        &mut self.coord
     }
 }
 

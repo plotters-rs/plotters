@@ -48,3 +48,8 @@ footer {
     font-size: 12px;
     text-align: center;
 }
+
+.hide {
+	visibility: hidden;
+	height: 0px;
+}

@@ -43,7 +43,12 @@ pub mod types {
 }
 
 mod ranged2d;
-pub use ranged2d::cartesian;
+pub mod ranged3d;
+
+pub mod cartesian {
+    pub use super::ranged2d::cartesian::{Cartesian2d, MeshLine};
+    pub use super::ranged3d::Cartesian3d;
+}
 
 mod translate;
 pub use translate::{CoordTranslate, ReverseCoordTranslate};

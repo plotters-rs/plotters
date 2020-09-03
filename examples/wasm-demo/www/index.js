@@ -5,12 +5,21 @@ class Chart {}
 const canvas = document.getElementById("canvas");
 const coord = document.getElementById("coord");
 const plotType = document.getElementById("plot-type");
+const pitch = document.getElementById("pitch");
+const yaw = document.getElementById("yaw");
+const control = document.getElementById("3d-control");
 const status = document.getElementById("status");
 
 let chart = null;
 
 /** Main entry point */
 export function main() {
+	let hash = location.hash.substr(1);
+	for(var i = 0; i < plotType.options.length; i++) {
+		if(hash == plotType.options[i].value) {
+			plotType.value = hash;
+		}
+	}
     setupUI();
     setupCanvas();
 }
@@ -24,6 +33,10 @@ export function setup(WasmChart) {
 function setupUI() {
     status.innerText = "WebAssembly loaded!";
     plotType.addEventListener("change", updatePlot);
+	yaw.addEventListener("change", updatePlot);
+	pitch.addEventListener("change", updatePlot);
+	yaw.addEventListener("input", updatePlot);
+	pitch.addEventListener("input", updatePlot);
     window.addEventListener("resize", setupCanvas);
     window.addEventListener("mousemove", onMouseMove);
 }
@@ -58,15 +71,33 @@ function onMouseMove(event) {
     }
 }
 
+function updatePlot3d() {
+	let yaw_value = Number(yaw.value) / 100.0;
+	let pitch_value = Number(pitch.value) / 100.0;
+	Chart.plot3d(canvas, pitch_value, yaw_value);
+	coord.innerText = `Pitch:${pitch_value}, Yaw:${yaw_value}`
+}
+
 /** Redraw currently selected plot. */
 function updatePlot() {
     const selected = plotType.selectedOptions[0];
     status.innerText = `Rendering ${selected.innerText}...`;
     chart = null;
     const start = performance.now();
-    chart = (selected.value == "mandelbrot")
-        ? Chart.mandelbrot(canvas)
-        : Chart.power("canvas", Number(selected.value));
+	switch(selected.value) {
+		case "mandelbrot":
+			control.classList.add("hide");
+			chart = Chart.mandelbrot(canvas);
+			break;
+		case "3d-plot": 
+			control.classList.remove("hide");
+			updatePlot3d();
+			break;
+		default:
+			control.classList.add("hide");
+			chart = Chart.power("canvas", Number(selected.value))
+	}
+	
     const end = performance.now();
     status.innerText = `Rendered ${selected.innerText} in ${Math.ceil(end - start)}ms`;
 }
