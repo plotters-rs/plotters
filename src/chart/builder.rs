@@ -307,6 +307,12 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         })
     }
 
+    /// Build a 3 dimensional cartesian chart. The function will returns a chart
+    /// context, where data series can be rendered on.
+    /// - `x_spec`: The specification of X axis
+    /// - `y_spec`: The specification of Y axis
+    /// - `z_sepc`: The specification of Z axis
+    /// - Returns: A chart context
     pub fn build_cartesian_3d<X: AsRangedCoord, Y: AsRangedCoord, Z: AsRangedCoord>(
         &mut self,
         x_spec: X,

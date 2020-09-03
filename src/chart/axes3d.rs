@@ -13,6 +13,7 @@ use crate::drawing::DrawingAreaErrorKind;
 
 use plotters_backend::DrawingBackend;
 
+/// The configurations about the 3D plot's axes
 pub struct Axes3dStyle<'a, 'b, X: Ranged, Y: Ranged, Z: Ranged, DB: DrawingBackend> {
     pub(super) parent_size: (u32, u32),
     pub(super) target: Option<&'b mut ChartContext<'a, DB, Cartesian3d<X, Y, Z>>>,
@@ -36,22 +37,26 @@ where
     Z: Ranged<ValueType = ZT> + ValueFormatter<ZT>,
     DB: DrawingBackend,
 {
+    /// Set the size of the tick mark
     pub fn tick_size<Size: SizeDesc>(&mut self, size: Size) -> &mut Self {
         let actual_size = size.in_pixels(&self.parent_size);
         self.tick_size = actual_size;
         self
     }
 
+    /// Set the number of labels on the X axes
     pub fn x_labels(&mut self, n: usize) -> &mut Self {
         self.n_labels[0] = n;
         self
     }
 
+    /// Set the number of labels on the Y axes
     pub fn y_labels(&mut self, n: usize) -> &mut Self {
         self.n_labels[1] = n;
         self
     }
 
+    /// Set the number of labels on the Z axes
     pub fn z_labels(&mut self, n: usize) -> &mut Self {
         self.n_labels[2] = n;
         self

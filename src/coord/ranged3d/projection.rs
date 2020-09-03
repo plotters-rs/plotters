@@ -1,6 +1,7 @@
 use std::f64::consts::PI;
 use std::ops::Mul;
 
+/// The projection matrix which is used to project the 3D space to the 2D display panel
 #[derive(Clone, Debug, Copy)]
 pub struct ProjectionMatrix([[f64; 4]; 4]);
 
@@ -68,6 +69,7 @@ impl Mul<(f64, f64, f64)> for ProjectionMatrix {
 }
 
 impl ProjectionMatrix {
+    /// Returns the identity matrix
     pub fn one() -> Self {
         ProjectionMatrix([
             [1.0, 0.0, 0.0, 0.0],
@@ -76,9 +78,11 @@ impl ProjectionMatrix {
             [0.0, 0.0, 0.0, 1.0],
         ])
     }
+    /// Returns the zero maxtrix
     pub fn zero() -> Self {
         ProjectionMatrix([[0.0; 4]; 4])
     }
+    /// Returns the matrix which shift the coordinate
     pub fn shift(x: f64, y: f64, z: f64) -> Self {
         ProjectionMatrix([
             [1.0, 0.0, 0.0, x],
@@ -87,6 +91,7 @@ impl ProjectionMatrix {
             [0.0, 0.0, 0.0, 1.0],
         ])
     }
+    /// Returns the matrix which rotates the coordinate
     pub fn rotate(x: f64, y: f64, z: f64) -> Self {
         let (c, b, a) = (x, y, z);
         ProjectionMatrix([
@@ -106,6 +111,7 @@ impl ProjectionMatrix {
             [0.0, 0.0, 0.0, 1.0],
         ])
     }
+    /// Returns the matrix that applies a scale factor
     pub fn scale(factor: f64) -> Self {
         ProjectionMatrix([
             [1.0, 0.0, 0.0, 0.0],
@@ -114,6 +120,7 @@ impl ProjectionMatrix {
             [0.0, 0.0, 0.0, 1.0 / factor],
         ])
     }
+    /// Normalize the matrix, this will make the metric unit to 1
     pub fn normalize(&mut self) {
         if self.0[3][3] > 1e-20 {
             for r in 0..4 {
@@ -124,12 +131,14 @@ impl ProjectionMatrix {
         }
     }
 
+    /// Get the distance of the point in guest coordinate from the screen in pixels
     pub fn projected_depth(&self, (x, y, z): (i32, i32, i32)) -> i32 {
         let r = &self.0[2];
         (r[0] * x as f64 + r[1] * y as f64 + r[2] * z as f64 + r[3]) as i32
     }
 }
 
+/// The helper struct to build a projection matrix
 #[derive(Copy, Clone)]
 pub struct ProjectionMatrixBuilder {
     pub yaw: f64,
@@ -150,12 +159,15 @@ impl ProjectionMatrixBuilder {
         }
     }
 
+    /// Set the pivot point, which means the 3D coordinate "before" should be mapped into
+    /// the 2D coordinatet "after"
     pub fn set_pivot(&mut self, before: (i32, i32, i32), after: (i32, i32)) -> &mut Self {
         self.pivot_before = before;
         self.pivot_after = after;
         self
     }
 
+    /// Build the matrix based on the configuration
     pub fn into_matrix(self) -> ProjectionMatrix {
         let mut ret = if self.pivot_before == (0, 0, 0) {
             ProjectionMatrix::default()

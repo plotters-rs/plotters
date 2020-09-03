@@ -1,5 +1,11 @@
 use crate::element::Polygon;
 use crate::style::ShapeStyle;
+/// The surface series.
+///
+/// Currently the surface is representing any surface in form
+/// y = f(x,z)
+///
+/// TODO: make this more general
 pub struct SurfaceSeries<X, Y, Z> {
     x_data: Vec<X>,
     y_data: Vec<Y>,

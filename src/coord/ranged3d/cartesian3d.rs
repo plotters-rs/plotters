@@ -5,6 +5,7 @@ use plotters_backend::BackendCoord;
 
 use std::ops::Range;
 
+/// A 3D cartesian coordinate system
 pub struct Cartesian3d<X: Ranged, Y: Ranged, Z: Ranged> {
     pub(crate) logic_x: X,
     pub(crate) logic_y: Y,
@@ -53,6 +54,7 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
             projection: Self::create_projection(actual_x, actual_y, build_projection_matrix),
         }
     }
+    /// Set the projection matrix
     pub fn set_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
         &mut self,
         actual_x: Range<i32>,
@@ -63,6 +65,7 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         self
     }
 
+    /// Create a new coordinate
     pub fn new<SX: Into<X>, SY: Into<Y>, SZ: Into<Z>>(
         logic_x: SX,
         logic_y: SY,
@@ -73,10 +76,12 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
             pb.into_matrix()
         })
     }
+    /// Get the projection matrix
     pub fn projection(&self) -> &ProjectionMatrix {
         &self.projection
     }
 
+    /// Do not project, only transform the guest coordinate system
     pub fn map_3d(&self, x: &X::ValueType, y: &Y::ValueType, z: &Z::ValueType) -> (i32, i32, i32) {
         (
             self.logic_x.map(x, (0, self.coord_size.0)),
@@ -85,6 +90,7 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         )
     }
 
+    /// Get the depth of the projection
     pub fn projected_depth(&self, x: &X::ValueType, y: &Y::ValueType, z: &Z::ValueType) -> i32 {
         self.projection.projected_depth(self.map_3d(x, y, z))
     }
