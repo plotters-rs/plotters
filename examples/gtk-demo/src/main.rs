@@ -18,7 +18,7 @@ fn build_ui(app: &gtk::Application) {
             .caption("This is a test", ("sans-serif", 20))
             .x_label_area_size(40)
             .y_label_area_size(40)
-            .build_ranged(0..100, 0..100)
+            .build_cartesian_2d(0..100, 0..100)
             .unwrap();
 
         chart.configure_mesh()

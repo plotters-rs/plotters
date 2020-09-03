@@ -31,7 +31,7 @@ use plotters_backend::DrawingBackend;
 ///    chart.plotting_area().fill(&WHITE).unwrap(); // Clear the previously drawn graph
 ///    // At this point, you are able to draw next frame
 ///```
-///#[derive(Clone)]
+#[derive(Clone)]
 pub struct ChartState<CT: CoordTranslate> {
     drawing_area_pos: (i32, i32),
     drawing_area_size: (u32, u32),

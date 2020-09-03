@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut chart = ChartBuilder::on(&root)
         .margin(10)
         .set_all_label_area_size(30)
-        .build_ranged(-1.2..1.2, -1.2..1.2)?;
+        .build_cartesian_2d(-1.2..1.2, -1.2..1.2)?;
 
     chart
         .configure_mesh()
