@@ -217,7 +217,12 @@ make_numeric_coord!(
 impl_reverse_mapping_trait!(f32, RangedCoordf32);
 impl ValueFormatter<f32> for RangedCoordf32 {
     fn format(value: &f32) -> String {
-        crate::data::float::pretty_print_float(*value as f64, false)
+        crate::data::float::FloatPrettyPrinter {
+            allow_scientific: false,
+            min_decimal: 1,
+            max_decimal: 5,
+        }
+        .print(*value as f64)
     }
 }
 make_numeric_coord!(
@@ -230,7 +235,12 @@ make_numeric_coord!(
 impl_reverse_mapping_trait!(f64, RangedCoordf64);
 impl ValueFormatter<f64> for RangedCoordf64 {
     fn format(value: &f64) -> String {
-        crate::data::float::pretty_print_float(*value, false)
+        crate::data::float::FloatPrettyPrinter {
+            allow_scientific: false,
+            min_decimal: 1,
+            max_decimal: 5,
+        }
+        .print(*value)
     }
 }
 make_numeric_coord!(

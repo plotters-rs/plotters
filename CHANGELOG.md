@@ -10,6 +10,8 @@ This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.
 - Linspace coordinate type, which allows define a discrete coordinate on continous value types (such as f32, DateTime, etc) with a step specification
 - Nested coordinate type, now we support define pair of category and nested values as nested coordinate.
 - Introduce backend crates: plotters-bitmap, plotters-svg, plotters-cairo, plotters-canvas, plotters-console
+- 3D Plotting features
+
 ### Fixed
 
 - Adjust Canvas backend size with DPR (Thanks to Marius-Mueller)

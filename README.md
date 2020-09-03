@@ -117,6 +117,10 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/3d-plot.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot.svg" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
@@ -416,7 +420,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(20)
         .y_label_area_size(40)
         // Finally attach a coordinate on the drawing area and make a chart context
-        .build_ranged(0f32..10f32, 0f32..10f32)?;
+        .build_cartesian_2d(0f32..10f32, 0f32..10f32)?;
 
     // Then we can draw a mesh
     chart

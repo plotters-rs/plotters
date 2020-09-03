@@ -77,5 +77,6 @@ Plotters 0.3 ships with tons of improvement made in the coordinate abstraction a
 * Linspace coordinate, which can be used converting a continous coorindate into a discrete buckets
 * Nested coordinate
 * Slices can now be used as cooradnite specification, which allows people define an axis of category.
+* 3D Coordinate is now supported
 
 ## Fix bugs and improve testing

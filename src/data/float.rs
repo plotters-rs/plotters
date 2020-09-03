@@ -13,32 +13,91 @@ fn find_minimal_repr(n: f64, eps: f64) -> (f64, usize) {
     }
 }
 
-fn float_to_string(n: f64, max_precision: usize) -> String {
-    let (sign, n) = if n < 0.0 { ("-", -n) } else { ("", n) };
-    let int_part = n.floor();
+fn float_to_string(n: f64, max_precision: usize, min_decimal: usize) -> String {
+    let (mut result, mut count) = loop {
+        let (sign, n) = if n < 0.0 { ("-", -n) } else { ("", n) };
+        let int_part = n.floor();
 
-    let dec_part =
-        ((n.abs() - int_part.abs()) * (10.0f64).powf(max_precision as f64)).round() as u64;
+        let dec_part =
+            ((n.abs() - int_part.abs()) * (10.0f64).powi(max_precision as i32)).round() as u64;
 
-    if dec_part == 0 || max_precision == 0 {
-        return format!("{}{:.0}", sign, int_part);
+        if dec_part == 0 || max_precision == 0 {
+            break (format!("{}{:.0}", sign, int_part), 0);
+        }
+
+        let mut leading = "".to_string();
+        let mut dec_result = format!("{}", dec_part);
+
+        for _ in 0..(max_precision - dec_result.len()) {
+            leading.push('0');
+        }
+
+        while let Some(c) = dec_result.pop() {
+            if c != '0' {
+                dec_result.push(c);
+                break;
+            }
+        }
+
+        break (
+            format!("{}{:.0}.{}{}", sign, int_part, leading, dec_result),
+            leading.len() + dec_result.len(),
+        );
+    };
+
+    if count == 0 && min_decimal > 0 {
+        result.push('.');
     }
 
-    let mut leading = "".to_string();
-    let mut dec_result = format!("{}", dec_part);
-
-    for _ in 0..(max_precision - dec_result.len()) {
-        leading.push('0');
+    while count < min_decimal {
+        result.push('0');
+        count += 1;
     }
+    result
+}
 
-    while let Some(c) = dec_result.pop() {
-        if c != '0' {
-            dec_result.push(c);
-            break;
+pub struct FloatPrettyPrinter {
+    pub allow_scientific: bool,
+    pub min_decimal: i32,
+    pub max_decimal: i32,
+}
+
+impl FloatPrettyPrinter {
+    pub fn print(&self, n: f64) -> String {
+        let (n, p) = find_minimal_repr(n, (10f64).powi(-self.max_decimal));
+        let d_repr = float_to_string(n, p, self.min_decimal as usize);
+        if !self.allow_scientific {
+            d_repr
+        } else {
+            if n == 0.0 {
+                return "0".to_string();
+            }
+
+            let mut idx = n.abs().log10().floor();
+            let mut exp = (10.0f64).powf(idx);
+
+            if n.abs() / exp + 1e-5 >= 10.0 {
+                idx += 1.0;
+                exp *= 10.0;
+            }
+
+            if idx.abs() < 3.0 {
+                return d_repr;
+            }
+
+            let (sn, sp) = find_minimal_repr(n / exp, 1e-5);
+            let s_repr = format!(
+                "{}e{}",
+                float_to_string(sn, sp, self.min_decimal as usize),
+                float_to_string(idx, 0, 0)
+            );
+            if s_repr.len() + 1 < d_repr.len() {
+                s_repr
+            } else {
+                d_repr
+            }
         }
     }
-
-    format!("{}{:.0}.{}{}", sign, int_part, leading, dec_result)
 }
 
 /// The function that pretty prints the floating number
@@ -50,35 +109,12 @@ fn float_to_string(n: f64, max_precision: usize) -> String {
 /// - `allow_sn`: Should we use scientific notation when possible
 /// - **returns**: The pretty printed string
 pub fn pretty_print_float(n: f64, allow_sn: bool) -> String {
-    let (n, p) = find_minimal_repr(n, 1e-10);
-    let d_repr = float_to_string(n, p);
-    if !allow_sn {
-        d_repr
-    } else {
-        if n == 0.0 {
-            return "0".to_string();
-        }
-
-        let mut idx = n.abs().log10().floor();
-        let mut exp = (10.0f64).powf(idx);
-
-        if n.abs() / exp + 1e-5 >= 10.0 {
-            idx += 1.0;
-            exp *= 10.0;
-        }
-
-        if idx.abs() < 3.0 {
-            return d_repr;
-        }
-
-        let (sn, sp) = find_minimal_repr(n / exp, 1e-5);
-        let s_repr = format!("{}e{}", float_to_string(sn, sp), float_to_string(idx, 0));
-        if s_repr.len() + 1 < d_repr.len() {
-            s_repr
-        } else {
-            d_repr
-        }
-    }
+    (FloatPrettyPrinter {
+        allow_scientific: allow_sn,
+        min_decimal: 0,
+        max_decimal: 10,
+    })
+    .print(n)
 }
 
 #[cfg(test)]
