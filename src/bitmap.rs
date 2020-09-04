@@ -1009,6 +1009,7 @@ impl<P: PixelFormat> Drop for BitMapBackend<'_, P> {
 #[test]
 fn test_bitmap_backend() {
     use plotters::prelude::*;
+
     let mut buffer = vec![0; 10 * 10 * 3];
 
     {
@@ -1411,7 +1412,7 @@ mod test {
             let mut chart = ChartBuilder::on(&root)
                 .caption("This is a test", ("sans-serif", 20))
                 .set_all_label_area_size(40)
-                .build_ranged(0..10, 0..10)
+                .build_cartesian_2d(0..10, 0..10)
                 .unwrap();
 
             chart
@@ -1447,7 +1448,7 @@ mod test {
             let mut chart = ChartBuilder::on(&root)
                 .caption("All anchor point positions", ("sans-serif", 20))
                 .set_all_label_area_size(40)
-                .build_ranged(0..100, 0..50)
+                .build_cartesian_2d(0..100, 0..50)
                 .unwrap();
 
             chart
@@ -1532,7 +1533,7 @@ mod test {
             let mut chart = ChartBuilder::on(&root)
                 .caption("All series label positions", ("sans-serif", 20))
                 .set_all_label_area_size(40)
-                .build_ranged(0..50, 0..50)
+                .build_cartesian_2d(0..50, 0..50)
                 .unwrap();
 
             chart

@@ -27,4 +27,4 @@ image_encoder = ["image"]
 gif_backend = ["gif", "image_encoder"]
 
 [dev-dependencies]
-plotters = {path = "../plotters", default_features = false, features = ["ttf"]}
+plotters = {version = "^0.3.0", default_features = false, features = ["ttf"]}
