@@ -9,7 +9,7 @@ BEGIN {
 }
 {
 	link=tolower($2)
-	gsub(/[^a-z0-9 ]/, "", link);
+	gsub(/[^a-z0-9 \-]/, "", link);
 	gsub(/[^a-z0-9]/, "-", link);
 	print "  "level[$1]"["$2"](#"link")"
 }'

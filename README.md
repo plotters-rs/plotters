@@ -136,7 +136,7 @@ To view the source code for each example, please click on the example image.
   * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
   * [What types of figure are supported?](#what-types-of-figure-are-supported)
   * [Concepts by examples](#concepts-by-examples)
-    + [Drawing Back-ends](#drawing-backends)
+    + [Drawing Back-ends](#drawing-back-ends)
     + [Drawing Area](#drawing-area)
     + [Elements](#elements)
     + [Composable Elements](#composable-elements)
