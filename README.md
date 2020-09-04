@@ -23,6 +23,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
+- Plotters now moved all backend code to sperate repository, check [FAQ list](#faq-list) for details
 
 ## Gallery
 
@@ -544,5 +545,15 @@ The following list is a complete list of features that can be opt in and out.
 	As you may realized, Plotters is a drawing library rather than a traditional data plotting library, 
 	you have the freedom to draw anything you want on the drawing area.
 	Use `DrawingArea::draw` to draw any element on the drawing area. 
+
+* Where can I find the backend code ?
+	
+	Since Plotters 0.3, all drawing backends are independent crate from the main Plotters crate.
+	Use the following link to find the backend code:
+
+	- [Bitmap Backend](https://github.com/plotters-rs/plotters-bitmap.git)
+	- [SVG Backend](https://github.com/plotters-rs/plotters-svg.git)
+	- [HTML5 Canvas Backend](https://github.com/plotters-rs/plotters-canvas.git)
+	- [GTK/Cairo Backend](https://github.com/plotters-rs/plotters-cairo.git)
 
 
