@@ -19,7 +19,7 @@ gif = { version = "0.10.3", optional = true }
 version = "0.23.9"
 optional = true
 default-features = false
-features = ["jpeg", "png_codec", "bmp"]
+features = ["jpeg", "png", "bmp"]
 
 [features]
 default = ["image_encoder", "gif_backend"]
