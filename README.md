@@ -122,6 +122,10 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot.svg" class="galleryItem" width=200px></img>
 </a>
 
+<a href="https://github.com/38/plotters/blob/master/examples/3d-plot2.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot2.gif" class="galleryItem" width=200px></img>
+</a>
+
 
 ## Table of Contents
   * [Gallery](#gallery)

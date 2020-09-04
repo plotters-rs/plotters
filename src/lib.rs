@@ -249,6 +249,16 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/3d-plot2.gif">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot2.gif" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        2-Var Gussian Distribution PDF
+        <a href="https://github.com/38/plotters/blob/master/examples/3d-plot2.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
