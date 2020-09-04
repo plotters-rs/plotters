@@ -61,6 +61,13 @@ impl CanvasBackend {
     pub fn with_canvas_object(canvas: HtmlCanvasElement) -> Option<Self> {
         Self::init_backend(canvas)
     }
+
+    /// Sets the stroke style and line width in the underlying context.
+    fn set_line_style(&mut self, style: &impl BackendStyle) {
+        self.context
+            .set_stroke_style(&make_canvas_color(style.as_color()));
+        self.context.set_line_width(style.stroke_width() as f64);
+    }
 }
 
 fn make_canvas_color(color: RGBAColor) -> JsValue {
@@ -110,9 +117,7 @@ impl DrawingBackend for CanvasBackend {
             return Ok(());
         }
 
-        self.context
-            .set_stroke_style(&make_canvas_color(style.as_color()));
-        self.context.set_line_width(style.stroke_width() as f64);
+        self.set_line_style(style);
         self.context.begin_path();
         self.context.move_to(f64::from(from.0), f64::from(from.1));
         self.context.line_to(f64::from(to.0), f64::from(to.1));
@@ -140,8 +145,7 @@ impl DrawingBackend for CanvasBackend {
                 f64::from(bottom_right.1 - upper_left.1),
             );
         } else {
-            self.context
-                .set_stroke_style(&make_canvas_color(style.as_color()));
+            self.set_line_style(style);
             self.context.stroke_rect(
                 f64::from(upper_left.0),
                 f64::from(upper_left.1),
@@ -163,8 +167,7 @@ impl DrawingBackend for CanvasBackend {
         let mut path = path.into_iter();
         self.context.begin_path();
         if let Some(start) = path.next() {
-            self.context
-                .set_stroke_style(&make_canvas_color(style.as_color()));
+            self.set_line_style(style);
             self.context.move_to(f64::from(start.0), f64::from(start.1));
             for next in path {
                 self.context.line_to(f64::from(next.0), f64::from(next.1));
@@ -211,8 +214,7 @@ impl DrawingBackend for CanvasBackend {
             self.context
                 .set_fill_style(&make_canvas_color(style.as_color()));
         } else {
-            self.context
-                .set_stroke_style(&make_canvas_color(style.as_color()));
+            self.set_line_style(style);
         }
         self.context.begin_path();
         self.context.arc(
