@@ -259,6 +259,16 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </div>
 </div>
 
+<div class="galleryItem">
+    <a href="https://plotters-rs.github.io/plotters-doc-data/tick_control.gif">
+        <img src="https://plotters-rs.github.io/plotters-doc-data/tick_control.gif" class="galleryItem"></img>
+    </a>
+    <div class="galleryText">
+        COVID-19 Visualization
+        <a href="https://github.com/38/plotters/blob/master/examples/tick_control.rs">[code]</a>
+    </div>
+</div>
+
 
 ## Table of Contents
   * [Gallery](#gallery)
