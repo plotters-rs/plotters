@@ -102,4 +102,8 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> CoordTranslate for Cartesian3d<X, Y, Z> {
         let pixel_coord_3d = self.map_3d(&coord.0, &coord.1, &coord.2);
         self.projection * pixel_coord_3d
     }
+
+    fn depth(&self, coord: &Self::From) -> i32 {
+        self.projected_depth(&coord.0, &coord.1, &coord.2)
+    }
 }

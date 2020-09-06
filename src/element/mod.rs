@@ -160,6 +160,9 @@ use std::borrow::Borrow;
 mod basic_shapes;
 pub use basic_shapes::*;
 
+mod basic_shapes_3d;
+pub use basic_shapes_3d::*;
+
 mod text;
 pub use text::*;
 
@@ -192,6 +195,9 @@ pub use self::image::BitMapElement;
 mod dynelem;
 pub use dynelem::{DynElement, IntoDynElement};
 
+use crate::coord::CoordTranslate;
+use crate::drawing::Rect;
+
 /// A type which is logically a collection of points, under any given coordinate system.
 /// Note: Ideally, a point collection trait should be any type of which coordinate elements can be
 /// iterated. This is similar to `iter` method of many collection types in std.
@@ -220,7 +226,7 @@ pub use dynelem::{DynElement, IntoDynElement};
 ///
 /// TODO: Once GAT is ready on stable Rust, we should simplify the design.
 ///
-pub trait PointCollection<'a, Coord> {
+pub trait PointCollection<'a, Coord, CM = BackendCoordOnly> {
     /// The item in point iterator
     type Point: Borrow<Coord> + 'a;
 
@@ -231,13 +237,42 @@ pub trait PointCollection<'a, Coord> {
     fn point_iter(self) -> Self::IntoIter;
 }
 /// The trait indicates we are able to draw it on a drawing area
-pub trait Drawable<DB: DrawingBackend> {
+pub trait Drawable<DB: DrawingBackend, CM: CoordMapper = BackendCoordOnly> {
     /// Actually draws the element. The key points is already translated into the
     /// image coordinate and can be used by DC directly
-    fn draw<I: Iterator<Item = BackendCoord>>(
+    fn draw<I: Iterator<Item = CM::Output>>(
         &self,
         pos: I,
         backend: &mut DB,
         parent_dim: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>>;
+}
+
+pub trait CoordMapper {
+    type Output;
+    fn map<CT: CoordTranslate>(coord_trans: &CT, from: &CT::From, rect: &Rect) -> Self::Output;
+}
+
+pub struct BackendCoordOnly;
+
+impl CoordMapper for BackendCoordOnly {
+    type Output = BackendCoord;
+    fn map<CT: CoordTranslate>(coord_trans: &CT, from: &CT::From, rect: &Rect) -> BackendCoord {
+        rect.truncate(coord_trans.translate(from))
+    }
+}
+
+pub struct BackendCoordAndZ;
+
+impl CoordMapper for BackendCoordAndZ {
+    type Output = (BackendCoord, i32);
+    fn map<CT: CoordTranslate>(
+        coord_trans: &CT,
+        from: &CT::From,
+        rect: &Rect,
+    ) -> (BackendCoord, i32) {
+        let coord = rect.truncate(coord_trans.translate(from));
+        let z = coord_trans.depth(from);
+        (coord, z)
+    }
 }
