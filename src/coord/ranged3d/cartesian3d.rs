@@ -21,10 +21,10 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
     fn create_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
         actual_x: Range<i32>,
         actual_y: Range<i32>,
+        coord_size: (i32, i32, i32),
         f: F,
     ) -> ProjectionMatrix {
-        let default_size = Self::compute_default_size(actual_x.clone(), actual_y.clone());
-        let center_3d = (default_size / 2, default_size / 2, default_size / 2);
+        let center_3d = (coord_size.0 / 2, coord_size.1 / 2, coord_size.2 / 2);
         let center_2d = (
             (actual_x.end + actual_x.start) / 2,
             (actual_y.end + actual_y.start) / 2,
@@ -46,14 +46,33 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         build_projection_matrix: F,
     ) -> Self {
         let default_size = Self::compute_default_size(actual_x.clone(), actual_y.clone());
+        let coord_size = (default_size, default_size, default_size);
         Self {
             logic_x: logic_x.into(),
             logic_y: logic_y.into(),
             logic_z: logic_z.into(),
-            coord_size: (default_size, default_size, default_size),
-            projection: Self::create_projection(actual_x, actual_y, build_projection_matrix),
+            coord_size,
+            projection: Self::create_projection(
+                actual_x,
+                actual_y,
+                coord_size,
+                build_projection_matrix,
+            ),
         }
     }
+
+    pub fn set_coord_pixel_range(
+        &mut self,
+        actual_x: Range<i32>,
+        actual_y: Range<i32>,
+        coord_size: (i32, i32, i32),
+    ) -> &mut Self {
+        self.coord_size = coord_size;
+        self.projection =
+            Self::create_projection(actual_x, actual_y, coord_size, |pb| pb.into_matrix());
+        self
+    }
+
     /// Set the projection matrix
     pub fn set_projection<F: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
         &mut self,
@@ -61,7 +80,7 @@ impl<X: Ranged, Y: Ranged, Z: Ranged> Cartesian3d<X, Y, Z> {
         actual_y: Range<i32>,
         f: F,
     ) -> &mut Self {
-        self.projection = Self::create_projection(actual_x, actual_y, f);
+        self.projection = Self::create_projection(actual_x, actual_y, self.coord_size, f);
         self
     }
 

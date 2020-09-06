@@ -604,6 +604,14 @@ where
             .set_projection(actual_x, actual_y, pf);
         self
     }
+
+    pub fn set_3d_pixel_range(&mut self, size: (i32, i32, i32)) -> &mut Self {
+        let (actual_x, actual_y) = self.drawing_area.get_pixel_range();
+        self.drawing_area
+            .as_coord_spec_mut()
+            .set_coord_pixel_range(actual_x, actual_y, size);
+        self
+    }
 }
 
 impl<'a, DB, X: Ranged, Y: Ranged, Z: Ranged> ChartContext<'a, DB, Cartesian3d<X, Y, Z>>
