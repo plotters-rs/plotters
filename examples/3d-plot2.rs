@@ -26,24 +26,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         chart.configure_axes().draw()?;
 
-        let series = (-15..15)
-            .map(|x| std::iter::repeat(x).zip(-15..15))
-            .flatten()
-            .map(|(x, z)| {
-                let x = x as f64 / 5.0;
-                let z = z as f64 / 5.0;
-                Polygon::new(
-                    vec![
-                        (x, pdf(x, z), z),
-                        (x + 0.2, pdf(x + 0.2, z), z),
-                        (x + 0.2, pdf(x + 0.2, z + 0.2), z + 0.2),
-                        (x, pdf(x, z + 0.2), z + 0.2),
-                    ],
-                    &HSLColor(240.0 / 360.0 - 240.0 / 360.0 * pdf(x, z) / 5.0, 1.0, 0.7),
-                )
-            });
+        chart.draw_series(
+            SurfaceSeries::xoy(
+                (-15..=15).map(|x| x as f64 / 5.0),
+                (-15..=15).map(|x| x as f64 / 5.0),
+                pdf,
+            )
+            .style_func(&|&v| {
+                (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
+            }),
+        )?;
 
-        chart.draw_series(series)?;
         root.present()?;
     }
 

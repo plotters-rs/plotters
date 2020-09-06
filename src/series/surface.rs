@@ -1,82 +1,202 @@
 use crate::element::Polygon;
-use crate::style::ShapeStyle;
+use crate::style::{colors::BLUE, Color, ShapeStyle};
+use std::marker::PhantomData;
+pub trait Direction<X, Y, Z> {
+    type Input1Type;
+    type Input2Type;
+    type OutputType;
+    fn make_coord(
+        free_vars: (Self::Input1Type, Self::Input2Type),
+        result: Self::OutputType,
+    ) -> (X, Y, Z);
+}
+
+macro_rules! define_panel_descriptor {
+    ($name: ident, $var1: ident, $var2: ident, $out: ident, ($first: ident, $second:ident) -> $result: ident = $output: expr) => {
+        pub struct $name;
+        impl<X, Y, Z> Direction<X, Y, Z> for $name {
+            type Input1Type = $var1;
+            type Input2Type = $var2;
+            type OutputType = $out;
+            fn make_coord(
+                ($first, $second): (Self::Input1Type, Self::Input2Type),
+                $result: Self::OutputType,
+            ) -> (X, Y, Z) {
+                $output
+            }
+        }
+    };
+}
+
+define_panel_descriptor!(XOY, X, Y, Z, (x, y) -> z = (x,y,z));
+define_panel_descriptor!(XOZ, X, Z, Y, (x, z) -> y = (x,y,z));
+define_panel_descriptor!(YOZ, Y, Z, X, (y, z) -> x = (x,y,z));
+
+enum StyleConfig<'a, T> {
+    Fixed(ShapeStyle),
+    Function(&'a dyn Fn(&T) -> ShapeStyle),
+}
+
+impl<T> StyleConfig<'_, T> {
+    fn get_style(&self, v: &T) -> ShapeStyle {
+        match self {
+            StyleConfig::Fixed(s) => s.clone(),
+            StyleConfig::Function(f) => f(v),
+        }
+    }
+}
+
 /// The surface series.
 ///
 /// Currently the surface is representing any surface in form
 /// y = f(x,z)
 ///
 /// TODO: make this more general
-pub struct SurfaceSeries<X, Y, Z> {
-    x_data: Vec<X>,
-    y_data: Vec<Y>,
-    z_data: Vec<Z>,
-    style: ShapeStyle,
-    size: usize,
-    state: usize,
+pub struct SurfaceSeries<'a, X, Y, Z, D, SurfaceFunc>
+where
+    D: Direction<X, Y, Z>,
+    SurfaceFunc: Fn(D::Input1Type, D::Input2Type) -> D::OutputType,
+{
+    free_var_1: Vec<D::Input1Type>,
+    free_var_2: Vec<D::Input2Type>,
+    surface_f: SurfaceFunc,
+    style: StyleConfig<'a, D::OutputType>,
+    adv: bool,
+    vidx_1: usize,
+    vidx_2: usize,
+    _phantom: PhantomData<(X, Y, Z, D)>,
 }
 
-impl<X, Y, Z> SurfaceSeries<X, Y, Z> {
-    pub fn new<XS, ZS, YF, S>(xs: XS, zs: ZS, y_func: YF, style: S) -> Self
-    where
-        YF: Fn(&X, &Z) -> Y,
-        XS: Iterator<Item = X>,
-        ZS: Iterator<Item = Z>,
-        S: Into<ShapeStyle>,
-    {
-        let x_data: Vec<_> = xs.collect();
-        let z_data: Vec<_> = zs.collect();
-        let y_data: Vec<_> = x_data
-            .iter()
-            .map(|x| z_data.iter().map(move |z| (x, z)))
-            .flatten()
-            .map(|(x, z)| y_func(x, z))
-            .collect();
-        let size = (x_data.len().max(1) - 1) * (z_data.len().max(1) - 1);
+impl<'a, X, Y, Z, D, SurfaceFunc> SurfaceSeries<'a, X, Y, Z, D, SurfaceFunc>
+where
+    D: Direction<X, Y, Z>,
+    SurfaceFunc: Fn(D::Input1Type, D::Input2Type) -> D::OutputType,
+{
+    pub fn new<IterA: Iterator<Item = D::Input1Type>, IterB: Iterator<Item = D::Input2Type>>(
+        first_iter: IterA,
+        second_iter: IterB,
+        func: SurfaceFunc,
+    ) -> Self {
         Self {
-            x_data,
-            y_data,
-            z_data,
-            style: style.into(),
-            size,
-            state: 0,
+            free_var_1: first_iter.collect(),
+            free_var_2: second_iter.collect(),
+            surface_f: func,
+            style: StyleConfig::Fixed(BLUE.mix(0.4).filled()),
+            adv: true,
+            vidx_1: 0,
+            vidx_2: 0,
+            _phantom: PhantomData,
         }
     }
 
-    fn point_at(&self, x: usize, z: usize) -> (X, Y, Z)
+    pub fn style_func<F: Fn(&D::OutputType) -> ShapeStyle>(mut self, f: &'a F) -> Self {
+        self.style = StyleConfig::Function(f);
+        self
+    }
+
+    pub fn style<S: Into<ShapeStyle>>(mut self, s: S) -> Self {
+        self.style = StyleConfig::Fixed(s.into());
+        self
+    }
+
+    fn get_next_free_value_2(&mut self) -> Option<[D::Input2Type; 2]>
     where
-        X: Clone,
-        Y: Clone,
-        Z: Clone,
+        D::Input2Type: Clone,
     {
-        (
-            self.x_data[x].clone(),
-            self.y_data[x * self.z_data.len() + z].clone(),
-            self.z_data[z].clone(),
-        )
+        if self.adv {
+            if self.vidx_2 + 1 < self.free_var_2.len() {
+                self.vidx_2 += 1;
+                return Some([
+                    self.free_var_2[self.vidx_2 - 1].clone(),
+                    self.free_var_2[self.vidx_2].clone(),
+                ]);
+            }
+            self.vidx_2 += 1;
+        } else {
+            if self.vidx_2 > 1 {
+                self.vidx_2 -= 1;
+                return Some([
+                    self.free_var_2[self.vidx_2 - 1].clone(),
+                    self.free_var_2[self.vidx_2].clone(),
+                ]);
+            }
+            self.vidx_2 = self.vidx_2.max(1) - 1;
+        }
+        None
     }
 }
 
-impl<X: Clone, Y: Clone, Z: Clone> Iterator for SurfaceSeries<X, Y, Z> {
-    type Item = Polygon<(X, Y, Z)>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.size <= self.state {
-            return None;
+macro_rules! impl_constructor {
+    ($dir: ty, $name: ident) => {
+        impl<'a, X, Y, Z, SurfaceFunc> SurfaceSeries<'a, X, Y, Z, $dir, SurfaceFunc>
+        where
+            SurfaceFunc: Fn(
+                <$dir as Direction<X, Y, Z>>::Input1Type,
+                <$dir as Direction<X, Y, Z>>::Input2Type,
+            ) -> <$dir as Direction<X, Y, Z>>::OutputType,
+        {
+            pub fn $name<IterA, IterB>(a: IterA, b: IterB, f: SurfaceFunc) -> Self
+            where
+                IterA: DoubleEndedIterator<Item = <$dir as Direction<X, Y, Z>>::Input1Type>,
+                IterB: DoubleEndedIterator<Item = <$dir as Direction<X, Y, Z>>::Input2Type>,
+            {
+                Self::new(a, b, f)
+            }
         }
+    };
+}
 
-        let x = self.state / (self.z_data.len() - 1);
-        let z = self.state % (self.z_data.len() - 1);
+impl_constructor!(XOY, xoy);
+impl_constructor!(XOZ, xoz);
+impl_constructor!(YOZ, yoz);
+impl<'a, X, Y, Z, D, SurfaceFunc> Iterator for SurfaceSeries<'a, X, Y, Z, D, SurfaceFunc>
+where
+    D: Direction<X, Y, Z>,
+    D::Input1Type: Clone,
+    D::Input2Type: Clone,
+    SurfaceFunc: Fn(D::Input1Type, D::Input2Type) -> D::OutputType,
+{
+    type Item = Polygon<(X, Y, Z)>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let (b0, b1) = if let Some([b0, b1]) = self.get_next_free_value_2() {
+            (b0, b1)
+        } else {
+            self.vidx_1 += 1;
+            self.adv = !self.adv;
+            if let Some([b0, b1]) = self.get_next_free_value_2() {
+                (b0, b1)
+            } else {
+                return None;
+            }
+        };
 
-        self.state += 1;
-
-        Some(Polygon::new(
-            vec![
-                self.point_at(x, z),
-                self.point_at(x, z + 1),
-                self.point_at(x + 1, z + 1),
-                self.point_at(x + 1, z),
-            ],
-            self.style.clone(),
-        ))
+        match (
+            self.free_var_1.get(self.vidx_1),
+            self.free_var_1.get(self.vidx_1 + 1),
+        ) {
+            (Some(a0), Some(a1)) => {
+                let value = (self.surface_f)(a0.clone(), b0.clone());
+                let style = self.style.get_style(&value);
+                let vert = vec![
+                    D::make_coord((a0.clone(), b0.clone()), value),
+                    D::make_coord(
+                        (a0.clone(), b1.clone()),
+                        (self.surface_f)(a0.clone(), b1.clone()),
+                    ),
+                    D::make_coord(
+                        (a1.clone(), b1.clone()),
+                        (self.surface_f)(a1.clone(), b1.clone()),
+                    ),
+                    D::make_coord(
+                        (a1.clone(), b0.clone()),
+                        (self.surface_f)(a1.clone(), b0.clone()),
+                    ),
+                ];
+                return Some(Polygon::new(vert, style));
+            }
+            _ => {
+                return None;
+            }
+        }
     }
 }
