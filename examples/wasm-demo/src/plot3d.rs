@@ -24,12 +24,12 @@ pub fn draw(canvas: HtmlCanvasElement, pitch: f64, yaw: f64) -> DrawResult<()> {
 
     chart.configure_axes().draw()?;
 
-    chart.draw_series(SurfaceSeries::<f64, _, f64>::new(
-        x_axis.values(),
-        z_axis.values(),
-        |&x, &z| (x * x + z * z).cos(),
-        &BLUE.mix(0.2),
-    ))?;
+    chart.draw_series(
+        SurfaceSeries::xoz(x_axis.values(), z_axis.values(), |x:f64, z:f64| {
+            (x * x + z * z).cos()
+        })
+        .style(&BLUE.mix(0.2)),
+    )?;
 
     chart.draw_series(LineSeries::new(
         (-100..100)

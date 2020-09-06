@@ -1,5 +1,11 @@
 # Changelog
 
+## Plotters latest(?)
+
+### Improved
+
+- Surface series now supports more customizations
+
 ## Plotters 0.3.0 (2020-09-03)
 This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.md) for more detials.
 

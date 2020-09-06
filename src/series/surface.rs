@@ -137,8 +137,8 @@ macro_rules! impl_constructor {
         {
             pub fn $name<IterA, IterB>(a: IterA, b: IterB, f: SurfaceFunc) -> Self
             where
-                IterA: DoubleEndedIterator<Item = <$dir as Direction<X, Y, Z>>::Input1Type>,
-                IterB: DoubleEndedIterator<Item = <$dir as Direction<X, Y, Z>>::Input2Type>,
+                IterA: Iterator<Item = <$dir as Direction<X, Y, Z>>::Input1Type>,
+                IterB: Iterator<Item = <$dir as Direction<X, Y, Z>>::Input2Type>,
             {
                 Self::new(a, b, f)
             }
