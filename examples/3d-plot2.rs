@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart.configure_axes().draw()?;
 
         chart.draw_series(
-            SurfaceSeries::xoy(
+            SurfaceSeries::xoz(
                 (-15..=15).map(|x| x as f64 / 5.0),
                 (-15..=15).map(|x| x as f64 / 5.0),
                 pdf,
