@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 plotters = {path = "../.."}
-plotters-cairo = "0.3.*"
-cairo-rs = "0.8.*"
-gtk = "0.8.*"
-gio = "0.8.*"
+plotters-cairo = "0.3.1"
+cairo-rs = "^0.9"
+gtk = "^0.9"
+gio = "^0.9"

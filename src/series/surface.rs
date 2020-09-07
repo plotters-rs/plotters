@@ -61,7 +61,6 @@ where
     free_var_2: Vec<D::Input2Type>,
     surface_f: SurfaceFunc,
     style: StyleConfig<'a, D::OutputType>,
-    adv: bool,
     vidx_1: usize,
     vidx_2: usize,
     _phantom: PhantomData<(X, Y, Z, D)>,
@@ -82,7 +81,6 @@ where
             free_var_2: second_iter.collect(),
             surface_f: func,
             style: StyleConfig::Fixed(BLUE.mix(0.4).filled()),
-            adv: true,
             vidx_1: 0,
             vidx_2: 0,
             _phantom: PhantomData,
@@ -99,31 +97,6 @@ where
         self
     }
 
-    fn get_next_free_value_2(&mut self) -> Option<[D::Input2Type; 2]>
-    where
-        D::Input2Type: Clone,
-    {
-        if self.adv {
-            if self.vidx_2 + 1 < self.free_var_2.len() {
-                self.vidx_2 += 1;
-                return Some([
-                    self.free_var_2[self.vidx_2 - 1].clone(),
-                    self.free_var_2[self.vidx_2].clone(),
-                ]);
-            }
-            self.vidx_2 += 1;
-        } else {
-            if self.vidx_2 > 1 {
-                self.vidx_2 -= 1;
-                return Some([
-                    self.free_var_2[self.vidx_2 - 1].clone(),
-                    self.free_var_2[self.vidx_2].clone(),
-                ]);
-            }
-            self.vidx_2 = self.vidx_2.max(1) - 1;
-        }
-        None
-    }
 }
 
 macro_rules! impl_constructor {
@@ -158,18 +131,19 @@ where
 {
     type Item = Polygon<(X, Y, Z)>;
     fn next(&mut self) -> Option<Self::Item> {
-        let (b0, b1) = if let Some([b0, b1]) = self.get_next_free_value_2() {
+        let (b0, b1) = if let (Some(b0), Some(b1)) = (self.free_var_2.get(self.vidx_2), self.free_var_2.get(self.vidx_2 + 1)) {
+            self.vidx_2 += 1;
             (b0, b1)
         } else {
             self.vidx_1 += 1;
-            self.adv = !self.adv;
-            if let Some([b0, b1]) = self.get_next_free_value_2() {
+            self.vidx_2 = 1;
+            if let (Some(b0), Some(b1)) = (self.free_var_2.get(0), self.free_var_2.get(1)) {
                 (b0, b1)
             } else {
                 return None;
             }
         };
-
+        
         match (
             self.free_var_1.get(self.vidx_1),
             self.free_var_1.get(self.vidx_1 + 1),

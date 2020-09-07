@@ -13,17 +13,30 @@ fn build_ui(app: &gtk::Application) {
         let root = CairoBackend::new(cr, (500, 500)).unwrap().into_drawing_area();
 
         root.fill(&WHITE).unwrap();
+        let root = root.margin(25, 25, 25, 25);
+
 
         let mut chart = ChartBuilder::on(&root)
             .caption("This is a test", ("sans-serif", 20))
-            .x_label_area_size(40)
-            .y_label_area_size(40)
-            .build_cartesian_2d(0..100, 0..100)
+            .build_cartesian_3d(0.0..100.0, 0.0..100.0, 0.0..100.0)
             .unwrap();
 
-        chart.configure_mesh()
+        chart.with_projection(|mut p| { 
+            p.scale = 0.9;
+            p.into_matrix()
+        });
+        
+        chart.configure_axes()
             .draw()
             .unwrap();
+
+        chart.draw_series(
+            SurfaceSeries::xoz(
+                (0..100).map(|n| n as f64),
+                (0..100).map(|n| n as f64),
+                |x,z| ((x - z) / 10.0).sin() * 20.0 + 50.0,
+            )
+        ).unwrap();
 
         Inhibit(false)
     })
