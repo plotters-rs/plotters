@@ -1,7 +1,7 @@
 use minifb::{Key, KeyRepeat, Window, WindowOptions};
+use plotters::prelude::*;
 use plotters_bitmap::bitmap_pixel::BGRXPixel;
 use plotters_bitmap::BitMapBackend;
-use plotters::prelude::*;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::time::SystemTime;
@@ -134,7 +134,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     break;
                 }
             }
-            window.update_with_buffer(unsafe { std::mem::transmute(&buf[..]) })?;
+            let buf = unsafe { std::slice::from_raw_parts(&buf[0] as *const _ as *const _, H * W) };
+            window.update_with_buffer(buf)?;
             last_flushed = epoch;
         }
 
