@@ -79,7 +79,8 @@ macro_rules! make_numeric_coord {
                     return (limit.1 - limit.0) / 2;
                 }
 
-                let logic_length = (*v - self.0) as f64 / (self.1 - self.0) as f64;
+
+                let logic_length = (*v as f64 - self.0 as f64) / (self.1 as f64 - self.0 as f64);
 
                 let actual_length = limit.1 - limit.0;
 

@@ -96,7 +96,6 @@ where
         self.style = StyleConfig::Fixed(s.into());
         self
     }
-
 }
 
 macro_rules! impl_constructor {
@@ -131,7 +130,10 @@ where
 {
     type Item = Polygon<(X, Y, Z)>;
     fn next(&mut self) -> Option<Self::Item> {
-        let (b0, b1) = if let (Some(b0), Some(b1)) = (self.free_var_2.get(self.vidx_2), self.free_var_2.get(self.vidx_2 + 1)) {
+        let (b0, b1) = if let (Some(b0), Some(b1)) = (
+            self.free_var_2.get(self.vidx_2),
+            self.free_var_2.get(self.vidx_2 + 1),
+        ) {
             self.vidx_2 += 1;
             (b0, b1)
         } else {
@@ -143,7 +145,7 @@ where
                 return None;
             }
         };
-        
+
         match (
             self.free_var_1.get(self.vidx_1),
             self.free_var_1.get(self.vidx_1 + 1),

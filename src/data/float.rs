@@ -64,8 +64,8 @@ pub struct FloatPrettyPrinter {
 
 impl FloatPrettyPrinter {
     pub fn print(&self, n: f64) -> String {
-        let (n, p) = find_minimal_repr(n, (10f64).powi(-self.max_decimal));
-        let d_repr = float_to_string(n, p, self.min_decimal as usize);
+        let (tn, p) = find_minimal_repr(n, (10f64).powi(-self.max_decimal));
+        let d_repr = float_to_string(tn, p, self.min_decimal as usize);
         if !self.allow_scientific {
             d_repr
         } else {
@@ -91,7 +91,7 @@ impl FloatPrettyPrinter {
                 float_to_string(sn, sp, self.min_decimal as usize),
                 float_to_string(idx, 0, 0)
             );
-            if s_repr.len() + 1 < d_repr.len() {
+            if s_repr.len() + 1 < d_repr.len() || (tn == 0.0 && n != 0.0) {
                 s_repr
             } else {
                 d_repr
