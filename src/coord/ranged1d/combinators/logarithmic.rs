@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::ops::Range;
 
 /// The trait for the type that is able to be presented in the log scale.
-/// This trait is primarily used by [LogRange](struct.LogRange.html).
+/// This trait is primarily used by [LogRangeExt](struct.LogRangeExt.html).
 pub trait LogScalable: Clone {
     /// Make the conversion from the type to the floating point number
     fn as_f64(&self) -> f64;
@@ -47,11 +47,20 @@ impl_log_scalable!(i, u16);
 impl_log_scalable!(i, u32);
 impl_log_scalable!(i, u64);
 
+impl_log_scalable!(i, i8);
+impl_log_scalable!(i, i16);
+impl_log_scalable!(i, i32);
+impl_log_scalable!(i, i64);
+
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
 
+/// Convert a range to a log scale coordinate spec
 pub trait IntoLogRange {
+    /// The type of the value
     type ValueType: LogScalable;
+
+    /// Make the log scale coordinate
     fn log_scale(self) -> LogRangeExt<Self::ValueType>;
 }
 
@@ -69,9 +78,6 @@ impl<T: LogScalable> IntoLogRange for Range<T> {
 /// The logarithmic coodinate decorator.
 /// This decorator is used to make the axis rendered as logarithmically.
 #[derive(Clone)]
-pub struct LogRange<V: LogScalable>(pub Range<V>);
-
-#[derive(Clone)]
 pub struct LogRangeExt<V: LogScalable> {
     range: Range<V>,
     zero: f64,
@@ -79,6 +85,8 @@ pub struct LogRangeExt<V: LogScalable> {
 }
 
 impl<V: LogScalable> LogRangeExt<V> {
+    /// Set the zero point of the log scale coordinate. Zero point is the point where we map -inf
+    /// of the axis to the coordinate
     pub fn zero_point(mut self, value: V) -> Self
     where
         V: PartialEq,
@@ -92,17 +100,12 @@ impl<V: LogScalable> LogRangeExt<V> {
         self
     }
 
+    /// Set the base multipler
     pub fn base(mut self, base: f64) -> Self {
         if self.base > 1.0 {
             self.base = base;
         }
         self
-    }
-}
-
-impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
-    fn from(range: LogRange<V>) -> LogCoord<V> {
-        range.0.log_scale().into()
     }
 }
 
@@ -138,11 +141,6 @@ impl<V: LogScalable> From<LogRangeExt<V>> for LogCoord<V> {
             marker: PhantomData,
         }
     }
-}
-
-impl<V: LogScalable> AsRangedCoord for LogRange<V> {
-    type CoordDescType = LogCoord<V>;
-    type Value = V;
 }
 
 impl<V: LogScalable> AsRangedCoord for LogRangeExt<V> {
@@ -201,8 +199,6 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
         let base = self.base;
         let base_ln = base.ln();
 
-        /*let mut start = self.//self.value_to_f64(&self.logic.start);
-        let mut end = self.value_to_f64(&self.logic.end);*/
         let Range { mut start, mut end } = self.normalized;
 
         if start > end {
@@ -257,6 +253,26 @@ impl<V: LogScalable> Ranged for LogCoord<V> {
         self.logic.clone()
     }
 }
+
+/// The logarithmic coodinate decorator.
+/// This decorator is used to make the axis rendered as logarithmically.
+#[deprecated(note = "LogRange is deprecated, use IntoLogRange trait method instead")]
+#[derive(Clone)]
+pub struct LogRange<V: LogScalable>(pub Range<V>);
+
+#[allow(deprecated)]
+impl<V: LogScalable> AsRangedCoord for LogRange<V> {
+    type CoordDescType = LogCoord<V>;
+    type Value = V;
+}
+
+#[allow(deprecated)]
+impl<V: LogScalable> From<LogRange<V>> for LogCoord<V> {
+    fn from(range: LogRange<V>) -> LogCoord<V> {
+        range.0.log_scale().into()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

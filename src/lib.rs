@@ -751,12 +751,15 @@ pub mod prelude {
         cartesian::Cartesian2d,
         combinators::{
             make_partial_axis, BindKeyPointMethod, BindKeyPoints, BuildNestedCoord, GroupBy,
-            IntoLinspace, IntoLogRange, IntoPartialAxis, Linspace, LogCoord, LogRange, LogScalable,
+            IntoLinspace, IntoLogRange, IntoPartialAxis, Linspace, LogCoord, LogScalable,
             NestedRange, NestedValue, ToGroupByRange,
         },
         ranged1d::{DiscreteRanged, IntoSegmentedCoord, Ranged, SegmentValue},
         CoordTranslate,
     };
+
+    #[allow(deprecated)]
+    pub use crate::coord::combinators::LogRange;
 
     #[cfg(feature = "chrono")]
     pub use crate::coord::types::{

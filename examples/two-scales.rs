@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .right_y_label_area_size(40)
         .margin(5)
         .caption("Dual Y-Axis Example", ("sans-serif", 50.0).into_font())
-        .build_cartesian_2d(0f32..10f32, LogRange(0.1f32..1e10f32))?
+        .build_cartesian_2d(0f32..10f32, (0.1f32..1e10f32).log_scale())?
         .set_secondary_coord(0f32..10f32, -1.0f32..1.0f32);
 
     chart
