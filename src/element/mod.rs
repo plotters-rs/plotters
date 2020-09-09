@@ -129,7 +129,7 @@
             .x_label_area_size(40)
             .y_label_area_size(40)
             .margin(5)
-            .build_ranged(0..50, 0..10)?;
+            .build_cartesian_2d(0..50, 0..10)?;
 
         chart
             .configure_mesh()
