@@ -28,8 +28,8 @@ impl ShapeStyle {
     }
 }
 
-impl<'a, T: Color> From<&'a T> for ShapeStyle {
-    fn from(f: &'a T) -> Self {
+impl<T: Color> From<T> for ShapeStyle {
+    fn from(f: T) -> Self {
         ShapeStyle {
             color: f.to_rgba(),
             filled: false,
