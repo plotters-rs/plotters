@@ -307,10 +307,10 @@ mod test {
         // the test case may be run in parallel. Thus the font cache
         // may contains other fonts.
         let _a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(CACHE.read().unwrap().contains_key("serif"));
+        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
 
         let _b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(CACHE.read().unwrap().contains_key("serif"));
+        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
 
         // TODO: Check they are the same
 
