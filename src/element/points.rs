@@ -1,6 +1,6 @@
 use super::*;
 use super::{Drawable, PointCollection};
-use crate::style::{ShapeStyle, SizeDesc};
+use crate::style::{Color, ShapeStyle, SizeDesc};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// The element that used to describe a point
@@ -94,7 +94,7 @@ impl<Coord, DB: DrawingBackend, Size: SizeDesc> Drawable<DB> for TriangleMarker<
                         (rad.sin() * f64::from(size) + f64::from(y)).ceil() as i32,
                     )
                 });
-            backend.fill_polygon(points, &self.style.color)?;
+            backend.fill_polygon(points, &self.style.color.to_backend_color())?;
         }
         Ok(())
     }

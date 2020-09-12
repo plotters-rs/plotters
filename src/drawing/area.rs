@@ -286,7 +286,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             backend.draw_rect(
                 (self.rect.x0, self.rect.y0),
                 (self.rect.x1 - 1, self.rect.y1 - 1),
-                color,
+                &color.to_backend_color(),
                 true,
             )
         })
@@ -299,7 +299,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         color: &ColorType,
     ) -> Result<(), DrawingAreaError<DB>> {
         let pos = self.coord.translate(&pos);
-        self.backend_ops(|b| b.draw_pixel(pos, color.color()))
+        self.backend_ops(|b| b.draw_pixel(pos, color.to_backend_color()))
     }
 
     /// Present all the pending changes to the backend

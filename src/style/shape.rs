@@ -40,7 +40,7 @@ impl<T: Color> From<T> for ShapeStyle {
 
 impl BackendStyle for ShapeStyle {
     fn color(&self) -> BackendColor {
-        self.color.color()
+        self.color.to_backend_color()
     }
     fn stroke_width(&self) -> u32 {
         self.stroke_width

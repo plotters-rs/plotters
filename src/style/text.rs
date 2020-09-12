@@ -76,7 +76,7 @@ impl<'a> TextStyle<'a> {
     pub fn color<C: Color>(&self, color: &'a C) -> Self {
         Self {
             font: self.font.clone(),
-            color: color.color(),
+            color: color.to_backend_color(),
             pos: self.pos,
         }
     }
@@ -131,7 +131,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
     fn from(font: T) -> Self {
         Self {
             font: font.into(),
-            color: BLACK.color(),
+            color: BLACK.to_backend_color(),
             pos: text_anchor::Pos::default(),
         }
     }

@@ -15,7 +15,7 @@ exclude = ["doc-template/*"]
 [dependencies]
 num-traits = "0.2.11"
 chrono = { version = "0.4.11", optional = true }
-plotters-backend = { git = "https://github.com/chrisduerr/plotters-backend", rev = "529f08f3aa5ede8e71950c1a5d3be4683330f549" }
+plotters-backend = "^0.3"
 plotters-svg = {version = "^0.3.*", optional = true}
 
 [dependencies.plotters-bitmap]

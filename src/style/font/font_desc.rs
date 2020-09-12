@@ -138,7 +138,7 @@ impl<'a> FontDesc<'a> {
     pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
         TextStyle {
             font: self.clone(),
-            color: color.color(),
+            color: color.to_backend_color(),
             pos: Pos::default(),
         }
     }

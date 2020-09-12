@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::data::Quartiles;
 use crate::element::{Drawable, PointCollection};
-use crate::style::{ShapeStyle, BLACK};
+use crate::style::{Color, ShapeStyle, BLACK};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 /// The boxplot orientation trait
@@ -218,7 +218,12 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for Boxplot<K
 
             // |---[   |  ]----|
             // _^^^_____________
-            backend.draw_line(moved(points[0]), moved(points[1]), &self.style.color)?;
+
+            backend.draw_line(
+                moved(points[0]),
+                moved(points[1]),
+                &self.style.color.to_backend_color(),
+            )?;
 
             // |---[   |  ]----|
             // ____^______^_____
