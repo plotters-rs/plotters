@@ -103,7 +103,7 @@ where
     ///let mut buffer = vec![0;1024*768*3];
     /// let root = BitMapBackend::with_buffer(&mut buffer, (1024, 768)).into_drawing_area();
     /// let mut chart = ChartBuilder::on(&root)
-    ///    .build_ranged(
+    ///    .build_cartesian_2d(
     ///        (0..100).with_key_points(vec![1,20,50,90]),   // <= This line will make the plot shows 4 tick marks at 1, 20, 50, 90
     ///        0..10
     /// ).unwrap();
@@ -143,7 +143,7 @@ where
     ///let mut buffer = vec![0;1024*768*3];
     /// let root = BitMapBackend::with_buffer(&mut buffer, (1024, 768)).into_drawing_area();
     /// let mut chart = ChartBuilder::on(&root)
-    ///    .build_ranged(
+    ///    .build_cartesian_2d(
     ///        (0..100).with_key_point_func(|n| (0..100 / n as i32).map(|x| x * 100 / n as i32).collect()),
     ///        0..10
     /// ).unwrap();

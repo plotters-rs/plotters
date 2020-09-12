@@ -302,11 +302,10 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             .iter()
             .map(|(_, text)| {
                 if orientation.0 > 0 && orientation.1 == 0 && tick_size >= 0 {
-                    let ((x0, _), (x1, _)) = label_style
-                        .font
-                        .layout_box(text)
-                        .unwrap_or(((0, 0), (0, 0)));
-                    x1 - x0
+                    self.drawing_area
+                        .estimate_text_size(text, &label_style)
+                        .map(|(w, _)| w)
+                        .unwrap_or(0) as i32
                 } else {
                     // Don't ever do the layout estimationfor the drawing area that is either not
                     // the right one or the tick mark is inward.

@@ -19,7 +19,6 @@ struct CountryData {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root =
         SVGBackend::new("plotters-doc-data/tick_control.svg", (1024, 768)).into_drawing_area();
-
     root.fill(&WHITE)?;
 
     let (upper, lower) = root.split_vertically(750);
@@ -79,4 +78,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
 
     Ok(())
+}
+#[test]
+fn entry_point() {
+    main().unwrap()
 }

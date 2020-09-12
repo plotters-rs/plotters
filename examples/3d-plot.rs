@@ -47,3 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
     Ok(())
 }
+#[test]
+fn entry_point() {
+    main().unwrap()
+}
