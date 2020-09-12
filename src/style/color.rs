@@ -61,7 +61,7 @@ impl<T: Color> Color for &'_ T {
 
 /// The RGBA representation of the color, Plotters use RGBA as the internal representation
 /// of color
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct RGBAColor(pub(crate) u8, pub(crate) u8, pub(crate) u8, pub(crate) f64);
 
 impl Color for RGBAColor {
@@ -95,7 +95,7 @@ impl<P: Palette> Color for PaletteColor<P> {
 }
 
 /// The color described by its RGB value
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct RGBColor(pub u8, pub u8, pub u8);
 
 impl BackendStyle for RGBAColor {

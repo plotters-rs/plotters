@@ -302,7 +302,6 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-
         // We cannot only check the size of font cache, because
         // the test case may be run in parallel. Thus the font cache
         // may contains other fonts.

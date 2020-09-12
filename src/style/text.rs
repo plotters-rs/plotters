@@ -38,15 +38,33 @@ impl<'a> IntoTextStyle<'a> for FontFamily<'a> {
     }
 }
 
+impl<'a, T: Color> IntoTextStyle<'a> for &'a T {
+    fn into_text_style<P: HasDimension>(self, _: &P) -> TextStyle<'a> {
+        Into::<TextStyle>::into(FontFamily::SansSerif).color(self)
+    }
+}
+
 impl<'a, T: SizeDesc> IntoTextStyle<'a> for (&'a str, T) {
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
         (self.0, self.1.in_pixels(parent)).into()
     }
 }
 
+impl<'a, T: SizeDesc, C: Color> IntoTextStyle<'a> for (&'a str, T, &'a C) {
+    fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
+        Into::<TextStyle>::into((self.0, self.1.in_pixels(parent))).color(self.2)
+    }
+}
+
 impl<'a, T: SizeDesc> IntoTextStyle<'a> for (FontFamily<'a>, T) {
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
         (self.0, self.1.in_pixels(parent)).into()
+    }
+}
+
+impl<'a, T: SizeDesc, C: Color> IntoTextStyle<'a> for (FontFamily<'a>, T, &'a C) {
+    fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a> {
+        Into::<TextStyle>::into((self.0, self.1.in_pixels(parent))).color(self.2)
     }
 }
 

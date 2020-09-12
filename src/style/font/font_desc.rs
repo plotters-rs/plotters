@@ -24,19 +24,31 @@ pub struct FontDesc<'a> {
 
 impl<'a> From<&'a str> for FontDesc<'a> {
     fn from(from: &'a str) -> FontDesc<'a> {
-        FontDesc::new(from.into(), 1.0, FontStyle::Normal)
+        FontDesc::new(from.into(), 12.0, FontStyle::Normal)
     }
 }
 
 impl<'a> From<FontFamily<'a>> for FontDesc<'a> {
     fn from(family: FontFamily<'a>) -> FontDesc<'a> {
-        FontDesc::new(family, 1.0, FontStyle::Normal)
+        FontDesc::new(family, 12.0, FontStyle::Normal)
     }
 }
 
 impl<'a, T: Into<f64>> From<(FontFamily<'a>, T)> for FontDesc<'a> {
     fn from((family, size): (FontFamily<'a>, T)) -> FontDesc<'a> {
         FontDesc::new(family, size.into(), FontStyle::Normal)
+    }
+}
+
+impl From<f64> for FontDesc<'static> {
+    fn from(size: f64) -> FontDesc<'static> {
+        FontDesc::new(FontFamily::SansSerif, size.into(), FontStyle::Normal)
+    }
+}
+
+impl From<u32> for FontDesc<'static> {
+    fn from(size: u32) -> FontDesc<'static> {
+        FontDesc::new(FontFamily::SansSerif, size.into(), FontStyle::Normal)
     }
 }
 
@@ -91,7 +103,7 @@ impl<'a> FontDesc<'a> {
     ///
     /// - `size`: The new size to set
     /// - **returns** The newly created font descriptor with a new size
-    pub fn resize(&self, size: f64) -> FontDesc<'a> {
+    pub fn resize(&self, size: f64) -> Self {
         Self {
             size,
             family: self.family,
