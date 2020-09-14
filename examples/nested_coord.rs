@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(35)
         .y_label_area_size(40)
         .margin(5)
-        .caption("Nested Coord", ("sans-serif", 50.0).into_font())
+        .caption("Nested Coord", ("sans-serif", 50.0))
         .build_cartesian_2d(
             ["Linear", "Quadratic"].nested_coord(|_| 0.0..10.0),
             0.0..10.0,
@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .disable_mesh()
-        .axis_desc_style(("sans-serif", 15).into_font())
+        .axis_desc_style(("sans-serif", 15))
         .draw()?;
 
     chart.draw_series(LineSeries::new(
