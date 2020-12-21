@@ -92,7 +92,7 @@ deprecated_items = [] # Keep some of the deprecated items for backward compatibi
 [dev-dependencies]
 rand = "0.7.3"
 itertools = "0.9.0"
-rand_distr = "0.2.2"
+rand_distr = "0.4.0"
 criterion = "0.3.2"
 rayon = "1.3.0"
 rand_xorshift = "0.2.0"
