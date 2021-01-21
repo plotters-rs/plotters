@@ -159,12 +159,12 @@ To use Plotters, you can simply add Plotters into your `Cargo.toml`
 plotters = "^0.3.0"
 ```
 
-And the following code draws a quadratic function. `src/main.rs`,
+And the following code draws a quadratic function to the file `plot.png`. `src/main.rs`,
 
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/0.png", (640, 480)).into_drawing_area();
+    let root = BitMapBackend::new("plot.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("sans-serif", 50).into_font())
