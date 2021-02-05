@@ -151,10 +151,12 @@ impl FontTransform {
             FontTransform::Rotate90 => (-y, x),
             FontTransform::Rotate180 => (-x, -y),
             FontTransform::Rotate270 => (y, -x),
-            FontTransform::RotateAngle(angle) => (
-                ((x as f32) * angle.cos()).round() as i32,
-                ((y as f32) * angle.sin()).round() as i32,
-            ),
+            FontTransform::RotateAngle(angle) => {
+                let (x, y) = (x as f32, y as f32);
+                let (sin, cos) = angle.to_radians().sin_cos();
+                let (x, y) = (x * cos - y * sin, x * sin + y * cos);
+                (x.round() as i32, y.round() as i32)
+            }
         }
     }
 }
@@ -248,4 +250,20 @@ pub trait BackendTextStyle {
         pos: BackendCoord,
         draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::FontError>;
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::FontTransform;
+
+    #[test]
+    fn text_rotation_works() {
+        assert_eq!(FontTransform::None.transform(1, 0), (1, 0));
+        assert_eq!(FontTransform::Rotate90.transform(1, 0), (0, 1));
+        assert_eq!(FontTransform::Rotate180.transform(1, 0), (-1, 0));
+        assert_eq!(FontTransform::Rotate270.transform(1, 0), (0, -1));
+
+        assert_eq!(FontTransform::RotateAngle(45f32).transform(10, 0), (7, 7));
+        assert_eq!(FontTransform::RotateAngle(45f32).transform(0, 10), (-7, 7));
+    }
 }
