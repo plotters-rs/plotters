@@ -84,12 +84,23 @@ impl BoxplotData {
         assert!(minimum.is_some());
         assert!(maximum.is_some());
 
+        let mut minimum = minimum.unwrap();
+        let mut maximum = maximum.unwrap();
+
+        //Make sure whiskers don't overlap with body of the upper-median-lower
+        if minimum > lower {
+            minimum = lower;
+        }
+        if maximum < upper {
+            maximum = upper;
+        }
+        
         Self {
-            minimum: minimum.unwrap(),
+            minimum,
             lower_quartile: lower,
             median,
             upper_quartile: upper,
-            maximum: maximum.unwrap(),
+            maximum,
             outliers
         }
     }
