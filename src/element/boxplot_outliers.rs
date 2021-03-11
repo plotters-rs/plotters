@@ -1,4 +1,4 @@
-use std::{cmp::max, marker::PhantomData};
+use std::{marker::PhantomData};
 
 use super::boxplot::{BoxplotOrient, BoxplotOrientH, BoxplotOrientV};
 use crate::element::{Drawable, PointCollection};
@@ -7,6 +7,7 @@ use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 const DEFAULT_WIDTH: u32 = 10;
 
+///Structure to contain the boxplot data with outliers
 #[derive(Clone, Debug)]
 pub struct BoxplotData {
     minimum: f64,
@@ -19,7 +20,8 @@ pub struct BoxplotData {
 
 impl BoxplotData {
     // Extract a value representing the `pct` percentile of a
-    // sorted `s`, using linear interpolation.
+    // sorted `s`, using linear interpolation. 
+    // Copied from Quartiles.
     fn percentile_of_sorted<T: Into<f64> + Copy>(s: &[T], pct: f64) -> f64 {
         assert!(!s.is_empty());
         if s.len() == 1 {
@@ -41,33 +43,34 @@ impl BoxplotData {
         lo + (hi - lo) * d
     }
 
-    pub fn values(&self) -> [f32; 5] {
-        [
-            self.minimum as f32,
-            self.lower_quartile as f32,
-            self.median as f32,
-            self.upper_quartile as f32,
-            self.maximum as f32,
-        ]
-    }
+    /// Create a new BoxplotData struct with the values calculated from the argument.
+    ///
+    /// - `s`: The array of the original values
+    /// - **returns** The newly created BoxplotData struct
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// assert_eq!(boxplot_data.median(), 37.5);
+    /// ```
+    pub fn new<T: Into<f64> + Copy + PartialOrd>(s: &[T]) -> Self {
+        let mut s = s.to_owned();
+        s.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
 
-    pub fn new<T: Into<f64> + Copy + PartialOrd>(values: &[T]) -> Self {
-        let mut values = values.to_owned();
-        values.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-
-        let lower = BoxplotData::percentile_of_sorted(&values, 25_f64);
-        let median = BoxplotData::percentile_of_sorted(&values, 50_f64);
-        let upper = BoxplotData::percentile_of_sorted(&values, 75_f64);
+        let lower = BoxplotData::percentile_of_sorted(&s, 25_f64);
+        let median = BoxplotData::percentile_of_sorted(&s, 50_f64);
+        let upper = BoxplotData::percentile_of_sorted(&s, 75_f64);
         let iqr = upper - lower;
         let lower_fence = lower - 1.5 * iqr;
         let upper_fence = upper + 1.5 * iqr;
 
-        let mut outliers = Vec::with_capacity(values.len() / 2);
+        let mut outliers = Vec::with_capacity(s.len() / 2);
 
         let mut minimum = None;
         let mut maximum = None;
 
-        for v in values {
+        for v in s {
             if v.into() < lower_fence || v.into() > upper_fence {
                 outliers.push(v.into());
             } else {
@@ -90,8 +93,43 @@ impl BoxplotData {
             outliers
         }
     }
+
+    /// Get the Boxplot values (without outliers).
+    ///
+    /// - **returns** The array [minimum, lower quartile, median, upper quartile, maximum]
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let values = boxplot_data.values();
+    /// assert_eq!(values, [7.0, 20.25, 37.5, 39.75, 41.0]);
+    /// ```
+    pub fn values(&self) -> [f32; 5] {
+        [
+            self.minimum as f32,
+            self.lower_quartile as f32,
+            self.median as f32,
+            self.upper_quartile as f32,
+            self.maximum as f32,
+        ]
+    }
+
+    /// Get the Boxplot data median.
+    ///
+    /// - **returns** The median
+    ///
+    /// ```rust
+    /// use plotters::prelude::*;
+    ///
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// assert_eq!(boxplot_data.median(), 37.5);
+    /// ```
+    pub fn median(&self) -> f64 {
+        self.median
+    }
 }
-/// The boxplot element
+/// The BoxplotOutliers element
 pub struct BoxplotOutliers<K, O: BoxplotOrient<K, f32>> {
     style: ShapeStyle,
     width: u32,
@@ -104,17 +142,17 @@ pub struct BoxplotOutliers<K, O: BoxplotOrient<K, f32>> {
 }
 
 impl<K: Clone> BoxplotOutliers<K, BoxplotOrientV<K, f32>> {
-    /// Create a new vertical boxplot element.
+    /// Create a new vertical BoxplotOutliers element.
     ///
     /// - `key`: The key (the X axis value)
-    /// - `quartiles`: The quartiles values for the Y axis
-    /// - **returns** The newly created boxplot element
+    /// - `boxplot_data`: The boxplot_data for the Y axis
+    /// - **returns** The newly created BoxplotOutliers element
     ///
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_vertical("group", &quartiles);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_vertical("group", &boxplot_data);
     /// ```
     pub fn new_vertical(key: K, boxplot_data: &BoxplotData) -> Self {
         let outliers = boxplot_data.outliers.iter().map(|o| *o as f32).collect();
@@ -132,17 +170,17 @@ impl<K: Clone> BoxplotOutliers<K, BoxplotOrientV<K, f32>> {
 }
 
 impl<K: Clone> BoxplotOutliers<K, BoxplotOrientH<K, f32>> {
-    /// Create a new horizontal boxplot element.
+    /// Create a new horizontal BoxplotOutliers element.
     ///
     /// - `key`: The key (the Y axis value)
-    /// - `quartiles`: The quartiles values for the X axis
-    /// - **returns** The newly created boxplot element
+    /// - `boxplot_data`: The boxplot_data for the X axis
+    /// - **returns** The newly created BoxplotOutliers element
     ///
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_horizontal("group", &quartiles);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_vertical("group", &boxplot_data);
     /// ```
     pub fn new_horizontal(key: K, boxplot_data: &BoxplotData) -> Self {
         let outliers = boxplot_data.outliers.iter().map(|o| *o as f32).collect();
@@ -160,16 +198,16 @@ impl<K: Clone> BoxplotOutliers<K, BoxplotOrientH<K, f32>> {
 }
 
 impl<K, O: BoxplotOrient<K, f32>> BoxplotOutliers<K, O> {
-    /// Set the style of the boxplot.
+    /// Set the style of the BoxplotOutliers.
     ///
     /// - `S`: The required style
-    /// - **returns** The up-to-dated boxplot element
+    /// - **returns** The up-to-dated BoxplotOutliers element
     ///
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_horizontal("group", &quartiles).style(&BLUE);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_horizontal("group", &boxplot_data).style(&BLUE);
     /// ```
     pub fn style<S: Into<ShapeStyle>>(mut self, style: S) -> Self {
         self.style = style.into();
@@ -179,13 +217,13 @@ impl<K, O: BoxplotOrient<K, f32>> BoxplotOutliers<K, O> {
     /// Set the bar width.
     ///
     /// - `width`: The required width
-    /// - **returns** The up-to-dated boxplot element
+    /// - **returns** The up-to-dated BoxplotOutliers element
     ///
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_horizontal("group", &quartiles).width(10);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_horizontal("group", &boxplot_data).width(10);
     /// ```
     pub fn width(mut self, width: u32) -> Self {
         self.width = width;
@@ -200,8 +238,8 @@ impl<K, O: BoxplotOrient<K, f32>> BoxplotOutliers<K, O> {
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_horizontal("group", &quartiles).whisker_width(0.5);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_horizontal("group", &boxplot_data).whisker_width(0.5);
     /// ```
     pub fn whisker_width(mut self, whisker_width: f64) -> Self {
         self.whisker_width = whisker_width;
@@ -216,8 +254,8 @@ impl<K, O: BoxplotOrient<K, f32>> BoxplotOutliers<K, O> {
     /// ```rust
     /// use plotters::prelude::*;
     ///
-    /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
-    /// let plot = Boxplot::new_horizontal("group", &quartiles).offset(-5);
+    /// let boxplot_data = BoxplotData::new(&[7, 15, 36, 39, 40, 41]);
+    /// let plot = BoxplotOutliers::new_horizontal("group", &boxplot_data).offset(-5);
     /// ```
     pub fn offset<T: Into<f64> + Copy>(mut self, offset: T) -> Self {
         self.offset = offset.into();
@@ -301,6 +339,8 @@ impl<K, DB: DrawingBackend, O: BoxplotOrient<K, f32>> Drawable<DB> for BoxplotOu
                 &self.style,
             )?;
 
+            // o  o o |---[   |  ]----|   oo o 
+            // ^__^_^_____________________^^_^
             for i in 5..points.len() {
                 backend.draw_circle(moved(points[i]), (width / 2.0) as u32, &self.style, false)?;
             }
@@ -321,10 +361,10 @@ mod test {
             .build_cartesian_2d(0..2, 0f32..100f32)
             .unwrap();
 
-        let values = Quartiles::new(&[6]);
+        let values = BoxplotData::new(&[6]);
         assert!(chart
             .plotting_area()
-            .draw(&Boxplot::new_vertical(1, &values))
+            .draw(&BoxplotOutliers::new_vertical(1, &values))
             .is_ok());
     }
 
@@ -335,10 +375,10 @@ mod test {
             .build_cartesian_2d(0f32..100f32, 0..2)
             .unwrap();
 
-        let values = Quartiles::new(&[6]);
+        let values = BoxplotData::new(&[6]);
         assert!(chart
             .plotting_area()
-            .draw(&Boxplot::new_horizontal(1, &values))
+            .draw(&BoxplotOutliers::new_horizontal(1, &values))
             .is_ok());
     }
 }
