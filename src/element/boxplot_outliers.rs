@@ -392,4 +392,32 @@ mod test {
             .draw(&BoxplotOutliers::new_horizontal(1, &values))
             .is_ok());
     }
+
+    #[test]
+    fn test_draw_with_outliers() {
+        let root = MockedBackend::new(1024, 768).into_drawing_area();
+        let chart = ChartBuilder::on(&root)
+            .build_cartesian_2d(0..2, 0f32..100f32)
+            .unwrap();
+
+        let values = BoxplotData::new(&[1,50,50,50,50,50,50,50,50,50,50,50,50,50]);
+        assert!(chart
+            .plotting_area()
+            .draw(&BoxplotOutliers::new_vertical(1, &values))
+            .is_ok());
+    }
+
+    #[test]
+    fn test_draw_with_outliers_two_sides() {
+        let root = MockedBackend::new(1024, 768).into_drawing_area();
+        let chart = ChartBuilder::on(&root)
+            .build_cartesian_2d(0..2, 0f32..100f32)
+            .unwrap();
+
+        let values = BoxplotData::new(&[1,50,50,50,50,50,100]);
+        assert!(chart
+            .plotting_area()
+            .draw(&BoxplotOutliers::new_vertical(1, &values))
+            .is_ok());
+    }
 }
