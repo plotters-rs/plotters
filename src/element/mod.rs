@@ -191,6 +191,8 @@ pub use boxplot::Boxplot;
 mod boxplot_outliers;
 #[cfg(feature = "boxplot_outliers")]
 pub use boxplot_outliers::BoxplotOutliers;
+#[cfg(feature = "boxplot_outliers")]
+pub use boxplot_outliers::BoxplotData;
 
 #[cfg(feature = "bitmap_backend")]
 mod image;

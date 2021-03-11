@@ -7,6 +7,7 @@ use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
 const DEFAULT_WIDTH: u32 = 10;
 
+#[derive(Clone, Debug)]
 pub struct BoxplotData {
     minimum: f64,
     lower_quartile: f64,
