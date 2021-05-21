@@ -15,8 +15,8 @@ jobs:
           override: true
     - uses: actions-rs/cargo@v1
       with:
-          command: build --no-default-features --features="svg_backend,chrono,image,deprecated_items,all_series,all_elements" 
-          args: --verbose
+          command: build  
+          args: --verbose --no-default-features --features="svg_backend,chrono,image,deprecated_items,all_series,all_elements"
   build_and_test:
     runs-on: ${{ matrix.os }}
     strategy:
