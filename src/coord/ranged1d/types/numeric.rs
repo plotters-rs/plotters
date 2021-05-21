@@ -110,6 +110,13 @@ macro_rules! gen_key_points_comp {
             }
 
             let range = (range.0 as f64, range.1 as f64);
+
+            assert!(!(range.0.is_nan() || range.1.is_nan()));
+
+            if range.0 == range.1 {
+                return vec![range.0 as $type];
+            }
+
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
             let mut digits = -(range.1 - range.0).log(10.0).floor() as i32 + 1;
             fn rem_euclid(a: f64, b: f64) -> f64 {
@@ -357,5 +364,11 @@ mod test {
         let pos = coord.map(&5, (1000, 2000));
         let value = coord.unmap(pos, (1000, 2000));
         assert_eq!(value, Some(5));
+    }
+
+    #[test]
+    fn test_zero_sized_coord_not_hang() {
+        let coord: RangedCoordf32 = (0.0..0.0).into();
+        let _points = coord.key_points(10);
     }
 }
