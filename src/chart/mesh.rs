@@ -396,9 +396,7 @@ where
 
     /// Draw the configured mesh on the target plot
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
-        let mut target = None;
-        std::mem::swap(&mut target, &mut self.target);
-        let target = target.unwrap();
+        let target = self.target.take().unwrap();
 
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
         let default_mesh_color_2 = RGBColor(0, 0, 0).mix(0.1);
@@ -466,8 +464,20 @@ where
             &x_label_style,
             &y_label_style,
             |m| match m {
-                MeshLine::XMesh(_, _, v) => Some((self.format_x)(v)),
-                MeshLine::YMesh(_, _, v) => Some((self.format_y)(v)),
+                MeshLine::XMesh(_, _, v) => {
+                    if self.draw_x_axis {
+                        Some((self.format_x)(v))
+                    } else {
+                        None
+                    }
+                }
+                MeshLine::YMesh(_, _, v) => {
+                    if self.draw_y_axis {
+                        Some((self.format_y)(v))
+                    } else {
+                        None
+                    }
+                }
             },
             self.draw_x_mesh,
             self.draw_y_mesh,

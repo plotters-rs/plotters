@@ -79,7 +79,6 @@ macro_rules! make_numeric_coord {
                     return (limit.1 - limit.0) / 2;
                 }
 
-
                 let logic_length = (*v as f64 - self.0 as f64) / (self.1 as f64 - self.0 as f64);
 
                 let actual_length = limit.1 - limit.0;
@@ -100,7 +99,7 @@ macro_rules! make_numeric_coord {
     };
     ($type:ty, $name:ident, $key_points:ident, $doc: expr) => {
         make_numeric_coord!($type, $name, $key_points, $doc, DefaultFormatting);
-    }
+    };
 }
 
 macro_rules! gen_key_points_comp {

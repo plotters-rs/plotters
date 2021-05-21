@@ -10,7 +10,7 @@ macro_rules! predefined_color {
     ($name:ident, $r:expr, $g:expr, $b:expr, $a: expr, $doc:expr) => {
         #[doc = $doc]
         pub const $name: RGBAColor = RGBAColor($r, $g, $b, $a);
-    }
+    };
 }
 
 predefined_color!(WHITE, 255, 255, 255, "The predefined white color");
