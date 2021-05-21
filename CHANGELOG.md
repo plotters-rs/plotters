@@ -1,6 +1,8 @@
 # Changelog
 
-## Plotters latest(?)
+## Plotters latest (?)
+
+## Plotters 0.3.1 (2021-05-21)
 
 ### Improved
 
