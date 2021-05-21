@@ -371,4 +371,11 @@ mod test {
         let coord: RangedCoordf32 = (0.0..0.0).into();
         let _points = coord.key_points(10);
     }
+
+    #[test]
+    fn test_small_coord() {
+        let coord: RangedCoordf64 = (0.0..1e-25).into();
+        let points = coord.key_points(10);
+        assert!(points.len() > 0);
+    }
 }
