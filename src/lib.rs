@@ -295,7 +295,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^0.3.0"
+plotters = "^0.3.1"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
