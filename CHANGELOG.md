@@ -5,6 +5,14 @@
 ### Improved
 
 - Surface series now supports more customizations
+- Z-orde support for 3D plots
+- Allow passing colors by value and reference (thanks to chrisduerr)
+
+### Fixed
+
+- Infinte loop / panic when the axis range is zero
+- UB in minifb example (thanks to TheEdward162)
+- Examples that uses old APIs (thanks to chrisduerr)
 
 ## Plotters 0.3.0 (2020-09-03)
 This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.md) for more detials.
