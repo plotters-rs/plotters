@@ -278,7 +278,7 @@ mod test {
     use super::*;
     #[test]
     fn regression_test_issue_143() {
-        let range : LogCoord<f64> = (1.0..5.0).log_scale().into();
+        let range: LogCoord<f64> = (1.0..5.0).log_scale().into();
 
         range.key_points(100);
     }

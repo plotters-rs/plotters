@@ -103,7 +103,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Real-time Rendering
-        <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters-piston/blob/master/examples/cpustat.rs">[code]</a>
     </div>
 </div>
 
