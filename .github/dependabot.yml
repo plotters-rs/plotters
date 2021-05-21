@@ -1,0 +1,19 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: ttf-parser
+    versions:
+    - 0.10.1
+    - 0.11.0
+- package-ecosystem: cargo
+  directory: "/examples/wasm-demo"
+  schedule:
+    interval: daily
+    time: "12:00"
+  open-pull-requests-limit: 10
