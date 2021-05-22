@@ -13,10 +13,10 @@ readme = "README.md"
 
 [dependencies]
 plotters-backend = "0.3.*"
-gif = { version = "0.10.3", optional = true }
+gif = { version = "0.11.2", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
-version = "0.23.9"
+version = "0.23.14"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]

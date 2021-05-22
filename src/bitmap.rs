@@ -20,6 +20,8 @@ pub enum BitMapBackendError {
     InvalidBuffer,
     /// Some IO error occurs while the bitmap maniuplation
     IOError(std::io::Error),
+    #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
+    GifEncodingError(gif::EncodingError),
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
     /// Image encoding error
     ImageError(ImageError),
@@ -45,7 +47,7 @@ fn blend(prev: &mut u8, new: u8, a: u64) {
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
 mod gif_support {
     use super::*;
-    use gif::{Encoder as GifEncoder, Frame as GifFrame, Repeat, SetParameter};
+    use gif::{Encoder as GifEncoder, Frame as GifFrame, Repeat};
     use std::fs::File;
 
     pub(super) struct GifFile {
@@ -67,11 +69,11 @@ mod gif_support {
                 dim.1 as u16,
                 &[],
             )
-            .map_err(BitMapBackendError::IOError)?;
+            .map_err(BitMapBackendError::GifEncodingError)?;
 
             encoder
-                .set(Repeat::Infinite)
-                .map_err(BitMapBackendError::IOError)?;
+                .set_repeat(Repeat::Infinite)
+                .map_err(BitMapBackendError::GifEncodingError)?;
 
             Ok(Self {
                 encoder,
@@ -89,7 +91,7 @@ mod gif_support {
 
             self.encoder
                 .write_frame(&frame)
-                .map_err(BitMapBackendError::IOError)?;
+                .map_err(BitMapBackendError::GifEncodingError)?;
 
             Ok(())
         }
