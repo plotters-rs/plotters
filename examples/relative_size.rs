@@ -42,8 +42,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     draw_chart(&upper)?;
     draw_chart(&lower)?;
+    let root = root.shrink((200, 200), (150, 100));
+    draw_chart(&root)?;
 
-    draw_chart(&root.shrink((200, 200), (150, 100)))?;
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
 
     Ok(())
 }
