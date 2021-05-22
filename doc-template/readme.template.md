@@ -317,5 +317,14 @@ The following list is a complete list of features that can be opt in and out.
 	- [HTML5 Canvas Backend](https://github.com/plotters-rs/plotters-canvas.git)
 	- [GTK/Cairo Backend](https://github.com/plotters-rs/plotters-cairo.git)
 
+* How to check if a backend writes file successfully ?
+
+	The behavior of Plotters backend is consistent with stadnard library. 
+	When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically 
+	whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored. 
+
+	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+	For more information, please see the examples.
+
 $$style$$
 
