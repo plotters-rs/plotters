@@ -12,9 +12,11 @@ mod text;
 /// Definitions of palettes of accessibility
 pub use self::palette::*;
 pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor};
-pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
+pub use colors::{
+  full_palette, BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW,
+};
 pub use font::{
-    FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
+  FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };
 pub use shape::ShapeStyle;
 pub use size::{AsRelative, RelativeSize, SizeDesc};
