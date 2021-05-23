@@ -520,6 +520,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ],
     ];
 
+    use plotters::style::text_anchor::*;
+    let centered = Pos::new(HPos::Center, VPos::Top);
+    let label_style = TextStyle::from(("monospace", 14.0).into_font()).pos(centered);
+
     for (col, colors) in colors.iter().enumerate() {
         chart.draw_series(colors.iter().zip(color_names[col].iter()).enumerate().map(
             |(row, (color, &name))| {
@@ -527,11 +531,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let col = col as f32;
                 EmptyElement::at((col, row))
                     + Circle::new((0, 0), 15, color.filled())
-                    + Text::new(
-                        name,
-                        (-((name.len() as f32 * 3.5) as i32), 16),
-                        ("mono", 14.0).into_font(),
-                    )
+                    + Text::new(name, (0, 16), &label_style)
             },
         ))?;
     }
