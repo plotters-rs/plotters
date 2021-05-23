@@ -796,9 +796,11 @@ pub mod prelude {
     pub use crate::series::SurfaceSeries;
 
     // Styles
-    pub use crate::style::{
-        full_palette, BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW,
-    };
+    pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
+
+    #[cfg(feature = "full_palette")]
+    pub use crate::style::full_palette;
+
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         IntoTextStyle, Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor,
