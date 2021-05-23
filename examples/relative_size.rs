@@ -28,9 +28,9 @@ fn draw_chart<B: DrawingBackend>(root: &DrawingArea<B, Shift>) -> DrawResult<(),
     Ok(())
 }
 
+const OUT_FILE_NAME: &'static str = "plotters-doc-data/relative_size.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root =
-        BitMapBackend::new("plotters-doc-data/relative_size.png", (1024, 768)).into_drawing_area();
+    let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 
@@ -47,6 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // To avoid the IO failure being ignored silently, we manually call the present function
     root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    println!("Result has been saved to {}", OUT_FILE_NAME);
 
     Ok(())
 }

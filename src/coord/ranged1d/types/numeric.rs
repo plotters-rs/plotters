@@ -109,7 +109,7 @@ macro_rules! gen_key_points_comp {
                 return vec![];
             }
 
-            let range = (range.0 as f64, range.1 as f64);
+            let range = (range.0.min(range.1) as f64, range.1.max(range.0) as f64);
 
             assert!(!(range.0.is_nan() || range.1.is_nan()));
 
@@ -367,7 +367,7 @@ mod test {
     }
 
     #[test]
-    fn test_zero_sized_coord_not_hang() {
+    fn regression_test_issue_253_zero_sized_coord_not_hang() {
         let coord: RangedCoordf32 = (0.0..0.0).into();
         let _points = coord.key_points(10);
     }
@@ -377,5 +377,11 @@ mod test {
         let coord: RangedCoordf64 = (0.0..1e-25).into();
         let points = coord.key_points(10);
         assert!(points.len() > 0);
+    }
+
+    #[test]
+    fn regression_test_issue_255_reverse_f32_coord_no_hang() {
+        let coord: RangedCoordf32 = (10.0..0.0).into();
+        let _points = coord.key_points(10);
     }
 }

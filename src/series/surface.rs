@@ -1,10 +1,17 @@
 use crate::element::Polygon;
 use crate::style::{colors::BLUE, Color, ShapeStyle};
 use std::marker::PhantomData;
+
+/// Any type that describe a surface orientation
 pub trait Direction<X, Y, Z> {
+    /// The type for the first input argument
     type Input1Type;
+    /// The type for the second input argument
     type Input2Type;
+    /// The output of the surface function
     type OutputType;
+
+    /// The function that maps a point on surface into the coordinate system
     fn make_coord(
         free_vars: (Self::Input1Type, Self::Input2Type),
         result: Self::OutputType,
@@ -48,10 +55,9 @@ impl<T> StyleConfig<'_, T> {
 
 /// The surface series.
 ///
-/// Currently the surface is representing any surface in form
-/// y = f(x,z)
+/// Currently the surface is representing any surface represented by a
+/// function of two variables
 ///
-/// TODO: make this more general
 pub struct SurfaceSeries<'a, X, Y, Z, D, SurfaceFunc>
 where
     D: Direction<X, Y, Z>,
@@ -71,6 +77,7 @@ where
     D: Direction<X, Y, Z>,
     SurfaceFunc: Fn(D::Input1Type, D::Input2Type) -> D::OutputType,
 {
+    /// Create a new surface series, the surface orientation is determined by D  
     pub fn new<IterA: Iterator<Item = D::Input1Type>, IterB: Iterator<Item = D::Input2Type>>(
         first_iter: IterA,
         second_iter: IterB,
