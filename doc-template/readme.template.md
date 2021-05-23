@@ -6,6 +6,9 @@
 <a href="https://docs.rs/plotters">
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
+<a href="https://docs.rs/plotters">
+    <img style="display: inline!important" src="https://img.shields.io/crates/d/plotters"></img>
+</a>
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>

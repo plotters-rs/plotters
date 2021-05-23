@@ -8,6 +8,9 @@
 <a href="https://docs.rs/plotters">
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
+<a href="https://docs.rs/plotters">
+    <img style="display: inline!important" src="https://img.shields.io/crates/d/plotters"></img>
+</a>
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
     <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
@@ -153,7 +156,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The 1D Gaussian Distribution
-        <a href="https://github.com/38/plotters/blob/master/examples/normal-dist2.rs">[code]</a>
+        <a href="https://github.com/38/plotters/blob/master/examples/nomal-dist2.rs">[code]</a>
     </div>
 </div>
 
