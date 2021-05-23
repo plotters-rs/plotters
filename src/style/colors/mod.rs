@@ -54,4 +54,5 @@ define_color!(CYAN, 0, 255, 255, "Cyan");
 define_color!(MAGENTA, 255, 0, 255, "Magenta");
 define_color!(TRANSPARENT, 0, 0, 0, 0.0, "Transparent");
 
+#[cfg(feature = "full_palette")]
 pub mod full_palette;
