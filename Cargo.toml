@@ -12,8 +12,10 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-plotters-backend = "0.3.*"
 gif = { version = "0.11.2", optional = true }
+
+[dependencies.plotters-backend]
+version = "^0.3"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.23.14"
