@@ -44,7 +44,6 @@ macro_rules! define_color {
     };
 }
 
-
 define_color!(WHITE, 255, 255, 255, "White");
 define_color!(BLACK, 0, 0, 0, "Black");
 define_color!(RED, 255, 0, 0, "Red");

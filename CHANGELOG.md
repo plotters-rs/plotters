@@ -2,6 +2,11 @@
 
 ## Plotters latest (?)
 
+### Improved
+
+- Improved documentaiton for predefined colors. (Thanks to siefkenj)
+- Introduce the full Material Design 2014 Color Palette. (Thanks to siefkenj)
+
 ## Plotters 0.3.1 (2021-05-21)
 
 ### Improved
