@@ -17,6 +17,8 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
 plotters-backend = "^0.3"
 plotters-svg = {version = "^0.3.*", optional = true}
+stretch = "0.3.2"
+paste = "1.0"
 
 [dependencies.plotters-bitmap]
 version = "^0.3.*"

@@ -89,7 +89,7 @@ impl<X: Ranged, Y: Ranged> Cartesian2d<X, Y> {
         self.logic_y.range()
     }
 
-    /// Get the horizental backend coordinate range where X axis should be drawn
+    /// Get the horizontal backend coordinate range where X axis should be drawn
     pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
         self.logic_x.axis_pixel_range(self.back_x)
     }

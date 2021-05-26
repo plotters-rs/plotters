@@ -756,7 +756,9 @@ pub use palette;
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {
     // Chart related types
-    pub use crate::chart::{ChartBuilder, ChartContext, LabelAreaPosition, SeriesLabelPosition};
+    pub use crate::chart::{
+        ChartBuilder, ChartContext, ChartLayout, LabelAreaPosition, SeriesLabelPosition,
+    };
 
     // Coordinates
     pub use crate::coord::{
