@@ -9,8 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&full_palette::WHITE)?;
 
     let mut chart = ChartLayout::new(&root);
-    chart.set_title_text("Chart Title").unwrap();
-    chart.draw().unwrap();
+    chart.set_title_text("Chart Title")?.draw()?;
 
     Ok(())
 }

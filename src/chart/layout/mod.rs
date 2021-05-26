@@ -1,8 +1,8 @@
 use crate::coord::Shift;
 
-use crate::drawing::DrawingArea;
+use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::style::IntoFont;
-use crate::style::{colors, TextStyle};
+use crate::style::TextStyle;
 
 use plotters_backend::DrawingBackend;
 
@@ -32,7 +32,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
         }
     }
 
-    pub fn draw(&mut self) -> Result<&mut Self, Box<dyn std::error::Error + 'a>> {
+    pub fn draw(&mut self) -> Result<&mut Self, DrawingAreaErrorKind<DB::ErrorType>> {
         let (x_range, y_range) = self.root_area.get_pixel_range();
         let (x_top, y_top) = (x_range.start, y_range.start);
         let (w, h) = (x_range.end - x_top, y_range.end - y_top);
@@ -54,11 +54,12 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
     pub fn set_title_text<S: AsRef<str>>(
         &mut self,
         title: S,
-    ) -> Result<&mut Self, Box<dyn std::error::Error + 'a>> {
+    ) -> Result<&mut Self, DrawingAreaErrorKind<DB::ErrorType>> {
         self.title_text = Some(title.as_ref().to_string());
         let (w, h) = self
             .root_area
-            .estimate_text_size(&self.title_text.as_ref().unwrap(), &self.title_style)?;
+            .estimate_text_size(&self.title_text.as_ref().unwrap(), &self.title_style)
+            .unwrap();
         self.nodes.set_chart_title_size(w as i32, h as i32)?;
         Ok(self)
     }

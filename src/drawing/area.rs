@@ -141,6 +141,8 @@ pub enum DrawingAreaErrorKind<E: Error + Send + Sync> {
     SharingError,
     /// The error caused by invalid layout
     LayoutError,
+    /// Layout error coming from the Stretch library
+    StretchError(stretch::Error),
 }
 
 impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
@@ -151,11 +153,18 @@ impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
                 write!(fmt, "Multiple backend operation in progress")
             }
             DrawingAreaErrorKind::LayoutError => write!(fmt, "Bad layout"),
+            DrawingAreaErrorKind::StretchError(e) => e.fmt(fmt),
         }
     }
 }
 
 impl<E: Error + Send + Sync> Error for DrawingAreaErrorKind<E> {}
+
+impl<E: Error + Send + Sync> From<stretch::Error> for DrawingAreaErrorKind<E> {
+    fn from(err: stretch::Error) -> Self {
+        DrawingAreaErrorKind::StretchError(err)
+    }
+}
 
 #[allow(type_alias_bounds)]
 type DrawingAreaError<T: DrawingBackend> = DrawingAreaErrorKind<T::ErrorType>;

@@ -66,7 +66,7 @@ macro_rules! impl_set_size {
                 &mut self,
                 w: i32,
                 h: i32,
-            ) -> Result<(), Box<dyn std::error::Error>> {
+            ) -> Result<(), stretch::Error> {
                 self.stretch_context.set_measure(
                     self.$name,
                     Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
@@ -83,7 +83,7 @@ macro_rules! impl_set_size {
                 &mut self,
                 w: i32,
                 h: i32,
-            ) -> Result<(), Box<dyn std::error::Error>> {
+            ) -> Result<(), stretch::Error> {
                 self.stretch_context.set_measure(
                     self.$name.$sub_part,
                     Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
@@ -106,7 +106,7 @@ pub(crate) struct CenteredLabelLayout {
 impl CenteredLabelLayout {
     /// Create an inner node that is `justify-content: center` with respect
     /// to its outer node.
-    fn new(stretch_context: &mut Stretch) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new(stretch_context: &mut Stretch) -> Result<Self, stretch::Error> {
         let inner = stretch_context.new_leaf(
             Default::default(),
             Box::new(|constraint| {
@@ -127,7 +127,7 @@ impl CenteredLabelLayout {
         Ok(Self { inner, outer })
     }
     /// Create an inner node that is horizontally centered in its 100% width parent.
-    fn new_row_layout(stretch_context: &mut Stretch) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new_row_layout(stretch_context: &mut Stretch) -> Result<Self, stretch::Error> {
         let layout = Self::new(stretch_context)?;
         // If the layout is placed in a row, the outer should have 100% width.
         let outer_style = *stretch_context.style(layout.outer)?;
@@ -142,7 +142,7 @@ impl CenteredLabelLayout {
         Ok(layout)
     }
     /// Create an inner node that is vertically centered in its 100% height parent.
-    fn new_col_layout(stretch_context: &mut Stretch) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new_col_layout(stretch_context: &mut Stretch) -> Result<Self, stretch::Error> {
         let layout = Self::new(stretch_context)?;
         // If the layout is placed in a row, the outer should have 100% width.
         let outer_style = *stretch_context.style(layout.outer)?;
@@ -232,7 +232,7 @@ pub(crate) struct ChartLayoutNodes {
 impl ChartLayoutNodes {
     /// Create a new `ChartLayoutNodes`. All margins/padding/sizes are set to 0
     /// and should be overridden as needed.
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> Result<Self, stretch::Error> {
         // Set up the layout engine
         let mut stretch_context = Stretch::new();
 
@@ -312,7 +312,7 @@ impl ChartLayoutNodes {
     }
     /// Compute the layout of all items to fill a container of width
     /// `w` and height `h`.
-    pub fn layout(&mut self, w: u32, h: u32) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn layout(&mut self, w: u32, h: u32) -> Result<(), stretch::Error> {
         // Compute the initial layout
         self.stretch_context.compute_layout(
             self.outer_container,
@@ -381,7 +381,7 @@ impl ChartLayoutNodes {
         &mut self,
         w: i32,
         h: i32,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), stretch::Error> {
         self.stretch_context.set_measure(
             self.chart_area,
             Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
@@ -420,7 +420,7 @@ impl ChartLayoutNodes {
 fn packed_title_label_area(
     stretch_context: &mut Stretch,
     flex_direction: FlexDirection,
-) -> Result<(Node, CenteredLabelLayout, Node), Box<dyn std::error::Error>> {
+) -> Result<(Node, CenteredLabelLayout, Node), stretch::Error> {
     let title = match flex_direction {
         FlexDirection::Row | FlexDirection::RowReverse => {
             // If the title and the label are packed in a row, the title should be centered in a *column*.
