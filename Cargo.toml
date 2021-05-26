@@ -15,13 +15,15 @@ exclude = ["doc-template/*"]
 [dependencies]
 num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
-plotters-backend = "^0.3"
 plotters-svg = {version = "^0.3.*", optional = true}
 stretch = "0.3.2"
 paste = "1.0"
 
+[dependencies.plotters-backend]
+version = "^0.3"
+
 [dependencies.plotters-bitmap]
-version = "^0.3.*"
+version = "^0.3"
 optional = true
 default_features = false
 
@@ -99,7 +101,6 @@ deprecated_items = [] # Keep some of the deprecated items for backward compatibi
 itertools = "0.10.0"
 criterion = "0.3.4"
 rayon = "1.5.1"
-plotters-bitmap = "^0.3.*"
 serde_json = "1.0.64"
 serde = "1.0.126"
 serde_derive = "1.0.126"
