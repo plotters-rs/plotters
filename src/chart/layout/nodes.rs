@@ -1,6 +1,9 @@
 use paste::paste;
-use std::collections::HashMap;
 use std::iter::once;
+use std::{
+    collections::HashMap,
+    ops::{Add, Sub},
+};
 
 use stretch::number::OrElse;
 use stretch::{
@@ -11,26 +14,115 @@ use stretch::{
     style::*,
 };
 
+/// Trait to constrain a type to a standard numeric type
+/// to prevent ambiguity in trait definitions.
+/// Idea from: https://stackoverflow.com/questions/39159226/conflicting-implementations-of-trait-in-rust
+pub trait Numeric {}
+impl Numeric for f64 {}
+impl Numeric for f32 {}
+impl Numeric for i64 {}
+impl Numeric for i32 {}
+impl Numeric for i16 {}
+impl Numeric for i8 {}
+impl Numeric for isize {}
+impl Numeric for u64 {}
+impl Numeric for u32 {}
+impl Numeric for u16 {}
+impl Numeric for u8 {}
+impl Numeric for usize {}
+
+/// An `Extent` stores the upper left and bottom right corner of a rectangular region
+#[derive(Clone, Debug, PartialEq)]
+pub struct Extent<T: Add + Sub + Copy> {
+    pub x0: T,
+    pub y0: T,
+    pub x1: T,
+    pub y1: T,
+}
+impl<T: Add<Output = T> + Sub<Output = T> + Copy> Extent<T> {
+    pub fn new(x0: T, y0: T, x1: T, y1: T) -> Self {
+        Self { x0, y0, x1, y1 }
+    }
+    /// Turn the extent into a tuple of the form `(x0,y0,x1,y1)`.
+    pub fn into_tuple(self) -> (T, T, T, T) {
+        (self.x0, self.y0, self.x1, self.y1)
+    }
+    /// Turn the extent into an array of tuples of the form `[(x0,y0),(x1,y1)]`.
+    pub fn into_array_of_tuples(self) -> [(T, T); 2] {
+        [(self.x0, self.y0), (self.x1, self.y1)]
+    }
+    /// Get `(width, height)` of the extent
+    pub fn size(&self) -> (T, T) {
+        (self.x1 - self.x0, self.y1 - self.y0)
+    }
+    /// Translate the extent by the point `(x,y)`
+    pub fn translate<S: Into<T> + Copy>(&self, (x, y): (S, S)) -> Self {
+        Extent {
+            x0: self.x0 + x.into(),
+            y0: self.y0 + y.into(),
+            x1: self.x1 + x.into(),
+            y1: self.y1 + y.into(),
+        }
+    }
+}
+
+/// Margin of a box
+#[derive(Debug, Clone, PartialEq)]
+pub struct Margin<T: Into<f32>> {
+    pub top: T,
+    pub right: T,
+    pub bottom: T,
+    pub left: T,
+}
+impl<T: Into<f32> + Copy + Numeric> From<(T, T, T, T)> for Margin<f32> {
+    /// Convert from a tuple to a margins object. The tuple order
+    /// is the same as the CSS standard `(top, right, bottom, left)`
+    fn from(tuple: (T, T, T, T)) -> Self {
+        Margin {
+            top: tuple.0.into(),
+            right: tuple.1.into(),
+            bottom: tuple.2.into(),
+            left: tuple.3.into(),
+        }
+    }
+}
+impl<T: Into<f32> + Copy + Numeric> From<(T, T)> for Margin<f32> {
+    /// Convert from a tuple to a margins object. The tuple order
+    /// is the same as the CSS standard `(vertical, horizontal)`
+    fn from(tuple: (T, T)) -> Self {
+        Margin {
+            top: tuple.0.into(),
+            right: tuple.1.into(),
+            bottom: tuple.0.into(),
+            left: tuple.1.into(),
+        }
+    }
+}
+impl<T: Into<f32> + Copy + Numeric> From<T> for Margin<f32> {
+    /// Convert a number to a margins object. The
+    /// number will be used for every margin
+    fn from(margin: T) -> Self {
+        Margin {
+            top: margin.into(),
+            right: margin.into(),
+            bottom: margin.into(),
+            left: margin.into(),
+        }
+    }
+}
+
 macro_rules! impl_get_size {
     ($name:ident) => {
         paste! {
             #[doc = "Get the size of the `" $name "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(width, height)`."]
             pub fn [<get_ $name _size>](&self) -> Option<(i32, i32)> {
-                self.extents_cache.as_ref().and_then(|extents_cache| {
-                    extents_cache
-                        .get(&self.$name)
-                        .map(|&(x1, y1, x2, y2)| (x2 - x1, y2 - y1))
-                })
+                self.get_size(&self.$name)
             }
             #[doc = "Get the extents of the `" $name "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(x1,y1,x2,y2)`."]
-            pub fn [<get_ $name _extents>](&self) -> Option<(i32, i32, i32, i32)> {
-                self.extents_cache.as_ref().and_then(|extents_cache| {
-                    extents_cache
-                        .get(&self.$name)
-                        .map(|&extent| extent)
-                })
+            pub fn [<get_ $name _extent>](&self) -> Option<Extent<i32>> {
+                self.get_extent(&self.$name)
             }
         }
     };
@@ -39,20 +131,31 @@ macro_rules! impl_get_size {
             #[doc = "Get the size of the `" $name "." $sub_part "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(width, height)`."]
             pub fn [<get_ $name _size>](&self) -> Option<(i32, i32)> {
-                self.extents_cache.as_ref().and_then(|extents_cache| {
-                    extents_cache
-                        .get(&self.$name.$sub_part)
-                        .map(|&(x1, y1, x2, y2)| (x2 - x1, y2 - y1))
-                })
+                self.get_size(&self.$name.$sub_part)
             }
             #[doc = "Get the size of the `" $name "." $sub_part "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(x1,y1,x2,y2)`."]
-            pub fn [<get_ $name _extents>](&self) -> Option<(i32, i32, i32, i32)> {
-                self.extents_cache.as_ref().and_then(|extents_cache| {
-                    extents_cache
-                        .get(&self.$name.$sub_part)
-                        .map(|&extent| extent)
-                })
+            pub fn [<get_ $name _extent>](&self) -> Option<Extent<i32>> {
+                self.get_extent(&self.$name.$sub_part)
+            }
+        }
+    };
+}
+
+macro_rules! impl_get_margin {
+    ($name:ident) => {
+        paste! {
+            #[doc = "Get the margin of the `" $name "` container."]
+            pub fn [<get_ $name _margin>](&self) -> Result<Margin<f32>, stretch::Error> {
+                self.get_margin(self.$name)
+            }
+        }
+    };
+    ($name:ident, $sub_part:ident) => {
+        paste! {
+            #[doc = "Get the margin of the `" $name "." $sub_part "` container."]
+            pub fn [<get_ $name _margin>](&self) -> Result<Margin<f32>, stretch::Error> {
+                self.get_margin(self.$name.$sub_part)
             }
         }
     };
@@ -61,39 +164,54 @@ macro_rules! impl_get_size {
 macro_rules! impl_set_size {
     ($name:ident) => {
         paste! {
-            #[doc = "Set the size of the `" $name "` container."]
+            #[doc = "Set the minimum size of the `" $name "` container."]
             pub fn [<set_ $name _size>](
                 &mut self,
-                w: i32,
-                h: i32,
+                w: u32,
+                h: u32,
             ) -> Result<(), stretch::Error> {
-                self.stretch_context.set_measure(
-                    self.$name,
-                    Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
-                )?;
-                Ok(())
+                self.set_min_size(self.$name, w, h)
             }
         }
     };
     ($name:ident, $sub_part:ident) => {
         paste! {
-            #[doc = "Set the size of the `" $name "." $sub_part "` container."]
+            #[doc = "Set the minimum size of the `" $name "." $sub_part "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(width, height)`."]
             pub fn [<set_ $name _size>](
                 &mut self,
-                w: i32,
-                h: i32,
+                w: u32,
+                h: u32,
             ) -> Result<(), stretch::Error> {
-                self.stretch_context.set_measure(
-                    self.$name.$sub_part,
-                    Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
-                )?;
-                Ok(())
+                self.set_min_size(self.$name.$sub_part, w, h)
             }
         }
     };
 }
-
+macro_rules! impl_set_margin {
+    ($name:ident) => {
+        paste! {
+            #[doc = "Set the margin of the `" $name "` container."]
+            pub fn [<set_ $name _margin>]<M: Into<Margin<f32>>>(
+                &mut self,
+                margin: M,
+            ) -> Result<(), stretch::Error> {
+                self.set_margin(self.$name, margin)
+            }
+        }
+    };
+    ($name:ident, $sub_part:ident) => {
+        paste! {
+            #[doc = "Set the margin of the `" $name "." $sub_part "` container."]
+            pub fn [<set_ $name _margin>]<M: Into<Margin<f32>>>(
+                &mut self,
+                margin: M,
+            ) -> Result<(), stretch::Error> {
+                self.set_margin(self.$name.$sub_part, margin)
+            }
+        }
+    };
+}
 /// A structure containing two nodes, `inner` and `outer`.
 /// `inner` is contained within `outer` and will be centered within
 /// `outer`. `inner` will be centered horizontally for a `row_layout`
@@ -201,7 +319,7 @@ pub(crate) struct ChartLayoutNodes {
     /// A map from nodes to extents of the form `(x1,y1,x2,y2)` where
     /// `(x1,y1)` is the upper left corner of the node and
     /// `(x2,y2)` is the lower right corner of the node.
-    extents_cache: Option<HashMap<Node, (i32, i32, i32, i32)>>,
+    extents_cache: Option<HashMap<Node, Extent<i32>>>,
     /// The `stretch` context that is used to compute the layout.
     stretch_context: Stretch,
     /// The outer-most node which contains all others.
@@ -369,27 +487,81 @@ impl ChartLayoutNodes {
 
         Ok(())
     }
-
-    pub fn get_chart_area_size(&self) -> Option<(i32, i32)> {
-        self.extents_cache.as_ref().and_then(|extents_cache| {
-            extents_cache
-                .get(&self.chart_area)
-                .map(|&(x1, y1, x2, y2)| (x2 - x1, y2 - y1))
-        })
+    /// Gets the size of `node`. `layout()` must be called first, otherwise an invalid size is returned.
+    fn get_size(&self, node: &Node) -> Option<(i32, i32)> {
+        self.extents_cache
+            .as_ref()
+            .and_then(|extents_cache| extents_cache.get(node).map(|extent| extent.size()))
     }
-    pub fn set_chart_area_size(
-        &mut self,
-        w: i32,
-        h: i32,
-    ) -> Result<(), stretch::Error> {
+    /// Sets the minimum size of `node`. The actual size of `node` may be larger after `layout()` is called.
+    fn set_min_size(&mut self, node: Node, w: u32, h: u32) -> Result<(), stretch::Error> {
         self.stretch_context.set_measure(
-            self.chart_area,
+            node,
             Some(new_measure_func_with_min_sizes(w as f32, h as f32)),
         )?;
         Ok(())
     }
+    /// Get the currently set margin for `node`.
+    fn get_margin(&self, node: Node) -> Result<Margin<f32>, stretch::Error> {
+        let style = self.stretch_context.style(node)?;
+        // A Stretch margin could be in `Points`, `Percent`, `Undefined` or `Auto`. We
+        // ignore everything but `Points`.
+        let top = match style.margin.top {
+            Dimension::Points(v) => v,
+            _ => 0.0,
+        };
+        let left = match style.margin.start {
+            Dimension::Points(v) => v,
+            _ => 0.0,
+        };
+        let bottom = match style.margin.bottom {
+            Dimension::Points(v) => v,
+            _ => 0.0,
+        };
+        let right = match style.margin.end {
+            Dimension::Points(v) => v,
+            _ => 0.0,
+        };
+
+        Ok(Margin {
+            top,
+            right,
+            bottom,
+            left,
+        })
+    }
+    /// Set the margin of `node`.
+    fn set_margin<M: Into<Margin<f32>>>(
+        &mut self,
+        node: Node,
+        margin: M,
+    ) -> Result<(), stretch::Error> {
+        let &old_style = self.stretch_context.style(node)?;
+        let margin: Margin<f32> = margin.into();
+        self.stretch_context.set_style(
+            node,
+            Style {
+                margin: geometry::Rect {
+                    top: Dimension::Points(margin.top),
+                    bottom: Dimension::Points(margin.bottom),
+                    start: Dimension::Points(margin.left),
+                    end: Dimension::Points(margin.right),
+                },
+                ..old_style
+            },
+        )?;
+
+        Ok(())
+    }
+    /// Get the extent (the upper left and lower right coordinates of the bounding rectangle) of `node`.
+    fn get_extent(&self, node: &Node) -> Option<Extent<i32>> {
+        self.extents_cache
+            .as_ref()
+            .and_then(|extents_cache| extents_cache.get(node).map(|extent| extent.clone()))
+    }
     // Getters for relevant box sizes
     impl_get_size!(outer_container);
+    impl_get_size!(chart_area);
     impl_get_size!(top_tick_label);
     impl_get_size!(bottom_tick_label);
     impl_get_size!(left_tick_label);
@@ -399,6 +571,11 @@ impl ChartLayoutNodes {
     impl_get_size!(bottom_label, inner);
     impl_get_size!(left_label, inner);
     impl_get_size!(right_label, inner);
+    impl_get_margin!(chart_title, inner);
+    impl_get_margin!(top_label, inner);
+    impl_get_margin!(bottom_label, inner);
+    impl_get_margin!(left_label, inner);
+    impl_get_margin!(right_label, inner);
 
     // Setters for relevant box sizes
     impl_set_size!(top_tick_label);
@@ -410,6 +587,11 @@ impl ChartLayoutNodes {
     impl_set_size!(bottom_label, inner);
     impl_set_size!(left_label, inner);
     impl_set_size!(right_label, inner);
+    impl_set_margin!(chart_title, inner);
+    impl_set_margin!(top_label, inner);
+    impl_set_margin!(bottom_label, inner);
+    impl_set_margin!(left_label, inner);
+    impl_set_margin!(right_label, inner);
 }
 
 /// Pack a centered title and a label-area together in a row (`FlexDirection::Row`/`RowReverse`)
@@ -469,24 +651,24 @@ fn new_measure_func_with_defaults() -> MeasureFunc {
 }
 
 /// When `stretch` computes the layout of a node, its
-/// extents are computed relatively to the parent. We want absolute positions,
+/// extent are computed relatively to the parent. We want absolute positions,
 /// so we need to compute them manually.
 ///   * **Returns**: A `HashMap` from nodes to tuples `(x1,y1,x2,y2)` where `(x1,y1)` and `(x2,y2)` represent the upper left and lower right corners of the bounding rectangle.
-fn compute_child_extents(stretch: &Stretch, node: Node) -> HashMap<Node, (i32, i32, i32, i32)> {
+fn compute_child_extents(stretch: &Stretch, node: Node) -> HashMap<Node, Extent<i32>> {
     const DEFAULT_CAPACITY: usize = 16;
     let mut ret = HashMap::with_capacity(DEFAULT_CAPACITY);
     fn _compute_child_extents(
         stretch: &Stretch,
         node: Node,
         offset: (i32, i32),
-        store: &mut HashMap<Node, (i32, i32, i32, i32)>,
+        store: &mut HashMap<Node, Extent<i32>>,
     ) {
         let layout = stretch.layout(node).unwrap();
         let geometry::Point { x, y } = layout.location;
         let geometry::Size { width, height } = layout.size;
         let (x1, y1) = (x as i32 + offset.0, y as i32 + offset.1);
         let (x2, y2) = ((width) as i32 + x1, (height) as i32 + y1);
-        store.insert(node, (x1, y1, x2, y2));
+        store.insert(node, Extent::new(x1, y1, x2, y2));
 
         if stretch.child_count(node).unwrap() > 0 {
             for child in stretch.children(node).unwrap() {
@@ -507,12 +689,12 @@ mod test {
         let mut layout = ChartLayoutNodes::new().unwrap();
         layout.layout(70, 50).unwrap();
         let extents_cache = layout.extents_cache.unwrap();
-        let &(x1, y1, x2, y2) = extents_cache.get(&layout.chart_area).unwrap();
+        let extent = extents_cache.get(&layout.chart_area).unwrap();
 
-        assert_eq!(x1, 0);
-        assert_eq!(y1, 0);
-        assert_eq!(x2, 70);
-        assert_eq!(y2, 50);
+        assert_eq!(extent.x0, 0);
+        assert_eq!(extent.y0, 0);
+        assert_eq!(extent.x1, 70);
+        assert_eq!(extent.y1, 50);
     }
     #[test]
     /// The default layout should make the chart area take the full area.
@@ -559,7 +741,77 @@ mod test {
         assert_eq!(w, 20);
         assert_eq!(h, 20);
 
-        let (x1, y1, x2, y2) = layout.get_chart_title_extents().unwrap();
-        assert_eq!((x1, y1, x2, y2), (25, 0, 45, 20));
+        let extent = layout.get_chart_title_extent().unwrap();
+        assert_eq!(extent, Extent::new(25, 0, 45, 20));
+    }
+    #[test]
+    fn set_chart_title_margin() {
+        let mut layout = ChartLayoutNodes::new().unwrap();
+        layout.set_chart_title_size(20, 20).unwrap();
+        layout
+            .set_chart_title_margin(Margin {
+                top: 10.0,
+                right: 15.0,
+                bottom: 20.0,
+                left: 5.0,
+            })
+            .unwrap();
+
+        let margin = layout.get_chart_title_margin().unwrap();
+
+        assert_eq!(
+            margin,
+            Margin {
+                top: 10.0,
+                right: 15.0,
+                bottom: 20.0,
+                left: 5.0,
+            }
+        );
+
+        layout.layout(100, 50).unwrap();
+        let extent = layout.get_chart_title_extent().unwrap();
+        assert_eq!(extent, Extent::new(35, 10, 55, 30));
+    }
+
+    #[test]
+    fn set_chart_title_margin_with_other_types() {
+        let mut layout = ChartLayoutNodes::new().unwrap();
+        layout.set_chart_title_size(20, 20).unwrap();
+        layout.set_chart_title_margin(10.).unwrap();
+        let margin = layout.get_chart_title_margin().unwrap();
+        assert_eq!(
+            margin,
+            Margin {
+                top: 10.0,
+                right: 10.0,
+                bottom: 10.0,
+                left: 10.0,
+            }
+        );
+
+        layout.set_chart_title_margin((10., 20.)).unwrap();
+        let margin = layout.get_chart_title_margin().unwrap();
+        assert_eq!(
+            margin,
+            Margin {
+                top: 10.0,
+                right: 20.0,
+                bottom: 10.0,
+                left: 20.0,
+            }
+        );
+
+        layout.set_chart_title_margin((10., 20., 30., 40.)).unwrap();
+        let margin = layout.get_chart_title_margin().unwrap();
+        assert_eq!(
+            margin,
+            Margin {
+                top: 10.0,
+                right: 20.0,
+                bottom: 30.0,
+                left: 40.0,
+            }
+        );
     }
 }

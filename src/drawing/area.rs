@@ -130,6 +130,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
     }
 }
 
+/// Sub error type specific to layout errors
+#[derive(Debug)]
+pub enum LayoutError {
+    /// Layout error coming from the Stretch library
+    StretchError(stretch::Error),
+    /// Could not compute the extents of a node during layout
+    ExtentsError,
+}
 /// The error description of any drawing area API
 #[derive(Debug)]
 pub enum DrawingAreaErrorKind<E: Error + Send + Sync> {
@@ -139,10 +147,8 @@ pub enum DrawingAreaErrorKind<E: Error + Send + Sync> {
     /// which indicates the drawing backend is current used by other
     /// drawing operation
     SharingError,
-    /// The error caused by invalid layout
-    LayoutError,
-    /// Layout error coming from the Stretch library
-    StretchError(stretch::Error),
+    /// Error encountered during layout
+    LayoutError(LayoutError),
 }
 
 impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
@@ -152,8 +158,10 @@ impl<E: Error + Send + Sync> std::fmt::Display for DrawingAreaErrorKind<E> {
             DrawingAreaErrorKind::SharingError => {
                 write!(fmt, "Multiple backend operation in progress")
             }
-            DrawingAreaErrorKind::LayoutError => write!(fmt, "Bad layout"),
-            DrawingAreaErrorKind::StretchError(e) => e.fmt(fmt),
+            DrawingAreaErrorKind::LayoutError(LayoutError::StretchError(e)) => e.fmt(fmt),
+            DrawingAreaErrorKind::LayoutError(LayoutError::ExtentsError) => {
+                write!(fmt, "Could not find the extends of node")
+            }
         }
     }
 }
@@ -162,7 +170,13 @@ impl<E: Error + Send + Sync> Error for DrawingAreaErrorKind<E> {}
 
 impl<E: Error + Send + Sync> From<stretch::Error> for DrawingAreaErrorKind<E> {
     fn from(err: stretch::Error) -> Self {
-        DrawingAreaErrorKind::StretchError(err)
+        DrawingAreaErrorKind::LayoutError(LayoutError::StretchError(err))
+    }
+}
+
+impl<E: Error + Send + Sync> From<LayoutError> for DrawingAreaErrorKind<E> {
+    fn from(err: LayoutError) -> Self {
+        DrawingAreaErrorKind::LayoutError(err)
     }
 }
 
