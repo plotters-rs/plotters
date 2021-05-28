@@ -256,6 +256,18 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
         Ok(self)
     }
 
+    /// Return a drawing area which corresponds to the `chart_area` of the current layout.
+    /// [`layout`] should be called before this function.
+    pub fn get_chart_drawing_area(
+        &mut self,
+    ) -> Result<DrawingArea<DB, Shift>, DrawingAreaErrorKind<DB::ErrorType>> {
+        let chart_area_extent = self.get_chart_area_extent()?;
+        Ok(DrawingArea::clone(self.root_area).shrink(
+            (chart_area_extent.x0, chart_area_extent.y0),
+            chart_area_extent.size(),
+        ))
+    }
+
     /// Set the text of a label. If the text is a blank screen, the label is cleared.
     #[inline(always)]
     fn set_text<S: AsRef<str>>(elm: &mut Label, text: S) {

@@ -311,7 +311,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                         .map(|(w, _)| w)
                         .unwrap_or(0) as i32
                 } else {
-                    // Don't ever do the layout estimationfor the drawing area that is either not
+                    // Don't ever do the layout estimation for the drawing area that is either not
                     // the right one or the tick mark is inward.
                     0
                 }
