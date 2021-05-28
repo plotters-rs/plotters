@@ -23,7 +23,7 @@ macro_rules! impl_get_extent {
                     .[<get_ $name _extent>]()
                     .ok_or_else(|| LayoutError::ExtentsError)?;
 
-                Ok(self.compute_absolute_pixel_coords(extent))
+                Ok(extent)
             }
             #[doc = "Get the size of the `" $name "` container."]
             #[doc = "  * **Returns**: An option containing a tuple `(width, height)`."]
@@ -181,13 +181,6 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
         }
     }
 
-    /// Translate the `extent` given in local pixel coordinates to be given
-    /// in absolute pixel coordinates.
-    fn compute_absolute_pixel_coords(&self, extent: Extent<i32>) -> Extent<i32> {
-        let (x_range, y_range) = self.root_area.get_pixel_range();
-        extent.translate((x_range.start, y_range.start))
-    }
-
     pub fn draw(&mut self) -> Result<&mut Self, DrawingAreaErrorKind<DB::ErrorType>> {
         let (x_range, y_range) = self.root_area.get_pixel_range();
         let (x_top, y_top) = (x_range.start, y_range.start);
@@ -200,11 +193,8 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
                 .nodes
                 .get_chart_title_extent()
                 .ok_or_else(|| LayoutError::ExtentsError)?;
-            self.root_area.draw_text(
-                text,
-                &self.chart_title.style,
-                (extent.x0 + x_top, extent.y0 + y_top),
-            )?;
+            self.root_area
+                .draw_text(text, &self.chart_title.style, (extent.x0, extent.y0))?;
         }
 
         if let Some(text) = self.top_label.text.as_ref() {
@@ -212,22 +202,16 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
                 .nodes
                 .get_top_label_extent()
                 .ok_or_else(|| LayoutError::ExtentsError)?;
-            self.root_area.draw_text(
-                text,
-                &self.top_label.style,
-                (extent.x0 + x_top, extent.y0 + y_top),
-            )?;
+            self.root_area
+                .draw_text(text, &self.top_label.style, (extent.x0, extent.y0))?;
         }
         if let Some(text) = self.bottom_label.text.as_ref() {
             let extent = self
                 .nodes
                 .get_bottom_label_extent()
                 .ok_or_else(|| LayoutError::ExtentsError)?;
-            self.root_area.draw_text(
-                text,
-                &self.bottom_label.style,
-                (extent.x0 + x_top, extent.y0 + y_top),
-            )?;
+            self.root_area
+                .draw_text(text, &self.bottom_label.style, (extent.x0, extent.y0))?;
         }
         // Draw the vertically oriented labels
         if let Some(text) = self.left_label.text.as_ref() {
@@ -238,7 +222,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
             self.root_area.draw_text(
                 text,
                 &self.left_label.style.transform(FontTransform::Rotate270),
-                (extent.x0 + x_top, extent.y1 + y_top),
+                (extent.x0, extent.y1),
             )?;
         }
         if let Some(text) = self.right_label.text.as_ref() {
@@ -249,7 +233,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
             self.root_area.draw_text(
                 text,
                 &self.right_label.style.transform(FontTransform::Rotate270),
-                (extent.x0 + x_top, extent.y1 + y_top),
+                (extent.x0, extent.y1),
             )?;
         }
 
