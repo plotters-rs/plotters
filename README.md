@@ -159,7 +159,7 @@ To view the source code for each example, please click on the example image.
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^0.3.1"
+plotters = "0.3.1"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
