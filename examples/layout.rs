@@ -36,6 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
     cc.configure_series_labels().border_style(&BLACK).draw()?;
+    root.present()?;
 
     Ok(())
 }
