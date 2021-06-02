@@ -1,13 +1,11 @@
 use std::borrow::Borrow;
 
-use plotters_backend::{DrawingBackend, BackendCoord};
+use plotters_backend::{BackendCoord, DrawingBackend};
 
+use crate::chart::{SeriesAnno, SeriesLabelStyle};
 use crate::coord::{CoordTranslate, ReverseCoordTranslate, Shift};
 use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
-use crate::element::{CoordMapper, PointCollection, Drawable};
-use crate::chart::{SeriesAnno, SeriesLabelStyle};
-
-
+use crate::element::{CoordMapper, Drawable, PointCollection};
 
 /// The context of the chart. This is the core object of Plotters.
 /// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
@@ -23,7 +21,6 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(crate) series_anno: Vec<SeriesAnno<'a, DB>>,
     pub(crate) drawing_area_pos: (i32, i32),
 }
-
 
 impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
     /// Convert the chart context into an closure that can be used for coordinate translation
@@ -96,4 +93,3 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
         Ok(self.alloc_series_anno())
     }
 }
-

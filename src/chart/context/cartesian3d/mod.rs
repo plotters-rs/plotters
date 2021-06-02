@@ -1,6 +1,10 @@
+use crate::chart::{axes3d::Axes3dStyle, ChartContext};
+use crate::coord::{
+    cartesian::Cartesian3d,
+    ranged1d::{Ranged, ValueFormatter},
+    ranged3d::{ProjectionMatrix, ProjectionMatrixBuilder},
+};
 use plotters_backend::DrawingBackend;
-use crate::chart::{ChartContext, axes3d::Axes3dStyle};
-use crate::coord::{ranged1d::{Ranged, ValueFormatter}, cartesian::Cartesian3d, ranged3d::{ProjectionMatrixBuilder, ProjectionMatrix}};
 
 mod draw_impl;
 

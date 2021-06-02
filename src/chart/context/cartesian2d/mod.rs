@@ -1,9 +1,13 @@
 use std::ops::Range;
 
-use plotters_backend::{DrawingBackend, BackendCoord};
+use plotters_backend::{BackendCoord, DrawingBackend};
 
-use crate::chart::{ChartContext, MeshStyle, DualCoordChartContext};
-use crate::coord::{cartesian::Cartesian2d, ranged1d::{ValueFormatter, Ranged, AsRangedCoord}, Shift};
+use crate::chart::{ChartContext, DualCoordChartContext, MeshStyle};
+use crate::coord::{
+    cartesian::Cartesian2d,
+    ranged1d::{AsRangedCoord, Ranged, ValueFormatter},
+    Shift,
+};
 use crate::drawing::DrawingArea;
 
 mod draw_impl;
@@ -58,7 +62,6 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
     pub fn backend_coord(&self, coord: &(X::ValueType, Y::ValueType)) -> BackendCoord {
         self.drawing_area.map_coordinate(coord)
     }
-
 }
 
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesian2d<X, Y>> {

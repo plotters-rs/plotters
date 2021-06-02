@@ -1,11 +1,17 @@
-
 use plotters_backend::DrawingBackend;
 
 use crate::chart::ChartContext;
-use crate::coord::{ranged1d::{Ranged, KeyPointHint}, CoordTranslate, cartesian::Cartesian3d};
+use crate::coord::{
+    cartesian::Cartesian3d,
+    ranged1d::{KeyPointHint, Ranged},
+    CoordTranslate,
+};
 use crate::drawing::DrawingAreaErrorKind;
-use crate::element::{EmptyElement, PathElement, Text, Polygon};
-use crate::style::{ShapeStyle, TextStyle, text_anchor::{Pos, VPos, HPos}};
+use crate::element::{EmptyElement, PathElement, Polygon, Text};
+use crate::style::{
+    text_anchor::{HPos, Pos, VPos},
+    ShapeStyle, TextStyle,
+};
 
 use super::Coord3D;
 
@@ -286,4 +292,3 @@ where
         ])
     }
 }
-

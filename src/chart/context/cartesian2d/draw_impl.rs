@@ -2,12 +2,18 @@ use std::ops::Range;
 
 use plotters_backend::DrawingBackend;
 
-use crate::coord::{ranged1d::{Ranged, KeyPointHint}, cartesian::{Cartesian2d, MeshLine}, Shift};
 use crate::chart::ChartContext;
-use crate::style::{ShapeStyle, TextStyle, text_anchor::{HPos, VPos, Pos}, FontTransform};
-use crate::drawing::{DrawingAreaErrorKind, DrawingArea};
+use crate::coord::{
+    cartesian::{Cartesian2d, MeshLine},
+    ranged1d::{KeyPointHint, Ranged},
+    Shift,
+};
+use crate::drawing::{DrawingArea, DrawingAreaErrorKind};
 use crate::element::PathElement;
-
+use crate::style::{
+    text_anchor::{HPos, Pos, VPos},
+    FontTransform, ShapeStyle, TextStyle,
+};
 
 impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesian2d<X, Y>> {
     /// The actual function that draws the mesh lines.
@@ -363,5 +369,4 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
 
         Ok(())
     }
-
 }

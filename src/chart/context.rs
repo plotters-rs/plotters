@@ -6,7 +6,6 @@ pub(super) mod cartesian3d;
 
 pub(super) use cartesian3d::Coord3D;
 
-
 #[cfg(test)]
 mod test {
     use crate::prelude::*;
