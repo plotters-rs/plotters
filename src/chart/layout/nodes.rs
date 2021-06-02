@@ -32,15 +32,25 @@ impl Numeric for usize {}
 
 /// An `Extent` stores the upper left and bottom right corner of a rectangular region
 #[derive(Clone, Debug, PartialEq)]
-pub struct Extent<T: Add + Sub + Copy> {
+pub struct Extent<T> {
     pub x0: T,
     pub y0: T,
     pub x1: T,
     pub y1: T,
 }
-impl<T: Add<Output = T> + Sub<Output = T> + Copy> Extent<T> {
+impl<T: Add<Output = T> + Sub<Output = T> + Copy + Ord> Extent<T> {
     pub fn new(x0: T, y0: T, x1: T, y1: T) -> Self {
         Self { x0, y0, x1, y1 }
+    }
+    /// Creates a new extent with upper-left corner at (0,0) and width/height given by `w`/`h`.
+    pub fn new_with_size(w: T, h: T) -> Self {
+        let zero = w - w;
+        Self {
+            x0: zero,
+            y0: zero,
+            x1: w,
+            y1: h,
+        }
     }
     /// Turn the extent into a tuple of the form `(x0,y0,x1,y1)`.
     pub fn into_tuple(self) -> (T, T, T, T) {
@@ -62,6 +72,18 @@ impl<T: Add<Output = T> + Sub<Output = T> + Copy> Extent<T> {
             x1: self.x1 + x.into(),
             y1: self.y1 + y.into(),
         }
+    }
+    /// Expand `self` as needed to contain both `self` and `other`
+    pub fn union_mut(&mut self, other: &Self) {
+        // Canonicalize the coordinates so the 0th is the upper left and 1st is the lower right.
+        let x0 = self.x0.min(self.x1).min(other.x0).min(other.x1);
+        let y0 = self.y0.min(self.y1).min(other.y0).min(other.y1);
+        let x1 = self.x0.max(self.x1).max(other.x0).max(other.x1);
+        let y1 = self.y0.max(self.y1).max(other.y0).max(other.y1);
+        self.x0 = x0;
+        self.y0 = y0;
+        self.x1 = x1;
+        self.y1 = y1;
     }
 }
 
@@ -314,6 +336,7 @@ impl CenteredLabelLayout {
 ///    </chart_container>
 ///</outer_container>
 /// ```
+#[allow(dead_code)]
 pub(crate) struct ChartLayoutNodes {
     /// A map from nodes to extents of the form `(x1,y1,x2,y2)` where
     /// `(x1,y1)` is the upper left corner of the node and
@@ -346,6 +369,7 @@ pub(crate) struct ChartLayoutNodes {
     chart_container: Node,
 }
 
+#[allow(dead_code)]
 impl ChartLayoutNodes {
     /// Create a new `ChartLayoutNodes`. All margins/padding/sizes are set to 0
     /// and should be overridden as needed.
@@ -374,6 +398,7 @@ impl ChartLayoutNodes {
             },
             new_measure_func_with_defaults(),
         )?;
+        // Center column with top label/chart/bottom label
         let center_container = stretch_context.new_node(
             Style {
                 flex_grow: 1.0,
@@ -382,6 +407,7 @@ impl ChartLayoutNodes {
             },
             vec![top_area, chart_area, bottom_area],
         )?;
+        // Container with everything except the title
         let chart_container = stretch_context.new_node(
             Style {
                 flex_grow: 1.0,

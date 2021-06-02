@@ -27,6 +27,7 @@ Currently we support the following 2D coordinate system:
 use plotters_backend::BackendCoord;
 
 pub mod ranged1d;
+pub mod ticks;
 
 ///  The coordinate combinators
 ///
