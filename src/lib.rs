@@ -7,9 +7,17 @@
    See the documentation for [BitMapBackend](struct.BitMapBackend.html) for more details.
 */
 
+#[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
+mod gif_support;
+
+mod error;
+pub mod bitmap_pixel;
+
 mod bitmap;
 pub use bitmap::BitMapBackend;
+pub use error::BitMapBackendError;
 
-pub mod bitmap_pixel {
-    pub use super::bitmap::{BGRXPixel, PixelFormat, RGBPixel};
-}
+
+/*pub mod bitmap_pixel {
+    pub use super::bitmap::{BGRXPixel, RGBPixel};
+}*/
