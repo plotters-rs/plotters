@@ -192,30 +192,35 @@ pub struct ChartLayout<'a, 'b, DB: DrawingBackend> {
 
 impl<'a, 'b, DB: DrawingBackend> ChartLayout<'a, 'b, DB> {
     /// Create a chart builder on the given drawing area
-    /// - `root`: The root drawing area
-    /// - Returns: The chart layout object
+    ///   - `root`: The root drawing area
+    ///   - Returns: The chart layout object
     pub fn new(root: &'a DrawingArea<DB, Shift>) -> Self {
+        let (w, h) = root.dim_in_pixel();
+        let min_dim = w.min(h) as f32;
+        let title_text_size = (min_dim / 10.).clamp(10., 100.);
+        let label_text_size = (min_dim / 16.).clamp(10., 100.);
+
         Self {
             root_area: root,
             chart_title: Label {
                 text: None,
-                style: TextStyle::from(("serif", 40.0).into_font()),
+                style: ("serif", title_text_size).into(),
             },
             top_label: Label {
                 text: None,
-                style: TextStyle::from(("serif", 25.0).into_font()),
+                style: ("serif", label_text_size).into(),
             },
             bottom_label: Label {
                 text: None,
-                style: TextStyle::from(("serif", 25.0).into_font()),
+                style: ("serif", label_text_size).into(),
             },
             left_label: Label {
                 text: None,
-                style: TextStyle::from(("serif", 25.0).into_font()),
+                style: ("serif", label_text_size).into(),
             },
             right_label: Label {
                 text: None,
-                style: TextStyle::from(("serif", 25.0).into_font()),
+                style: ("serif", label_text_size).into(),
             },
             nodes: ChartLayoutNodes::new().unwrap(),
             axis_ranges: AxisSpecs::new_blank(),
