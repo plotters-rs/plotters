@@ -40,7 +40,7 @@ $$[TOC]$$
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^$LATEST_VERSION"
+plotters = "$LATEST_VERSION"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,

@@ -20,6 +20,7 @@ pub trait Direction<X, Y, Z> {
 
 macro_rules! define_panel_descriptor {
     ($name: ident, $var1: ident, $var2: ident, $out: ident, ($first: ident, $second:ident) -> $result: ident = $output: expr) => {
+        #[allow(clippy::upper_case_acronyms)]
         pub struct $name;
         impl<X, Y, Z> Direction<X, Y, Z> for $name {
             type Input1Type = $var1;
@@ -175,11 +176,9 @@ where
                         (self.surface_f)(a1.clone(), b0.clone()),
                     ),
                 ];
-                return Some(Polygon::new(vert, style));
+                Some(Polygon::new(vert, style))
             }
-            _ => {
-                return None;
-            }
+            _ => None,
         }
     }
 }

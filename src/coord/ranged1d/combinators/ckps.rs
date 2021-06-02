@@ -156,7 +156,7 @@ where
         WithKeyPointMethod {
             inner: self.into(),
             bold_func: Box::new(func),
-            light_func: Box::new(|_| vec![]),
+            light_func: Box::new(|_| Vec::new()),
         }
     }
 }

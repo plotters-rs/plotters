@@ -126,11 +126,10 @@ impl<V: LogScalable> From<LogRangeExt<V>> for LogCoord<V> {
             if start == 0.0 {
                 start = start.max(end * 1e-5);
             }
-        } else {
-            if end == 0.0 {
-                end = end.max(start * 1e-5);
-            }
+        } else if end == 0.0 {
+            end = end.max(start * 1e-5);
         }
+
         LogCoord {
             linear: (start.ln()..end.ln()).into(),
             logic: spec.range,
@@ -179,7 +178,7 @@ impl<V: LogScalable> LogCoord<V> {
         let a = V::from_f64(fv + self.zero_point);
         let b = V::from_f64(self.zero_point);
 
-        V::as_f64(&a) == V::as_f64(&b)
+        (V::as_f64(&a) - V::as_f64(&b)).abs() < f64::EPSILON
     }
 }
 

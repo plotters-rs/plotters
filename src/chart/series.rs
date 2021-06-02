@@ -187,7 +187,7 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
             let label_text = anno.get_label();
             let draw_func = anno.get_draw_func();
 
-            if label_text == "" && draw_func.is_none() {
+            if label_text.is_empty() && draw_func.is_none() {
                 continue;
             }
 

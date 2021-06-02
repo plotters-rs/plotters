@@ -9,6 +9,7 @@ pub struct Cubiod<X, Y, Z> {
 }
 
 impl<X: Clone, Y: Clone, Z: Clone> Cubiod<X, Y, Z> {
+    #[allow(clippy::redundant_clone)]
     pub fn new<FS: Into<ShapeStyle>, ES: Into<ShapeStyle>>(
         [(x0, y0, z0), (x1, y1, z1)]: [(X, Y, Z); 2],
         face_style: FS,
@@ -50,7 +51,7 @@ impl<X, Y, Z, DB: DrawingBackend> Drawable<DB, BackendCoordAndZ> for Cubiod<X, Y
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let vert: Vec<_> = points.collect();
         let mut polygon = vec![];
-        for mask in vec![1, 2, 4] {
+        for mask in [1, 2, 4].iter().cloned() {
             let mask_a = if mask == 4 { 1 } else { mask * 2 };
             let mask_b = if mask == 1 { 4 } else { mask / 2 };
             let a = 0;
