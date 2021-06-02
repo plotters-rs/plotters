@@ -52,7 +52,7 @@ impl Rect {
     }
 
     /// Evenly split the rectangle to a row * col mesh
-    fn split_evenly<'a>(&'a self, (row, col): (usize, usize)) -> impl Iterator<Item = Rect> + 'a {
+    fn split_evenly(&self, (row, col): (usize, usize)) -> impl Iterator<Item = Rect> + '_ {
         fn compute_evenly_split(from: i32, to: i32, n: usize, idx: usize) -> i32 {
             let size = (to - from) as usize;
             from + idx as i32 * (size / n) as i32 + idx.min(size % n) as i32
@@ -78,8 +78,8 @@ impl Rect {
         xs.extend(x_breaks.map(|v| v + self.x0));
         ys.extend(y_breaks.map(|v| v + self.y0));
 
-        xs.sort();
-        ys.sort();
+        xs.sort_unstable();
+        ys.sort_unstable();
 
         let xsegs: Vec<_> = xs
             .iter()

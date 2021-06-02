@@ -190,9 +190,9 @@ impl<'a, F: Into<FontFamily<'a>>, T: SizeDesc, C: Color> IntoTextStyle<'a>
 }
 
 /// Make sure that we are able to automatically copy the `TextStyle`
-impl<'a, 'b: 'a> Into<TextStyle<'a>> for &'b TextStyle<'a> {
-    fn into(self) -> TextStyle<'a> {
-        self.clone()
+impl<'a, 'b: 'a> From<&'b TextStyle<'a>> for TextStyle<'a> {
+    fn from(this: &'b TextStyle<'a>) -> Self {
+        this.clone()
     }
 }
 

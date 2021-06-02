@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use plotters_backend::DrawingBackend;
 
 use crate::chart::ChartContext;
@@ -44,6 +46,7 @@ where
             z_points,
         }
     }
+    #[allow(clippy::type_complexity)]
     pub(crate) fn draw_axis_ticks(
         &mut self,
         axis: [[Coord3D<X::ValueType, Y::ValueType, Z::ValueType>; 3]; 2],
@@ -91,16 +94,19 @@ where
         for (pos, text) in labels {
             let logic_pos = Coord3D::build_coord([&pos[0], &pos[1], &pos[2]]);
             let mut font = font.clone();
-            if dir.0 < 0 {
-                font.pos = Pos::new(HPos::Right, VPos::Center);
-            } else if dir.0 > 0 {
-                font.pos = Pos::new(HPos::Left, VPos::Center);
-            };
-            if dir.1 < 0 {
-                font.pos = Pos::new(HPos::Center, VPos::Bottom);
-            } else if dir.1 > 0 {
-                font.pos = Pos::new(HPos::Center, VPos::Top);
-            };
+
+            match dir.0.cmp(&0) {
+                Ordering::Less => font.pos = Pos::new(HPos::Right, VPos::Center),
+                Ordering::Greater => font.pos = Pos::new(HPos::Left, VPos::Center),
+                _ => (),
+            }
+
+            match dir.1.cmp(&0) {
+                Ordering::Less => font.pos = Pos::new(HPos::Center, VPos::Bottom),
+                Ordering::Greater => font.pos = Pos::new(HPos::Center, VPos::Top),
+                _ => (),
+            }
+
             let element = EmptyElement::at(logic_pos)
                 + PathElement::new(vec![(0, 0), dir], style.clone())
                 + Text::new(text.to_string(), (dir.0 * 2, dir.1 * 2), font.clone());
@@ -108,6 +114,7 @@ where
         }
         Ok(())
     }
+    #[allow(clippy::type_complexity)]
     pub(crate) fn draw_axis(
         &mut self,
         idx: usize,
@@ -164,7 +171,7 @@ where
 
         self.plotting_area().draw(&PathElement::new(
             vec![Coord3D::build_coord(start), Coord3D::build_coord(end)],
-            style.clone(),
+            style,
         ))?;
 
         Ok([
@@ -172,6 +179,8 @@ where
             [end[0].clone(), end[1].clone(), end[2].clone()],
         ])
     }
+
+    #[allow(clippy::type_complexity)]
     pub(crate) fn draw_axis_panels(
         &mut self,
         bold_points: &KeyPoints3d<X, Y, Z>,
@@ -199,6 +208,7 @@ where
             r_iter.next().unwrap()?,
         ])
     }
+    #[allow(clippy::type_complexity)]
     fn draw_axis_panel(
         &mut self,
         idx: usize,
@@ -223,40 +233,45 @@ where
         ];
 
         let (mut panel, start, end) = {
-            let a = [&ranges[0][0], &ranges[1][0], &ranges[2][0]];
-            let mut b = [&ranges[0][1], &ranges[1][1], &ranges[2][1]];
-            let mut c = a;
-            let d = b;
+            let vert_a = [&ranges[0][0], &ranges[1][0], &ranges[2][0]];
+            let mut vert_b = [&ranges[0][1], &ranges[1][1], &ranges[2][1]];
+            let mut vert_c = vert_a;
+            let vert_d = vert_b;
 
-            b[idx] = &ranges[idx][0];
-            c[idx] = &ranges[idx][1];
+            vert_b[idx] = &ranges[idx][0];
+            vert_c[idx] = &ranges[idx][1];
 
-            let (a, b) = if coord.projected_depth(a[0].get_x(), a[1].get_y(), a[2].get_z())
-                >= coord.projected_depth(c[0].get_x(), c[1].get_y(), c[2].get_z())
-            {
-                (a, b)
-            } else {
-                (c, d)
-            };
+            let (vert_a, vert_b) =
+                if coord.projected_depth(vert_a[0].get_x(), vert_a[1].get_y(), vert_a[2].get_z())
+                    >= coord.projected_depth(
+                        vert_c[0].get_x(),
+                        vert_c[1].get_y(),
+                        vert_c[2].get_z(),
+                    )
+                {
+                    (vert_a, vert_b)
+                } else {
+                    (vert_c, vert_d)
+                };
 
-            let mut m = a.clone();
-            m[(idx + 1) % 3] = b[(idx + 1) % 3];
-            let mut n = a.clone();
-            n[(idx + 2) % 3] = b[(idx + 2) % 3];
+            let mut m = vert_a;
+            m[(idx + 1) % 3] = vert_b[(idx + 1) % 3];
+            let mut n = vert_a;
+            n[(idx + 2) % 3] = vert_b[(idx + 2) % 3];
 
             (
                 vec![
-                    Coord3D::build_coord(a),
+                    Coord3D::build_coord(vert_a),
                     Coord3D::build_coord(m),
-                    Coord3D::build_coord(b),
+                    Coord3D::build_coord(vert_b),
                     Coord3D::build_coord(n),
                 ],
-                a,
-                b,
+                vert_a,
+                vert_b,
             )
         };
         self.plotting_area()
-            .draw(&Polygon::new(panel.clone(), panel_style.clone()))?;
+            .draw(&Polygon::new(panel.clone(), panel_style))?;
         panel.push(panel[0].clone());
         self.plotting_area()
             .draw(&PathElement::new(panel, bold_grid_style.clone()))?;
