@@ -1,3 +1,4 @@
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 use std::path::Path;
 use std::marker::PhantomData;
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
