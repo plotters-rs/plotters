@@ -113,7 +113,7 @@ macro_rules! gen_key_points_comp {
 
             assert!(!(range.0.is_nan() || range.1.is_nan()));
 
-            if (range.0 - range.1).abs() < f64::EPSILON {
+            if (range.0 - range.1).abs() < std::f64::EPSILON {
                 return vec![range.0 as $type];
             }
 
