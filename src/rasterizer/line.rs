@@ -6,7 +6,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     mut to: BackendCoord,
     style: &S,
 ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-    if style.color().alpha == 0.0 {
+    if style.color().alpha == 0.0 || style.stroke_width() == 0 {
         return Ok(());
     }
 
