@@ -848,3 +848,6 @@ pub mod prelude {
     #[cfg(feature = "svg_backend")]
     pub use plotters_svg::SVGBackend;
 }
+
+#[cfg(test)]
+mod test;
