@@ -75,7 +75,13 @@ impl DefaultValueFormatOption for NoDefaultFormatting {}
 /// Determine how we can format a value in a coordinate system by default
 pub trait ValueFormatter<V> {
     /// Format the value
-    fn format(value: &V) -> String;
+    fn format(_value: &V) -> String {
+        panic!("Unimplemented formatting method");
+    }
+
+    fn format_ext(&self, value: &V) -> String {
+        Self::format(value)
+    }
 }
 
 // By default the value is formatted by the debug trait

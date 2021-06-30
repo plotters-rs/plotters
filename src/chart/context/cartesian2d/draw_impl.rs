@@ -27,22 +27,24 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
         mut fmt_label: FmtLabel,
     ) -> Result<(Vec<(i32, String)>, Vec<(i32, String)>), DrawingAreaErrorKind<DB::ErrorType>>
     where
-        FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
+        FmtLabel: FnMut(&X, &Y, &MeshLine<X, Y>) -> Option<String>,
     {
         let mut x_labels = vec![];
         let mut y_labels = vec![];
+        let xr = self.drawing_area.as_coord_spec().x_spec();
+        let yr = self.drawing_area.as_coord_spec().y_spec();
         self.drawing_area.draw_mesh(
             |b, l| {
                 let draw;
                 match l {
                     MeshLine::XMesh((x, _), _, _) => {
-                        if let Some(label_text) = fmt_label(&l) {
+                        if let Some(label_text) = fmt_label(xr, yr, &l) {
                             x_labels.push((x, label_text));
                         }
                         draw = x_mesh;
                     }
                     MeshLine::YMesh((_, y), _, _) => {
-                        if let Some(label_text) = fmt_label(&l) {
+                        if let Some(label_text) = fmt_label(xr, yr, &l) {
                             y_labels.push((y, label_text));
                         }
                         draw = y_mesh;
@@ -338,7 +340,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
         y_tick_size: [i32; 2],
     ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
-        FmtLabel: FnMut(&MeshLine<X, Y>) -> Option<String>,
+        FmtLabel: FnMut(&X, &Y, &MeshLine<X, Y>) -> Option<String>,
     {
         let (x_labels, y_labels) =
             self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;

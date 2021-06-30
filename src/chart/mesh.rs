@@ -159,8 +159,8 @@ pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
     pub(super) axis_style: Option<ShapeStyle>,
     pub(super) x_label_style: Option<TextStyle<'b>>,
     pub(super) y_label_style: Option<TextStyle<'b>>,
-    pub(super) format_x: &'b dyn Fn(&X::ValueType) -> String,
-    pub(super) format_y: &'b dyn Fn(&Y::ValueType) -> String,
+    pub(super) format_x: Option<&'b dyn Fn(&X::ValueType) -> String>,
+    pub(super) format_y: Option<&'b dyn Fn(&Y::ValueType) -> String>,
     pub(super) target: Option<&'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>>,
     pub(super) _phantom_data: PhantomData<(X, Y)>,
     pub(super) x_tick_size: [i32; 2],
@@ -203,8 +203,8 @@ where
             light_line_style: None,
             x_label_style: None,
             y_label_style: None,
-            format_x: &X::format,
-            format_y: &Y::format,
+            format_x: None,
+            format_y: None,
             target: Some(chart),
             _phantom_data: PhantomData,
             x_desc: None,
@@ -362,14 +362,14 @@ where
     /// Set the formatter function for the X label text
     /// - `fmt`: The formatter function
     pub fn x_label_formatter(&mut self, fmt: &'b dyn Fn(&X::ValueType) -> String) -> &mut Self {
-        self.format_x = fmt;
+        self.format_x = Some(fmt);
         self
     }
 
     /// Set the formatter function for the Y label text
     /// - `fmt`: The formatter function
     pub fn y_label_formatter(&mut self, fmt: &'b dyn Fn(&Y::ValueType) -> String) -> &mut Self {
-        self.format_y = fmt;
+        self.format_y = Some(fmt);
         self
     }
 
@@ -395,7 +395,11 @@ where
     }
 
     /// Draw the configured mesh on the target plot
-    pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
+    pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        X: ValueFormatter<<X as Ranged>::ValueType>,
+        Y: ValueFormatter<<Y as Ranged>::ValueType>,
+    {
         let target = self.target.take().unwrap();
 
         let default_mesh_color_1 = RGBColor(0, 0, 0).mix(0.2);
@@ -443,7 +447,7 @@ where
             &light_style,
             &x_label_style,
             &y_label_style,
-            |_| None,
+            |_, _, _| None,
             self.draw_x_mesh,
             self.draw_y_mesh,
             self.x_label_offset,
@@ -463,17 +467,25 @@ where
             &bold_style,
             &x_label_style,
             &y_label_style,
-            |m| match m {
+            |xr, yr, m| match m {
                 MeshLine::XMesh(_, _, v) => {
                     if self.draw_x_axis {
-                        Some((self.format_x)(v))
+                        if let Some(fmt_func) = self.format_x {
+                            Some(fmt_func(v))
+                        } else {
+                            Some(xr.format_ext(v))
+                        }
                     } else {
                         None
                     }
                 }
                 MeshLine::YMesh(_, _, v) => {
                     if self.draw_y_axis {
-                        Some((self.format_y)(v))
+                        if let Some(fmt_func) = self.format_y {
+                            Some(fmt_func(v))
+                        } else {
+                            Some(yr.format_ext(v))
+                        }
                     } else {
                         None
                     }
