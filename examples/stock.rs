@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.draw_series(
         data.iter()
-            .map(|x| CandleStick::new(parse_time(x.0), x.1, x.2, x.3, x.4, &GREEN, &RED, 15)),
+            .map(|x| CandleStick::new(parse_time(x.0), x.1, x.2, x.3, x.4, GREEN.filled(), RED, 15)),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
