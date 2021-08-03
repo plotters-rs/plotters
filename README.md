@@ -507,7 +507,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
+| bitmap\_backend  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
 | svg\_backend     | Enable `SVGBackend` Support | None | Yes |
 | bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
