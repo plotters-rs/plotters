@@ -1,6 +1,8 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
 use base64;
+use image::{png::PngEncoder, ImageBuffer, ImageError, Pixel, RgbImage, Rgb};
+use std::ops::Deref;
 use plotters_svg::SVGBackend;
 use plotters_bitmap::BitMapBackend;
 
@@ -42,9 +44,9 @@ pub fn evcxr_figure<
     SVGWrapper(buffer, "".to_string())
 }
 
-pub struct BitmapWrapper(String, String);
+pub struct BitMapWrapper(String, String);
 
-impl BitmapWrapper {
+impl BitMapWrapper {
     pub fn evcxr_display(&self) {
         println!("{:?}", self);
     }
@@ -55,7 +57,7 @@ impl BitmapWrapper {
     }
 }
 
-impl std::fmt::Debug for BitmapWrapper {
+impl std::fmt::Debug for BitMapWrapper {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         let svg = self.0.as_str();
         write!(
@@ -66,19 +68,34 @@ impl std::fmt::Debug for BitmapWrapper {
     }
 }
 
+fn encode_png<P, Container>(img: &ImageBuffer<P, Container>) -> Result<Vec<u8>, ImageError>
+where
+    P: Pixel<Subpixel = u8> + 'static,
+    Container: Deref<Target = [P::Subpixel]>,
+{
+    let mut buf = Vec::new();
+    let encoder = PngEncoder::new(&mut buf);
+    encoder.encode(img, img.width(), img.height(), P::COLOR_TYPE)?;
+    Ok(buf)
+}
+
 /// Start drawing an evcxr figure
 pub fn evcxr_bitmap_figure<
     Draw: FnOnce(DrawingArea<BitMapBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
 >(
     size: (u32, u32),
     draw: Draw,
-) -> SVGWrapper {
-    let pixel_size = plotters_bitmap::bitmap_pixel::RGBPixel::PIXEL_SIZE;
-    let mut buf = [u8; (size.0 as usize) * (size.1 as usize) * pixel_size];
-    let root = BitMapBackend::with_buffer(&buf, size).into_drawing_area();
-    let buffer = base64::encode(&buf);
+) -> BitMapWrapper {
+    let pixel_size = 3;
+    let mut buf = Vec::new();
+    buf.resize((size.0 as usize) * (size.1 as usize) * pixel_size, 0);
+    let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();
     draw(root).expect("Drawing failure");
-    BitmapWrapper(buffer, "".to_string())
+    let img = RgbImage::from_raw(size.0, size.1, buf).unwrap();
+    let enc_buf = encode_png(&img).unwrap();
+    let buffer = base64::encode(&enc_buf);
+    BitMapWrapper(buffer, "".to_string())
+    // todo!()
 }
 
 pub fn evcxr_animation<

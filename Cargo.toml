@@ -93,7 +93,7 @@ ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
 
 # Misc
 datetime = ["chrono"]
-evcxr = ["svg_backend"]
+evcxr = ["svg_backend", "bitmap_backend", "image"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 [dev-dependencies]
