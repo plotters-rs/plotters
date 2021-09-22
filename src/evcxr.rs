@@ -59,11 +59,11 @@ impl BitMapWrapper {
 
 impl std::fmt::Debug for BitMapWrapper {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let svg = self.0.as_str();
+        let enc = self.0.as_str();
         write!(
             formatter,
             "EVCXR_BEGIN_CONTENT text/html\n<img style=\"{}\" src=\"data:image/png;base64,{}\"/>\nEVCXR_END_CONTENT",
-            self.1, svg
+            self.1, enc
         )
     }
 }
@@ -95,7 +95,6 @@ pub fn evcxr_bitmap_figure<
     let enc_buf = encode_png(&img).unwrap();
     let buffer = base64::encode(&enc_buf);
     BitMapWrapper(buffer, "".to_string())
-    // todo!()
 }
 
 pub fn evcxr_animation<
