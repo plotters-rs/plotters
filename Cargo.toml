@@ -16,6 +16,7 @@ exclude = ["doc-template/*"]
 num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
 plotters-svg = {version = "^0.3.*", optional = true}
+base64 = "*"
 
 [dependencies.plotters-backend]
 version = "^0.3"
