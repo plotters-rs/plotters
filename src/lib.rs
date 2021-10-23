@@ -810,7 +810,7 @@ pub mod prelude {
     // Elements
     pub use crate::element::{
         Circle, Cross, Cubiod, DynElement, EmptyElement, IntoDynElement, MultiLineText,
-        PathElement, Pixel, Polygon, Rectangle, Text, TriangleMarker,
+        PathElement, Pie, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
     #[cfg(feature = "boxplot")]

@@ -132,6 +132,9 @@ To view the source code for each example, please click on the example image.
 <a href="https://github.com/38/plotters/blob/master/examples/tick_control.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/tick_control.svg" class="galleryItem" width=200px></img>
 </a>
+<a href="https://github.com/38/plotters/blob/master/examples/pie.rs">
+	<img src="https://plotters-rs.github.io/plotters-doc-data/pie_chart.png" class="galleryItem" width=200px></img>
+</a>
 
 
 ## Table of Contents

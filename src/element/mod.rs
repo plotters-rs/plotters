@@ -195,6 +195,9 @@ pub use self::image::BitMapElement;
 mod dynelem;
 pub use dynelem::{DynElement, IntoDynElement};
 
+mod pie;
+pub use pie::Pie;
+
 use crate::coord::CoordTranslate;
 use crate::drawing::Rect;
 
