@@ -22,6 +22,15 @@ use target::{Target, Buffer};
 
 
 /// The backend that drawing a bitmap
+///
+/// # Warning
+///
+/// You should call [`.present()?`](plotters_backend::DrawingBackend::present) on a
+/// `BitMapBackend`, not just `drop` it or allow it to go out of scope.
+///
+/// If the `BitMapBackend` is just dropped, it will make a best effort attempt to write the
+/// generated charts to the output file, but any errors that occcur (such as inability to
+/// create the output file) will be silently ignored.
 pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     /// The path to the image
     #[allow(dead_code)]
