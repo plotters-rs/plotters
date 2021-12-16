@@ -61,7 +61,7 @@ If you need to modify the readme and documentation, please change the template a
 use the following command to synchronize the doc to both `src/lib.rs` and `README.md`.
 
 ```bash
-bash doc-template/update-readme.sh
+bash doc-template/update_readme.sh
 ```
 
 ## Testing Notes
