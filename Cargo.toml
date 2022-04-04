@@ -89,6 +89,7 @@ surface_series = []
 
 # Font implemnetation
 ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
+fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 
 # Misc
 datetime = ["chrono"]
