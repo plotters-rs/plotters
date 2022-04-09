@@ -655,6 +655,30 @@ where
     }
 }
 
+impl<DT> DiscreteRanged for RangedDateTime<DT>
+where
+    DT: Datelike + Timelike + TimeValue + Clone + PartialOrd,
+    DT: Add<Duration, Output = DT>,
+    DT: Sub<DT, Output = Duration>,
+    RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
+{
+    fn size(&self) -> usize {
+        ((self.1.clone() - self.0.clone()).num_milliseconds().max(-1) + 1) as usize
+    }
+
+    fn index_of(&self, value: &DT) -> Option<usize> {
+        let ret = (value.clone() - self.0.clone()).num_milliseconds();
+        if ret < 0 {
+            return None;
+        }
+        Some(ret as usize)
+    }
+
+    fn from_index(&self, index: usize) -> Option<DT> {
+        Some(self.0.clone() + Duration::milliseconds(index as i64))
+    }
+}
+
 /// The coordinate that for duration of time
 #[derive(Clone)]
 pub struct RangedDuration(Duration, Duration);
