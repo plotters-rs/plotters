@@ -27,8 +27,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart.configure_mesh().light_line_style(&WHITE).draw()?;
 
     chart.draw_series(
-        data.iter()
-            .map(|x| CandleStick::new(parse_time(x.0), x.1, x.2, x.3, x.4, GREEN.filled(), RED, 15)),
+        data.iter().map(|x| {
+            CandleStick::new(parse_time(x.0), x.1, x.2, x.3, x.4, GREEN.filled(), RED, 15)
+        }),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
