@@ -89,6 +89,8 @@ surface_series = []
 
 # Font implementation
 ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
+# dlopen fontconfig C library at runtime instead of linking at build time
+# Can be useful for cross compiling, especially considering fontconfig has lots of C dependencies
 fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 
 # Misc
