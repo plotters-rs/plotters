@@ -141,6 +141,7 @@ To view the source code for each example, please click on the example image.
 
 ## Table of Contents
   * [Gallery](#gallery)
+  * [Dependecies](#dependencies)
   * [Quick Start](#quick-start)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
   * [Interactive Tutorial with Jupyter Notebook](#interactive-tutorial-with-jupyter-notebook)
@@ -158,6 +159,14 @@ To view the source code for each example, please click on the example image.
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
     + [List of Features](#list-of-features)
   * [FAQ List](#faq-list)
+
+
+
+## Dependencies
+
+### Ubuntu Linux
+
+ ```sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev```
 
 ## Quick Start
 
@@ -587,5 +596,4 @@ The following list is a complete list of features that can be opt in and out.
 
 	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
 	For more information, please see the examples.
-
 
