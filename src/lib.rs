@@ -331,6 +331,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .border_style(&BLACK)
         .draw()?;
 
+    root.present()?;
+
     Ok(())
 }
 ```
@@ -451,6 +453,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50, 50), (200, 150), &RED, true)?;
+    backend.present()?;
     Ok(())
 }
 ```
@@ -475,6 +478,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
+    root.present()?;
     Ok(())
 }
 ```
@@ -502,6 +506,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         50,
         Into::<ShapeStyle>::into(&GREEN).filled(),
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -544,6 +549,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -599,6 +605,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(format!("{:?}", c), (10, 0), ("sans-serif", 10).into_font());
         },
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
