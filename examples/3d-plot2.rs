@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         root.fill(&WHITE)?;
 
         let mut chart = ChartBuilder::on(&root)
-            .caption("2D Guassian PDF", ("sans-serif", 20))
+            .caption("2D Gaussian PDF", ("sans-serif", 20))
             .build_cartesian_3d(-3.0..3.0, 0.0..6.0, -3.0..3.0)?;
         chart.with_projection(|mut p| {
             p.pitch = 1.57 - (1.57 - pitch as f64 / 50.0).abs();
