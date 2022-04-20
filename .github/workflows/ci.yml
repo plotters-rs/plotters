@@ -1,6 +1,6 @@
-name: Push Check
+name: CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   fmt:
