@@ -15,9 +15,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let labels = vec!["Pizza", "Pacman"];
 
     let mut pie = Pie::new(&center, &radius, &sizes, &colors, &labels);
-    pie.with_start_angle(66.0);
-    pie.with_label_style((("sans-serif", 50).into_font()).color(&(ORANGE)));
-    pie.with_percentages((("sans-serif", radius * 0.08).into_font()).color(&BLACK));
+    pie.start_angle(66.0);
+    pie.label_style((("sans-serif", 50).into_font()).color(&(ORANGE)));
+    pie.percentages((("sans-serif", radius * 0.08).into_font()).color(&BLACK));
     root_area.draw(&pie)?;
 
     Ok(())

@@ -3,8 +3,20 @@ use crate::{
     style::{IntoFont, RGBColor, TextStyle, BLACK},
 };
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
-use std::{f64::consts::PI, fmt::Display};
+use std::{error::Error, f64::consts::PI, fmt::Display};
 
+#[derive(Debug)]
+enum PieError {
+    LengthMismatch,
+}
+impl Display for PieError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            &PieError::LengthMismatch => write!(f, "Length Mismatch"),
+        }
+    }
+}
+impl Error for PieError {}
 /// A Pie Graph
 pub struct Pie<'a, Coord, Label: Display> {
     center: &'a Coord, // cartesian coord
@@ -30,7 +42,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
         labels: &'a [Label],
     ) -> Self {
         // fold iterator to pre-calculate total from given slice sizes
-        let total = sizes.iter().fold(0.0, |acc, slice_size| acc + slice_size);
+        let total = sizes.iter().sum();
 
         // default label style and offset as 5% of the radius
         let radius_5pct = radius * 0.05;
@@ -55,25 +67,25 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
     /// ```
     /// use plotters::prelude::*;
     /// let mut pie = Pie::new(&(50,50), &10.0, &[50.0, 25.25, 20.0, 5.5], &[RED, BLUE, GREEN, WHITE], &["Red", "Blue", "Green", "White"]);
-    /// pie.with_start_angle(-90.0);  // retract to a right angle, so it starts aligned to a vertical Y axis.
+    /// pie.start_angle(-90.0);  // retract to a right angle, so it starts aligned to a vertical Y axis.
     /// ```
-    pub fn with_start_angle(&mut self, start_angle: f64) {
+    pub fn start_angle(&mut self, start_angle: f64) {
         // angle is more intuitive in degrees as an API, but we use it as radian offset internally.
         self.start_radian = start_angle.to_radians();
     }
 
     ///
-    pub fn with_label_style<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
-        let label_style = label_style.into();
-        self.label_style = label_style;
+    pub fn label_style<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
+        self.label_style = label_style.into();
     }
 
-    pub fn with_label_offset(&mut self, offset_to_radius: f64) {
+    /// Sets the offset to labels, to distanciate them further/closer from the center.
+    pub fn label_offset(&mut self, offset_to_radius: f64) {
         self.label_offset = offset_to_radius
     }
 
-    // enables drawing the wedge's percentage in the middle of the wedge, with the given style
-    pub fn with_percentages<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
+    /// enables drawing the wedge's percentage in the middle of the wedge, with the given style
+    pub fn percentages<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
         self.percentage_style = Some(label_style.into());
     }
 }
@@ -94,15 +106,18 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
         let radian_increment = PI / 180.0 / self.radius.sqrt() * 2.0;
         let mut perc_labels = Vec::new();
         for (index, slice) in self.sizes.iter().enumerate() {
-            let slice_style = self
-                .colors
-                .get(index)
-                .expect("Slice colors length mismatch");
+            let slice_style =
+                self.colors
+                    .get(index)
+                    .ok_or(DrawingErrorKind::FontError(Box::new(
+                        PieError::LengthMismatch,
+                    )))?;
             let label = self
                 .labels
                 .get(index)
-                .expect("Slice labels length mismatch");
-
+                .ok_or(DrawingErrorKind::FontError(Box::new(
+                    PieError::LengthMismatch,
+                )))?;
             // start building wedge line against the previous edge
             let mut points = vec![self.center.clone()];
             let ratio = slice / self.total;
@@ -156,6 +171,8 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 perc_labels.push((perc_label, perc_coord));
             }
         }
+        // while percentages are generated during the first main iterations,
+        // they have to go on top of the already drawn wedges, so require a new iteration.
         for (label, coord) in perc_labels {
             let style = self.percentage_style.as_ref().unwrap();
             backend.draw_text(&label, style, coord)?;
