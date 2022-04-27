@@ -93,7 +93,8 @@ impl FontExt {
         if let Some(face) = self.face.as_ref() {
             if let Some(kern) = face.tables().kern {
                 let kern = kern
-                    .subtables.into_iter()
+                    .subtables
+                    .into_iter()
                     .filter(|st| st.horizontal && !st.variable)
                     .filter_map(|st| st.glyphs_kerning(GlyphId(prev as u16), GlyphId(next as u16)))
                     .next()
