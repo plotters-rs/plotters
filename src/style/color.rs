@@ -61,6 +61,8 @@ impl<T: Color> Color for &'_ T {
 
 /// The RGBA representation of the color, Plotters use RGBA as the internal representation
 /// of color
+///
+/// If you want to directly create a RGB color with transparency use [RGBColor::mix]
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct RGBAColor(pub(crate) u8, pub(crate) u8, pub(crate) u8, pub(crate) f64);
 
