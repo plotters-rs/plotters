@@ -19,6 +19,8 @@
     <img style="display: inline! important" src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
 </a>
 
+![Minimum Rust version 1.46](https://img.shields.io/badge/rustc-1.46+-06a096.svg)
+
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends, 
 including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 
 
@@ -136,6 +138,7 @@ To view the source code for each example, please click on the example image.
 
 ## Table of Contents
   * [Gallery](#gallery)
+  * [Dependecies](#dependencies)
   * [Quick Start](#quick-start)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
   * [Interactive Tutorial with Jupyter Notebook](#interactive-tutorial-with-jupyter-notebook)
@@ -153,6 +156,14 @@ To view the source code for each example, please click on the example image.
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
     + [List of Features](#list-of-features)
   * [FAQ List](#faq-list)
+
+
+
+## Dependencies
+
+### Ubuntu Linux
+
+ ```sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev```
 
 ## Quick Start
 
@@ -191,6 +202,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .draw()?;
+
+    root.present()?;
 
     Ok(())
 }
@@ -312,6 +325,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50, 50), (200, 150), &RED, true)?;
+    backend.present()?;
     Ok(())
 }
 ```
@@ -336,6 +350,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
+    root.present()?;
     Ok(())
 }
 ```
@@ -363,6 +378,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         50,
         Into::<ShapeStyle>::into(&GREEN).filled(),
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -405,6 +421,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -460,6 +477,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(format!("{:?}", c), (10, 0), ("sans-serif", 10).into_font());
         },
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -575,5 +593,4 @@ The following list is a complete list of features that can be opt in and out.
 
 	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
 	For more information, please see the examples.
-
 
