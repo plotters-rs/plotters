@@ -1,6 +1,3 @@
-> **THIS IS A FORK OF THE ORIGINAL REPOSITORY. 
-I WILL ACCEPT PULL REQUESTS HERE UNTIL [@38](https://github.com/38) COMMENTS ON THE CURRENT SITUATION AND FURTHER STEPS CAN BE PLANNED.**
-
 # Plotters - A Rust drawing library focus on data plotting for both WASM and native applications  🦀📈🚀
 
 <a href="https://crates.io/crates/plotters">
