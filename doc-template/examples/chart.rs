@@ -39,5 +39,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(format!("{:?}", c), (10, 0), ("sans-serif", 10).into_font());
         },
     ))?;
+    root.present()?;
     Ok(())
 }

@@ -78,7 +78,7 @@ impl<X, Y: PartialOrd, DB: DrawingBackend> Drawable<DB> for CandleStick<X, Y> {
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let mut points: Vec<_> = points.take(4).collect();
         if points.len() == 4 {
-            let fill = false;
+            let fill = self.style.filled;
             if points[0].1 > points[3].1 {
                 points.swap(0, 3);
             }

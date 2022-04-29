@@ -86,7 +86,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .draw()?;
 
     let cs = chart.into_chart_state();
-    drop(root);
+    root.present()?;
 
     let mut data = VecDeque::new();
     let start_ts = SystemTime::now();
@@ -140,7 +140,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 },
             ))?;
 
-            drop(root);
+            root.present()?;
             drop(chart);
 
             if let Some(keys) = window.get_keys_pressed(KeyRepeat::Yes) {
