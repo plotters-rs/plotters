@@ -146,6 +146,8 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
             offset_theta = theta_final;
 
             // draw wedge
+            // TODO: Currently the backend doesn't have API to draw an arc. We need add that in the
+            // future
             backend.fill_polygon(points, slice_style)?;
 
             // label coords from the middle
