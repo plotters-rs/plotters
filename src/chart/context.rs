@@ -183,6 +183,5 @@ mod test {
         chart
             .draw_series(std::iter::once(Circle::new((5, 5, 5), 5, &RED)))
             .expect("Drawing error");
-
     }
 }
