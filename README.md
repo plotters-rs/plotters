@@ -528,7 +528,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
+| bitmap\_backend  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
 | svg\_backend     | Enable `SVGBackend` Support | None | Yes |
 | bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
@@ -542,7 +542,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| datetime | Eanble the date and time coordinate support | chrono | Yes |
+| datetime | Enable the date and time coordinate support | chrono | Yes |
 
 - Element, series and util functions
 
@@ -590,7 +590,7 @@ The following list is a complete list of features that can be opt in and out.
 
 * How to check if a backend writes file successfully ?
 
-	The behavior of Plotters backend is consistent with stadnard library. 
+	The behavior of Plotters backend is consistent with standard library. 
 	When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically 
 	whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored. 
 
