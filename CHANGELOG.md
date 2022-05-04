@@ -2,6 +2,10 @@
 
 ## Plotters latest (?)
 
+### Added
+
+- Pie element (by hhamana)
+
 ### Improved
 
 - Improved documentaiton for predefined colors. (Thanks to siefkenj)

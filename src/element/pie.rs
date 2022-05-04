@@ -16,7 +16,9 @@ impl Display for PieError {
         }
     }
 }
+
 impl Error for PieError {}
+
 /// A Pie Graph
 pub struct Pie<'a, Coord, Label: Display> {
     center: &'a Coord, // cartesian coord
@@ -46,6 +48,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
 
         // default label style and offset as 5% of the radius
         let radius_5pct = radius * 0.05;
+
         // strong assumption that the background is white for legibility.
         let label_style = TextStyle::from(("sans-serif", radius_5pct).into_font()).color(&BLACK);
         Self {
