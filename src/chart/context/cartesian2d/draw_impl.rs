@@ -169,7 +169,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             .map(|(_, text)| {
                 if orientation.0 > 0 && orientation.1 == 0 && tick_size >= 0 {
                     self.drawing_area
-                        .estimate_text_size(text, &label_style)
+                        .estimate_text_size(text, label_style)
                         .map(|(w, _)| w)
                         .unwrap_or(0) as i32
                 } else {
@@ -253,7 +253,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             };
 
             let label_style = &label_style.pos(Pos::new(h_pos, v_pos));
-            area.draw_text(&t, label_style, (text_x, text_y))?;
+            area.draw_text(t, label_style, (text_x, text_y))?;
 
             if tick_size != 0 {
                 if let Some(style) = axis_style {
@@ -312,7 +312,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             };
 
             let actual_style = &actual_style.pos(Pos::new(h_pos, v_pos));
-            area.draw_text(&text, &actual_style, (x0 as i32, y0 as i32))?;
+            area.draw_text(text, actual_style, (x0 as i32, y0 as i32))?;
         }
 
         Ok(())

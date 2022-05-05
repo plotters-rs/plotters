@@ -8,5 +8,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         50,
         Into::<ShapeStyle>::into(&GREEN).filled(),
     ))?;
+    root.present()?;
     Ok(())
 }

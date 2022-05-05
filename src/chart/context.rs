@@ -132,6 +132,10 @@ mod test {
             .draw()
             .expect("Draw Secondary axes");
 
+        // test that chart states work correctly with dual coord charts
+        let cs = chart.into_chart_state();
+        let mut chart = cs.clone().restore(&drawing_area);
+
         chart
             .draw_series(std::iter::once(Circle::new((5, 5), 5, &RED)))
             .expect("Drawing error");
@@ -171,6 +175,10 @@ mod test {
         });
 
         chart.configure_axes().draw().expect("Drawing axes");
+
+        // test that chart states work correctly with 3d coordinates
+        let cs = chart.into_chart_state();
+        let mut chart = cs.clone().restore(&drawing_area);
 
         chart
             .draw_series(std::iter::once(Circle::new((5, 5, 5), 5, &RED)))
