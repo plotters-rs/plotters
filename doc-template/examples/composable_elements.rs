@@ -25,5 +25,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
+    root.present()?;
     Ok(())
 }

@@ -1,8 +1,23 @@
-name: Push Check
+name: CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
   msrv:
     runs-on: ubuntu-latest
     steps:
@@ -11,12 +26,12 @@ jobs:
           submodules: recursive
     - uses: actions-rs/toolchain@v1
       with:
-          toolchain: 1.36.0
+          toolchain: 1.46.0
           override: true
     - uses: actions-rs/cargo@v1
       with:
-          command: build
-          args: --verbose
+          command: build  
+          args: --verbose --no-default-features --features=svg_backend,chrono,image,deprecated_items,all_series,all_elements
   build_and_test:
     runs-on: ${{ matrix.os }}
     strategy:

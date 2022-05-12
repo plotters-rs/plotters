@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -10,27 +10,29 @@ homepage = "https://plotters-rs.github.io/"
 keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
 categories = ["visualization", "wasm"]
 readme = "README.md"
-exclude = ["doc-template/*"]
+exclude = ["doc-template", "plotters-doc-data"]
 
 [dependencies]
-num-traits = "0.2.11"
-chrono = { version = "0.4.11", optional = true }
-plotters-backend = "^0.3"
+num-traits = "0.2.14"
+chrono = { version = "0.4.19", optional = true }
 plotters-svg = {version = "^0.3.*", optional = true}
 
+[dependencies.plotters-backend]
+version = "^0.3"
+
 [dependencies.plotters-bitmap]
-version = "^0.3.*"
+version = "^0.3"
 optional = true
 default_features = false
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-ttf-parser = { version = "0.8.2", optional = true }
+ttf-parser = { version = "0.15.0", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 pathfinder_geometry = { version = "0.5.1", optional = true }
-font-kit = { version = "0.7.0", optional = true }
+font-kit = { version = "0.11.0", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
-version = "0.23.4"
+version = "0.23.14"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]
@@ -39,7 +41,7 @@ features = ["jpeg", "png", "bmp"]
 version = "0.2.62"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
-version = "0.3.39"
+version = "0.3.51"
 features = [
          "Document",
          "DomRect",
@@ -58,7 +60,8 @@ default = [
         "chrono",
         "ttf",
         "image",
-        "deprecated_items",  "all_series", "all_elements"
+        "deprecated_items",  "all_series", "all_elements",
+        "full_palette"
 ]
 all_series = ["area_series", "line_series", "point_series", "surface_series"]
 all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
@@ -68,6 +71,9 @@ bitmap_backend = ["plotters-bitmap", "ttf"]
 bitmap_encoder = ["plotters-bitmap/image_encoder"]
 bitmap_gif = ["plotters-bitmap/gif_backend"]
 svg_backend = ["plotters-svg"]
+
+# Colors
+full_palette = []
 
 # Elements
 errorbar = []
@@ -81,8 +87,11 @@ line_series = []
 point_series = []
 surface_series = []
 
-# Font implemnetation
+# Font implementation
 ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
+# dlopen fontconfig C library at runtime instead of linking at build time
+# Can be useful for cross compiling, especially considering fontconfig has lots of C dependencies
+fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 
 # Misc
 datetime = ["chrono"]
@@ -90,19 +99,20 @@ evcxr = ["svg_backend"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 [dev-dependencies]
-rand = "0.7.3"
-itertools = "0.9.0"
-rand_distr = "0.2.2"
-criterion = "0.3.2"
-rayon = "1.3.0"
-rand_xorshift = "0.2.0"
-plotters-bitmap = "^0.3.*"
-serde_json = "1.0.57"
-serde = "1.0.115"
-serde_derive = "1.0.115"
+itertools = "0.10.0"
+criterion = "0.3.4"
+rayon = "1.5.1"
+serde_json = "1.0.64"
+serde = "1.0.126"
+serde_derive = "1.0.126"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+rand = "0.8.3"
+rand_distr = "0.4.0"
+rand_xorshift = "0.3.0"
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.12"
+wasm-bindgen-test = "0.3.24"
 
 [[bench]]
 name = "benchmark"

@@ -6,6 +6,7 @@ use plotters_backend::BackendCoord;
 use std::ops::Range;
 
 /// A 3D cartesian coordinate system
+#[derive(Clone)]
 pub struct Cartesian3d<X: Ranged, Y: Ranged, Z: Ranged> {
     pub(crate) logic_x: X,
     pub(crate) logic_y: Y,

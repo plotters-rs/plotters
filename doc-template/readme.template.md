@@ -6,6 +6,9 @@
 <a href="https://docs.rs/plotters">
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
+<a href="https://docs.rs/plotters">
+    <img style="display: inline!important" src="https://img.shields.io/crates/d/plotters"></img>
+</a>
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
@@ -37,13 +40,13 @@ $$[TOC]$$
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^$LATEST_VERSION"
+plotters = "$LATEST_VERSION"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
 
 ```rust
-$$examples/quick_start.rs$$
+$$../examples/quick_start.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/0.png)
@@ -155,7 +158,7 @@ But Plotter is aimed to be a platform that is fully extendable to support any ot
 Plotters can use different drawing back-ends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
 
 ```rust
-$$examples/drawing_backends.rs$$
+$$../examples/drawing_backends.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/1.png)
@@ -168,7 +171,7 @@ This is done by creating sub-drawing-areas.
 Besides that, the drawing area also allows the customized coordinate system, by doing so, the coordinate mapping is done by the drawing area automatically.
 
 ```rust
-$$examples/drawing_area.rs$$
+$$../examples/drawing_area.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/2.png)
@@ -184,7 +187,7 @@ You may also combine existing elements to build a complex element.
 To learn more about the element system, please read the [element module documentation](./element/index.html).
 
 ```rust
-$$examples/elements.rs$$
+$$../examples/elements.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/3.png)
@@ -198,7 +201,7 @@ coordinate which has the upper-left corner defined as `(0,0)` is used for furthe
 For example, we can have an element which includes a dot and its coordinate.
 
 ```rust
-$$examples/composable_elements.rs$$
+$$../examples/composable_elements.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/4.png)
@@ -211,7 +214,7 @@ For example, you can define the label areas, meshes, and put a data series onto 
 of the chart context object.
 
 ```rust
-$$examples/chart.rs$$
+$$../examples/chart.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/5.png)
@@ -271,7 +274,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| datetime | Eanble the date and time coordinate support | chrono | Yes |
+| datetime | Enable the date and time coordinate support | chrono | Yes |
 
 - Element, series and util functions
 
@@ -316,6 +319,15 @@ The following list is a complete list of features that can be opt in and out.
 	- [SVG Backend](https://github.com/plotters-rs/plotters-svg.git)
 	- [HTML5 Canvas Backend](https://github.com/plotters-rs/plotters-canvas.git)
 	- [GTK/Cairo Backend](https://github.com/plotters-rs/plotters-cairo.git)
+
+* How to check if a backend writes file successfully ?
+
+	The behavior of Plotters backend is consistent with standard library. 
+	When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically 
+	whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored. 
+
+	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+	For more information, please see the examples.
 
 $$style$$
 

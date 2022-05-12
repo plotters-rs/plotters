@@ -16,9 +16,9 @@ struct CountryData {
     data: Vec<DailyData>,
 }
 
+const OUT_FILE_NAME: &'static str = "plotters-doc-data/tick_control.svg";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root =
-        SVGBackend::new("plotters-doc-data/tick_control.svg", (1024, 768)).into_drawing_area();
+    let root = SVGBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
     let (upper, lower) = root.split_vertically(750);
@@ -76,6 +76,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_series_labels()
         .border_style(&BLACK)
         .draw()?;
+
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    println!("Result has been saved to {}", OUT_FILE_NAME);
 
     Ok(())
 }

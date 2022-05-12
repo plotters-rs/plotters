@@ -37,7 +37,7 @@ Before you finalize your PR, please check the following thing:
 
 - Please make sure the WASM target works as well. The easiest way to do that is try to run our WASM demo under [examples/wasm-demo](https://github.com/38/plotters/blob/master/examples/wasm-demo) directory and follow the instruction in the `README.md` file under that directory.
 
-## Is my code meets the styling guideline
+## Does my code meet the styling guidelines
 
 Although there's no strictly enforced rules for the style, but please read the following recommendations before you start work.
 
@@ -61,7 +61,7 @@ If you need to modify the readme and documentation, please change the template a
 use the following command to synchronize the doc to both `src/lib.rs` and `README.md`.
 
 ```bash
-bash doc-template/update-readme.sh
+bash doc-template/update_readme.sh
 ```
 
 ## Testing Notes

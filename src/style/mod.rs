@@ -13,6 +13,10 @@ mod text;
 pub use self::palette::*;
 pub use color::{Color, HSLColor, PaletteColor, RGBAColor, RGBColor};
 pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
+
+#[cfg(feature = "full_palette")]
+pub use colors::full_palette;
+
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };

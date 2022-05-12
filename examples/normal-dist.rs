@@ -4,9 +4,9 @@ use rand::SeedableRng;
 use rand_distr::{Distribution, Normal};
 use rand_xorshift::XorShiftRng;
 
+const OUT_FILE_NAME: &'static str = "plotters-doc-data/normal-dist.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root =
-        BitMapBackend::new("plotters-doc-data/normal-dist.png", (1024, 768)).into_drawing_area();
+    let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 
@@ -53,6 +53,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .data(random_points.iter().map(|(_, y)| (*y, 1)));
     x_hist_ctx.draw_series(x_hist)?;
     y_hist_ctx.draw_series(y_hist)?;
+
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    println!("Result has been saved to {}", OUT_FILE_NAME);
 
     Ok(())
 }

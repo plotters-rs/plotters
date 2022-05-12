@@ -17,9 +17,9 @@ fn snowflake_iter(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
     ret
 }
 
+const OUT_FILE_NAME: &'static str = "plotters-doc-data/snowflake.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root =
-        BitMapBackend::new("plotters-doc-data/snowflake.png", (1024, 768)).into_drawing_area();
+    let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 
     root.fill(&WHITE)?;
 
@@ -46,6 +46,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     snowflake_vertices.push(snowflake_vertices[0]);
     chart.draw_series(std::iter::once(PathElement::new(snowflake_vertices, &RED)))?;
 
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }
 #[test]

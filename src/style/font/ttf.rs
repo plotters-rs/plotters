@@ -91,13 +91,16 @@ impl FontExt {
 
     fn query_kerning_table(&self, prev: u32, next: u32) -> f32 {
         if let Some(face) = self.face.as_ref() {
-            let kern = face
-                .kerning_subtables()
-                .filter(|st| st.is_horizontal() && !st.is_variable())
-                .filter_map(|st| st.glyphs_kerning(GlyphId(prev as u16), GlyphId(next as u16)))
-                .next()
-                .unwrap_or(0);
-            return kern as f32;
+            if let Some(kern) = face.tables().kern {
+                let kern = kern
+                    .subtables
+                    .into_iter()
+                    .filter(|st| st.horizontal && !st.variable)
+                    .filter_map(|st| st.glyphs_kerning(GlyphId(prev as u16), GlyphId(next as u16)))
+                    .next()
+                    .unwrap_or(0);
+                return kern as f32;
+            }
         }
         0.0
     }

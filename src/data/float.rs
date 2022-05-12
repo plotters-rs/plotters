@@ -13,6 +13,7 @@ fn find_minimal_repr(n: f64, eps: f64) -> (f64, usize) {
     }
 }
 
+#[allow(clippy::never_loop)]
 fn float_to_string(n: f64, max_precision: usize, min_decimal: usize) -> String {
     let (mut result, mut count) = loop {
         let (sign, n) = if n < 0.0 { ("-", -n) } else { ("", n) };

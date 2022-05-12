@@ -8,6 +8,9 @@
 <a href="https://docs.rs/plotters">
     <img style="display: inline!important" src="https://docs.rs/plotters/badge.svg"></img>
 </a>
+<a href="https://docs.rs/plotters">
+    <img style="display: inline!important" src="https://img.shields.io/crates/d/plotters"></img>
+</a>
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
     <img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
@@ -103,7 +106,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Real-time Rendering
-        <a href="https://github.com/38/plotters/tree/master/examples/piston-demo">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters-piston/blob/master/examples/cpustat.rs">[code]</a>
     </div>
 </div>
 
@@ -295,7 +298,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
 ```toml
 [dependencies]
-plotters = "^0.3.0"
+plotters = "0.3.1"
 ```
 
 And the following code draws a quadratic function. `src/main.rs`,
@@ -327,6 +330,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
         .draw()?;
+
+    root.present()?;
 
     Ok(())
 }
@@ -448,6 +453,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // And if we want SVG backend
     // let backend = SVGBackend::new("output.svg", (800, 600));
     backend.draw_rect((50, 50), (200, 150), &RED, true)?;
+    backend.present()?;
     Ok(())
 }
 ```
@@ -464,14 +470,14 @@ Besides that, the drawing area also allows the customized coordinate system, by 
 ```rust
 use plotters::prelude::*;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root_drawing_area =
-        BitMapBackend::new("plotters-doc-data/2.png", (300, 200)).into_drawing_area();
+    let root = BitMapBackend::new("plotters-doc-data/2.png", (300, 200)).into_drawing_area();
     // And we can split the drawing area into 3x3 grid
-    let child_drawing_areas = root_drawing_area.split_evenly((3, 3));
+    let child_drawing_areas = root.split_evenly((3, 3));
     // Then we fill the drawing area with different color
     for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
+    root.present()?;
     Ok(())
 }
 ```
@@ -499,6 +505,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         50,
         Into::<ShapeStyle>::into(&GREEN).filled(),
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -541,6 +548,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.draw(&dot_and_label(0.5, 0.6))?;
     root.draw(&dot_and_label(0.25, 0.33))?;
     root.draw(&dot_and_label(0.8, 0.8))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -596,6 +604,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             + Text::new(format!("{:?}", c), (10, 0), ("sans-serif", 10).into_font());
         },
     ))?;
+    root.present()?;
     Ok(())
 }
 ```
@@ -657,7 +666,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| datetime | Eanble the date and time coordinate support | chrono | Yes |
+| datetime | Enable the date and time coordinate support | chrono | Yes |
 
 - Element, series and util functions
 
@@ -702,6 +711,15 @@ The following list is a complete list of features that can be opt in and out.
     - [SVG Backend](https://github.com/plotters-rs/plotters-svg.git)
     - [HTML5 Canvas Backend](https://github.com/plotters-rs/plotters-canvas.git)
     - [GTK/Cairo Backend](https://github.com/plotters-rs/plotters-cairo.git)
+
+* How to check if a backend writes file successfully ?
+
+    The behavior of Plotters backend is consistent with standard library.
+    When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically
+    whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored.
+
+    In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+    For more information, please see the examples.
 
 
 <style>
@@ -784,17 +802,21 @@ pub mod prelude {
     pub use crate::series::SurfaceSeries;
 
     // Styles
+    pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
+
+    #[cfg(feature = "full_palette")]
+    pub use crate::style::full_palette;
+
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         IntoTextStyle, Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBColor,
         ShapeStyle, TextStyle,
     };
-    pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     // Elements
     pub use crate::element::{
         Circle, Cross, Cubiod, DynElement, EmptyElement, IntoDynElement, MultiLineText,
-        PathElement, Pixel, Polygon, Rectangle, Text, TriangleMarker,
+        PathElement, Pie, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 
     #[cfg(feature = "boxplot")]
@@ -832,3 +854,6 @@ pub mod prelude {
     #[cfg(feature = "svg_backend")]
     pub use plotters_svg::SVGBackend;
 }
+
+#[cfg(test)]
+mod test;

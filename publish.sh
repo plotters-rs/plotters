@@ -30,14 +30,14 @@ sed -i "s/^## Plotters .* (?) *\$/## Plotters ${NEW_VERSION} ($DATE)/g" CHANGELO
 
 echo ${NEW_VERSION} > doc-template/latest_version
 
-git add -u .
-git commit -m "Bump version number from ${OLD_VERSION} to ${NEW_VERSION}"
-git tag -a "v${NEW_VERSION}" -m "Plotters ${NEW_VERSION} release"
-
 # Verify MSRV
 MSRV=$(cat ${ROOT}/doc-template/msrv.txt)
 rustup install ${MSRV}
-cargo +${MSRV} build
+cargo +${MSRV} build --features="svg_backend,chrono,image,deprecated_items,all_series,all_elements" --no-default-features
+
+git add -u .
+git commit -m "Bump version number from ${OLD_VERSION} to ${NEW_VERSION}"
+git tag -a "v${NEW_VERSION}" -m "Plotters ${NEW_VERSION} release"
 
 cargo publish
 git push origin
