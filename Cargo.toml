@@ -98,6 +98,7 @@ fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 datetime = ["chrono"]
 evcxr = ["svg_backend", "bitmap_backend", "image"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
+evcxr_bitmap_figure = ["bitmap_backend", "evcxr"]
 
 [dev-dependencies]
 itertools = "0.10.0"
