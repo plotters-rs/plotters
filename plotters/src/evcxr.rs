@@ -1,10 +1,10 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
 use base64;
-use image::{png::PngEncoder, ImageBuffer, ImageError, Pixel, RgbImage, Rgb};
-use std::ops::Deref;
-use plotters_svg::SVGBackend;
+use image::{png::PngEncoder, ImageBuffer, ImageError, Pixel, Rgb, RgbImage};
 use plotters_bitmap::BitMapBackend;
+use plotters_svg::SVGBackend;
+use std::ops::Deref;
 
 /// The wrapper for the generated SVG
 pub struct SVGWrapper(String, String);
