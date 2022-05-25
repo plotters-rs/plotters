@@ -45,8 +45,10 @@ pub fn evcxr_figure<
     SVGWrapper(buffer, "".to_string())
 }
 
+#[cfg(feature = "evcxr_bitmap_figure")]
 pub struct BitMapWrapper(String, String);
 
+#[cfg(feature = "evcxr_bitmap_figure")]
 impl BitMapWrapper {
     pub fn evcxr_display(&self) {
         println!("{:?}", self);
@@ -58,6 +60,7 @@ impl BitMapWrapper {
     }
 }
 
+#[cfg(feature = "evcxr_bitmap_figure")]
 impl std::fmt::Debug for BitMapWrapper {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         let enc = self.0.as_str();
@@ -69,6 +72,7 @@ impl std::fmt::Debug for BitMapWrapper {
     }
 }
 
+#[cfg(feature = "evcxr_bitmap_figure")]
 fn encode_png<P, Container>(img: &ImageBuffer<P, Container>) -> Result<Vec<u8>, ImageError>
 where
     P: Pixel<Subpixel = u8> + 'static,
@@ -80,6 +84,7 @@ where
     Ok(buf)
 }
 
+#[cfg(feature = "evcxr_bitmap_figure")]
 /// Start drawing an evcxr figure
 pub fn evcxr_bitmap_figure<
     Draw: FnOnce(DrawingArea<BitMapBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
@@ -98,13 +103,14 @@ pub fn evcxr_bitmap_figure<
     BitMapWrapper(buffer, "".to_string())
 }
 
-pub fn evcxr_animation<
-    Draw: FnOnce(DrawingArea<SVGBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
->(
-    drawing_area: &DrawingArea<SVGBackend, Shift>,
-    draws: Draw,
-    frames: usize,
-    interval: usize,
-) -> SVGWrapper {
-    todo!();
-}
+// #[cfg(feature = "evcxr_bitmap_figure")]
+// pub fn evcxr_animation<
+//     Draw: FnOnce(DrawingArea<SVGBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
+// >(
+//     drawing_area: &DrawingArea<SVGBackend, Shift>,
+//     draws: Draw,
+//     frames: usize,
+//     interval: usize,
+// ) -> SVGWrapper {
+//     todo!();
+// }
