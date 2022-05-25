@@ -184,12 +184,12 @@ impl KeyPointHint for LightPoints {
 /// Which is used to describe any 1D axis.
 pub trait Ranged {
     /// This marker decides if Plotters default [ValueFormatter](trait.ValueFormatter.html) implementation should be used.
-    /// This assicated type can be one of follow two types:
-    /// - [DefaultFormatting](struct.DefaultFormatting.html) will allow Plotters automatically impl
+    /// This associated type can be one of the following two types:
+    /// - [DefaultFormatting](struct.DefaultFormatting.html) will allow Plotters to automatically impl
     /// the formatter based on `Debug` trait, if `Debug` trait is not impl for the `Self::Value`,
     /// [ValueFormatter](trait.ValueFormatter.html) will not impl unless you impl it manually.
     ///
-    /// - [NoDefaultFormatting](struct.NoDefaultFormatting.html) Disable the automatical `Debug`
+    /// - [NoDefaultFormatting](struct.NoDefaultFormatting.html) Disable the automatic `Debug`
     /// based value formatting. Thus you have to impl the
     /// [ValueFormatter](trait.ValueFormatter.html) manually.
     ///

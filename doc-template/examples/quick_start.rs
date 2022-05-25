@@ -25,5 +25,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .border_style(&BLACK)
         .draw()?;
 
+    root.present()?;
+
     Ok(())
 }
