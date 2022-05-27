@@ -11,6 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let center = (dims.0 as i32 / 2, dims.1 as i32 / 2);
     let radius = 300.0;
     let sizes = vec![66.0, 33.0];
+    let _rgba = RGBAColor(0, 50, 255, 1.0);
     let colors = vec![RGBColor(0, 50, 255), CYAN];
     let labels = vec!["Pizza", "Pacman"];
 

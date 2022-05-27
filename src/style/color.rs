@@ -64,7 +64,7 @@ impl<T: Color> Color for &'_ T {
 ///
 /// If you want to directly create a RGB color with transparency use [RGBColor::mix]
 #[derive(Copy, Clone, PartialEq, Debug, Default)]
-pub struct RGBAColor(pub(crate) u8, pub(crate) u8, pub(crate) u8, pub(crate) f64);
+pub struct RGBAColor(pub u8, pub u8, pub u8, pub f64);
 
 impl Color for RGBAColor {
     #[inline(always)]
