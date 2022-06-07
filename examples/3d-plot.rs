@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         pb.into_matrix()
     });
 
-    chart.configure_axes().draw()?;
+    chart.configure_axes().max_light_lines(4).draw()?;
 
     chart
         .draw_series(

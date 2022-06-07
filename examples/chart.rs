@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .margin_right(20)
             .caption(format!("y = x^{}", 1 + 2 * idx), ("sans-serif", 40))
             .build_cartesian_2d(-1f32..1f32, -1f32..1f32)?;
-        cc.configure_mesh().x_labels(5).y_labels(3).draw()?;
+        cc.configure_mesh().x_labels(5).y_labels(3).max_light_lines(4).draw()?;
 
         cc.draw_series(LineSeries::new(
             (-1f32..1f32)

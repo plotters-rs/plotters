@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             p.into_matrix() // build the projection matrix
         });
 
-        chart.configure_axes().draw()?;
+        chart.configure_axes().max_light_lines(4).draw()?;
 
         chart.draw_series(
             SurfaceSeries::xoz(
