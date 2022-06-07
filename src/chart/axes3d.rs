@@ -162,9 +162,9 @@ where
             BoldPoints(self.n_labels[2]),
         );
         let kps_light = chart.get_key_points(
-            LightPoints::new(self.n_labels[0], self.n_labels[0] * self.light_lines_limit[0]),
-            LightPoints::new(self.n_labels[1], self.n_labels[1] * self.light_lines_limit[1]),
-            LightPoints::new(self.n_labels[2], self.n_labels[2] * self.light_lines_limit[2]),
+            LightPoints::new(self.n_labels[0] * self.light_lines_limit[0], self.n_labels[0] * self.light_lines_limit[0]),
+            LightPoints::new(self.n_labels[1] * self.light_lines_limit[1], self.n_labels[1] * self.light_lines_limit[1]),
+            LightPoints::new(self.n_labels[2] * self.light_lines_limit[2], self.n_labels[2] * self.light_lines_limit[2])
         );
 
         let panels = chart.draw_axis_panels(
