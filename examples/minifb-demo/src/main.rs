@@ -69,24 +69,27 @@ fn main() -> Result<(), Box<dyn Error>> {
         H,
         WindowOptions::default(),
     )?;
-    let root =
-        BitMapBackend::<BGRXPixel>::with_buffer_and_format(buf.borrow_mut(), (W as u32, H as u32))?
-            .into_drawing_area();
-    root.fill(&BLACK)?;
+    let cs = {
+        let root =
+            BitMapBackend::<BGRXPixel>::with_buffer_and_format(buf.borrow_mut(), (W as u32, H as u32))?
+                .into_drawing_area();
+        root.fill(&BLACK)?;
 
-    let mut chart = ChartBuilder::on(&root)
-        .margin(10)
-        .set_all_label_area_size(30)
-        .build_cartesian_2d(-1.2..1.2, -1.2..1.2)?;
+        let mut chart = ChartBuilder::on(&root)
+            .margin(10)
+            .set_all_label_area_size(30)
+            .build_cartesian_2d(-1.2..1.2, -1.2..1.2)?;
 
-    chart
-        .configure_mesh()
-        .label_style(("sans-serif", 15).into_font().color(&GREEN))
-        .axis_style(&GREEN)
-        .draw()?;
+        chart
+            .configure_mesh()
+            .label_style(("sans-serif", 15).into_font().color(&GREEN))
+            .axis_style(&GREEN)
+            .draw()?;
 
-    let cs = chart.into_chart_state();
-    root.present()?;
+        let cs = chart.into_chart_state();
+        root.present()?;
+        cs
+    };
 
     let mut data = VecDeque::new();
     let start_ts = SystemTime::now();
@@ -117,58 +120,58 @@ fn main() -> Result<(), Box<dyn Error>> {
         data.push_back((epoch, phase_x.sin(), phase_y.sin()));
 
         if epoch - last_flushed > 1.0 / FREAME_RATE {
-            let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(
-                buf.borrow_mut(),
-                (W as u32, H as u32),
-            )?
-            .into_drawing_area();
-            let mut chart = cs.clone().restore(&root);
-            chart.plotting_area().fill(&BLACK)?;
+            {
+                let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(
+                    buf.borrow_mut(),
+                    (W as u32, H as u32),
+                )?
+                .into_drawing_area();
+                {
+                    let mut chart = cs.clone().restore(&root);
+                    chart.plotting_area().fill(&BLACK)?;
 
-            chart
-                .configure_mesh()
-                .bold_line_style(&GREEN.mix(0.2))
-                .light_line_style(&TRANSPARENT)
-                .draw()?;
+                    chart
+                        .configure_mesh()
+                        .bold_line_style(&GREEN.mix(0.2))
+                        .light_line_style(&TRANSPARENT)
+                        .draw()?;
 
-            chart.draw_series(data.iter().zip(data.iter().skip(1)).map(
-                |(&(e, x0, y0), &(_, x1, y1))| {
-                    PathElement::new(
-                        vec![(x0, y0), (x1, y1)],
-                        &GREEN.mix(((e - epoch) * 20.0).exp()),
-                    )
-                },
-            ))?;
+                    chart.draw_series(data.iter().zip(data.iter().skip(1)).map(
+                        |(&(e, x0, y0), &(_, x1, y1))| {
+                            PathElement::new(
+                                vec![(x0, y0), (x1, y1)],
+                                &GREEN.mix(((e - epoch) * 20.0).exp()),
+                            )
+                        },
+                    ))?;
+                }
+                root.present()?;
 
-            root.present()?;
-            drop(chart);
-
-            if let Some(keys) = window.get_keys_pressed(KeyRepeat::Yes) {
-                for key in keys {
-                    let old_fx = fx;
-                    let old_fy = fy;
-                    match key {
-                        Key::Equal => {
-                            fy += 0.1;
+                if let Some(keys) = window.get_keys_pressed(KeyRepeat::Yes) {
+                    for key in keys {
+                        let old_fx = fx;
+                        let old_fy = fy;
+                        match key {
+                            Key::Equal => {
+                                fy += 0.1;
+                            }
+                            Key::Minus => {
+                                fy -= 0.1;
+                            }
+                            Key::Key0 => {
+                                fx += 0.1;
+                            }
+                            Key::Key9 => {
+                                fx -= 0.1;
+                            }
+                            _ => {
+                                continue;
+                            }
                         }
-                        Key::Minus => {
-                            fy -= 0.1;
-                        }
-                        Key::Key0 => {
-                            fx += 0.1;
-                        }
-                        Key::Key9 => {
-                            fx -= 0.1;
-                        }
-                        _ => {
-                            continue;
-                        }
+                        xphase += 2.0 * epoch * std::f64::consts::PI * (old_fx - fx);
+                        yphase += 2.0 * epoch * std::f64::consts::PI * (old_fy - fy);
                     }
-                    xphase += 2.0 * epoch * std::f64::consts::PI * (old_fx - fx);
-                    yphase += 2.0 * epoch * std::f64::consts::PI * (old_fy - fy);
-
                     window.set_title(&get_window_title(fx, fy, yphase - xphase));
-                    break;
                 }
             }
 
