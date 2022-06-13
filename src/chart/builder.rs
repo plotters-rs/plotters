@@ -19,7 +19,7 @@ This is used to configure the label area size with function
 
 ```
 # use plotters::prelude::*;
-let drawing_area = BitMapBackend::new("set_label_area_size.png", (400, 200)).into_drawing_area();
+let drawing_area = BitMapBackend::new("label_area_position.png", (400, 200)).into_drawing_area();
 drawing_area.fill(&WHITE);
 let mut chart_builder = ChartBuilder::on(&drawing_area);
 chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 60).set_label_area_size(LabelAreaPosition::Left, 35);
@@ -27,7 +27,7 @@ let mut chart_context = chart_builder.build_cartesian_2d(0.0..5.0, 0.0..3.0).unw
 chart_context.configure_mesh().x_desc("Spacious X label area").y_desc("Narrow Y label area").draw().unwrap();
 ```
 
-![Output chart showing a spacious X label area and a narrow Y label area](https://plotters-rs.github.io/plotters-doc-data/sample.png)
+![Output chart showing a spacious X label area and a narrow Y label area](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/label_area_position.png)
 
 # See also
 
