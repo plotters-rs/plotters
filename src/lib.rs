@@ -616,7 +616,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Development Version
 
-To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.toml`
+Find the latest development version of Plotters on [GitHub](https://github.com/38/plotters.git).
+Clone the repository and learn more about the Plotters API and ways to contribute. Your help is needed!
+
+If you want to add the development version of Plotters to your project, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
