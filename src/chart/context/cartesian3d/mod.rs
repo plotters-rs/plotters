@@ -62,12 +62,11 @@ where
     let drawing_area = BitMapBackend::new("configure_axes.png", (300, 200)).into_drawing_area();
     drawing_area.fill(&WHITE);
     let mut chart_builder = ChartBuilder::on(&drawing_area);
-    chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 60);
     let mut chart_context = chart_builder.build_cartesian_3d(0.0..4.0, 0.0..4.0, 0.0..4.0).unwrap();
     chart_context.configure_axes().x_labels(0).z_labels(0).draw().unwrap();
     ```
 
-    The output is a chart with no labels in the X or Z axes:
+    The result is a chart with no labels in the X or Z axes:
 
     ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/configure_axes.png)
 
