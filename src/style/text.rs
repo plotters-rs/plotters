@@ -15,9 +15,50 @@ pub struct TextStyle<'a> {
     /// The anchor point position
     pub pos: text_anchor::Pos,
 }
+
+/// Trait for values that can be converted into `TextStyle` values
 pub trait IntoTextStyle<'a> {
+    /** Converts the value into a TextStyle value.
+
+    `parent` is used in some cases to convert a font size from points to pixels.
+
+    # Example
+
+    ```
+    # use plotters::prelude::*;
+    let drawing_area = BitMapBackend::new("into_text_style.png", (200, 100)).into_drawing_area();
+    let text_style = ("Calibri", 20, &RED).into_text_style(&drawing_area);
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    ```
+
+    The result is a text label styled accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/into_text_style.png)
+
+    */
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a>;
 
+    /** Specifies the color of the text element
+
+    # Example
+
+    ```
+    # use plotters::prelude::*;
+    let drawing_area = BitMapBackend::new("with_color.png", (200, 100)).into_drawing_area();
+    let text_style = ("Calibri", 20).with_color(RED).into_text_style(&drawing_area);
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    ```
+
+    The result is a text label styled accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/with_color.png)
+
+    # See also
+
+    [`FontDesc::color`]
+    [`IntoTextStyle::into_text_style`] for a more succinct example
+
+    */
     fn with_color<C: Color>(self, color: C) -> TextStyleBuilder<'a, Self>
     where
         Self: Sized,

@@ -86,7 +86,27 @@ impl<'a> FontDesc<'a> {
         self.transform.clone()
     }
 
-    /// Set the color of the font and return the result text style object
+    /** Returns a new text style object with the specified `color`.
+
+    # Example
+
+    ```
+    # use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
+    let drawing_area = BitMapBackend::new("font_desc_color.png", (200, 100)).into_drawing_area();
+    let text_style = ("Calibri", 20).into_font().color(&RED);
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    ```
+
+    The result is a text label colorized accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/font_desc_color.png)
+
+    # See also
+
+    [`IntoTextStyle::with_color`]
+    [`IntoTextStyle::into_text_style`] for a more succinct example
+
+    */
     pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
         TextStyle {
             font: self.clone(),
