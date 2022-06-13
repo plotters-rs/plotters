@@ -27,7 +27,9 @@ let mut chart_context = chart_builder.build_cartesian_2d(0.0..5.0, 0.0..3.0).unw
 chart_context.configure_mesh().x_desc("Spacious X label area").y_desc("Narrow Y label area").draw().unwrap();
 ```
 
-![Output chart showing a spacious X label area and a narrow Y label area](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/label_area_position.png)
+The result is a chart showing a spacious X label area and a narrow Y label area:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/label_area_position.png)
 
 # See also
 
