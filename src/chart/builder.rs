@@ -9,14 +9,39 @@ use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
 use plotters_backend::DrawingBackend;
 
-/// The enum used to specify the position of label area.
-/// This is used when we configure the label area size with the API
-/// [ChartBuilder::set_label_area_size](struct ChartBuilder.html#method.set_label_area_size)
+/**
+Specifies one of the four label positions around the figure.
+
+This is used to configure the label area size with function
+[ChartBuilder::set_label_area_size()].
+
+# Example
+
+```
+# use plotters::prelude::*;
+let drawing_area = BitMapBackend::new("set_label_area_size.png", (400, 200)).into_drawing_area();
+drawing_area.fill(&WHITE);
+let mut chart_builder = ChartBuilder::on(&drawing_area);
+chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 60).set_label_area_size(LabelAreaPosition::Left, 35);
+let mut chart_context = chart_builder.build_cartesian_2d(0.0..5.0, 0.0..3.0).unwrap();
+chart_context.configure_mesh().x_desc("Spacious X label area").y_desc("Narrow Y label area").draw().unwrap();
+```
+
+![Output chart showing a spacious X label area and a narrow Y label area](https://plotters-rs.github.io/plotters-doc-data/sample.png)
+
+# See also
+
+[ChartBuilder::set_left_and_bottom_label_area_size()]
+*/
 #[derive(Copy, Clone)]
 pub enum LabelAreaPosition {
+    /// Top of the figure
     Top = 0,
+    /// Bottom of the figure
     Bottom = 1,
+    /// Left side of the figure
     Left = 2,
+    /// Right side of the figure
     Right = 3,
 }
 
