@@ -30,6 +30,22 @@ pub trait IntoTextStyle<'a> {
         }
     }
 
+    /** Specifies the position of the text anchor relative to the text element
+
+    # Example
+
+    ```
+    # use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
+    let drawing_area = BitMapBackend::new("with_anchor.png", (400, 200)).into_drawing_area();
+    let text_style = WHITE.with_anchor::<RGBColor>(Pos::new(HPos::Center, VPos::Bottom)).into_text_style(&drawing_area);
+    drawing_area.draw_text("This label sits at backend coordinates (220,50)", &text_style, (220, 50));
+    ```
+
+    The result is a text label positioned accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@11692b9/apidoc/with_anchor.png)
+
+    */
     fn with_anchor<C: Color>(self, pos: text_anchor::Pos) -> TextStyleBuilder<'a, Self>
     where
         Self: Sized,
