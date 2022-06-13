@@ -6,11 +6,11 @@ use std::collections::VecDeque;
 use std::error::Error;
 use std::time::SystemTime;
 use std::borrow::{Borrow, BorrowMut};
-const W: usize = 480;
-const H: usize = 320;
+const W: usize = 800;
+const H: usize = 600;
 
 const SAMPLE_RATE: f64 = 10_000.0;
-const FREAME_RATE: f64 = 30.0;
+const FRAME_RATE: f64 = 30.0;
 
 struct BufferWrapper(Vec<u32>);
 impl Borrow<[u8]> for BufferWrapper {
@@ -119,7 +119,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let phase_y = 2.0 * epoch * std::f64::consts::PI * fy + yphase;
         data.push_back((epoch, phase_x.sin(), phase_y.sin()));
 
-        if epoch - last_flushed > 1.0 / FREAME_RATE {
+        if epoch - last_flushed > 1.0 / FRAME_RATE {
             {
                 let root = BitMapBackend::<BGRXPixel>::with_buffer_and_format(
                     buf.borrow_mut(),
@@ -170,8 +170,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                         }
                         xphase += 2.0 * epoch * std::f64::consts::PI * (old_fx - fx);
                         yphase += 2.0 * epoch * std::f64::consts::PI * (old_fy - fy);
+                        window.set_title(&get_window_title(fx, fy, yphase - xphase));
                     }
-                    window.set_title(&get_window_title(fx, fy, yphase - xphase));
                 }
             }
 
