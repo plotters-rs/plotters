@@ -147,35 +147,34 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 root.present()?;
 
-                if let Some(keys) = window.get_keys_pressed(KeyRepeat::Yes) {
-                    for key in keys {
-                        let old_fx = fx;
-                        let old_fy = fy;
-                        match key {
-                            Key::Equal => {
-                                fy += 0.1;
-                            }
-                            Key::Minus => {
-                                fy -= 0.1;
-                            }
-                            Key::Key0 => {
-                                fx += 0.1;
-                            }
-                            Key::Key9 => {
-                                fx -= 0.1;
-                            }
-                            _ => {
-                                continue;
-                            }
+                let keys = window.get_keys_pressed(KeyRepeat::Yes);
+                for key in keys {
+                    let old_fx = fx;
+                    let old_fy = fy;
+                    match key {
+                        Key::Equal => {
+                            fy += 0.1;
                         }
-                        xphase += 2.0 * epoch * std::f64::consts::PI * (old_fx - fx);
-                        yphase += 2.0 * epoch * std::f64::consts::PI * (old_fy - fy);
-                        window.set_title(&get_window_title(fx, fy, yphase - xphase));
+                        Key::Minus => {
+                            fy -= 0.1;
+                        }
+                        Key::Key0 => {
+                            fx += 0.1;
+                        }
+                        Key::Key9 => {
+                            fx -= 0.1;
+                        }
+                        _ => {
+                            continue;
+                        }
                     }
+                    xphase += 2.0 * epoch * std::f64::consts::PI * (old_fx - fx);
+                    yphase += 2.0 * epoch * std::f64::consts::PI * (old_fy - fy);
+                    window.set_title(&get_window_title(fx, fy, yphase - xphase));
                 }
             }
 
-            window.update_with_buffer(buf.borrow())?;
+            window.update_with_buffer(buf.borrow(), W, H)?;
             last_flushed = epoch;
         }
 
