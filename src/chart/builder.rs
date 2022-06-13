@@ -13,7 +13,7 @@ use plotters_backend::DrawingBackend;
 Specifies one of the four label positions around the figure.
 
 This is used to configure the label area size with function
-[ChartBuilder::set_label_area_size()].
+[`ChartBuilder::set_label_area_size()`].
 
 # Example
 
@@ -31,7 +31,7 @@ chart_context.configure_mesh().x_desc("Spacious X label area").y_desc("Narrow Y 
 
 # See also
 
-[ChartBuilder::set_left_and_bottom_label_area_size()]
+[`ChartBuilder::set_left_and_bottom_label_area_size()`]
 */
 #[derive(Copy, Clone)]
 pub enum LabelAreaPosition {
