@@ -89,7 +89,7 @@ pub trait IntoTextStyle<'a> {
     drawing_area.draw_text("The anchor sits at the left bottom of this label", &text_style_left_bottom, anchor_position);
     ```
 
-    The result is a text label positioned accordingly:
+    The result has a red pixel at the center and two text labels positioned accordingly:
 
     ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@4ac0bb4/apidoc/with_anchor.png)
 
