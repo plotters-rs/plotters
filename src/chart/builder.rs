@@ -18,7 +18,7 @@ This is used to configure the label area size with function
 # Example
 
 ```
-# use plotters::prelude::*;
+use plotters::prelude::*;
 let drawing_area = BitMapBackend::new("label_area_position.png", (400, 200)).into_drawing_area();
 drawing_area.fill(&WHITE);
 let mut chart_builder = ChartBuilder::on(&drawing_area);

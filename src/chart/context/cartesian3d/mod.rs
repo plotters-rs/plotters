@@ -58,7 +58,7 @@ where
     # Example
 
     ```
-    # use plotters::prelude::*;
+    use plotters::prelude::*;
     let drawing_area = BitMapBackend::new("configure_axes.png", (300, 200)).into_drawing_area();
     drawing_area.fill(&WHITE);
     let mut chart_builder = ChartBuilder::on(&drawing_area);

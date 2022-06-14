@@ -25,7 +25,7 @@ pub trait IntoTextStyle<'a> {
     # Example
 
     ```
-    # use plotters::prelude::*;
+    use plotters::prelude::*;
     let drawing_area = BitMapBackend::new("into_text_style.png", (200, 100)).into_drawing_area();
     let text_style = ("Calibri", 20, &RED).into_text_style(&drawing_area);
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
@@ -43,7 +43,7 @@ pub trait IntoTextStyle<'a> {
     # Example
 
     ```
-    # use plotters::prelude::*;
+    use plotters::prelude::*;
     let drawing_area = BitMapBackend::new("with_color.png", (200, 100)).into_drawing_area();
     let text_style = ("Calibri", 20).with_color(RED).into_text_style(&drawing_area);
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
@@ -55,8 +55,9 @@ pub trait IntoTextStyle<'a> {
 
     # See also
 
-    [`FontDesc::color`]
-    [`IntoTextStyle::into_text_style`] for a more succinct example
+    [`FontDesc::color()`]
+
+    [`IntoTextStyle::into_text_style()`] for a more succinct example
 
     */
     fn with_color<C: Color>(self, color: C) -> TextStyleBuilder<'a, Self>
@@ -76,7 +77,7 @@ pub trait IntoTextStyle<'a> {
     # Example
 
     ```
-    # use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
+    use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
     let drawing_area = BitMapBackend::new("with_anchor.png", (400, 200)).into_drawing_area();
     let text_style = WHITE.with_anchor::<RGBColor>(Pos::new(HPos::Center, VPos::Bottom)).into_text_style(&drawing_area);
     drawing_area.draw_text("This label sits at backend coordinates (220,50)", &text_style, (220, 50));
@@ -85,6 +86,10 @@ pub trait IntoTextStyle<'a> {
     The result is a text label positioned accordingly:
 
     ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@11692b9/apidoc/with_anchor.png)
+
+    # See also
+
+    [`TextStyle::pos()`]
 
     */
     fn with_anchor<C: Color>(self, pos: text_anchor::Pos) -> TextStyleBuilder<'a, Self>

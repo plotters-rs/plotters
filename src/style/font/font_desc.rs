@@ -91,7 +91,7 @@ impl<'a> FontDesc<'a> {
     # Example
 
     ```
-    # use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
+    use plotters::prelude::*;
     let drawing_area = BitMapBackend::new("font_desc_color.png", (200, 100)).into_drawing_area();
     let text_style = ("Calibri", 20).into_font().color(&RED);
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
@@ -103,8 +103,9 @@ impl<'a> FontDesc<'a> {
 
     # See also
 
-    [`IntoTextStyle::with_color`]
-    [`IntoTextStyle::into_text_style`] for a more succinct example
+    [`IntoTextStyle::with_color()`](crate::style::IntoTextStyle::with_color)
+
+    [`IntoTextStyle::into_text_style()`](crate::style::IntoTextStyle::into_text_style) for a more succinct example
 
     */
     pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
