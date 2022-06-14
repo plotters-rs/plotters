@@ -26,14 +26,15 @@ pub trait IntoTextStyle<'a> {
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("into_text_style.png", (200, 100)).into_drawing_area();
+    let drawing_area = SVGBackend::new("into_text_style.svg", (200, 100)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
     let text_style = ("Calibri", 20, &RED).into_text_style(&drawing_area);
-    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
     ```
 
     The result is a text label styled accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/into_text_style.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/into_text_style.svg)
 
     */
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a>;
@@ -44,14 +45,15 @@ pub trait IntoTextStyle<'a> {
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("with_color.png", (200, 100)).into_drawing_area();
+    let drawing_area = SVGBackend::new("with_color.svg", (200, 100)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
     let text_style = ("Calibri", 20).with_color(RED).into_text_style(&drawing_area);
-    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
     ```
 
     The result is a text label styled accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/with_color.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/with_color.svg)
 
     # See also
 
@@ -78,20 +80,21 @@ pub trait IntoTextStyle<'a> {
 
     ```
     use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
-    let drawing_area = BitMapBackend::new("with_anchor.png", (400, 200)).into_drawing_area();
-    let anchor_right_top = Pos::new(HPos::Right, VPos::Top);
-    let text_style_right_top = WHITE.with_anchor::<RGBColor>(anchor_right_top).into_text_style(&drawing_area);
-    let anchor_left_bottom = Pos::new(HPos::Left, VPos::Bottom);
-    let text_style_left_bottom = WHITE.with_anchor::<RGBColor>(anchor_left_bottom).into_text_style(&drawing_area);
     let anchor_position = (200,100);
-    drawing_area.draw_pixel(anchor_position, &RED);
+    let anchor_left_bottom = Pos::new(HPos::Left, VPos::Bottom);
+    let anchor_right_top = Pos::new(HPos::Right, VPos::Top);
+    let drawing_area = SVGBackend::new("with_anchor.svg", (400, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    drawing_area.draw(&Circle::new(anchor_position, 5, RED.filled()));
+    let text_style_right_top = BLACK.with_anchor::<RGBColor>(anchor_right_top).into_text_style(&drawing_area);
     drawing_area.draw_text("The anchor sits at the right top of this label", &text_style_right_top, anchor_position);
+    let text_style_left_bottom = BLACK.with_anchor::<RGBColor>(anchor_left_bottom).into_text_style(&drawing_area);
     drawing_area.draw_text("The anchor sits at the left bottom of this label", &text_style_left_bottom, anchor_position);
     ```
 
     The result has a red pixel at the center and two text labels positioned accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@4ac0bb4/apidoc/with_anchor.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/with_anchor.svg)
 
     # See also
 

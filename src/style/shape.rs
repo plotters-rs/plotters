@@ -21,19 +21,20 @@ impl ShapeStyle {
     ```
     use plotters::prelude::*;
     let original_style = ShapeStyle {
-        color: GREEN.mix(0.8),
+        color: BLUE.mix(0.6),
         filled: false,
         stroke_width: 2,
     };
     let filled_style = original_style.filled();
-    let drawing_area = BitMapBackend::new("shape_style_filled.png", (400, 200)).into_drawing_area();
+    let drawing_area = SVGBackend::new("shape_style_filled.svg", (400, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
     drawing_area.draw(&Circle::new((150, 100), 90, original_style));
     drawing_area.draw(&Circle::new((250, 100), 90, filled_style));
     ```
 
-    The result is a figure with two green circles, with one of them filled:
+    The result is a figure with two circles, one of them filled:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f922c4c/apidoc/shape_style_filled.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/shape_style_filled.svg)
     */
     pub fn filled(&self) -> Self {
         Self {
@@ -51,19 +52,20 @@ impl ShapeStyle {
     ```
     use plotters::prelude::*;
     let original_style = ShapeStyle {
-        color: GREEN.mix(0.8),
+        color: BLUE.mix(0.6),
         filled: false,
         stroke_width: 2,
     };
     let new_style = original_style.stroke_width(5);
-    let drawing_area = BitMapBackend::new("shape_style_stroke_width.png", (400, 200)).into_drawing_area();
+    let drawing_area = SVGBackend::new("shape_style_stroke_width.svg", (400, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
     drawing_area.draw(&Circle::new((150, 100), 90, original_style));
     drawing_area.draw(&Circle::new((250, 100), 90, new_style));
     ```
 
-    The result is a figure with two green circles, with one of them thicker than the other:
+    The result is a figure with two circles, one of them thicker than the other:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f922c4c/apidoc/shape_style_stroke_width.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/shape_style_stroke_width.svg)
     */
     pub fn stroke_width(&self, width: u32) -> Self {
         Self {

@@ -59,8 +59,8 @@ where
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("configure_axes.png", (300, 200)).into_drawing_area();
-    drawing_area.fill(&WHITE);
+    let drawing_area = SVGBackend::new("configure_axes.svg", (300, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
     let mut chart_builder = ChartBuilder::on(&drawing_area);
     let mut chart_context = chart_builder.build_cartesian_3d(0.0..4.0, 0.0..4.0, 0.0..4.0).unwrap();
     chart_context.configure_axes().x_labels(0).z_labels(0).draw().unwrap();
@@ -68,7 +68,7 @@ where
 
     The result is a chart with no labels in the X or Z axes:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/configure_axes.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@a947f8a/apidoc/configure_axes.svg)
 
     # See also
 
