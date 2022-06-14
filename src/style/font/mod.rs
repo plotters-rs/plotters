@@ -24,6 +24,7 @@ use web::FontDataInternal;
 mod font_desc;
 pub use font_desc::*;
 
+/// Represents a box where a text label can be fit
 pub type LayoutBox = ((i32, i32), (i32, i32));
 
 pub trait FontData: Clone {

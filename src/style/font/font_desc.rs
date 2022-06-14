@@ -116,6 +116,7 @@ impl<'a> FontDesc<'a> {
         }
     }
 
+    /// Returns the font family
     pub fn get_family(&self) -> FontFamily {
         self.family
     }
