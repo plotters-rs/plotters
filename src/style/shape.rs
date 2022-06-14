@@ -27,13 +27,13 @@ impl ShapeStyle {
         stroke_width: 2,
     };
     let filled_style = original_style.filled();
-    drawing_area.draw(&Circle::new((150, 100), 100, original_style));
-    drawing_area.draw(&Circle::new((300, 100), 100, filled_style));
+    drawing_area.draw(&Circle::new((150, 100), 90, original_style));
+    drawing_area.draw(&Circle::new((250, 100), 90, filled_style));
     ```
 
     The result is a figure with two green circles, with one of them filled:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/shape_style_filled.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f922c4c/apidoc/shape_style_filled.png)
     */
     pub fn filled(&self) -> Self {
         Self {
@@ -56,14 +56,14 @@ impl ShapeStyle {
         filled: false,
         stroke_width: 2,
     };
-    let filled_style = original_style.stroke_width(5);
-    drawing_area.draw(&Circle::new((150, 100), 100, original_style));
-    drawing_area.draw(&Circle::new((300, 100), 100, filled_style));
+    let new_style = original_style.stroke_width(5);
+    drawing_area.draw(&Circle::new((150, 100), 90, original_style));
+    drawing_area.draw(&Circle::new((250, 100), 90, new_style));
     ```
 
     The result is a figure with two green circles, with one of them thicker than the other:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@apidoc/apidoc/shape_style_stroke_width.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f922c4c/apidoc/shape_style_stroke_width.png)
     */
     pub fn stroke_width(&self, width: u32) -> Self {
         Self {
