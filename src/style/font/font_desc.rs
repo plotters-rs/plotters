@@ -92,8 +92,8 @@ impl<'a> FontDesc<'a> {
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("font_desc_color.png", (200, 100)).into_drawing_area();
     let text_style = ("Calibri", 20).into_font().color(&RED);
+    let drawing_area = BitMapBackend::new("font_desc_color.png", (200, 100)).into_drawing_area();
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
     ```
 

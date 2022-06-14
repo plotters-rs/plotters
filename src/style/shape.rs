@@ -20,13 +20,13 @@ impl ShapeStyle {
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("shape_style_filled.png", (400, 200)).into_drawing_area();
     let original_style = ShapeStyle {
         color: GREEN.mix(0.8),
         filled: false,
         stroke_width: 2,
     };
     let filled_style = original_style.filled();
+    let drawing_area = BitMapBackend::new("shape_style_filled.png", (400, 200)).into_drawing_area();
     drawing_area.draw(&Circle::new((150, 100), 90, original_style));
     drawing_area.draw(&Circle::new((250, 100), 90, filled_style));
     ```
@@ -50,13 +50,13 @@ impl ShapeStyle {
 
     ```
     use plotters::prelude::*;
-    let drawing_area = BitMapBackend::new("shape_style_stroke_width.png", (400, 200)).into_drawing_area();
     let original_style = ShapeStyle {
         color: GREEN.mix(0.8),
         filled: false,
         stroke_width: 2,
     };
     let new_style = original_style.stroke_width(5);
+    let drawing_area = BitMapBackend::new("shape_style_stroke_width.png", (400, 200)).into_drawing_area();
     drawing_area.draw(&Circle::new((150, 100), 90, original_style));
     drawing_area.draw(&Circle::new((250, 100), 90, new_style));
     ```
