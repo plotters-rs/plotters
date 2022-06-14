@@ -174,6 +174,10 @@ impl<'a> TextStyle<'a> {
     /// let pos = Pos::new(HPos::Left, VPos::Top);
     /// let style = TextStyle::from(("sans-serif", 20).into_font()).pos(pos);
     /// ```
+    /// 
+    /// # See also
+    /// 
+    /// [`IntoTextStyle::with_anchor()`]
     pub fn pos(&self, pos: text_anchor::Pos) -> Self {
         Self {
             font: self.font.clone(),
