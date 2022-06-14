@@ -79,13 +79,19 @@ pub trait IntoTextStyle<'a> {
     ```
     use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
     let drawing_area = BitMapBackend::new("with_anchor.png", (400, 200)).into_drawing_area();
-    let text_style = WHITE.with_anchor::<RGBColor>(Pos::new(HPos::Center, VPos::Bottom)).into_text_style(&drawing_area);
-    drawing_area.draw_text("This label sits at backend coordinates (220,50)", &text_style, (220, 50));
+    let anchor_position = (200,100);
+    let anchor_right_top = Pos::new(HPos::Right, VPos::Top);
+    let anchor_left_bottom = Pos::new(HPos::Left, VPos::Bottom);
+    let text_style_right_top = WHITE.with_anchor::<RGBColor>(anchor_right_top).into_text_style(&drawing_area);
+    let text_style_left_bottom = WHITE.with_anchor::<RGBColor>(anchor_left_bottom).into_text_style(&drawing_area);
+    drawing_area.draw_pixel(anchor_position, &RED);
+    drawing_area.draw_text("The anchor sits at the right top of this label", &text_style_right_top, anchor_position);
+    drawing_area.draw_text("The anchor sits at the left bottom of this label", &text_style_left_bottom, anchor_position);
     ```
 
     The result is a text label positioned accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@11692b9/apidoc/with_anchor.png)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@4ac0bb4/apidoc/with_anchor.png)
 
     # See also
 
