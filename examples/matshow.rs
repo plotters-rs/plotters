@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_mesh()
         .x_labels(15)
         .y_labels(15)
+        .max_light_lines(4)
         .x_label_offset(35)
         .y_label_offset(25)
         .disable_x_mesh()

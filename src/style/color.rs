@@ -77,6 +77,7 @@ impl Color for RGBAColor {
 }
 
 /// A color in the given palette
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
 
 impl<P: Palette> PaletteColor<P> {
@@ -122,6 +123,7 @@ impl BackendStyle for RGBColor {
 }
 
 /// The color described by HSL color space
+#[derive(Copy, Clone, PartialEq, Debug, Default)]
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl Color for HSLColor {
