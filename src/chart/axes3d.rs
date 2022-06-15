@@ -45,28 +45,28 @@ where
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive X labels
     pub fn x_max_light_lines(&mut self, value: usize) -> &mut Self {
         self.light_lines_limit[0] = value;
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive Y labels
     pub fn y_max_light_lines(&mut self, value: usize) -> &mut Self {
         self.light_lines_limit[1] = value;
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive Z labels
     pub fn z_max_light_lines(&mut self, value: usize) -> &mut Self {
         self.light_lines_limit[2] = value;
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive labels in X, Y, and Z
     pub fn max_light_lines(&mut self, value: usize) -> &mut Self {
         self.light_lines_limit[0] = value;
@@ -162,9 +162,18 @@ where
             BoldPoints(self.n_labels[2]),
         );
         let kps_light = chart.get_key_points(
-            LightPoints::new(self.n_labels[0] * self.light_lines_limit[0], self.n_labels[0] * self.light_lines_limit[0]),
-            LightPoints::new(self.n_labels[1] * self.light_lines_limit[1], self.n_labels[1] * self.light_lines_limit[1]),
-            LightPoints::new(self.n_labels[2] * self.light_lines_limit[2], self.n_labels[2] * self.light_lines_limit[2])
+            LightPoints::new(
+                self.n_labels[0],
+                self.n_labels[0] * self.light_lines_limit[0],
+            ),
+            LightPoints::new(
+                self.n_labels[1],
+                self.n_labels[1] * self.light_lines_limit[1],
+            ),
+            LightPoints::new(
+                self.n_labels[2],
+                self.n_labels[2] * self.light_lines_limit[2],
+            ),
         );
 
         let panels = chart.draw_axis_panels(
