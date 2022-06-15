@@ -200,6 +200,12 @@ where
             return ret;
         }
 
+        // When all data is in the same week, just plot properly.
+        if total_weeks == 0 {
+            ret.push(self.0.clone());
+            return ret;
+        }
+
         let week_per_point = ((total_weeks as f64) / (max_points as f64)).ceil() as usize;
 
         for idx in 0..=(total_weeks as usize / week_per_point) {

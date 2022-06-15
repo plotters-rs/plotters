@@ -33,6 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .disable_x_mesh()
         .disable_y_mesh()
         .x_labels(30)
+        .max_light_lines(4)
         .y_desc("Average Temp (F)")
         .draw()?;
     chart

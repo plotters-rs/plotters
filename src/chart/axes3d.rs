@@ -18,6 +18,7 @@ pub struct Axes3dStyle<'a, 'b, X: Ranged, Y: Ranged, Z: Ranged, DB: DrawingBacke
     pub(super) parent_size: (u32, u32),
     pub(super) target: Option<&'b mut ChartContext<'a, DB, Cartesian3d<X, Y, Z>>>,
     pub(super) tick_size: i32,
+    pub(super) light_lines_limit: [usize; 3],
     pub(super) n_labels: [usize; 3],
     pub(super) bold_line_style: ShapeStyle,
     pub(super) light_line_style: ShapeStyle,
@@ -41,6 +42,36 @@ where
     pub fn tick_size<Size: SizeDesc>(&mut self, size: Size) -> &mut Self {
         let actual_size = size.in_pixels(&self.parent_size);
         self.tick_size = actual_size;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive X labels
+    pub fn x_max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.light_lines_limit[0] = value;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive Y labels
+    pub fn y_max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.light_lines_limit[1] = value;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive Z labels
+    pub fn z_max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.light_lines_limit[2] = value;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive labels in X, Y, and Z
+    pub fn max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.light_lines_limit[0] = value;
+        self.light_lines_limit[1] = value;
+        self.light_lines_limit[2] = value;
         self
     }
 
@@ -104,6 +135,7 @@ where
         Self {
             parent_size,
             tick_size,
+            light_lines_limit: [10, 10, 10],
             n_labels: [10, 10, 10],
             bold_line_style: Into::<ShapeStyle>::into(&BLACK.mix(0.2)),
             light_line_style: Into::<ShapeStyle>::into(&TRANSPARENT),
@@ -130,9 +162,18 @@ where
             BoldPoints(self.n_labels[2]),
         );
         let kps_light = chart.get_key_points(
-            LightPoints::new(self.n_labels[0], self.n_labels[0] * 10),
-            LightPoints::new(self.n_labels[1], self.n_labels[1] * 10),
-            LightPoints::new(self.n_labels[2], self.n_labels[2] * 10),
+            LightPoints::new(
+                self.n_labels[0],
+                self.n_labels[0] * self.light_lines_limit[0],
+            ),
+            LightPoints::new(
+                self.n_labels[1],
+                self.n_labels[1] * self.light_lines_limit[1],
+            ),
+            LightPoints::new(
+                self.n_labels[2],
+                self.n_labels[2] * self.light_lines_limit[2],
+            ),
         );
 
         let panels = chart.draw_axis_panels(

@@ -149,6 +149,8 @@ pub struct MeshStyle<'a, 'b, X: Ranged, Y: Ranged, DB: DrawingBackend> {
     pub(super) draw_y_axis: bool,
     pub(super) x_label_offset: i32,
     pub(super) y_label_offset: i32,
+    pub(super) x_light_lines_limit: usize,
+    pub(super) y_light_lines_limit: usize,
     pub(super) n_x_labels: usize,
     pub(super) n_y_labels: usize,
     pub(super) axis_desc_style: Option<TextStyle<'b>>,
@@ -197,6 +199,8 @@ where
             draw_y_mesh: true,
             draw_x_axis: true,
             draw_y_axis: true,
+            x_light_lines_limit: 10,
+            y_light_lines_limit: 10,
             n_x_labels: 10,
             n_y_labels: 10,
             bold_line_style: None,
@@ -308,6 +312,29 @@ where
         self.axis_style = Some(style.into());
         self
     }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive X labels
+    pub fn x_max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.x_light_lines_limit = value;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive Y labels
+    pub fn y_max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.y_light_lines_limit = value;
+        self
+    }
+
+    /// Set the maximum number of divisions for the minor grid
+    /// - `value`: Maximum desired divisions between two consecutive labels in X and Y
+    pub fn max_light_lines(&mut self, value: usize) -> &mut Self {
+        self.x_light_lines_limit = value;
+        self.y_light_lines_limit = value;
+        self
+    }
+
     /// Set how many labels for the X axis at most
     /// - `value`: The maximum desired number of labels in the X axis
     pub fn x_labels(&mut self, value: usize) -> &mut Self {
@@ -441,8 +468,8 @@ where
 
         target.draw_mesh(
             (
-                LightPoints::new(self.n_y_labels, self.n_y_labels * 10),
-                LightPoints::new(self.n_x_labels, self.n_x_labels * 10),
+                LightPoints::new(self.n_y_labels, self.n_y_labels * self.y_light_lines_limit),
+                LightPoints::new(self.n_x_labels, self.n_x_labels * self.x_light_lines_limit),
             ),
             &light_style,
             &x_label_style,
