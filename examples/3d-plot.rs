@@ -18,7 +18,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         pb.into_matrix()
     });
 
-    chart.configure_axes().light_grid_style(BLACK.mix(0.15)).max_light_lines(3).draw()?;
+    chart
+        .configure_axes()
+        .light_grid_style(BLACK.mix(0.15))
+        .max_light_lines(3)
+        .draw()?;
 
     chart
         .draw_series(
