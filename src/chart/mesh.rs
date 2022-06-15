@@ -313,21 +313,21 @@ where
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive X labels
     pub fn x_max_light_lines(&mut self, value: usize) -> &mut Self {
         self.x_light_lines_limit = value;
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive Y labels
     pub fn y_max_light_lines(&mut self, value: usize) -> &mut Self {
         self.y_light_lines_limit = value;
         self
     }
 
-    /// Set the maximum number of divisions for the fine grind grid
+    /// Set the maximum number of divisions for the minor grid
     /// - `value`: Maximum desired divisions between two consecutive labels in X and Y
     pub fn max_light_lines(&mut self, value: usize) -> &mut Self {
         self.x_light_lines_limit = value;
