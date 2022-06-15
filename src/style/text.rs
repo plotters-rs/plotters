@@ -28,13 +28,13 @@ pub trait IntoTextStyle<'a> {
     use plotters::prelude::*;
     let drawing_area = SVGBackend::new("into_text_style.svg", (200, 100)).into_drawing_area();
     drawing_area.fill(&WHITE).unwrap();
-    let text_style = ("Calibri", 20, &RED).into_text_style(&drawing_area);
+    let text_style = ("sans-serif", 20, &RED).into_text_style(&drawing_area);
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
     ```
 
     The result is a text label styled accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/into_text_style.svg)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/into_text_style.svg)
 
     */
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a>;
@@ -47,13 +47,13 @@ pub trait IntoTextStyle<'a> {
     use plotters::prelude::*;
     let drawing_area = SVGBackend::new("with_color.svg", (200, 100)).into_drawing_area();
     drawing_area.fill(&WHITE).unwrap();
-    let text_style = ("Calibri", 20).with_color(RED).into_text_style(&drawing_area);
+    let text_style = ("sans-serif", 20).with_color(RED).into_text_style(&drawing_area);
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
     ```
 
     The result is a text label styled accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/with_color.svg)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/with_color.svg)
 
     # See also
 

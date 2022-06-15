@@ -92,7 +92,7 @@ impl<'a> FontDesc<'a> {
 
     ```
     use plotters::prelude::*;
-    let text_style = ("Calibri", 20).into_font().color(&RED);
+    let text_style = ("sans-serif", 20).into_font().color(&RED);
     let drawing_area = SVGBackend::new("font_desc_color.svg", (200, 100)).into_drawing_area();
     drawing_area.fill(&WHITE).unwrap();
     drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
@@ -100,7 +100,7 @@ impl<'a> FontDesc<'a> {
 
     The result is a text label colorized accordingly:
 
-    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/font_desc_color.svg)
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/font_desc_color.svg)
 
     # See also
 
