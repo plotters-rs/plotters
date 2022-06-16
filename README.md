@@ -19,7 +19,7 @@
     <img style="display: inline! important" src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
 </a>
 
-![Minimum Rust version 1.46](https://img.shields.io/badge/rustc-1.46+-06a096.svg)
+![Minimum Rust version 1.56](https://img.shields.io/badge/rustc-1.56+-06a096.svg)
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends, 
 including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 

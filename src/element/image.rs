@@ -182,7 +182,7 @@ impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, RGBPixe
 impl<'a, Coord> From<(Coord, DynamicImage)> for BitMapElement<'a, Coord, BGRXPixel> {
     fn from((pos, image): (Coord, DynamicImage)) -> Self {
         let (w, h) = image.dimensions();
-        let rgb_image = image.to_bgra8().into_raw();
+        let rgb_image = image.to_rgb8().into_raw();
         Self {
             pos,
             image: Buffer::Owned(rgb_image),
