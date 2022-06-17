@@ -59,6 +59,7 @@ fn test_pixel_element() {
         .expect("Drawing Failure");
 }
 
+/// This is a deprecated type. Please use new name [`PathElement`] instead.
 #[deprecated(note = "Use new name PathElement instead")]
 pub type Path<Coord> = PathElement<Coord>;
 

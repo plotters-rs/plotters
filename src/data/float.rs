@@ -58,8 +58,11 @@ fn float_to_string(n: f64, max_precision: usize, min_decimal: usize) -> String {
 }
 
 pub struct FloatPrettyPrinter {
+    /// Whether scientific notation is allowed
     pub allow_scientific: bool,
+    /// Minimum allowed number of decimal digits
     pub min_decimal: i32,
+    /// Maximum allowed number of decimal digits
     pub max_decimal: i32,
 }
 

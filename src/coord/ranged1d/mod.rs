@@ -96,9 +96,9 @@ where
 
 /// Specify the weight of key points.
 pub enum KeyPointWeight {
-    // Allows only bold key points
+    /// Allows only bold key points
     Bold,
-    // Allows any key points
+    /// Allows any key points
     Any,
 }
 

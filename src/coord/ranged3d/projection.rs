@@ -142,8 +142,11 @@ impl ProjectionMatrix {
 /// The helper struct to build a projection matrix
 #[derive(Copy, Clone)]
 pub struct ProjectionMatrixBuilder {
+    /// Specifies the yaw of the 3D coordinate system
     pub yaw: f64,
+    /// Specifies the pitch of the 3D coordinate system
     pub pitch: f64,
+    /// Specifies the scale of the 3D coordinate system
     pub scale: f64,
     pivot_before: (i32, i32, i32),
     pivot_after: (i32, i32),

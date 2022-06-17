@@ -54,18 +54,27 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
     }
 }
 
-/// Describes where we want to put the series label
+/// Useful to specify the position of the series label
 pub enum SeriesLabelPosition {
+    /// Places the series label at the upper left
     UpperLeft,
+    /// Places the series label at the middle left
     MiddleLeft,
+    /// Places the series label at the lower left
     LowerLeft,
+    /// Places the series label at the upper middle
     UpperMiddle,
+    /// Places the series label at the middle middle
     MiddleMiddle,
+    /// Places the series label at the lower middle
     LowerMiddle,
+    /// Places the series label at the upper right
     UpperRight,
+    /// Places the series label at the middle right
     MiddleRight,
+    /// Places the series label at the lower right
     LowerRight,
-    /// Force the series label drawn at the specific location
+    /// Places the series label at the specific location in backend coordinates
     Coordinate(i32, i32),
 }
 
