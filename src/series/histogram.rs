@@ -70,7 +70,7 @@ to the right of `.margin(10)`. The lower portion of the bars are removed:
 
 ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@a617d37/apidoc/histogram_baseline.svg)
 
-The following figure uses [`Histogram::baseline()`] for finer control. Let's add
+The following figure uses [`Histogram::baseline_func()`] for finer control. Let's add
 `.baseline_func(|x| if let SegmentValue::Exact(v) = x {*v as i32} else {0})`
 to the right of `.margin(10)`. The lower portion of the bars are removed; the removed portion is taller
 to the right:
