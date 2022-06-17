@@ -111,18 +111,18 @@ pub struct ErrorBar<K, V, O: ErrorBarOrient<K, V>> {
 }
 
 impl<K, V> ErrorBar<K, V, ErrorBarOrientV<K, V>> {
-/**
-Creates a vertical error bar.
-`
-- `key`: Horizontal position of the bar
-- `min`: Minimum of the data
-- `avg`: Average of the data
-- `max`: Maximum of the data
-- `style`: Color, transparency, and fill of the error bar. See [`ShapeStyle`] for more information and examples.
-- `width`: Width of the error marks in backend coordinates.
+    /**
+    Creates a vertical error bar.
+    `
+    - `key`: Horizontal position of the bar
+    - `min`: Minimum of the data
+    - `avg`: Average of the data
+    - `max`: Maximum of the data
+    - `style`: Color, transparency, and fill of the error bar. See [`ShapeStyle`] for more information and examples.
+    - `width`: Width of the error marks in backend coordinates.
 
-See [`ErrorBar`] for more information and examples.
-*/
+    See [`ErrorBar`] for more information and examples.
+    */
     pub fn new_vertical<S: Into<ShapeStyle>>(
         key: K,
         min: V,
@@ -142,18 +142,18 @@ See [`ErrorBar`] for more information and examples.
 }
 
 impl<K, V> ErrorBar<K, V, ErrorBarOrientH<K, V>> {
-/**
-Creates a horizontal error bar.
+    /**
+    Creates a horizontal error bar.
 
-- `key`: Vertical position of the bar
-- `min`: Minimum of the data
-- `avg`: Average of the data
-- `max`: Maximum of the data
-- `style`: Color, transparency, and fill of the error bar. See [`ShapeStyle`] for more information and examples.
-- `width`: Width of the error marks in backend coordinates.
+    - `key`: Vertical position of the bar
+    - `min`: Minimum of the data
+    - `avg`: Average of the data
+    - `max`: Maximum of the data
+    - `style`: Color, transparency, and fill of the error bar. See [`ShapeStyle`] for more information and examples.
+    - `width`: Width of the error marks in backend coordinates.
 
-See [`ErrorBar`] for more information and examples.
-*/
+    See [`ErrorBar`] for more information and examples.
+    */
     pub fn new_horizontal<S: Into<ShapeStyle>>(
         key: K,
         min: V,
