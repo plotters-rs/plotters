@@ -2,6 +2,26 @@ use super::{BackendCoordAndZ, Drawable, PointCollection};
 use crate::style::ShapeStyle;
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
+/**
+Represents a cuboid, a six-faced solid.
+
+# Examples
+
+```
+use plotters::prelude::*;
+let drawing_area = SVGBackend::new("cuboid.svg", (300, 200)).into_drawing_area();
+drawing_area.fill(&WHITE).unwrap();
+let mut chart_builder = ChartBuilder::on(&drawing_area);
+let mut chart_context = chart_builder.margin(20).build_cartesian_3d(0.0..3.5, 0.0..2.5, 0.0..1.5).unwrap();
+chart_context.configure_axes().x_labels(4).y_labels(3).z_labels(2).draw().unwrap();
+let cubiod = Cubiod::new([(0.,0.,0.), (3.,2.,1.)], BLUE.mix(0.2), BLUE);
+chart_context.draw_series(std::iter::once(cubiod)).unwrap();
+```
+
+The result is a semi-transparent cuboid with blue edges:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b6703f7/apidoc/cuboid.svg)
+*/
 pub struct Cubiod<X, Y, Z> {
     face_style: ShapeStyle,
     edge_style: ShapeStyle,
@@ -9,6 +29,11 @@ pub struct Cubiod<X, Y, Z> {
 }
 
 impl<X: Clone, Y: Clone, Z: Clone> Cubiod<X, Y, Z> {
+    /**
+    Creates a cuboid.
+
+    See [`Cubiod`] for more information and examples.
+    */
     #[allow(clippy::redundant_clone)]
     pub fn new<FS: Into<ShapeStyle>, ES: Into<ShapeStyle>>(
         [(x0, y0, z0), (x1, y1, z1)]: [(X, Y, Z); 2],
