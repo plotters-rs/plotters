@@ -91,7 +91,6 @@ where
     }
 }
 
-
 /// Bind a existing coordinate spec with a given key points vector. See [WithKeyPoints](struct.WithKeyPoints.html ) for more details.
 pub trait BindKeyPoints
 where
