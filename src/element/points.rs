@@ -3,12 +3,27 @@ use super::{Drawable, PointCollection};
 use crate::style::{Color, ShapeStyle, SizeDesc};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
-/// The element that used to describe a point
+/**
+A common trait for elements that can be interpreted as points: A cross, a circle, a triangle marker...
+
+This is used internally by Plotters and should probably not be included in user code.
+See [`EmptyElement`] for more information and examples.
+*/
 pub trait PointElement<Coord, Size: SizeDesc> {
+    /**
+    Point creator.
+
+    This is used internally by Plotters and should probably not be included in user code.
+    See [`EmptyElement`] for more information and examples.
+    */
     fn make_point(pos: Coord, size: Size, style: ShapeStyle) -> Self;
 }
 
-/// Describe a cross
+/**
+A cross marker for visualizing data series.
+
+See [`EmptyElement`] for more information and examples.
+*/
 pub struct Cross<Coord, Size: SizeDesc> {
     center: Coord,
     size: Size,
@@ -16,6 +31,11 @@ pub struct Cross<Coord, Size: SizeDesc> {
 }
 
 impl<Coord, Size: SizeDesc> Cross<Coord, Size> {
+    /**
+    Creates a cross marker.
+
+    See [`EmptyElement`] for more information and examples.
+    */
     pub fn new<T: Into<ShapeStyle>>(coord: Coord, size: Size, style: T) -> Self {
         Self {
             center: coord,
@@ -51,7 +71,11 @@ impl<Coord, DB: DrawingBackend, Size: SizeDesc> Drawable<DB> for Cross<Coord, Si
     }
 }
 
-/// Describe a triangle marker
+/**
+A triangle marker for visualizing data series.
+
+See [`EmptyElement`] for more information and examples.
+*/
 pub struct TriangleMarker<Coord, Size: SizeDesc> {
     center: Coord,
     size: Size,
@@ -59,6 +83,11 @@ pub struct TriangleMarker<Coord, Size: SizeDesc> {
 }
 
 impl<Coord, Size: SizeDesc> TriangleMarker<Coord, Size> {
+    /**
+    Creates a triangle marker.
+
+    See [`EmptyElement`] for more information and examples.
+    */
     pub fn new<T: Into<ShapeStyle>>(coord: Coord, size: Size, style: T) -> Self {
         Self {
             center: coord,
