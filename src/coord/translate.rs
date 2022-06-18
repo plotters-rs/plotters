@@ -3,6 +3,7 @@ use std::ops::Deref;
 
 /// The trait that translates some customized object to the backend coordinate
 pub trait CoordTranslate {
+    /// Specifies the object to be translated from
     type From;
 
     /// Translate the guest coordinate to the guest coordinate

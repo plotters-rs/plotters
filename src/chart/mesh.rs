@@ -116,7 +116,7 @@ where
         self
     }
 
-    /// Set all the tick mark to the same size
+    /// Set all the tick marks to the same size
     /// `value`: The new size
     pub fn set_all_tick_mark_size<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         let size = value.in_pixels(&self.style.parent_size);
@@ -124,7 +124,8 @@ where
         self.style.y_tick_size = [size, size];
         self
     }
-
+    /// Sets the tick mark size for a given label area position.
+    /// `value`: The new size
     pub fn set_tick_mark_size<S: SizeDesc>(
         &mut self,
         pos: LabelAreaPosition,

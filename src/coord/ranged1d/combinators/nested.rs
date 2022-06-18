@@ -160,10 +160,12 @@ impl<P: DiscreteRanged, S: DiscreteRanged> DiscreteRanged for NestedRange<P, S> 
     }
 }
 
+/// Used to build a nested coordinate system.
 pub trait BuildNestedCoord: AsRangedCoord
 where
     Self::CoordDescType: DiscreteRanged,
 {
+    /// Builds a nested coordinate system.
     fn nested_coord<S: AsRangedCoord>(
         self,
         builder: impl Fn(<Self::CoordDescType as Ranged>::ValueType) -> S,

@@ -165,6 +165,7 @@ impl Default for ProjectionMatrixBuilder {
 }
 
 impl ProjectionMatrixBuilder {
+    /// Creates a new, default projection matrix builder object.
     pub fn new() -> Self {
         Self::default()
     }

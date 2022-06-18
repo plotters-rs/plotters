@@ -2,13 +2,22 @@ use super::{Drawable, PointCollection};
 use crate::style::{Color, ShapeStyle, SizeDesc};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
-/// An element of a single pixel
+/**
+An element representing a single pixel.
+
+See [`EmptyElement`] for more information and examples.
+*/
 pub struct Pixel<Coord> {
     pos: Coord,
     style: ShapeStyle,
 }
 
 impl<Coord> Pixel<Coord> {
+    /**
+    Creates a new pixel.
+
+    See [`EmptyElement`] for more information and examples.
+    */
     pub fn new<P: Into<Coord>, S: Into<ShapeStyle>>(pos: P, style: S) -> Self {
         Self {
             pos: pos.into(),

@@ -68,6 +68,7 @@ impl Rect {
             })
     }
 
+    /// Evenly the rectangle into a grid with arbitrary breaks; return a rect iterator.
     fn split_grid(
         &self,
         x_breaks: impl Iterator<Item = i32>,
@@ -211,10 +212,12 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, Cartesian2d<X, Y>
         self.coord.get_y_range()
     }
 
+    /// Get the range of X of the backend coordinate for current drawing area
     pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
         self.coord.get_x_axis_pixel_range()
     }
 
+    /// Get the range of Y of the backend coordinate for current drawing area
     pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
         self.coord.get_y_axis_pixel_range()
     }
@@ -235,6 +238,7 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         }
     }
 
+    /// Strip the applied coordinate specification and returns a drawing area
     pub fn use_screen_coord(&self) -> DrawingArea<DB, Shift> {
         DrawingArea {
             rect: self.rect.clone(),
@@ -519,14 +523,17 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
+    /// Returns the coordinates by value
     pub fn into_coord_spec(self) -> CT {
         self.coord
     }
 
+    /// Returns the coordinates by reference
     pub fn as_coord_spec(&self) -> &CT {
         &self.coord
     }
 
+    /// Returns the coordinates by mutable reference
     pub fn as_coord_spec_mut(&mut self) -> &mut CT {
         &mut self.coord
     }

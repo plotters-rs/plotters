@@ -319,6 +319,7 @@ where
     }
 }
 
+/// Makes a linspace coordinate from the ranged coordinates.
 pub trait IntoLinspace: AsRangedCoord {
     /// Set the step value, make a linspace coordinate from the given range.
     /// By default the matching method use the exact match
