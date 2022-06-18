@@ -29,7 +29,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
-- Plotters now moved all backend code to sperate repository, check [FAQ list](#faq-list) for details
+- Plotters now moved all backend code to separate repositories, check [FAQ list](#faq-list) for details.
 
 ## Gallery
 
@@ -719,10 +719,10 @@ The following list is a complete list of features that can be opt in and out.
 * How to check if a backend writes file successfully ?
 
     The behavior of Plotters backend is consistent with standard library.
-    When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically
-    whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored.
+    When the backend instance is being dropped, [`DrawingArea::present()`] or [`Backend::present()`] is called automatically
+    whenever is needed. When the `present()` method is called from `drop`, any error will be silently ignored.
 
-    In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+    In the case that error handling is important, you need manually call the `present()` method before the backend gets dropped.
     For more information, please see the examples.
 
 
