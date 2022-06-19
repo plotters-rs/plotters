@@ -5,7 +5,7 @@ use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 /**
 An element representing a single pixel.
 
-See [`EmptyElement`] for more information and examples.
+See [`crate::element::EmptyElement`] for more information and examples.
 */
 pub struct Pixel<Coord> {
     pos: Coord,
@@ -16,7 +16,7 @@ impl<Coord> Pixel<Coord> {
     /**
     Creates a new pixel.
 
-    See [`EmptyElement`] for more information and examples.
+    See [`crate::element::EmptyElement`] for more information and examples.
     */
     pub fn new<P: Into<Coord>, S: Into<ShapeStyle>>(pos: P, style: S) -> Self {
         Self {
