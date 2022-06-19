@@ -64,11 +64,11 @@ where
     let drawing_area = SVGBackend::new("configure_axes.svg", (300, 200)).into_drawing_area();
     drawing_area.fill(&WHITE).unwrap();
     let mut chart_builder = ChartBuilder::on(&drawing_area);
-    let mut chart_context = chart_builder.margin(10).build_cartesian_3d(0.0..4.0, 0.0..3.0, 0.0..2.0).unwrap();
+    let mut chart_context = chart_builder.margin_bottom(30).build_cartesian_3d(0.0..4.0, 0.0..3.0, 0.0..2.7).unwrap();
     chart_context.configure_axes().tick_size(8).x_labels(4).y_labels(3).z_labels(2)
         .max_light_lines(5).axis_panel_style(GREEN.mix(0.1)).bold_grid_style(BLUE.mix(0.3))
-        .light_grid_style(BLUE.mix(0.2)).label_style(("Calibri", 20))
-        .x_formatter(|x| format!("x={x}")).draw().unwrap();
+        .light_grid_style(BLUE.mix(0.2)).label_style(("Calibri", 10))
+        .x_formatter(&|x| format!("x={x}")).draw().unwrap();
     ```
 
     The resulting chart reflects the customizations specified through `configure_axes()`:
