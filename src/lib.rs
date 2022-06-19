@@ -754,6 +754,7 @@ pub mod element;
 pub mod series;
 pub mod style;
 
+/// Evaluation Context for Rust. See [the evcxr crate](https://crates.io/crates/evcxr) for more information.
 #[cfg(feature = "evcxr")]
 pub mod evcxr;
 
