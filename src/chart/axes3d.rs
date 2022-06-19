@@ -141,7 +141,7 @@ where
             light_line_style: Into::<ShapeStyle>::into(&TRANSPARENT),
             axis_panel_style: Into::<ShapeStyle>::into(&BLACK.mix(0.1)),
             axis_style: Into::<ShapeStyle>::into(&BLACK.mix(0.8)),
-            label_style: ("sans-serf", (12).percent().max(12).in_pixels(&parent_size)).into(),
+            label_style: ("sans-serif", (12).percent().max(12).in_pixels(&parent_size)).into(),
             format_x: &X::format,
             format_y: &Y::format,
             format_z: &Z::format,
