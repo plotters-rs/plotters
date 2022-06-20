@@ -76,31 +76,29 @@ These operations must be done before building error bars.
 
 ```
 use plotters::prelude::*;
-let x_values = [1.0f64, 2., 3., 4., 5.];
+let data = [(1.0, 3.3), (2., 2.1), (3., 1.5), (4., 1.9), (5., 1.0)];
 let drawing_area = SVGBackend::new("error_bars_vertical.svg", (300, 200)).into_drawing_area();
 drawing_area.fill(&WHITE).unwrap();
 let mut chart_builder = ChartBuilder::on(&drawing_area);
 chart_builder.margin(10).set_left_and_bottom_label_area_size(20);
 let mut chart_context = chart_builder.build_cartesian_2d(0.0..6.0, 0.0..6.0).unwrap();
 chart_context.configure_mesh().draw().unwrap();
-chart_context.draw_series(x_values.map(|x| {
-    let y = 4. - 0.1 * x * x;
-    ErrorBar::new_vertical(x, y - 1.0, y, y + 1.1, BLUE.filled(), 10)
+chart_context.draw_series(data.map(|(x, y)| {
+    ErrorBar::new_vertical(x, y - 0.4, y, y + 0.3, BLUE.filled(), 10)
+})).unwrap();
+chart_context.draw_series(data.map(|(x, y)| {
+    ErrorBar::new_vertical(x, y + 1.0, y + 1.9, y + 2.4, RED, 10)
 })).unwrap();
 ```
 
-This code produces a series of five error bars showing minima, maxima, and average values:
+This code produces two series of five error bars each, showing minima, maxima, and average values:
 
-![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@413b8a1/apidoc/error_bars_vertical.svg)
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@06d370f/apidoc/error_bars_vertical.svg)
 
 [`ErrorBar::new_vertical()`] is used to create vertical error bars. Here is an example using
 [`ErrorBar::new_horizontal()`] instead:
 
-![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@413b8a1/apidoc/error_bars_horizontal.svg)
-
-The blue color style is applied to the circles, bars, and error marks. Here is an example without `filled()`:
-
-![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@413b8a1/apidoc/error_bars_hollow.svg)
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@06d370f/apidoc/error_bars_horizontal.svg)
 */
 pub struct ErrorBar<K, V, O: ErrorBarOrient<K, V>> {
     style: ShapeStyle,

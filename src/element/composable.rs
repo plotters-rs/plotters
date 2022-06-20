@@ -12,15 +12,15 @@ An empty composable element. This is the starting point of a composed element.
 
 ```
 use plotters::prelude::*;
-let x_values = [1.0f64, 2., 3., 4., 5.];
+let data = [(1.0, 3.3), (2., 2.1), (3., 1.5), (4., 1.9), (5., 1.0)];
 let drawing_area = SVGBackend::new("composable.svg", (300, 200)).into_drawing_area();
 drawing_area.fill(&WHITE).unwrap();
 let mut chart_builder = ChartBuilder::on(&drawing_area);
 chart_builder.margin(7).set_left_and_bottom_label_area_size(20);
 let mut chart_context = chart_builder.build_cartesian_2d(0.0..5.5, 0.0..5.5).unwrap();
 chart_context.configure_mesh().draw().unwrap();
-chart_context.draw_series(x_values.map(|x| {
-    EmptyElement::at((x, 4.5 - 0.15 * x * x)) // Use the guest coordinate system with EmptyElement
+chart_context.draw_series(data.map(|(x, y)| {
+    EmptyElement::at((x, y)) // Use the guest coordinate system with EmptyElement
     + Circle::new((0, 0), 10, BLUE) // Use backend coordinates with the rest
     + Cross::new((4, 4), 3, RED)
     + Pixel::new((4, -4), RED)
@@ -30,7 +30,7 @@ chart_context.draw_series(x_values.map(|x| {
 
 The result is a data series where each point consists of a circle, a cross, a pixel, and a triangle:
 
-![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f3a2021/apidoc/composable.svg)
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@06d370f/apidoc/composable.svg)
 
 */
 pub struct EmptyElement<Coord, DB: DrawingBackend> {
