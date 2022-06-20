@@ -15,7 +15,9 @@ readme = "README.md"
 gif = { version = "0.11.2", optional = true }
 
 [dependencies.plotters-backend]
-version = "^0.3"
+branch = "master"
+git = "https://github.com/plotters-rs/plotters-backend"
+# version = "0.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.23.14"
