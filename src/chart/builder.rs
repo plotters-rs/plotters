@@ -47,9 +47,14 @@ pub enum LabelAreaPosition {
     Right = 3,
 }
 
-/// The helper object to create a chart context, which is used for the high-level figure drawing.
-/// With the help of this object, we can convert a basic drawing area into a chart context, which
-/// allows the high-level charting API being used on the drawing area.
+/**
+The helper object to create a chart context, which is used for the high-level figure drawing.
+
+With the help of this object, we can convert a basic drawing area into a chart context, which
+allows the high-level charting API being used on the drawing area.
+
+See [`ChartBuilder::on()`] for more information and examples.
+*/
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
     overlap_plotting_area: [bool; 4],
@@ -65,6 +70,8 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     - `root`: The root drawing area
     - Returns: The chart builder object
 
+    # Example
+
     ```
     use plotters::prelude::*;
     let drawing_area = SVGBackend::new("chart_builder_on.svg", (300, 200)).into_drawing_area();
@@ -75,6 +82,10 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     let mut chart_context = chart_builder.build_cartesian_2d(0.0..3.8, 0.0..2.8).unwrap();
     chart_context.configure_mesh().draw().unwrap();
     ```
+    The result is a chart with customized margins, label area sizes, and title:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@42ecf52/apidoc/chart_builder_on.svg)
+
     */
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
         Self {

@@ -34,17 +34,30 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
         }
     }
 
-    /// Set the series label
-    /// - `label`: The string would be use as label for current series
+    /**
+    Sets the series label for the current series.
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn label<L: Into<String>>(&mut self, label: L) -> &mut Self {
         self.label = Some(label.into());
         self
     }
 
-    /// Set the legend element creator function
-    /// - `func`: The function use to create the element
-    /// *Note*: The creation function uses a shifted pixel-based coordinate system. And place the
-    /// point (0,0) to the mid-right point of the shape
+    /**
+    Sets the legend element creator function.
+
+    - `func`: The function use to create the element
+
+    # Note
+
+    The creation function uses a shifted pixel-based coordinate system, where the
+    point (0,0) is defined to the mid-right point of the shape.
+
+    # See also
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn legend<E: IntoDynElement<'a, DB, BackendCoord>, T: Fn(BackendCoord) -> E + 'a>(
         &mut self,
         func: T,
@@ -54,7 +67,11 @@ impl<'a, DB: DrawingBackend> SeriesAnno<'a, DB> {
     }
 }
 
-/// Useful to specify the position of the series label
+/**
+Useful to specify the position of the series label.
+
+See [`ChartContext::configure_series_labels()`] for more information and examples.
+*/
 pub enum SeriesLabelPosition {
     /// Places the series label at the upper left
     UpperLeft,
@@ -126,16 +143,25 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         }
     }
 
-    /// Set the series label positioning style
-    /// `pos` - The positioning style
+    /**
+    Sets the series label positioning style
+
+    `pos` - The positioning style
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn position(&mut self, pos: SeriesLabelPosition) -> &mut Self {
         self.position = pos;
         self
     }
 
-    /// Set the margin of the series label drawing are
-    ///
-    /// - `value`: The size specification
+    /**
+    Sets the margin of the series label drawing area.
+
+    - `value`: The size specification in backend units (pixels)
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn margin<S: SizeDesc>(&mut self, value: S) -> &mut Self {
         self.margin = value
             .in_pixels(&self.target.plotting_area().dim_in_pixel())
@@ -143,8 +169,13 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         self
     }
 
-    /// Set the size of legend area
-    /// `size` - The size of legend area in pixel
+    /**
+    Sets the size of the legend area.
+
+    `size` - The size of legend area in backend units (pixels)
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn legend_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size
             .in_pixels(&self.target.plotting_area().dim_in_pixel())
@@ -153,28 +184,47 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         self
     }
 
-    /// Set the style of the label series area
-    /// `style` - The style of the border
+    /**
+    Sets the style of the label series area.
+
+    `style` - The style of the border
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn border_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.border_style = style.into();
         self
     }
 
-    /// Set the background style
-    /// `style` - The style of the border
+    /**
+    Sets the background style of the label series area.
+
+    `style` - The style of the border
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn background_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
         self.background = style.into();
         self
     }
 
-    /// Set the series label font
-    /// `font` - The font
+    /**
+    Sets the font for series labels.
+
+    `font` - Desired font
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn label_font<F: IntoTextStyle<'b>>(&mut self, font: F) -> &mut Self {
         self.label_font = Some(font.into_text_style(&self.target.plotting_area().dim_in_pixel()));
         self
     }
 
-    /// Draw the series label area
+    /**
+    Draws the series label area.
+
+    See [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let drawing_area = self.target.plotting_area().strip_coord_spec();
 
