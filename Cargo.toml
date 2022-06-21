@@ -15,7 +15,6 @@ readme = "README.md"
 gif = { version = "0.11.2", optional = true }
 
 [dependencies.plotters-backend]
-branch = "master"
 git = "https://github.com/plotters-rs/plotters-backend"
 # version = "0.3.1"
 
@@ -31,7 +30,6 @@ image_encoder = ["image"]
 gif_backend = ["gif", "image_encoder"]
 
 [dev-dependencies.plotters]
-branch = "master"
 default_features = false
 features = ["ttf"]
 git = "https://github.com/plotters-rs/plotters"
