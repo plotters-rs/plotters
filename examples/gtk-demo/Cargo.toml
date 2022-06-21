@@ -8,7 +8,10 @@ edition = "2018"
 
 [dependencies]
 plotters = {path = "../.."}
-plotters-cairo = "0.3.1"
 cairo-rs = "^0.9"
 gtk = "^0.9"
 gio = "^0.9"
+
+[dependencies.plotters-cairo]
+git = "https://github.com/plotters-rs/plotters-cairo"
+# version = "0.3.1"
