@@ -11,7 +11,6 @@ minifb = "0.23.0"
 plotters = {path = "../..", default_features = false, features = ["ttf"]}
 
 [dependencies.plotters-bitmap]
-branch = "master"
 default_features = false
 git = "https://github.com/plotters-rs/plotters-bitmap"
 # version = "0.3.1"

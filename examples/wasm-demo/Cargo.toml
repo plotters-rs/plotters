@@ -14,7 +14,6 @@ wee_alloc = "0.4.5"
 web-sys = { version = "0.3.39", features = ["HtmlCanvasElement"] }
 
 [dependencies.plotters-canvas]
-branch = "master"
 git = "https://github.com/plotters-rs/plotters-canvas"
 # version = "0.3.1"
 

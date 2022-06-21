@@ -13,6 +13,5 @@ gtk = "^0.9"
 gio = "^0.9"
 
 [dependencies.plotters-cairo]
-branch = "master"
 git = "https://github.com/plotters-rs/plotters-cairo"
 # version = "0.3.1"
