@@ -9,20 +9,52 @@ use crate::style::{IntoTextStyle, SizeDesc, TextStyle};
 
 use plotters_backend::DrawingBackend;
 
-/// The enum used to specify the position of label area.
-/// This is used when we configure the label area size with the API
-/// [ChartBuilder::set_label_area_size](struct ChartBuilder.html#method.set_label_area_size)
+/**
+Specifies one of the four label positions around the figure.
+
+This is used to configure the label area size with function
+[`ChartBuilder::set_label_area_size()`].
+
+# Example
+
+```
+use plotters::prelude::*;
+let drawing_area = SVGBackend::new("label_area_position.svg", (300, 200)).into_drawing_area();
+drawing_area.fill(&WHITE).unwrap();
+let mut chart_builder = ChartBuilder::on(&drawing_area);
+chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 60).set_label_area_size(LabelAreaPosition::Left, 35);
+let mut chart_context = chart_builder.build_cartesian_2d(0.0..4.0, 0.0..3.0).unwrap();
+chart_context.configure_mesh().x_desc("Spacious X label area").y_desc("Narrow Y label area").draw().unwrap();
+```
+
+The result is a chart with a spacious X label area and a narrow Y label area:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@9ca6541/apidoc/label_area_position.svg)
+
+# See also
+
+[`ChartBuilder::set_left_and_bottom_label_area_size()`]
+*/
 #[derive(Copy, Clone)]
 pub enum LabelAreaPosition {
+    /// Top of the figure
     Top = 0,
+    /// Bottom of the figure
     Bottom = 1,
+    /// Left side of the figure
     Left = 2,
+    /// Right side of the figure
     Right = 3,
 }
 
-/// The helper object to create a chart context, which is used for the high-level figure drawing.
-/// With the help of this object, we can convert a basic drawing area into a chart context, which
-/// allows the high-level charting API being used on the drawing area.
+/**
+The helper object to create a chart context, which is used for the high-level figure drawing.
+
+With the help of this object, we can convert a basic drawing area into a chart context, which
+allows the high-level charting API being used on the drawing area.
+
+See [`ChartBuilder::on()`] for more information and examples.
+*/
 pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
     label_area_size: [u32; 4], // [upper, lower, left, right]
     overlap_plotting_area: [bool; 4],
@@ -32,9 +64,29 @@ pub struct ChartBuilder<'a, 'b, DB: DrawingBackend> {
 }
 
 impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
-    /// Create a chart builder on the given drawing area
-    /// - `root`: The root drawing area
-    /// - Returns: The chart builder object
+    /**
+    Create a chart builder on the given drawing area
+
+    - `root`: The root drawing area
+    - Returns: The chart builder object
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let drawing_area = SVGBackend::new("chart_builder_on.svg", (300, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let mut chart_builder = ChartBuilder::on(&drawing_area);
+    chart_builder.margin(5).set_left_and_bottom_label_area_size(35)
+    .caption("Figure title or caption", ("Calibri", 20, FontStyle::Italic, &RED).into_text_style(&drawing_area));
+    let mut chart_context = chart_builder.build_cartesian_2d(0.0..3.8, 0.0..2.8).unwrap();
+    chart_context.configure_mesh().draw().unwrap();
+    ```
+    The result is a chart with customized margins, label area sizes, and title:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@42ecf52/apidoc/chart_builder_on.svg)
+
+    */
     pub fn on(root: &'a DrawingArea<DB, Shift>) -> Self {
         Self {
             label_area_size: [0; 4],
@@ -45,47 +97,78 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         }
     }
 
-    /// Set the margin size of the chart (applied for top, bottom, left and right at the same time)
-    /// - `size`: The size of the chart margin.
+    /**
+    Sets the size of the four margins of the chart.
+
+    - `size`: The desired size of the four chart margins in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn margin<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin = [size, size, size, size];
         self
     }
 
-    /// Set the top margin of current chart
-    /// - `size`: The size of the top margin.
+    /**
+    Sets the size of the top margin of the chart.
+
+    - `size`: The desired size of the margin in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn margin_top<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[0] = size;
         self
     }
 
-    /// Set the bottom margin of current chart
-    /// - `size`: The size of the bottom margin.
+    /**
+    Sets the size of the bottom margin of the chart.
+
+    - `size`: The desired size of the margin in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn margin_bottom<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[1] = size;
         self
     }
 
-    /// Set the left margin of current chart
-    /// - `size`: The size of the left margin.
+    /**
+    Sets the size of the left margin of the chart.
+
+    - `size`: The desired size of the margin in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn margin_left<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[2] = size;
         self
     }
 
-    /// Set the right margin of current chart
-    /// - `size`: The size of the right margin.
+    /**
+    Sets the size of the right margin of the chart.
+
+    - `size`: The desired size of the margin in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn margin_right<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area).max(0) as u32;
         self.margin[3] = size;
         self
     }
 
-    /// Set all the label area size with the same value
+    /**
+    Sets the size of the four label areas of the chart.
+
+    - `size`: The desired size of the four label areas in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn set_all_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area);
         self.set_label_area_size(LabelAreaPosition::Top, size)
@@ -94,40 +177,76 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
             .set_label_area_size(LabelAreaPosition::Right, size)
     }
 
-    /// Set the most commonly used label area size to the same value
+    /**
+    Sets the size of the left and bottom label areas of the chart.
+
+    - `size`: The desired size of the left and bottom label areas in backend units (pixels).
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn set_left_and_bottom_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         let size = size.in_pixels(self.root_area);
         self.set_label_area_size(LabelAreaPosition::Left, size)
             .set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
-    /// Set the size of X label area
-    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
+    /**
+    Sets the size of the X label area at the bottom of the chart.
+
+    - `size`: The desired size of the X label area in backend units (pixels).
+    If set to 0, the X label area is removed.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         self.set_label_area_size(LabelAreaPosition::Bottom, size)
     }
 
-    /// Set the size of the Y label area
-    /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
+    /**
+    Sets the size of the Y label area to the left of the chart.
+
+    - `size`: The desired size of the Y label area in backend units (pixels).
+    If set to 0, the Y label area is removed.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         self.set_label_area_size(LabelAreaPosition::Left, size)
     }
 
-    /// Set the size of X label area on the top of the chart
-    /// - `size`: The height of the x label area, if x is 0, the chart doesn't have the X label area
+    /**
+    Sets the size of the X label area at the top of the chart.
+
+    - `size`: The desired size of the top X label area in backend units (pixels).
+    If set to 0, the top X label area is removed.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn top_x_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         self.set_label_area_size(LabelAreaPosition::Top, size)
     }
 
-    /// Set the size of the Y label area on the right side
-    /// - `size`: The width of the Y label area. If size is 0, the chart doesn't have Y label area
+    /**
+    Sets the size of the Y label area to the right of the chart.
+
+    - `size`: The desired size of the Y label area in backend units (pixels).
+    If set to 0, the Y label area to the right is removed.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn right_y_label_area_size<S: SizeDesc>(&mut self, size: S) -> &mut Self {
         self.set_label_area_size(LabelAreaPosition::Right, size)
     }
 
-    /// Set a label area size
-    /// - `pos`: THe position where the label area located
-    /// - `size`: The size of the label area size
+    /**
+    Sets the size of a chart label area.
+
+    - `pos`: The position of the desired label area to adjust
+    - `size`: The desired size of the label area in backend units (pixels).
+    If set to 0, the label area is removed.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn set_label_area_size<S: SizeDesc>(
         &mut self,
         pos: LabelAreaPosition,
@@ -139,10 +258,16 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
-    /// Set the caption of the chart
-    /// - `caption`: The caption of the chart
-    /// - `style`: The text style
-    /// - Note: If the caption is set, the margin option will be ignored
+    /**
+    Sets the title or caption of the chart.
+
+    - `caption`: The caption of the chart
+    - `style`: The text style
+
+    The title or caption will be centered at the top of the drawing area.
+
+    See [`ChartBuilder::on()`] for more information and examples.
+    */
     pub fn caption<S: AsRef<str>, Style: IntoTextStyle<'b>>(
         &mut self,
         caption: S,
@@ -155,6 +280,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self
     }
 
+    /// This function has been renamed to [`ChartBuilder::build_cartesian_2d()`] and is to be removed in the future.
     #[allow(clippy::type_complexity)]
     #[deprecated(
         note = "`build_ranged` has been renamed to `build_cartesian_2d` and is to be removed in the future."
@@ -170,11 +296,15 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         self.build_cartesian_2d(x_spec, y_spec)
     }
 
-    /// Build the chart with a 2D Cartesian coordinate system. The function will returns a chart
-    /// context, where data series can be rendered on.
-    /// - `x_spec`: The specification of X axis
-    /// - `y_spec`: The specification of Y axis
-    /// - Returns: A chart context
+    /**
+    Builds a chart with a 2D Cartesian coordinate system.
+
+    - `x_spec`: Specifies the X axis range and data properties
+    - `y_spec`: Specifies the Y axis range and data properties
+    - Returns: A `ChartContext` object, ready to visualize data.
+
+    See [`ChartBuilder::on()`] and [`ChartContext::configure_mesh()`] for more information and examples.
+    */
     #[allow(clippy::type_complexity)]
     pub fn build_cartesian_2d<X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
@@ -307,12 +437,16 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         })
     }
 
-    /// Build a 3 dimensional cartesian chart. The function will returns a chart
-    /// context, where data series can be rendered on.
-    /// - `x_spec`: The specification of X axis
-    /// - `y_spec`: The specification of Y axis
-    /// - `z_sepc`: The specification of Z axis
-    /// - Returns: A chart context
+    /**
+    Builds a chart with a 3D Cartesian coordinate system.
+
+    - `x_spec`: Specifies the X axis range and data properties
+    - `y_spec`: Specifies the Y axis range and data properties
+    - `z_sepc`: Specifies the Z axis range and data properties
+    - Returns: A `ChartContext` object, ready to visualize data.
+
+    See [`ChartBuilder::on()`] and [`ChartContext::configure_axes()`] for more information and examples.
+    */
     #[allow(clippy::type_complexity)]
     pub fn build_cartesian_3d<X: AsRangedCoord, Y: AsRangedCoord, Z: AsRangedCoord>(
         &mut self,

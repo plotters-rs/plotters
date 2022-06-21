@@ -6,10 +6,11 @@ use plotters_svg::SVGBackend;
 pub struct SVGWrapper(String, String);
 
 impl SVGWrapper {
+    /// Displays the contents of the `SVGWrapper` struct.
     pub fn evcxr_display(&self) {
         println!("{:?}", self);
     }
-
+    /// Sets the style of the `SVGWrapper` struct.
     pub fn style<S: Into<String>>(mut self, style: S) -> Self {
         self.1 = style.into();
         self

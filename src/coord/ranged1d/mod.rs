@@ -78,7 +78,7 @@ pub trait ValueFormatter<V> {
     fn format(_value: &V) -> String {
         panic!("Unimplemented formatting method");
     }
-
+    /// Determine how we can format a value in a coordinate system by default
     fn format_ext(&self, value: &V) -> String {
         Self::format(value)
     }
@@ -96,9 +96,9 @@ where
 
 /// Specify the weight of key points.
 pub enum KeyPointWeight {
-    // Allows only bold key points
+    /// Allows only bold key points
     Bold,
-    // Allows any key points
+    /// Allows any key points
     Any,
 }
 
@@ -222,12 +222,15 @@ pub trait Ranged {
 /// an pixel-based coordinate is given, it's possible to figure out the underlying
 /// logic value.
 pub trait ReversibleRanged: Ranged {
+    /// Perform the reverse mapping
     fn unmap(&self, input: i32, limit: (i32, i32)) -> Option<Self::ValueType>;
 }
 
 /// The trait for the type that can be converted into a ranged coordinate axis
 pub trait AsRangedCoord: Sized {
+    /// Type to describe a coordinate system
     type CoordDescType: Ranged<ValueType = Self::Value> + From<Self>;
+    /// Type for values in the given coordinate system
     type Value;
 }
 

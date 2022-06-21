@@ -54,11 +54,45 @@ impl<T> StyleConfig<'_, T> {
     }
 }
 
-/// The surface series.
-///
-/// Currently the surface is representing any surface represented by a
-/// function of two variables
-///
+/**
+Represents functions of two variables.
+
+# Examples
+
+```
+use plotters::prelude::*;
+let drawing_area = SVGBackend::new("surface_series_xoz.svg", (640, 480)).into_drawing_area();
+drawing_area.fill(&WHITE).unwrap();
+let mut chart_context = ChartBuilder::on(&drawing_area)
+    .margin(10)
+    .build_cartesian_3d(-3.0..3.0f64, -3.0..3.0f64, -3.0..3.0f64)
+    .unwrap();
+chart_context.configure_axes().draw().unwrap();
+let axis_title_style = ("sans-serif", 20, &BLACK).into_text_style(&drawing_area);
+chart_context.draw_series([("x", (3., -3., -3.)), ("y", (-3., 3., -3.)), ("z", (-3., -3., 3.))]
+.map(|(label, position)| Text::new(label, position, &axis_title_style))).unwrap();
+chart_context.draw_series(SurfaceSeries::xoz(
+    (-30..30).map(|v| v as f64 / 10.0),
+    (-30..30).map(|v| v as f64 / 10.0),
+    |x:f64,z:f64|(0.7 * (x * x + z * z)).cos()).style(&BLUE.mix(0.5))
+).unwrap();
+```
+
+The code above with [`SurfaceSeries::xoy()`] produces a surface that depends on x and y and
+points in the z direction:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@10ace42/apidoc/surface_series_xoy.svg)
+
+The code above with [`SurfaceSeries::xoz()`] produces a surface that depends on x and z and
+points in the y direction:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@10ace42/apidoc/surface_series_xoz.svg)
+
+The code above with [`SurfaceSeries::yoz()`] produces a surface that depends on y and z and
+points in the x direction:
+
+![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@10ace42/apidoc/surface_series_yoz.svg)
+*/
 pub struct SurfaceSeries<'a, X, Y, Z, D, SurfaceFunc>
 where
     D: Direction<X, Y, Z>,
@@ -95,11 +129,42 @@ where
         }
     }
 
+    /**
+    Sets the style as a function of the value of the dependent coordinate of the surface.
+
+    # Examples
+
+    ```
+    use plotters::prelude::*;
+    let drawing_area = SVGBackend::new("surface_series_style_func.svg", (640, 480)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let mut chart_context = ChartBuilder::on(&drawing_area)
+        .margin(10)
+        .build_cartesian_3d(-3.0..3.0f64, -3.0..3.0f64, -3.0..3.0f64)
+        .unwrap();
+    chart_context.configure_axes().draw().unwrap();
+    let axis_title_style = ("sans-serif", 20, &BLACK).into_text_style(&drawing_area);
+    chart_context.draw_series([("x", (3., -3., -3.)), ("y", (-3., 3., -3.)), ("z", (-3., -3., 3.))]
+    .map(|(label, position)| Text::new(label, position, &axis_title_style))).unwrap();
+    chart_context.draw_series(SurfaceSeries::xoz(
+        (-30..30).map(|v| v as f64 / 10.0),
+        (-30..30).map(|v| v as f64 / 10.0),
+        |x:f64,z:f64|(0.4 * (x * x + z * z)).cos()).style_func(
+            &|y| HSLColor(0.6666, y + 0.5, 0.5).mix(0.8).filled()
+        )
+    ).unwrap();
+    ```
+
+    The resulting style varies from gray to blue according to the value of y:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@da8400f/apidoc/surface_series_style_func.svg)
+    */
     pub fn style_func<F: Fn(&D::OutputType) -> ShapeStyle>(mut self, f: &'a F) -> Self {
         self.style = StyleConfig::Function(f);
         self
     }
 
+    /// Sets the style of the plot. See [`SurfaceSeries`] for more information and examples.
     pub fn style<S: Into<ShapeStyle>>(mut self, s: S) -> Self {
         self.style = StyleConfig::Fixed(s.into());
         self
@@ -115,6 +180,7 @@ macro_rules! impl_constructor {
                 <$dir as Direction<X, Y, Z>>::Input2Type,
             ) -> <$dir as Direction<X, Y, Z>>::OutputType,
         {
+            /// Implements the constructor. See [`SurfaceSeries`] for more information and examples.
             pub fn $name<IterA, IterB>(a: IterA, b: IterB, f: SurfaceFunc) -> Self
             where
                 IterA: Iterator<Item = <$dir as Direction<X, Y, Z>>::Input1Type>,

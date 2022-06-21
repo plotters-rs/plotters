@@ -91,6 +91,7 @@ where
     }
 }
 
+/// Bind a existing coordinate spec with a given key points vector. See [WithKeyPoints](struct.WithKeyPoints.html ) for more details.
 pub trait BindKeyPoints
 where
     Self: AsRangedCoord,
@@ -131,6 +132,7 @@ pub struct WithKeyPointMethod<R: Ranged> {
     light_func: Box<dyn Fn(usize) -> Vec<R::ValueType>>,
 }
 
+/// Bind an existing coordinate spec with a given key points algorithm. See [WithKeyPointMethod](struct.WithKeyMethod.html ) for more details.
 pub trait BindKeyPointMethod
 where
     Self: AsRangedCoord,

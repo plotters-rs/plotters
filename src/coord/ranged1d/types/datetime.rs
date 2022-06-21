@@ -562,11 +562,13 @@ where
 
 /// The trait that converts a normal date coord into a monthly one
 pub trait IntoMonthly<T: TimeValue> {
+    /// Converts a normal date coord into a monthly one
     fn monthly(self) -> Monthly<T>;
 }
 
 /// The trait that converts a normal date coord into a yearly one
 pub trait IntoYearly<T: TimeValue> {
+    /// Converts a normal date coord into a yearly one
     fn yearly(self) -> Yearly<T>;
 }
 

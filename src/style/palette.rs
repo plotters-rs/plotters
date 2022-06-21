@@ -1,7 +1,10 @@
 use super::color::PaletteColor;
 
+/// Represents a color palette
 pub trait Palette {
+    /// Array of colors
     const COLORS: &'static [(u8, u8, u8)];
+    /// Returns a color from the palette
     fn pick(idx: usize) -> PaletteColor<Self>
     where
         Self: Sized,

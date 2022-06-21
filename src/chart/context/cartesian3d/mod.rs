@@ -52,6 +52,48 @@ where
     Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
     Z: Ranged<ValueType = ZT> + ValueFormatter<ZT>,
 {
+    /**
+    Create an axis configuration object, to set line styles, labels, sizes, etc.
+
+    Default values for axis configuration are set by function `Axes3dStyle::new()`.
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let drawing_area = SVGBackend::new("configure_axes.svg", (300, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let mut chart_builder = ChartBuilder::on(&drawing_area);
+    let mut chart_context = chart_builder.margin_bottom(30).build_cartesian_3d(0.0..4.0, 0.0..3.0, 0.0..2.7).unwrap();
+    chart_context.configure_axes().tick_size(8).x_labels(4).y_labels(3).z_labels(2)
+        .max_light_lines(5).axis_panel_style(GREEN.mix(0.1)).bold_grid_style(BLUE.mix(0.3))
+        .light_grid_style(BLUE.mix(0.2)).label_style(("Calibri", 10))
+        .x_formatter(&|x| format!("x={x}")).draw().unwrap();
+    ```
+
+    The resulting chart reflects the customizations specified through `configure_axes()`:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@4c3cef4/apidoc/configure_axes.svg)
+
+    All these customizations are `Axes3dStyle` methods.
+
+    In the chart, `tick_size(8)` produces tick marks 8 pixels long. You can use
+    `(5u32).percent().max(5).in_pixels(chart.plotting_area()` to tell Plotters to calculate the tick mark
+    size as a percentage of the dimensions of the figure. See [`crate::style::RelativeSize`] and
+    [`crate::style::SizeDesc`] for more information.
+
+    `x_labels(4)` specifies a maximum of 4
+    tick marks and labels in the X axis. `max_light_lines(5)` specifies a maximum of 5 minor grid lines
+    between any two tick marks. `axis_panel_style(GREEN.mix(0.1))` specifies the style of the panels in
+    the background, a light green color. `bold_grid_style(BLUE.mix(0.3))` and `light_grid_style(BLUE.mix(0.2))`
+    specify the style of the major and minor grid lines, respectively. `label_style()` specifies the text
+    style of the axis labels, and `x_formatter(|x| format!("x={x}"))` specifies the string format of the X
+    axis labels.
+
+    # See also
+
+    [`ChartContext::configure_mesh()`], a similar function for 2D plots
+    */
     pub fn configure_axes(&mut self) -> Axes3dStyle<'a, '_, X, Y, Z, DB> {
         Axes3dStyle::new(self)
     }
@@ -77,7 +119,7 @@ where
             .set_projection(actual_x, actual_y, pf);
         self
     }
-
+    /// Sets the 3d coordinate pixel range.
     pub fn set_3d_pixel_range(&mut self, size: (i32, i32, i32)) -> &mut Self {
         let (actual_x, actual_y) = self.drawing_area.get_pixel_range();
         self.drawing_area

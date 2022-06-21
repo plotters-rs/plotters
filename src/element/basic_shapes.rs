@@ -2,13 +2,22 @@ use super::{Drawable, PointCollection};
 use crate::style::{Color, ShapeStyle, SizeDesc};
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 
-/// An element of a single pixel
+/**
+An element representing a single pixel.
+
+See [`crate::element::EmptyElement`] for more information and examples.
+*/
 pub struct Pixel<Coord> {
     pos: Coord,
     style: ShapeStyle,
 }
 
 impl<Coord> Pixel<Coord> {
+    /**
+    Creates a new pixel.
+
+    See [`crate::element::EmptyElement`] for more information and examples.
+    */
     pub fn new<P: Into<Coord>, S: Into<ShapeStyle>>(pos: P, style: S) -> Self {
         Self {
             pos: pos.into(),
@@ -59,6 +68,7 @@ fn test_pixel_element() {
         .expect("Drawing Failure");
 }
 
+/// This is a deprecated type. Please use new name [`PathElement`] instead.
 #[deprecated(note = "Use new name PathElement instead")]
 pub type Path<Coord> = PathElement<Coord>;
 

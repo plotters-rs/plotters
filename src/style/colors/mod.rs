@@ -21,6 +21,7 @@ macro_rules! doc {
     }
 }
 
+/// Defines and names a color based on its R, G, B, A values.
 #[macro_export]
 macro_rules! define_color {
     ($name:ident, $r:expr, $g:expr, $b:expr, $doc:expr) => {

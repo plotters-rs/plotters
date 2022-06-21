@@ -43,8 +43,10 @@ pub mod types {
 }
 
 mod ranged2d;
+/// Ranged coordinates in 3d.
 pub mod ranged3d;
 
+/// Groups Cartesian ranged coordinates in 2d and 3d.
 pub mod cartesian {
     pub use super::ranged2d::cartesian::{Cartesian2d, MeshLine};
     pub use super::ranged3d::Cartesian3d;

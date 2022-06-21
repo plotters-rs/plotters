@@ -15,9 +15,53 @@ pub struct TextStyle<'a> {
     /// The anchor point position
     pub pos: text_anchor::Pos,
 }
+
+/// Trait for values that can be converted into `TextStyle` values
 pub trait IntoTextStyle<'a> {
+    /** Converts the value into a TextStyle value.
+
+    `parent` is used in some cases to convert a font size from points to pixels.
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let drawing_area = SVGBackend::new("into_text_style.svg", (200, 100)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let text_style = ("sans-serif", 20, &RED).into_text_style(&drawing_area);
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
+    ```
+
+    The result is a text label styled accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/into_text_style.svg)
+
+    */
     fn into_text_style<P: HasDimension>(self, parent: &P) -> TextStyle<'a>;
 
+    /** Specifies the color of the text element
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let drawing_area = SVGBackend::new("with_color.svg", (200, 100)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let text_style = ("sans-serif", 20).with_color(RED).into_text_style(&drawing_area);
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50)).unwrap();
+    ```
+
+    The result is a text label styled accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/with_color.svg)
+
+    # See also
+
+    [`FontDesc::color()`]
+
+    [`IntoTextStyle::into_text_style()`] for a more succinct example
+
+    */
     fn with_color<C: Color>(self, color: C) -> TextStyleBuilder<'a, Self>
     where
         Self: Sized,
@@ -30,6 +74,33 @@ pub trait IntoTextStyle<'a> {
         }
     }
 
+    /** Specifies the position of the text anchor relative to the text element
+
+    # Example
+
+    ```
+    use plotters::{prelude::*,style::text_anchor::{HPos, Pos, VPos}};
+    let anchor_position = (200,100);
+    let anchor_left_bottom = Pos::new(HPos::Left, VPos::Bottom);
+    let anchor_right_top = Pos::new(HPos::Right, VPos::Top);
+    let drawing_area = SVGBackend::new("with_anchor.svg", (400, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    drawing_area.draw(&Circle::new(anchor_position, 5, RED.filled()));
+    let text_style_right_top = BLACK.with_anchor::<RGBColor>(anchor_right_top).into_text_style(&drawing_area);
+    drawing_area.draw_text("The anchor sits at the right top of this label", &text_style_right_top, anchor_position);
+    let text_style_left_bottom = BLACK.with_anchor::<RGBColor>(anchor_left_bottom).into_text_style(&drawing_area);
+    drawing_area.draw_text("The anchor sits at the left bottom of this label", &text_style_left_bottom, anchor_position);
+    ```
+
+    The result has a red pixel at the center and two text labels positioned accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b0b94d5/apidoc/with_anchor.svg)
+
+    # See also
+
+    [`TextStyle::pos()`]
+
+    */
     fn with_anchor<C: Color>(self, pos: text_anchor::Pos) -> TextStyleBuilder<'a, Self>
     where
         Self: Sized,
@@ -112,6 +183,10 @@ impl<'a> TextStyle<'a> {
     /// let pos = Pos::new(HPos::Left, VPos::Top);
     /// let style = TextStyle::from(("sans-serif", 20).into_font()).pos(pos);
     /// ```
+    ///
+    /// # See also
+    ///
+    /// [`IntoTextStyle::with_anchor()`]
     pub fn pos(&self, pos: text_anchor::Pos) -> Self {
         Self {
             font: self.font.clone(),

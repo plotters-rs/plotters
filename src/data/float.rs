@@ -57,13 +57,18 @@ fn float_to_string(n: f64, max_precision: usize, min_decimal: usize) -> String {
     result
 }
 
+/// Handles printing of floating point numbers
 pub struct FloatPrettyPrinter {
+    /// Whether scientific notation is allowed
     pub allow_scientific: bool,
+    /// Minimum allowed number of decimal digits
     pub min_decimal: i32,
+    /// Maximum allowed number of decimal digits
     pub max_decimal: i32,
 }
 
 impl FloatPrettyPrinter {
+    /// Handles printing of floating point numbers
     pub fn print(&self, n: f64) -> String {
         let (tn, p) = find_minimal_repr(n, (10f64).powi(-self.max_decimal));
         let d_repr = float_to_string(tn, p, self.min_decimal as usize);
@@ -103,7 +108,7 @@ impl FloatPrettyPrinter {
 
 /// The function that pretty prints the floating number
 /// Since rust doesn't have anything that can format a float with out appearance, so we just
-/// implemnet a float pretty printing function, which finds the shortest representation of a
+/// implement a float pretty printing function, which finds the shortest representation of a
 /// floating point number within the allowed error range.
 ///
 /// - `n`: The float number to pretty-print

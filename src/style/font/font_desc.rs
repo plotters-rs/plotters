@@ -86,7 +86,29 @@ impl<'a> FontDesc<'a> {
         self.transform.clone()
     }
 
-    /// Set the color of the font and return the result text style object
+    /** Returns a new text style object with the specified `color`.
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let text_style = ("sans-serif", 20).into_font().color(&RED);
+    let drawing_area = SVGBackend::new("font_desc_color.svg", (200, 100)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    drawing_area.draw_text("This is a big red label", &text_style, (10, 50));
+    ```
+
+    The result is a text label colorized accordingly:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@f030ed3/apidoc/font_desc_color.svg)
+
+    # See also
+
+    [`IntoTextStyle::with_color()`](crate::style::IntoTextStyle::with_color)
+
+    [`IntoTextStyle::into_text_style()`](crate::style::IntoTextStyle::into_text_style) for a more succinct example
+
+    */
     pub fn color<C: Color>(&self, color: &C) -> TextStyle<'a> {
         TextStyle {
             font: self.clone(),
@@ -95,6 +117,7 @@ impl<'a> FontDesc<'a> {
         }
     }
 
+    /// Returns the font family
     pub fn get_family(&self) -> FontFamily {
         self.family
     }

@@ -12,13 +12,16 @@ pub(super) mod cartesian3d;
 
 pub(super) use cartesian3d::Coord3D;
 
-/// The context of the chart. This is the core object of Plotters.
-/// Any plot/chart is abstracted as this type, and any data series can be placed to the chart
-/// context.
-///
-/// - To draw a series on a chart context, use [ChartContext::draw_series](struct.ChartContext.html#method.draw_series)
-/// - To draw a single element to the chart, you may want to use [ChartContext::plotting_area](struct.ChartContext.html#method.plotting_area)
-///
+/**
+The context of the chart. This is the core object of Plotters.
+
+Any plot/chart is abstracted as this type, and any data series can be placed to the chart context.
+
+- To draw a series on a chart context, use [`ChartContext::draw_series()`].
+- To draw a single element on the chart, you may want to use [`ChartContext::plotting_area()`].
+
+See [`crate::series::LineSeries`] and [`ChartContext::configure_series_labels()`] for more information and examples
+*/
 pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(crate) x_label_area: [Option<DrawingArea<DB, Shift>>; 2],
     pub(crate) y_label_area: [Option<DrawingArea<DB, Shift>>; 2],
@@ -36,7 +39,34 @@ impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT>
 }
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
-    /// Configure the styles for drawing series labels in the chart
+    /**
+    Configure the styles for drawing series labels in the chart
+
+    # Example
+
+    ```
+    use plotters::prelude::*;
+    let data = [(1.0, 3.3), (2., 2.1), (3., 1.5), (4., 1.9), (5., 1.0)];
+    let drawing_area = SVGBackend::new("configure_series_labels.svg", (300, 200)).into_drawing_area();
+    drawing_area.fill(&WHITE).unwrap();
+    let mut chart_builder = ChartBuilder::on(&drawing_area);
+    chart_builder.margin(7).set_left_and_bottom_label_area_size(20);
+    let mut chart_context = chart_builder.build_cartesian_2d(0.0..5.5, 0.0..5.5).unwrap();
+    chart_context.configure_mesh().draw().unwrap();
+    chart_context.draw_series(LineSeries::new(data, BLACK)).unwrap().label("Series 1")
+        .legend(|(x,y)| Rectangle::new([(x - 15, y + 1), (x, y)], BLACK));
+    chart_context.configure_series_labels().position(SeriesLabelPosition::UpperRight).margin(20)
+        .legend_area_size(5).border_style(BLUE).background_style(BLUE.mix(0.1)).label_font(("Calibri", 20)).draw().unwrap();
+    ```
+
+    The result is a chart with one data series labeled "Series 1" in a blue legend box:
+
+    ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@8e0fe60/apidoc/configure_series_labels.svg)
+
+    # See also
+
+    See [`crate::series::LineSeries`] for more information and examples
+    */
     pub fn configure_series_labels<'b>(&'b mut self) -> SeriesLabelStyle<'a, 'b, DB, CT>
     where
         DB: 'a,
@@ -82,7 +112,11 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
         &mut self.series_anno[idx]
     }
 
-    /// Draw a data series. A data series in Plotters is abstracted as an iterator of elements
+    /**
+    Draws a data series. A data series in Plotters is abstracted as an iterator of elements.
+
+    See [`crate::series::LineSeries`] and [`ChartContext::configure_series_labels()`] for more information and examples.
+    */
     pub fn draw_series<B, E, R, S>(
         &mut self,
         series: S,
