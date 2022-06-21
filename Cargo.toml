@@ -17,16 +17,19 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
 
 [dependencies.plotters-backend]
+branch = "master"
 git = "https://github.com/plotters-rs/plotters-backend"
 # version = "0.3.1"
 
 [dependencies.plotters-bitmap]
+branch = "master"
 default_features = false
 git = "https://github.com/plotters-rs/plotters-bitmap"
 optional = true
 # version = "0.3.1"
 
 [dependencies.plotters-svg]
+branch = "master"
 git = "https://github.com/plotters-rs/plotters-svg"
 optional = true
 # version = "0.3.1"
