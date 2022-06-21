@@ -15,7 +15,8 @@ readme = "README.md"
 gif = { version = "0.11.2", optional = true }
 
 [dependencies.plotters-backend]
-version = "^0.3"
+git = "https://github.com/plotters-rs/plotters-backend"
+# version = "0.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.23.14"
@@ -28,5 +29,8 @@ default = ["image_encoder", "gif_backend"]
 image_encoder = ["image"]
 gif_backend = ["gif", "image_encoder"]
 
-[dev-dependencies]
-plotters = {version = "^0.3.0", default_features = false, features = ["ttf"]}
+[dev-dependencies.plotters]
+default_features = false
+features = ["ttf"]
+git = "https://github.com/plotters-rs/plotters"
+# version = "0.3.1"
