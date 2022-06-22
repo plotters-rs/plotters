@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: cargo
-  directory: "/"
+  directory: "plotters/"
   schedule:
     interval: daily
     time: "12:00"
@@ -12,7 +12,7 @@ updates:
     - 0.10.1
     - 0.11.0
 - package-ecosystem: cargo
-  directory: "/examples/wasm-demo"
+  directory: "plotters/examples/wasm-demo"
   schedule:
     interval: daily
     time: "12:00"
