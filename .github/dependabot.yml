@@ -1,7 +1,6 @@
 version: 2
 updates:
 - package-ecosystem: cargo
-<<<<<<< HEAD
   directory: "plotters/"
   schedule:
     interval: daily
@@ -24,7 +23,7 @@ updates:
     time: "12:00"
   open-pull-requests-limit: 10
 - package-ecosystem: cargo
-  directory: "/"
+  directory: "plotters-bitmap"
   schedule:
     interval: daily
   open-pull-requests-limit: 10

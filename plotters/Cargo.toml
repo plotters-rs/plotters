@@ -27,7 +27,7 @@ optional = true
 # version = "0.3.1"
 
 [dependencies.plotters-svg]
-git = "https://github.com/plotters-rs/plotters-svg"
+path = "../plotters-svg"
 optional = true
 # version = "0.3.1"
 

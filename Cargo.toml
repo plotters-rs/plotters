@@ -1,4 +1,4 @@
 [workspace]
-members = ["plotters", "plotters-backend"]
+members = ["plotters", "plotters-backend", "plotters-bitmap", "plotters-svg"]
 default = "plotters"
 

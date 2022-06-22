@@ -5,8 +5,8 @@ Cargo.lock
 backup/*
 **/Cargo.lock
 **/target
-examples/wasm-demo/www/pkg
-examples/.ipynb_checkpoints/
+plotters/examples/wasm-demo/www/pkg
+plotters/examples/.ipynb_checkpoints/
 tarpaulin-report.html
 .vscode/*
 tags
