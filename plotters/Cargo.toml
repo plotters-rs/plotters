@@ -17,7 +17,7 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
 
 [dependencies.plotters-backend]
-git = "https://github.com/plotters-rs/plotters-backend"
+path = "../plotters-backend"
 # version = "0.3.1"
 
 [dependencies.plotters-bitmap]
