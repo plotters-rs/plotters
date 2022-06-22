@@ -1,8 +1,8 @@
-#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-use std::path::Path;
-use std::marker::PhantomData;
 #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
 use crate::gif_support;
+use std::marker::PhantomData;
+#[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
+use std::path::Path;
 
 pub(super) enum Target<'a> {
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
@@ -28,4 +28,3 @@ impl<'a> Buffer<'a> {
         }
     }
 }
-

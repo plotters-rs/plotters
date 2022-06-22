@@ -1,7 +1,6 @@
 use crate::BitMapBackend;
 use plotters_backend::DrawingBackend;
 
-
 #[inline(always)]
 pub(super) fn blend(prev: &mut u8, new: u8, a: u64) {
     if new > *prev {
@@ -10,7 +9,6 @@ pub(super) fn blend(prev: &mut u8, new: u8, a: u64) {
         *prev -= (u64::from(*prev - new) * a / 256) as u8
     }
 }
-
 
 /// The trait that describes some details about a particular pixel format
 pub trait PixelFormat: Sized {
@@ -149,4 +147,3 @@ pub trait PixelFormat: Sized {
         false
     }
 }
-

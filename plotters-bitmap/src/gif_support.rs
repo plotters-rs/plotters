@@ -37,8 +37,7 @@ impl GifFile {
     }
 
     pub(super) fn flush_frame(&mut self, buffer: &[u8]) -> Result<(), BitMapBackendError> {
-        let mut frame =
-            GifFrame::from_rgb_speed(self.width as u16, self.height as u16, buffer, 10);
+        let mut frame = GifFrame::from_rgb_speed(self.width as u16, self.height as u16, buffer, 10);
 
         frame.delay = self.delay as u16;
 

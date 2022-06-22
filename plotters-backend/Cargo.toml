@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT"
 description = "Plotters Backend API"
 homepage = "https://plotters-rs.github.io"
-repository = "https://github.com/plotters-rs/plotters-backend"
+repository = "https://github.com/plotters-rs/plotters"
 readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

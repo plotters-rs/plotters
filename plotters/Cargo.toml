@@ -18,18 +18,15 @@ chrono = { version = "0.4.19", optional = true }
 
 [dependencies.plotters-backend]
 path = "../plotters-backend"
-# version = "0.3.1"
 
 [dependencies.plotters-bitmap]
 default_features = false
 path = "../plotters-bitmap"
 optional = true
-# version = "0.3.1"
 
 [dependencies.plotters-svg]
 path = "../plotters-svg"
 optional = true
-# version = "0.3.1"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ttf-parser = { version = "0.15.0", optional = true }

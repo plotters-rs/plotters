@@ -1,5 +1,5 @@
-use super::PixelFormat;
 use super::pixel_format::blend;
+use super::PixelFormat;
 use crate::BitMapBackend;
 use plotters_backend::DrawingBackend;
 
