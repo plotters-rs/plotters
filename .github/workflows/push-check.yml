@@ -11,7 +11,7 @@ jobs:
           submodules: recursive
     - uses: actions-rs/toolchain@v1
       with:
-          toolchain: 1.36.0
+          toolchain: 1.56.0
           override: true
     - uses: actions-rs/cargo@v1
       with:
