@@ -1,4 +1,4 @@
-name: CI
+name: Plotters Core
 
 on: [push, pull_request]
 
