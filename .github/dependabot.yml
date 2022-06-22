@@ -16,4 +16,9 @@ updates:
   schedule:
     interval: daily
     time: "12:00"
+- package-ecosystem: cargo
+  directory: "plotters-backend"
+  schedule:
+    interval: daily
+    time: "12:00"
   open-pull-requests-limit: 10
