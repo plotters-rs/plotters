@@ -22,7 +22,7 @@ path = "../plotters-backend"
 
 [dependencies.plotters-bitmap]
 default_features = false
-git = "https://github.com/plotters-rs/plotters-bitmap"
+path = "../plotters-bitmap"
 optional = true
 # version = "0.3.1"
 

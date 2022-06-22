@@ -1,6 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: cargo
+<<<<<<< HEAD
   directory: "plotters/"
   schedule:
     interval: daily
@@ -22,3 +23,12 @@ updates:
     interval: daily
     time: "12:00"
   open-pull-requests-limit: 10
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: gif
+    versions:
+    - 0.11.1
