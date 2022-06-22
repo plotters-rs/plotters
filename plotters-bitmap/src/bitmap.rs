@@ -3,8 +3,8 @@ use plotters_backend::{
 };
 use std::marker::PhantomData;
 
-use crate::error::BitMapBackendError;
 use crate::bitmap_pixel::{PixelFormat, RGBPixel};
+use crate::error::BitMapBackendError;
 
 #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
 mod image_encoding_support {
@@ -18,8 +18,7 @@ use image_encoding_support::*;
 
 mod target;
 
-use target::{Target, Buffer};
-
+use target::{Buffer, Target};
 
 /// The backend that drawing a bitmap
 ///

@@ -1,7 +1,7 @@
 version: 2
 updates:
 - package-ecosystem: cargo
-  directory: "plotters/"
+  directory: "/"
   schedule:
     interval: daily
     time: "12:00"
@@ -11,23 +11,6 @@ updates:
     versions:
     - 0.10.1
     - 0.11.0
-- package-ecosystem: cargo
-  directory: "plotters/examples/wasm-demo"
-  schedule:
-    interval: daily
-    time: "12:00"
-- package-ecosystem: cargo
-  directory: "plotters-backend"
-  schedule:
-    interval: daily
-    time: "12:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: cargo
-  directory: "plotters-bitmap"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-  ignore:
   - dependency-name: gif
     versions:
     - 0.11.1

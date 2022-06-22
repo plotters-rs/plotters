@@ -22,4 +22,3 @@ impl std::fmt::Display for BitMapBackendError {
 }
 
 impl std::error::Error for BitMapBackendError {}
-

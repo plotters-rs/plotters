@@ -42,10 +42,7 @@ jobs:
       with:
           toolchain: 1.56.0
           override: true
-    - uses: actions-rs/cargo@v1
-      with:
-          command: build  
-          args: --verbose --no-default-features --features=svg_backend,chrono,image,deprecated_items,all_series,all_elements
+          args: --all-features
   build_and_test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -92,7 +89,7 @@ jobs:
           command: build
           args: --verbose --release --examples
     - name: Run all the examples
-      run: for example in examples/*.rs; do ./target/release/examples/$(basename ${example} .rs); done && tar -czvf example-outputs.tar.gz plotters-doc-data
+      run: cd plotters && for example in examples/*.rs; do ../target/release/examples/$(basename ${example} .rs); done && tar -czvf example-outputs.tar.gz plotters-doc-data
     - uses: actions/upload-artifact@v1
       with:
           name: example-outputs
