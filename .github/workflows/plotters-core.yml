@@ -93,4 +93,4 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
           name: example-outputs
-          path: example-outputs.tar.gz
+          path: plotters/example-outputs.tar.gz
