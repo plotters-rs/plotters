@@ -11,10 +11,10 @@ pub fn draw(canvas_id: &str, power: i32) -> DrawResult<impl Fn((i32, i32)) -> Op
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .margin(20)
+        .margin(20u32)
         .caption(format!("y=x^{}", power), font)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
+        .x_label_area_size(30u32)
+        .y_label_area_size(30u32)
         .build_cartesian_2d(-1f32..1f32, -1.2f32..1.2f32)?;
 
     chart.configure_mesh().x_labels(3).y_labels(3).draw()?;

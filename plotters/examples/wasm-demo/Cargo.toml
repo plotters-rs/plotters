@@ -8,7 +8,7 @@ edition = "2018"
 crate-type=["cdylib"]
 
 [dependencies]
-plotters = {path = "../.."}
+plotters = {git = "https://github.com/plotters-rs/plotters"}
 wasm-bindgen = "0.2.62"
 wee_alloc = "0.4.5"
 web-sys = { version = "0.3.39", features = ["HtmlCanvasElement"] }
@@ -19,3 +19,5 @@ git = "https://github.com/plotters-rs/plotters-canvas"
 
 [profile.release]
 lto = true
+
+[workspace]
