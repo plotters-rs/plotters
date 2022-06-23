@@ -46,13 +46,13 @@ impl PixelFormat for BGRXPixel {
             upper_left.1.min(bottom_right.1).max(0),
         );
         let (x1, y1) = (
-            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
-            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+            upper_left.0.max(bottom_right.0).min(w as i32),
+            upper_left.1.max(bottom_right.1).min(h as i32),
         );
 
         // This may happen when the minimal value is larger than the limit.
         // Thus we just have something that is completely out-of-range
-        if x0 > x1 || y0 > y1 {
+        if x0 >= x1 || y0 >= y1 {
             return;
         }
 
@@ -79,9 +79,9 @@ impl PixelFormat for BGRXPixel {
         const N: u64 = 0xff00_ff00_ff00_ff00;
         const M: u64 = 0x00ff_00ff_00ff_00ff;
 
-        for y in y0..=y1 {
+        for y in y0..y1 {
             let start = (y * w as i32 + x0) as usize;
-            let count = (x1 - x0 + 1) as usize;
+            let count = (x1 - x0) as usize;
 
             let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 8];
             let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
@@ -135,13 +135,13 @@ impl PixelFormat for BGRXPixel {
             upper_left.1.min(bottom_right.1).max(0),
         );
         let (x1, y1) = (
-            upper_left.0.max(bottom_right.0).min(w as i32 - 1),
-            upper_left.1.max(bottom_right.1).min(h as i32 - 1),
+            upper_left.0.max(bottom_right.0).min(w as i32),
+            upper_left.1.max(bottom_right.1).min(h as i32),
         );
 
         // This may happen when the minimal value is larger than the limit.
         // Thus we just have something that is completely out-of-range
-        if x0 > x1 || y0 > y1 {
+        if x0 >= x1 || y0 >= y1 {
             return;
         }
 
@@ -149,12 +149,12 @@ impl PixelFormat for BGRXPixel {
 
         if r == g && g == b {
             // If r == g == b, then we can use memset
-            if x0 != 0 || x1 != w as i32 - 1 {
+            if x0 != 0 || x1 != w as i32 {
                 // If it's not the entire row is filled, we can only do
                 // memset per row
-                for y in y0..=y1 {
+                for y in y0..y1 {
                     let start = (y * w as i32 + x0) as usize;
-                    let count = (x1 - x0 + 1) as usize;
+                    let count = (x1 - x0) as usize;
                     dst[(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut()
                         .for_each(|e| *e = r);
@@ -162,19 +162,19 @@ impl PixelFormat for BGRXPixel {
             } else {
                 // If the entire memory block is going to be filled, just use single memset
                 dst[Self::PIXEL_SIZE * (y0 * w as i32) as usize
-                    ..((y1 + 1) * w as i32) as usize * Self::PIXEL_SIZE]
+                    ..(y1 * w as i32) as usize * Self::PIXEL_SIZE]
                     .iter_mut()
                     .for_each(|e| *e = r);
             }
         } else {
-            let count = (x1 - x0 + 1) as usize;
+            let count = (x1 - x0) as usize;
             if count < 8 {
-                for y in y0..=y1 {
+                for y in y0..y1 {
                     let start = (y * w as i32 + x0) as usize;
                     let mut iter = dst
                         [(start * Self::PIXEL_SIZE)..((start + count) * Self::PIXEL_SIZE)]
                         .iter_mut();
-                    for _ in 0..=(x1 - x0) {
+                    for _ in 0..count {
                         *iter.next().unwrap() = b;
                         *iter.next().unwrap() = g;
                         *iter.next().unwrap() = r;
@@ -182,7 +182,7 @@ impl PixelFormat for BGRXPixel {
                     }
                 }
             } else {
-                for y in y0..=y1 {
+                for y in y0..y1 {
                     let start = (y * w as i32 + x0) as usize;
                     let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 8];
                     let slice =
