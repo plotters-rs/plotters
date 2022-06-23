@@ -8,6 +8,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
-    root.present()?;
+    root_drawing_area.present()?;
     Ok(())
 }
