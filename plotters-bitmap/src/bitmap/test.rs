@@ -46,7 +46,7 @@ fn test_bitmap_backend_fill_half() {
         for y in 0..10 {
             assert_eq!(
                 buffer[(y * 10 + x) as usize * 3 + 0],
-                if x <= 5 { 255 } else { 0 }
+                if x < 5 { 255 } else { 0 }
             );
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], 0);
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], 0);
@@ -67,7 +67,7 @@ fn test_bitmap_backend_fill_half() {
         for y in 0..10 {
             assert_eq!(
                 buffer[(y * 10 + x) as usize * 3 + 0],
-                if y <= 5 { 255 } else { 0 }
+                if y < 5 { 255 } else { 0 }
             );
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 1], 0);
             assert_eq!(buffer[(y * 10 + x) as usize * 3 + 2], 0);
@@ -95,7 +95,7 @@ fn test_bitmap_backend_blend() {
 
     for x in 0..10 {
         for y in 0..10 {
-            let (r, g, b) = if x <= 5 {
+            let (r, g, b) = if x < 5 {
                 (205, 225, 245)
             } else {
                 (255, 255, 255)
@@ -159,6 +159,22 @@ fn test_draw_rect_out_of_range() {
 
 #[cfg(test)]
 #[test]
+fn test_draw_rect_exclude_bottom_right() {
+    use plotters::prelude::*;
+    let mut buffer = vec![0; 100 * 100 * 3];
+
+    {
+        let mut back = BitMapBackend::with_buffer(&mut buffer, (100, 100));
+
+        back.draw_rect((0, 0), (0, 0), &RED.to_rgba(), true)
+            .unwrap();
+    }
+
+    assert_eq!(&buffer[0..3], &[0, 0, 0]);
+}
+
+#[cfg(test)]
+#[test]
 fn test_draw_line_out_of_range() {
     use plotters::prelude::*;
     let mut buffer = vec![0; 1000 * 1000 * 3];
@@ -203,7 +219,7 @@ fn test_bitmap_blend_large() {
 
         for x in 0..1000 {
             for y in 0..1000 {
-                let expected_value = if x <= 100 && y <= 100 {
+                let expected_value = if x < 100 && y < 100 {
                     let (r, g, b) = fill_color.to_rgba().rgb();
                     (
                         if r > 0 { 139 } else { 12 },
