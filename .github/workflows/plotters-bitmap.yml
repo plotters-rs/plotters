@@ -1,6 +1,6 @@
-name: Bitmap
+name: Plotters Bitmap Backend
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build_and_test:
@@ -19,8 +19,8 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
           command: test
-          args: --verbose
+          args: --verbose --package=plotters-bitmap
     - uses: actions-rs/cargo@v1
       with:
           command: test
-          args: --verbose --no-default-features --lib
+          args: --verbose --no-default-features --lib --package=plotters-bitmap

@@ -1,4 +1,4 @@
-name: Plotters Core
+name: Plotters Core Crate
 
 on: [push, pull_request]
 
@@ -89,7 +89,13 @@ jobs:
           command: build
           args: --verbose --release --examples
     - name: Run all the examples
-      run: cd plotters && for example in examples/*.rs; do ../target/release/examples/$(basename ${example} .rs); done && tar -czvf example-outputs.tar.gz plotters-doc-data
+      run: |
+        cd plotters
+        for example in examples/*.rs
+        do 
+          ../target/release/examples/$(basename ${example} .rs)
+        done 
+        tar -czvf example-outputs.tar.gz plotters-doc-data
     - uses: actions/upload-artifact@v1
       with:
           name: example-outputs
