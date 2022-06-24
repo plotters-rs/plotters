@@ -118,7 +118,7 @@ macro_rules! gen_key_points_comp {
             }
 
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
-            // The value granularity controls how we round the values. 
+            // The value granularity controls how we round the values.
             let mut value_granularity = scale / 10.0;
             fn rem_euclid(a: f64, b: f64) -> f64 {
                 if b > 0.0 {
