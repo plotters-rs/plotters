@@ -118,7 +118,8 @@ macro_rules! gen_key_points_comp {
             }
 
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
-            let mut digits = -(range.1 - range.0).log(10.0).floor() as i32 + 1;
+            // The value granularity controls how we round the values. 
+            let mut value_granularity = scale / 10.0;
             fn rem_euclid(a: f64, b: f64) -> f64 {
                 if b > 0.0 {
                     a - (a / b).floor() * b
@@ -131,6 +132,7 @@ macro_rules! gen_key_points_comp {
             // The scale must yield number of points than requested
             if 1 + ((range.1 - range.0) / scale).floor() as usize > max_points {
                 scale *= 10.0;
+                value_granularity *= 10.0;
             }
 
             'outer: loop {
@@ -148,21 +150,16 @@ macro_rules! gen_key_points_comp {
                     scale = old_scale / nxt;
                 }
                 scale = old_scale / 10.0;
-                if scale < 1.0 {
-                    digits += 1;
-                }
+                value_granularity /= 10.0;
             }
 
             let mut ret = vec![];
             let mut left = range.0 + scale - rem_euclid(range.0, scale);
             let right = range.1 - rem_euclid(range.1, scale);
             while left <= right {
-                let size = (10f64).powf(digits as f64 + 1.0);
-                let new_left = (left * size).abs() + 1e-3;
-                if left < 0.0 {
-                    left = -new_left.round() / size;
-                } else {
-                    left = new_left.round() / size;
+                let new_left = (left / value_granularity).round() * value_granularity;
+                if new_left < range.0 {
+                    left = new_left + value_granularity;
                 }
                 ret.push(left as $type);
                 left += scale;
@@ -383,5 +380,12 @@ mod test {
     fn regression_test_issue_255_reverse_f32_coord_no_hang() {
         let coord: RangedCoordf32 = (10.0..0.0).into();
         let _points = coord.key_points(10);
+    }
+
+    #[test]
+    fn regession_test_issue_358_key_points_no_hang() {
+        let coord: RangedCoordf64 = (-200.0..801.0).into();
+        let points = coord.key_points(500);
+        assert!(points.len() <= 500);
     }
 }
