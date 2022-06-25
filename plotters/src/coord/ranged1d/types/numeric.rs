@@ -152,9 +152,9 @@ macro_rules! gen_key_points_comp {
                     }
                     let new_right = range.1 - rem_euclid(range.1, old_scale / nxt);
 
-                    let npoints = 1 + ((new_right - new_left) / old_scale * nxt) as usize;
+                    let npoints = 1.0 + ((new_right - new_left) / old_scale * nxt);
 
-                    if npoints > max_points {
+                    if npoints.round() as usize > max_points {
                         break 'outer;
                     }
 
@@ -431,5 +431,8 @@ mod test {
         let coord: RangedCoordf64 = (0.9995..1.0005).into();
         let points = coord.key_points(11);
         assert_eq!(points.len(), 11);
+        let coord: RangedCoordf64 = (0.9995..1.0005).into();
+        let points = coord.key_points(2);
+        assert!(points.len() <= 2);
     }
 }
