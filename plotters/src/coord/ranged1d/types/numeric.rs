@@ -124,10 +124,15 @@ macro_rules! gen_key_points_comp {
             // By default, we make the granularity as the 1/10 of the scale.
             let mut value_granularity = scale / 10.0;
             fn rem_euclid(a: f64, b: f64) -> f64 {
-                if b > 0.0 {
+                let ret = if b > 0.0 {
                     a - (a / b).floor() * b
                 } else {
                     a - (a / b).ceil() * b
+                };
+                if (ret - b).abs() < std::f64::EPSILON {
+                    0.0
+                } else {
+                    ret
                 }
             }
 
@@ -174,7 +179,7 @@ macro_rules! gen_key_points_comp {
             let left_base = (left / value_granularity).floor() * value_granularity;
             let mut left_relative = left - left_base;
             let right = range.1 - rem_euclid(range.1, scale);
-            while left_relative <= right - left_base {
+            while (right - left_relative - left_base) >= -std::f64::EPSILON {
                 let new_left_relative = (left_relative / value_granularity).round() * value_granularity;
                 if new_left_relative < 0.0 {
                     left_relative += value_granularity;
@@ -423,5 +428,8 @@ mod test {
         let coord: RangedCoordf64 = (1.0..125.0).into();
         let points = coord.key_points(12);
         assert_eq!(points.len(), 12);
+        let coord: RangedCoordf64 = (0.9995..1.0005).into();
+        let points = coord.key_points(11);
+        assert_eq!(points.len(), 11);
     }
 }
