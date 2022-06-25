@@ -119,6 +119,9 @@ macro_rules! gen_key_points_comp {
 
             let mut scale = (10f64).powf((range.1 - range.0).log(10.0).floor());
             // The value granularity controls how we round the values.
+            // To avoid generating key points like 1.00000000001, we round to the nearest multiple of the
+            // value granularity.
+            // By default, we make the granularity as the 1/10 of the scale.
             let mut value_granularity = scale / 10.0;
             fn rem_euclid(a: f64, b: f64) -> f64 {
                 if b > 0.0 {
@@ -154,15 +157,21 @@ macro_rules! gen_key_points_comp {
             }
 
             let mut ret = vec![];
-            let mut left = range.0 + scale - rem_euclid(range.0, scale);
+            // In some extreme cases, left might be too big, so that (left + scale) - left == 0 due to 
+            // floating point error.
+            // In this case, we may loop forever. To avoid this, we need to use two variables to store
+            // the current left value. So we need keep a left_base and a left_relative.
+            let left = range.0 + scale - rem_euclid(range.0, scale);
+            let left_base = (left / value_granularity).floor() * value_granularity;
+            let mut left_relative = left - left_base;
             let right = range.1 - rem_euclid(range.1, scale);
-            while left <= right {
-                let new_left = (left / value_granularity).round() * value_granularity;
-                if new_left < range.0 {
-                    left = new_left + value_granularity;
+            while left_relative <= right - left_base {
+                let new_left_relative = (left_relative / value_granularity).round() * value_granularity;
+                if new_left_relative < 0.0 {
+                    left_relative += value_granularity;
                 }
-                ret.push(left as $type);
-                left += scale;
+                ret.push((left_relative + left_base) as $type);
+                left_relative += scale;
             }
             return ret;
         }
@@ -385,6 +394,13 @@ mod test {
     #[test]
     fn regession_test_issue_358_key_points_no_hang() {
         let coord: RangedCoordf64 = (-200.0..801.0).into();
+        let points = coord.key_points(500);
+        assert!(points.len() <= 500);
+    }
+
+    #[test]
+    fn regression_test_issue_358_key_points_no_hang_2() {
+        let coord: RangedCoordf64 = (10000000000001f64..10000000000002f64).into();
         let points = coord.key_points(500);
         assert!(points.len() <= 500);
     }
