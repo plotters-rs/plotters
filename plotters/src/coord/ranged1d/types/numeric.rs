@@ -141,7 +141,10 @@ macro_rules! gen_key_points_comp {
             'outer: loop {
                 let old_scale = scale;
                 for nxt in [2.0, 5.0, 10.0].iter() {
-                    let new_left = range.0 + scale / nxt - rem_euclid(range.0, scale / nxt);
+                    let mut new_left = range.0 - rem_euclid(range.0, scale / nxt);
+                    if new_left < range.0 {
+                        new_left += scale / nxt;
+                    }
                     let new_right = range.1 - rem_euclid(range.1, scale / nxt);
 
                     let npoints = 1 + ((new_right - new_left) / old_scale * nxt) as usize;
@@ -161,7 +164,13 @@ macro_rules! gen_key_points_comp {
             // floating point error.
             // In this case, we may loop forever. To avoid this, we need to use two variables to store
             // the current left value. So we need keep a left_base and a left_relative.
-            let left = range.0 + scale - rem_euclid(range.0, scale);
+            let left = {
+                let mut value = range.0 - rem_euclid(range.0, scale);
+                if value < range.0 {
+                    value += scale;
+                }
+                value
+            };
             let left_base = (left / value_granularity).floor() * value_granularity;
             let mut left_relative = left - left_base;
             let right = range.1 - rem_euclid(range.1, scale);
@@ -403,5 +412,13 @@ mod test {
         let coord: RangedCoordf64 = (10000000000001f64..10000000000002f64).into();
         let points = coord.key_points(500);
         assert!(points.len() <= 500);
+    }
+
+    #[test]
+    fn test_coord_follows_hint() {
+        let coord: RangedCoordf64 = (1.0..2.0).into();
+        let points = coord.key_points(6);
+        assert_eq!(points.len(), 6);
+        assert_eq!(points[0], 1.0);
     }
 }
