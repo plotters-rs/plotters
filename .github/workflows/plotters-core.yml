@@ -48,7 +48,7 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
           command: test
-          args: --verbose --no-default-features --lib
+          args: --verbose --no-default-features --features=svg_backend --lib
   test_all_features:
     runs-on: ubuntu-latest
     steps:
