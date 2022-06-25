@@ -141,11 +141,11 @@ macro_rules! gen_key_points_comp {
             'outer: loop {
                 let old_scale = scale;
                 for nxt in [2.0, 5.0, 10.0].iter() {
-                    let mut new_left = range.0 - rem_euclid(range.0, scale / nxt);
+                    let mut new_left = range.0 - rem_euclid(range.0, old_scale / nxt);
                     if new_left < range.0 {
-                        new_left += scale / nxt;
+                        new_left += old_scale / nxt;
                     }
-                    let new_right = range.1 - rem_euclid(range.1, scale / nxt);
+                    let new_right = range.1 - rem_euclid(range.1, old_scale / nxt);
 
                     let npoints = 1 + ((new_right - new_left) / old_scale * nxt) as usize;
 
@@ -420,5 +420,8 @@ mod test {
         let points = coord.key_points(6);
         assert_eq!(points.len(), 6);
         assert_eq!(points[0], 1.0);
+        let coord: RangedCoordf64 = (1.0..125.0).into();
+        let points = coord.key_points(12);
+        assert_eq!(points.len(), 12);
     }
 }
