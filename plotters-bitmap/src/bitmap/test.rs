@@ -344,7 +344,7 @@ fn test_draw_simple_lines() {
 
     let nz_count = buffer.into_iter().filter(|x| *x != 0).count();
 
-    assert_eq!(nz_count, 5 * 1000 * 3);
+    assert_eq!(nz_count, 6 * 1000 * 3);
 }
 
 #[cfg(test)]
