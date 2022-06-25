@@ -252,12 +252,12 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         if (from.0 == to.0 || from.1 == to.1) && style.stroke_width() == 1 {
             if alpha >= 1.0 {
                 if from.1 == to.1 {
-                    P::fill_rect_fast(self, from, to, r, g, b);
+                    P::fill_rect_fast(self, from, (to.0 + 1, to.1 + 1), r, g, b);
                 } else {
                     P::fill_vertical_line_fast(self, from.0, (from.1, to.1), r, g, b);
                 }
             } else {
-                P::blend_rect_fast(self, from, to, r, g, b, alpha);
+                P::blend_rect_fast(self, from, (to.0 + 1, to.1 + 1), r, g, b, alpha);
             }
             return Ok(());
         }
