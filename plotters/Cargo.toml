@@ -28,22 +28,22 @@ optional = true
 path = "../plotters-svg"
 optional = true
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+[target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies]
 ttf-parser = { version = "0.15.0", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 pathfinder_geometry = { version = "0.5.1", optional = true }
 font-kit = { version = "0.11.0", optional = true }
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
+[target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies.image]
 version = "0.24.2"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]
 
-[target.'cfg(target_arch = "wasm32")'.dependencies.wasm-bindgen]
+[target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies.wasm-bindgen]
 version = "0.2.62"
 
-[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
+[target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies.web-sys]
 version = "0.3.51"
 features = [
          "Document",
@@ -114,7 +114,7 @@ rand = "0.8.3"
 rand_distr = "0.4.0"
 rand_xorshift = "0.3.0"
 
-[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+[target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dev-dependencies]
 wasm-bindgen-test = "0.3.24"
 
 [[bench]]
