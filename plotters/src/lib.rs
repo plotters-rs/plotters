@@ -24,6 +24,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 - To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
 - Plotters now moved all backend code to sperate repositories, check [FAQ list](#faq-list) for details
+- Some interesting [demo projects](#demo-projects) are available, feel free to try them out.
 
 ## Gallery
 
@@ -273,7 +274,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
   * [Dependencies](#dependencies)
     + [Ubuntu Linux](#ubuntu-linux)
   * [Quick Start](#quick-start)
-  * [Demo Projects ](#demo-projects-)
+  * [Demo Projects](#demo-projects)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
   * [Interactive Tutorial with Jupyter Notebook](#interactive-tutorial-with-jupyter-notebook)
   * [Plotting in Rust](#plotting-in-rust)
