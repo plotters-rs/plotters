@@ -32,7 +32,11 @@ optional = true
 ttf-parser = { version = "0.15.0", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 pathfinder_geometry = { version = "0.5.1", optional = true }
+
 font-kit = { version = "0.11.0", optional = true }
+ab_glyph = { version = "0.2.12", optional = true }
+once_cell = { version = "1.8.0", optional = true }
+
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies.image]
 version = "0.24.2"
@@ -95,6 +99,8 @@ ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
 # dlopen fontconfig C library at runtime instead of linking at build time
 # Can be useful for cross compiling, especially considering fontconfig has lots of C dependencies
 fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
+
+ab_glyph_ = ["ab_glyph", "once_cell"]
 
 # Misc
 datetime = ["chrono"]

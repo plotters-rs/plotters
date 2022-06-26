@@ -20,6 +20,14 @@ pub use colors::full_palette;
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };
+
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    not(target_os = "wasi"),
+    feature = "ab_glyph_"
+))]
+pub use font::register_font;
+
 pub use shape::ShapeStyle;
 pub use size::{AsRelative, RelativeSize, SizeDesc};
 pub use text::text_anchor;

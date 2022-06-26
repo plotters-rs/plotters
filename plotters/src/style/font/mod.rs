@@ -8,23 +8,41 @@
 
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    feature = "ttf"
+    all(feature = "ttf", not(feature = "ab_glyph_"))
 ))]
 mod ttf;
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    feature = "ttf"
+    all(feature = "ttf", not(feature = "ab_glyph_"))
 ))]
 use ttf::FontDataInternal;
 
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    not(feature = "ttf")
+    feature = "ab_glyph_"
+))]
+mod ab_glyph;
+#[cfg(all(
+    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
+    feature = "ab_glyph_"
+))]
+pub use self::ab_glyph::register_font;
+#[cfg(all(
+    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
+    feature = "ab_glyph_"
+))]
+use self::ab_glyph::FontDataInternal;
+
+#[cfg(all(
+    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
+    not(feature = "ttf"),
+    not(feature = "ab_glyph_")
 ))]
 mod naive;
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    not(feature = "ttf")
+    not(feature = "ttf"),
+    not(feature = "ab_glyph_")
 ))]
 use naive::FontDataInternal;
 
