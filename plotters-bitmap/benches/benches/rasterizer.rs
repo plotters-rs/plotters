@@ -1,7 +1,7 @@
 use criterion::{criterion_group, Criterion};
 use plotters::prelude::*;
 use plotters_backend::BackendStyle;
-use plotters_bitmap::bitmap_pixel::BGRXPixel;
+use plotters_bitmap::{bitmap_pixel::BGRXPixel, BitMapBackend};
 
 const W: u32 = 1000;
 const H: u32 = 1000;

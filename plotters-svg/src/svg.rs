@@ -578,8 +578,8 @@ impl Drop for SVGBackend<'_> {
 mod test {
     use super::*;
     use plotters::element::Circle;
-    use plotters::prelude::*;
     use plotters::style::text_anchor::{HPos, Pos, VPos};
+    use plotters::prelude::{ChartBuilder, IntoDrawingArea, TextStyle, IntoFont, BLACK, Color, RED, BLUE, SeriesLabelPosition, WHITE};
     use std::fs;
     use std::path::Path;
 
@@ -603,8 +603,8 @@ mod test {
             let root = SVGBackend::with_string(&mut content, (500, 500)).into_drawing_area();
 
             let mut chart = ChartBuilder::on(&root)
-                .caption("This is a test", ("sans-serif", 20))
-                .set_all_label_area_size(40)
+                .caption("This is a test", ("sans-serif", 20u32))
+                .set_all_label_area_size(40u32)
                 .build_cartesian_2d(0..10, 0..10)
                 .unwrap();
 
@@ -674,9 +674,9 @@ mod test {
                 .unwrap();
 
             let mut chart = ChartBuilder::on(&root)
-                .caption("All anchor point positions", ("sans-serif", 20))
-                .set_all_label_area_size(40)
-                .build_cartesian_2d(0..100, 0..50)
+                .caption("All anchor point positions", ("sans-serif", 20u32))
+                .set_all_label_area_size(40u32)
+                .build_cartesian_2d(0..100i32, 0..50i32)
                 .unwrap();
 
             chart
@@ -763,9 +763,9 @@ mod test {
             let root = SVGBackend::with_string(&mut content, (width, height)).into_drawing_area();
 
             let mut chart = ChartBuilder::on(&root)
-                .caption("All series label positions", ("sans-serif", 20))
-                .set_all_label_area_size(40)
-                .build_cartesian_2d(0..50, 0..50)
+                .caption("All series label positions", ("sans-serif", 20u32))
+                .set_all_label_area_size(40u32)
+                .build_cartesian_2d(0..50i32, 0..50i32)
                 .unwrap();
 
             chart
@@ -776,16 +776,16 @@ mod test {
                 .unwrap();
 
             chart
-                .draw_series(std::iter::once(Circle::new((5, 15), 5, &RED)))
+                .draw_series(std::iter::once(Circle::new((5, 15), 5u32, &RED)))
                 .expect("Drawing error")
                 .label("Series 1")
-                .legend(|(x, y)| Circle::new((x, y), 3, RED.filled()));
+                .legend(|(x, y)| Circle::new((x, y), 3u32, RED.filled()));
 
             chart
-                .draw_series(std::iter::once(Circle::new((5, 15), 10, &BLUE)))
+                .draw_series(std::iter::once(Circle::new((5, 15), 10u32, &BLUE)))
                 .expect("Drawing error")
                 .label("Series 2")
-                .legend(|(x, y)| Circle::new((x, y), 3, BLUE.filled()));
+                .legend(|(x, y)| Circle::new((x, y), 3u32, BLUE.filled()));
 
             for pos in vec![
                 SeriesLabelPosition::UpperLeft,

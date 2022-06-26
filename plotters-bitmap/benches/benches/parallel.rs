@@ -2,6 +2,7 @@ use criterion::{criterion_group, BenchmarkId, Criterion};
 
 use plotters::coord::Shift;
 use plotters::prelude::*;
+use plotters_bitmap::BitMapBackend;
 use rayon::prelude::*;
 
 const SIZES: &'static [u32] = &[100, 400, 800, 1000, 2000];

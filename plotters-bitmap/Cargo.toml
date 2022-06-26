@@ -1,6 +1,6 @@
 [package]
 name = "plotters-bitmap"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -30,5 +30,14 @@ gif_backend = ["gif", "image_encoder"]
 
 [dev-dependencies.plotters]
 default_features = false
-features = ["ttf"]
+features = ["ttf", "line_series", "bitmap_backend"]
 path = "../plotters"
+
+[dev-dependencies]
+criterion = "0.3.4"
+rayon = "1.5.1"
+
+[[bench]]
+name = "benchmark"
+harness = false
+path = "benches/main.rs"
