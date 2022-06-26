@@ -78,9 +78,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             self.drawing_area.get_y_axis_pixel_range()
         };
 
-        /* At this point, the coordinate system tells us the pixel range
-         * after the translation.
-         * However, we need to use the logic coordinate system for drawing. */
+        // At this point, the coordinate system tells us the pixel range after the translation.
+        // However, we need to use the logic coordinate system for drawing.
         if orientation.0 == 0 {
             axis_range.start -= x0;
             axis_range.end -= x0;

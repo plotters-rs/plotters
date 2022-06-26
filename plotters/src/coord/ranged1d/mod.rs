@@ -213,7 +213,7 @@ pub trait Ranged {
         if limit.0 < limit.1 {
             limit.0..limit.1
         } else {
-            (limit.1 + 1)..(limit.0 + 1)
+            limit.1..limit.0
         }
     }
 }

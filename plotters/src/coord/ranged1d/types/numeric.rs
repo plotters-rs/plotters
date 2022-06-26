@@ -87,7 +87,11 @@ macro_rules! make_numeric_coord {
                     return limit.1;
                 }
 
-                return limit.0 + (actual_length as f64 * logic_length + 1e-3).floor() as i32;
+                if actual_length > 0 {
+                    return limit.0 + (actual_length as f64 * logic_length + 1e-3).floor() as i32;
+                } else {
+                    return limit.0 + (actual_length as f64 * logic_length - 1e-3).ceil() as i32;
+                }
             }
             fn key_points<Hint: KeyPointHint>(&self, hint: Hint) -> Vec<$type> {
                 $key_points((self.0, self.1), hint.max_num_points())
@@ -165,7 +169,7 @@ macro_rules! gen_key_points_comp {
             }
 
             let mut ret = vec![];
-            // In some extreme cases, left might be too big, so that (left + scale) - left == 0 due to 
+            // In some extreme cases, left might be too big, so that (left + scale) - left == 0 due to
             // floating point error.
             // In this case, we may loop forever. To avoid this, we need to use two variables to store
             // the current left value. So we need keep a left_base and a left_relative.
@@ -180,7 +184,8 @@ macro_rules! gen_key_points_comp {
             let mut left_relative = left - left_base;
             let right = range.1 - rem_euclid(range.1, scale);
             while (right - left_relative - left_base) >= -std::f64::EPSILON {
-                let new_left_relative = (left_relative / value_granularity).round() * value_granularity;
+                let new_left_relative =
+                    (left_relative / value_granularity).round() * value_granularity;
                 if new_left_relative < 0.0 {
                     left_relative += value_granularity;
                 }
