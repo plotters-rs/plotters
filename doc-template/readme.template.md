@@ -18,7 +18,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 
 - A new Plotters Developer's Guide is working in progress. The preview version is available at [here](https://plotters-rs.github.io/book).
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
-- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
+- To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
 - Plotters now moved all backend code to sperate repositories, check [FAQ list](#faq-list) for details
 
@@ -50,6 +50,14 @@ $$../examples/quick_start.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/0.png)
+
+## Demo Projects 
+
+To learn how to use Plotters in different scenarios by checking out the following demo projects:
+
+- WebAssembly + Plotters: [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
+- minifb + Plotters: [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
+- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters/plotters-gtk-demo) 
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -111,7 +119,7 @@ jupyter notebook
 
 And select the notebook called `evcxr-jupyter-integration.ipynb`.
 
-Also, there's a static HTML version of this notebook available at the [this location](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+Also, there's a static HTML version of this notebook available at the [this location](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html)
 
 ## Plotting in Rust
 
@@ -138,8 +146,8 @@ very useful for visualization on a web page and would have a huge performance im
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+There's a small demo for Plotters + WASM available at [here](https://github.com/plotters-rs/plotters-wasm-demo). 
+To play with the deployed version, follow this [link](https://plotters-rs.github.io/wasm-demo/www/index.html).
 
 
 ## What types of figure are supported?
