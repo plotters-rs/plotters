@@ -199,13 +199,12 @@ macro_rules! gen_key_points_comp {
         fn $name(range: ($type, $type), max_points: usize) -> Vec<$type> {
             let mut scale: $type = 1;
             let range = (range.0.min(range.1), range.0.max(range.1));
-            'outer: while (range.1 - range.0 + scale - 1) as usize / (scale as usize) > max_points {
+            let range_size = range.1 as f64 - range.0 as f64;
+            'outer: while (range_size / scale as f64).ceil() > max_points as f64 {
                 let next_scale = scale * 10;
                 for new_scale in [scale * 2, scale * 5, scale * 10].iter() {
                     scale = *new_scale;
-                    if (range.1 - range.0 + *new_scale - 1) as usize / (*new_scale as usize)
-                        < max_points
-                    {
+                    if (range_size / *new_scale as f64).ceil() < max_points as f64 {
                         break 'outer;
                     }
                 }
@@ -220,7 +219,11 @@ macro_rules! gen_key_points_comp {
             let mut ret = vec![];
             while left <= right {
                 ret.push(left as $type);
-                left += scale;
+                if left < right {
+                    left += scale;
+                } else {
+                    break;
+                }
             }
 
             return ret;
