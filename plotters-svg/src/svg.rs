@@ -578,8 +578,11 @@ impl Drop for SVGBackend<'_> {
 mod test {
     use super::*;
     use plotters::element::Circle;
+    use plotters::prelude::{
+        ChartBuilder, Color, IntoDrawingArea, IntoFont, SeriesLabelPosition, TextStyle, BLACK,
+        BLUE, RED, WHITE,
+    };
     use plotters::style::text_anchor::{HPos, Pos, VPos};
-    use plotters::prelude::{ChartBuilder, IntoDrawingArea, TextStyle, IntoFont, BLACK, Color, RED, BLUE, SeriesLabelPosition, WHITE};
     use std::fs;
     use std::path::Path;
 

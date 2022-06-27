@@ -225,7 +225,7 @@ fn test_bitmap_blend_large() {
 #[test]
 fn test_bitmap_bgrx_pixel_format() {
     use crate::{bitmap_pixel::BGRXPixel, BitMapBackend};
-    use plotters::prelude::{BLACK, RED, WHITE, GREEN, YELLOW, BLUE, RGBColor, Color};
+    use plotters::prelude::{Color, RGBColor, BLACK, BLUE, GREEN, RED, WHITE, YELLOW};
     let mut rgb_buffer = vec![0; 1000 * 1000 * 3];
     let mut bgrx_buffer = vec![0; 1000 * 1000 * 4];
 
