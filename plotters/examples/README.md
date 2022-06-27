@@ -17,4 +17,3 @@ The examples that have their own directories and `Cargo.toml` files work differe
 - For WebAssembly sample project, check [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
 - For Frame Buffer, Realtime Readering example, check [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
 - For GTK integration, check [plotters-gtk-demo](https://github.com/plotters-rs/plotters-gtk-demo)
-- 
