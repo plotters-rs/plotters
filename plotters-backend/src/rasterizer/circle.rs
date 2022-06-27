@@ -322,8 +322,8 @@ pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
 
         if fill {
             check_result!(b.draw_line((left, y), (right, y), &style.color()));
-            check_result!(b.draw_line((x, top), (x, up), &style.color()));
-            check_result!(b.draw_line((x, down), (x, bottom), &style.color()));
+            check_result!(b.draw_line((x, top), (x, up - 1), &style.color()));
+            check_result!(b.draw_line((x, down + 1), (x, bottom), &style.color()));
         } else {
             check_result!(b.draw_pixel((left, y), style.color().mix(1.0 - v)));
             check_result!(b.draw_pixel((right, y), style.color().mix(1.0 - v)));
