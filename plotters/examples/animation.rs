@@ -17,8 +17,9 @@ fn snowflake_iter(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
     ret
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/animation.gif";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/animation.gif";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let root = BitMapBackend::gif(OUT_FILE_NAME, (800, 600), 1_000)?.into_drawing_area();
 
     for i in 0..8 {

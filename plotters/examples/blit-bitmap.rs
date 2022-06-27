@@ -5,9 +5,10 @@ use image::{imageops::FilterType, ImageFormat};
 use std::fs::File;
 use std::io::BufReader;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/blit-bitmap.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/blit-bitmap.png";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
@@ -23,8 +24,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (w, h) = chart.plotting_area().dim_in_pixel();
     let image = image::load(
         BufReader::new(
-            File::open("plotters-doc-data/cat.png").map_err(|e| {
-                eprintln!("Unable to open file plotters-doc-data.png, please make sure you have clone this repo with --recursive");
+            File::open("plotters/examples/cat.png").map_err(|e| {
+                eprintln!("Unable to open file ../target/plotters-doc-data.png, please make sure you have clone this repo with --recursive");
                 e
             })?),
         ImageFormat::Png,
@@ -35,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart.draw_series(std::iter::once(elem))?;
     // To avoid the IO failure being ignored silently, we manually call the present function
-    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root.present().expect("Unable to write result to file, please make sure '../target/plotters-doc-data' dir exists under current dir");
     println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }

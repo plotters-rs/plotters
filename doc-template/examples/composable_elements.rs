@@ -2,7 +2,8 @@ use plotters::prelude::*;
 use plotters::coord::types::RangedCoordf32;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("plotters-doc-data/4.png", (640, 480)).into_drawing_area();
+    std::fs::create_dir_all("../target/plotters-doc-data")?;
+    let root = BitMapBackend::new("../target/plotters-doc-data/4.png", (640, 480)).into_drawing_area();
 
     root.fill(&RGBColor(240, 200, 200))?;
 

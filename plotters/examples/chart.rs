@@ -1,7 +1,8 @@
 use plotters::prelude::*;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/sample.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/sample.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let root_area = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 
     root_area.fill(&WHITE)?;
@@ -84,7 +85,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // To avoid the IO failure being ignored silently, we manually call the present function
-    root_area.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root_area.present().expect("Unable to write result to file, please make sure '../target/plotters-doc-data' dir exists under current dir");
     println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }

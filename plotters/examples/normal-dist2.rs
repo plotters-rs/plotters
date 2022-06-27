@@ -6,8 +6,9 @@ use rand_xorshift::XorShiftRng;
 
 use num_traits::sign::Signed;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/normal-dist2.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/normal-dist2.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let sd = 0.60;
 
     let random_points: Vec<f64> = {
@@ -72,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart.configure_series_labels().draw()?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
-    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root.present().expect("Unable to write result to file, please make sure '../target/plotters-doc-data' dir exists under current dir");
     println!("Result has been saved to {}", OUT_FILE_NAME);
 
     Ok(())

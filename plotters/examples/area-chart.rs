@@ -4,8 +4,9 @@ use rand::SeedableRng;
 use rand_distr::{Distribution, Normal};
 use rand_xorshift::XorShiftRng;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/area-chart.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/area-chart.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let data: Vec<_> = {
         let norm_dist = Normal::new(500.0, 100.0).unwrap();
         let mut x_rand = XorShiftRng::from_seed(*b"MyFragileSeed123");
@@ -44,7 +45,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
-    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root.present().expect("Unable to write result to file, please make sure '../target/plotters-doc-data' dir exists under current dir");
     println!("Result has been saved to {}", OUT_FILE_NAME);
     Ok(())
 }

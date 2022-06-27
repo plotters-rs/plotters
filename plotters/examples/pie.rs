@@ -1,7 +1,8 @@
 use plotters::{prelude::*, style::full_palette::ORANGE};
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/pie-chart.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/pie-chart.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let root_area = BitMapBackend::new(&OUT_FILE_NAME, (950, 700)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
     let title_style = TextStyle::from(("sans-serif", 30).into_font()).color(&(BLACK));

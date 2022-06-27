@@ -8,8 +8,9 @@ fn pdf(x: f64, y: f64) -> f64 {
     A * (-x * x / 2.0 / SDX / SDX - y * y / 2.0 / SDY / SDY).exp()
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/3d-plot2.gif";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/3d-plot2.gif";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     let root = BitMapBackend::gif(OUT_FILE_NAME, (600, 400), 100)?.into_drawing_area();
 
     for pitch in 0..157 {
@@ -45,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // To avoid the IO failure being ignored silently, we manually call the present function
-    root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
+    root.present().expect("Unable to write result to file, please make sure '../target/plotters-doc-data' dir exists under current dir");
     println!("Result has been saved to {}", OUT_FILE_NAME);
 
     Ok(())

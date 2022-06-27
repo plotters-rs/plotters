@@ -183,8 +183,9 @@ where
     Ok(())
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/console-example.png";
+const OUT_FILE_NAME: &'static str = "../target/plotters-doc-data/console-example.png";
 fn main() -> Result<(), Box<dyn Error>> {
+    std::fs::create_dir_all(std::path::Path::new(OUT_FILE_NAME).parent().unwrap())?;
     draw_chart(TextDrawingBackend(vec![PixelState::Empty; 5000]).into_drawing_area())?;
     let b = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
     b.fill(&WHITE)?;
