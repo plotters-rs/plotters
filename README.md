@@ -210,7 +210,7 @@ To learn how to use Plotters in different scenarios by checking out the followin
 
 - WebAssembly + Plotters: [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
 - minifb + Plotters: [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
-- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters/plotters-gtk-demo) 
+- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters-rs/plotters-gtk-demo) 
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
