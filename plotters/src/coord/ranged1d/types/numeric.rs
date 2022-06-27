@@ -443,4 +443,11 @@ mod test {
         let points = coord.key_points(2);
         assert!(points.len() <= 2);
     }
+
+    #[test]
+    fn regression_test_issue_304_intmax_keypoint_no_panic() {
+        let coord : RangedCoordu32 = (0..u32::MAX).into();
+        let p = coord.key_points(10);
+        assert!(p.len() > 0 && p.len() <= 10);
+    }
 }
