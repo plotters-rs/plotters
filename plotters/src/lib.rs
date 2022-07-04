@@ -873,5 +873,17 @@ pub mod prelude {
     pub use plotters_svg::SVGBackend;
 }
 
+/// This module contains some useful re-export of backend related types.
+pub mod backend {
+    pub use plotters_backend::DrawingBackend;
+    #[cfg(feature = "bitmap_backend")]
+    pub use plotters_bitmap::{
+        bitmap_pixel::{BGRXPixel, PixelFormat, RGBPixel},
+        BitMapBackend,
+    };
+    #[cfg(feature = "svg_backend")]
+    pub use plotters_svg::SVGBackend;
+}
+
 #[cfg(test)]
 mod test;

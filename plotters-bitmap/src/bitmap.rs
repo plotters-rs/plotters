@@ -228,7 +228,11 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         point: BackendCoord,
         color: BackendColor,
     ) -> Result<(), DrawingErrorKind<BitMapBackendError>> {
-        if point.0 < 0 || point.1 < 0 || point.0 as u32 >= self.size.0 || point.1 as u32 >= self.size.1 {
+        if point.0 < 0
+            || point.1 < 0
+            || point.0 as u32 >= self.size.0
+            || point.1 as u32 >= self.size.1
+        {
             return Ok(());
         }
 
