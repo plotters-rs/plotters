@@ -21,11 +21,11 @@ version = "0.3.3"
 
 [dependencies.plotters-bitmap]
 default_features = false
-version = "0.3.2"
+version = "^0.3"
 optional = true
 
 [dependencies.plotters-svg]
-version = "0.3.2"
+version = "^0.3"
 optional = true
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies]
