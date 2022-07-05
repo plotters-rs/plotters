@@ -114,7 +114,7 @@ where
     */
     pub fn style<S: Into<ShapeStyle>>(mut self, style: S) -> Self {
         let style = style.into();
-        self.style = Box::new(move |_, _| style.clone());
+        self.style = Box::new(move |_, _| style);
         self
     }
 

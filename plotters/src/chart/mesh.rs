@@ -441,15 +441,12 @@ where
 
         let bold_style = self
             .bold_line_style
-            .clone()
             .unwrap_or_else(|| (&default_mesh_color_1).into());
         let light_style = self
             .light_line_style
-            .clone()
             .unwrap_or_else(|| (&default_mesh_color_2).into());
         let axis_style = self
             .axis_style
-            .clone()
             .unwrap_or_else(|| (&default_axis_color).into());
 
         let x_label_style = self

@@ -17,7 +17,7 @@ impl<'a, Coord, I: IntoIterator<Item = Coord>, E, Size: SizeDesc + Clone> Iterat
     fn next(&mut self) -> Option<Self::Item> {
         self.data_iter
             .next()
-            .map(|x| (self.make_point)(x, self.size.clone(), self.style.clone()))
+            .map(|x| (self.make_point)(x, self.size.clone(), self.style))
     }
 }
 

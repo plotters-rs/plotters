@@ -45,7 +45,7 @@ impl Target<'_> {
 }
 
 enum SVGTag {
-    SVG,
+    Svg,
     Circle,
     Line,
     Polygon,
@@ -59,7 +59,7 @@ enum SVGTag {
 impl SVGTag {
     fn to_tag_name(&self) -> &'static str {
         match self {
-            SVGTag::SVG => "svg",
+            SVGTag::Svg => "svg",
             SVGTag::Circle => "circle",
             SVGTag::Line => "line",
             SVGTag::Polyline => "polyline",
@@ -92,14 +92,14 @@ impl<'a> SVGBackend<'a> {
     }
     fn open_tag(&mut self, tag: SVGTag, attr: &[(&str, &str)], close: bool) {
         let buf = self.target.get_mut();
-        buf.push_str("<");
+        buf.push('<');
         buf.push_str(tag.to_tag_name());
         for (key, value) in attr {
-            buf.push_str(" ");
+            buf.push(' ');
             buf.push_str(key);
             buf.push_str("=\"");
             Self::escape_and_push(buf, value);
-            buf.push_str("\"");
+            buf.push('\"');
         }
         if close {
             buf.push_str("/>\n");
@@ -122,7 +122,7 @@ impl<'a> SVGBackend<'a> {
 
     fn init_svg_file(&mut self, size: (u32, u32)) {
         self.open_tag(
-            SVGTag::SVG,
+            SVGTag::Svg,
             &[
                 ("width", &format!("{}", size.0)),
                 ("height", &format!("{}", size.1)),
@@ -472,7 +472,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         );
 
         Self::escape_and_push(self.target.get_mut(), text);
-        self.target.get_mut().push_str("\n");
+        self.target.get_mut().push('\n');
 
         self.close_tag();
 

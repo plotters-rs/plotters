@@ -35,19 +35,18 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
         let yr = self.drawing_area.as_coord_spec().y_spec();
         self.drawing_area.draw_mesh(
             |b, l| {
-                let draw;
-                match l {
+                let draw = match l {
                     MeshLine::XMesh((x, _), _, _) => {
                         if let Some(label_text) = fmt_label(xr, yr, &l) {
                             x_labels.push((x, label_text));
                         }
-                        draw = x_mesh;
+                        x_mesh
                     }
                     MeshLine::YMesh((_, y), _, _) => {
                         if let Some(label_text) = fmt_label(xr, yr, &l) {
                             y_labels.push((y, label_text));
                         }
-                        draw = y_mesh;
+                        y_mesh
                     }
                 };
                 if draw {
@@ -122,7 +121,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
 
             area.draw(&PathElement::new(
                 vec![(x0, y0), (x1, y1)],
-                axis_style.clone(),
+                *axis_style,
             ))?;
         }
 
@@ -283,7 +282,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                             _ => panic!("Bug: Invalid orientation specification"),
                         }
                     };
-                    let line = PathElement::new(vec![(kx0, ky0), (kx1, ky1)], style.clone());
+                    let line = PathElement::new(vec![(kx0, ky0), (kx1, ky1)], *style);
                     area.draw(&line)?;
                 }
             }

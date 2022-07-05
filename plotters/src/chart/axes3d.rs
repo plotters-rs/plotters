@@ -264,13 +264,13 @@ where
         let panels = chart.draw_axis_panels(
             &kps_bold,
             &kps_light,
-            self.axis_panel_style.clone(),
-            self.bold_line_style.clone(),
-            self.light_line_style.clone(),
+            self.axis_panel_style,
+            self.bold_line_style,
+            self.light_line_style,
         )?;
 
         for i in 0..3 {
-            let axis = chart.draw_axis(i, &panels, self.axis_style.clone())?;
+            let axis = chart.draw_axis(i, &panels, self.axis_style)?;
             let labels: Vec<_> = match i {
                 0 => kps_bold
                     .x_points
@@ -307,7 +307,7 @@ where
                 axis,
                 &labels[..],
                 self.tick_size,
-                self.axis_style.clone(),
+                self.axis_style,
                 self.label_style.clone(),
             )?;
         }

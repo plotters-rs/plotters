@@ -112,17 +112,17 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
             let slice_style =
                 self.colors
                     .get(index)
-                    .ok_or(DrawingErrorKind::FontError(Box::new(
+                    .ok_or_else(|| DrawingErrorKind::FontError(Box::new(
                         PieError::LengthMismatch,
                     )))?;
             let label = self
                 .labels
                 .get(index)
-                .ok_or(DrawingErrorKind::FontError(Box::new(
+                .ok_or_else(|| DrawingErrorKind::FontError(Box::new(
                     PieError::LengthMismatch,
                 )))?;
             // start building wedge line against the previous edge
-            let mut points = vec![self.center.clone()];
+            let mut points = vec![*self.center];
             let ratio = slice / self.total;
             let theta_final = ratio * 2.0 * PI + offset_theta; // end radian for the wedge
 
@@ -190,7 +190,7 @@ impl<'a, Label: Display> PointCollection<'a, (i32, i32)> for &'a Pie<'a, (i32, i
     type Point = &'a (i32, i32);
     type IntoIter = std::iter::Once<&'a (i32, i32)>;
     fn point_iter(self) -> std::iter::Once<&'a (i32, i32)> {
-        std::iter::once(&self.center)
+        std::iter::once(self.center)
     }
 }
 

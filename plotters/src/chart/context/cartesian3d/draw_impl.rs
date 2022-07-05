@@ -108,8 +108,8 @@ where
             }
 
             let element = EmptyElement::at(logic_pos)
-                + PathElement::new(vec![(0, 0), dir], style.clone())
-                + Text::new(text.to_string(), (dir.0 * 2, dir.1 * 2), font.clone());
+                + PathElement::new(vec![(0, 0), dir], style)
+                + Text::new(text.to_string(), (dir.0 * 2, dir.1 * 2), font);
             self.plotting_area().draw(&element)?;
         }
         Ok(())
@@ -197,9 +197,9 @@ where
                 idx,
                 bold_points,
                 light_points,
-                panel_style.clone(),
-                bold_grid_style.clone(),
-                light_grid_style.clone(),
+                panel_style,
+                bold_grid_style,
+                light_grid_style,
             )
         });
         Ok([
@@ -274,7 +274,7 @@ where
             .draw(&Polygon::new(panel.clone(), panel_style))?;
         panel.push(panel[0].clone());
         self.plotting_area()
-            .draw(&PathElement::new(panel, bold_grid_style.clone()))?;
+            .draw(&PathElement::new(panel, bold_grid_style))?;
 
         for (kps, style) in vec![
             (light_points, light_grid_style),
@@ -295,7 +295,7 @@ where
                     kp_end[idx] = kp;
                     self.plotting_area().draw(&PathElement::new(
                         vec![Coord3D::build_coord(kp_start), Coord3D::build_coord(kp_end)],
-                        style.clone(),
+                        style,
                     ))?;
                 }
             }

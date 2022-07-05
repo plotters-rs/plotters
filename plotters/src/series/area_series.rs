@@ -82,13 +82,13 @@ impl<DB: DrawingBackend, X: Clone + 'static, Y: Clone + 'static> Iterator for Ar
 
             self.state = 1;
 
-            Some(Polygon::new(data, self.area_style.clone()).into_dyn())
+            Some(Polygon::new(data, self.area_style).into_dyn())
         } else if self.state == 1 {
             let data: Vec<_> = self.data.clone();
 
             self.state = 2;
 
-            Some(PathElement::new(data, self.border_style.clone()).into_dyn())
+            Some(PathElement::new(data, self.border_style).into_dyn())
         } else {
             None
         }

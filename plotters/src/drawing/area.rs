@@ -58,8 +58,7 @@ impl Rect {
             from + idx as i32 * (size / n) as i32 + idx.min(size % n) as i32
         }
         (0..row)
-            .map(move |x| repeat(x).zip(0..col))
-            .flatten()
+            .flat_map(move |x| repeat(x).zip(0..col))
             .map(move |(ri, ci)| Self {
                 y0: compute_evenly_split(self.y0, self.y1, row, ri),
                 y1: compute_evenly_split(self.y0, self.y1, row, ri + 1),
@@ -87,6 +86,11 @@ impl Rect {
             .zip(xs.iter().skip(1))
             .map(|(a, b)| (*a, *b))
             .collect();
+
+        // Justify: this is actually needed. Because we need to return a iterator that have 
+        // static life time, thus we need to copy the value to a buffer and then turn the buffer
+        // into a iterator.
+        #[allow(clippy::needless_collect)]
         let ysegs: Vec<_> = ys
             .iter()
             .zip(ys.iter().skip(1))
@@ -95,13 +99,12 @@ impl Rect {
 
         ysegs
             .into_iter()
-            .map(move |(y0, y1)| {
+            .flat_map(move |(y0, y1)| {
                 xsegs
                     .clone()
                     .into_iter()
                     .map(move |(x0, x1)| Self { x0, y0, x1, y1 })
             })
-            .flatten()
     }
 
     /// Make the coordinate in the range of the rectangle

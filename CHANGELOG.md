@@ -1,15 +1,23 @@
 # Changelog
 
-## Plotters latest (?)
+## Plotters 0.3.3 (?)
+
+## Plotters 0.3.2 (2022-07-05)
 
 ### Added
 
-- Pie element (by hhamana)
+- Pie element (by @hhamana)
 
 ### Improved
 
-- Improved documentaiton for predefined colors. (Thanks to siefkenj)
-- Introduce the full Material Design 2014 Color Palette. (Thanks to siefkenj)
+- Improved documentaiton for predefined colors. (Thanks to @siefkenj)
+- Introduce the full Material Design 2014 Color Palette. (Thanks to @siefkenj)
+- Massive documentation improvements (Thanks to @facorread and many others)
+
+### Fixed
+
+- More float point axis key point algorithm fixes (@38)
+- Default rasterizer fixes (@shinmili and @38)
 
 ## Plotters 0.3.1 (2021-05-21)
 
@@ -26,6 +34,7 @@
 - Examples that uses old APIs (thanks to chrisduerr)
 
 ## Plotters 0.3.0 (2020-09-03)
+
 This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.md) for more detials.
 
 ### Added
@@ -44,26 +53,28 @@ This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.
 ### Improvement
 
 - Enhanced key point algorithms: New key point hint trait are used for key point algorithms && many improvment on key point algorithms for different types
-- Renamed `MeshStyle::line\_style\_1\ and `MeshStyle::line\_style\_2` to `bold\_line\_style` and `light\_line\_style`
-- Reorganize the "plotters::coord" namespace 
+- Renamed `MeshStyle::line\_style\_1` and `MeshStyle::line\_style\_2` to `bold\_line\_style` and `light\_line\_style`
+- Reorganize the "plotters::coord" namespace
 - Improved discrete coordinate trait
 - Split backend code into isolated crates and can be maintained indepdendenly
 - Category coordinate is now replaced by slice coordinate
-- Removing the requirement for `Debug` trait for chart coordinate, allows ranged coordinate define its own formatting function. 
+- Removing the requirement for `Debug` trait for chart coordinate, allows ranged coordinate define its own formatting function.
 
 ### Removed
 
 - The `Path` name alias for `PathElement`
-- Most code `plotters::drawing::backend\_impl::\* ` (expect `MockedBackend` for testing purpose) is removed due to crate split. 
+- Most code `plotters::drawing::backend\_impl::\*` (expect `MockedBackend` for testing purpose) is removed due to crate split. 
 - Piston backend due to the Piston project seems not actively developing
 
 ## Plotters 0.2.15 (2020-05-26)
+
 ### Fixed
 
 - Division by zero with logarithmic coord (issue #143)
 - Update dependencies
 
 ## Plotters 0.2.14 (2020-05-05)
+
 ### Fixed
 
 - Compile error with older rustc which causing breaks

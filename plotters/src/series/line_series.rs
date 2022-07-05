@@ -45,13 +45,13 @@ impl<DB: DrawingBackend, Coord: Clone + 'static> Iterator for LineSeries<DB, Coo
                 let idx = self.point_idx;
                 self.point_idx += 1;
                 return Some(
-                    Circle::new(self.data[idx].clone(), self.point_size, self.style.clone())
+                    Circle::new(self.data[idx].clone(), self.point_size, self.style)
                         .into_dyn(),
                 );
             }
             let mut data = vec![];
             std::mem::swap(&mut self.data, &mut data);
-            Some(PathElement::new(data, self.style.clone()).into_dyn())
+            Some(PathElement::new(data, self.style).into_dyn())
         } else {
             None
         }

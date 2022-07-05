@@ -174,6 +174,7 @@ pub trait DrawingBackend: Sized {
             for end in path.into_iter() {
                 if let Some(begin) = begin {
                     let result = self.draw_line(begin, end, style);
+                    #[allow(clippy::question_mark)]
                     if result.is_err() {
                         return result;
                     }
@@ -290,11 +291,11 @@ pub trait DrawingBackend: Sized {
     /// TODO: The default implementation of bitmap blitting assumes that the bitmap is RGB, but
     /// this may not be the case. But for bitmap backend it's actually ok if we use the bitmap
     /// element that matches the pixel format, but we need to fix this.
-    fn blit_bitmap<'a>(
+    fn blit_bitmap(
         &mut self,
         pos: BackendCoord,
         (iw, ih): (u32, u32),
-        src: &'a [u8],
+        src: &[u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (w, h) = self.get_size();
 
@@ -315,6 +316,7 @@ pub trait DrawingBackend: Sized {
                     rgb: (r, g, b),
                 };
                 let result = self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), color);
+                #[allow(clippy::question_mark)]
                 if result.is_err() {
                     return result;
                 }

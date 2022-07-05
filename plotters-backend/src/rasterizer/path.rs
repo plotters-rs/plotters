@@ -122,7 +122,7 @@ fn traverse_vertices<'a>(
         recent.swap(1, 2);
         recent[2] = *p;
         compute_polygon_vertex(&recent, f64::from(width) / 2.0, &mut vertex_buf);
-        vertex_buf.iter().cloned().for_each(|v| op(v));
+        vertex_buf.iter().cloned().for_each(&mut op);
     }
 
     let b = recent[1];

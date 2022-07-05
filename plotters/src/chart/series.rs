@@ -251,7 +251,7 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
             }
 
             funcs.push(
-                draw_func.unwrap_or_else(|| &|p: BackendCoord| EmptyElement::at(p).into_dyn()),
+                draw_func.unwrap_or(&|p: BackendCoord| EmptyElement::at(p).into_dyn()),
             );
             label_element.push_line(label_text);
         }
@@ -280,7 +280,7 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
         ))?;
         drawing_area.draw(&Rectangle::new(
             [(label_x, label_y), (label_x + w, label_y + h)],
-            self.border_style.clone(),
+            self.border_style,
         ))?;
         drawing_area.draw(&label_element)?;
 

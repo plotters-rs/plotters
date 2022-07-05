@@ -48,7 +48,7 @@ enum StyleConfig<'a, T> {
 impl<T> StyleConfig<'_, T> {
     fn get_style(&self, v: &T) -> ShapeStyle {
         match self {
-            StyleConfig::Fixed(s) => s.clone(),
+            StyleConfig::Fixed(s) => *s,
             StyleConfig::Function(f) => f(v),
         }
     }

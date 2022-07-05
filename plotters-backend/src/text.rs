@@ -241,6 +241,7 @@ pub trait BackendTextStyle {
 
     fn family(&self) -> FontFamily;
 
+    #[allow(clippy::type_complexity)]
     fn layout_box(&self, text: &str) -> Result<((i32, i32), (i32, i32)), Self::FontError>;
 
     fn draw<E, DrawFunc: FnMut(i32, i32, BackendColor) -> Result<(), E>>(

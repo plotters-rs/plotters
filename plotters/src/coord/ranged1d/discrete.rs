@@ -34,6 +34,9 @@ where
     ///
     /// - `value`: The index to map
     /// - **returns** The value
+    // TODO: This doesn't follows rust's naming convention - however, this is a protential breaking
+    // change, so postpone the fix to the next major release
+    #[allow(clippy::wrong_self_convention)]
     fn from_index(&self, index: usize) -> Option<Self::ValueType>;
 
     /// Return a iterator that iterates over the all possible values

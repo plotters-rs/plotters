@@ -289,11 +289,11 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         plotters_backend::rasterizer::draw_rect(self, upper_left, bottom_right, style, fill)
     }
 
-    fn blit_bitmap<'b>(
+    fn blit_bitmap(
         &mut self,
         pos: BackendCoord,
         (sw, sh): (u32, u32),
-        src: &'b [u8],
+        src: &[u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (dw, dh) = self.get_size();
 

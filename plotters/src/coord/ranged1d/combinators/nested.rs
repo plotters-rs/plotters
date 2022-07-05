@@ -113,7 +113,7 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
             self.primary
                 .values()
                 .enumerate()
-                .map(|(idx, val)| {
+                .flat_map(|(idx, val)| {
                     std::iter::once(NestedValue::Category(val)).chain(
                         self.secondary[idx]
                             .key_points(secondary_size)
@@ -123,7 +123,6 @@ impl<P: DiscreteRanged, S: Ranged> Ranged for NestedRange<P, S> {
                             }),
                     )
                 })
-                .flatten()
                 .collect()
         }
     }
