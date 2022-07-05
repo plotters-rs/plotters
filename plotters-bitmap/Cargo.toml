@@ -15,7 +15,7 @@ readme = "README.md"
 gif = { version = "0.11.2", optional = true }
 
 [dependencies.plotters-backend]
-path = "../plotters-backend"
+version = "0.3.2"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
 version = "0.24.2"
@@ -31,7 +31,7 @@ gif_backend = ["gif", "image_encoder"]
 [dev-dependencies.plotters]
 default_features = false
 features = ["ttf", "line_series", "bitmap_backend"]
-path = "../plotters"
+version = "0.3.2"
 
 [dev-dependencies]
 criterion = "0.3.4"
