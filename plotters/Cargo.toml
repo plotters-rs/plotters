@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -17,16 +17,17 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.19", optional = true }
 
 [dependencies.plotters-backend]
-version = "0.3.3"
+path = "../plotters-backend"
 
 [dependencies.plotters-bitmap]
 default_features = false
-version = "^0.3"
 optional = true
+path = "../plotters-bitmap"
 
 [dependencies.plotters-svg]
 version = "^0.3"
 optional = true
+path = "../plotters-svg"
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies]
 ttf-parser = { version = "0.15.0", optional = true }
