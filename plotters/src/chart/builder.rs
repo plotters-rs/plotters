@@ -253,7 +253,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         size: S,
     ) -> &mut Self {
         let size = size.in_pixels(self.root_area);
-        self.label_area_size[pos as usize] = size.abs() as u32;
+        self.label_area_size[pos as usize] = size.unsigned_abs();
         self.overlap_plotting_area[pos as usize] = size < 0;
         self
     }

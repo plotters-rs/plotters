@@ -154,7 +154,7 @@ impl<'a> FontDesc<'a> {
     pub fn box_size(&self, text: &str) -> FontResult<(u32, u32)> {
         let ((min_x, min_y), (max_x, max_y)) = self.layout_box(text)?;
         let (w, h) = self.get_transform().transform(max_x - min_x, max_y - min_y);
-        Ok((w.abs() as u32, h.abs() as u32))
+        Ok((w.unsigned_abs(), h.unsigned_abs()))
     }
 
     /// Actually draws a font with a drawing function
