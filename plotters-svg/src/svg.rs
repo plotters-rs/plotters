@@ -13,6 +13,7 @@ use std::fs::File;
 use std::io::Cursor;
 use std::io::{BufWriter, Error, Write};
 use std::path::Path;
+use std::fmt::Write as _;
 
 fn make_svg_color(color: BackendColor) -> String {
     let (r, g, b) = color.rgb;
@@ -314,7 +315,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 (
                     "points",
                     &path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                        s.push_str(&format!("{},{} ", x, y));
+                        write!(s, "{},{} ", x, y).ok();
                         s
                     }),
                 ),
@@ -340,7 +341,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 (
                     "points",
                     &path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                        s.push_str(&format!("{},{} ", x, y));
+                        write!(s, "{},{} ", x, y).ok();
                         s
                     }),
                 ),
