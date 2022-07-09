@@ -832,8 +832,10 @@ pub mod prelude {
     };
 
     // Elements
+    #[allow(deprecated)]
+    pub use crate::element::Cubiod;
     pub use crate::element::{
-        Circle, Cross, Cubiod, DynElement, EmptyElement, IntoDynElement, MultiLineText,
+        Circle, Cross, Cuboid, DynElement, EmptyElement, IntoDynElement, MultiLineText,
         PathElement, Pie, Pixel, Polygon, Rectangle, Text, TriangleMarker,
     };
 

@@ -272,7 +272,7 @@ impl CoordMapper for BackendCoordOnly {
 /**
 Used for 3d coordinate transformations.
 
-See [`Cubiod`] for more information and an example.
+See [`Cuboid`] for more information and an example.
 */
 pub struct BackendCoordAndZ;
 
