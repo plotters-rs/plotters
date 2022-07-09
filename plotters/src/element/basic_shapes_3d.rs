@@ -14,25 +14,25 @@ drawing_area.fill(&WHITE).unwrap();
 let mut chart_builder = ChartBuilder::on(&drawing_area);
 let mut chart_context = chart_builder.margin(20).build_cartesian_3d(0.0..3.5, 0.0..2.5, 0.0..1.5).unwrap();
 chart_context.configure_axes().x_labels(4).y_labels(3).z_labels(2).draw().unwrap();
-let cubiod = Cubiod::new([(0.,0.,0.), (3.,2.,1.)], BLUE.mix(0.2), BLUE);
-chart_context.draw_series(std::iter::once(cubiod)).unwrap();
+let cuboid = Cuboid::new([(0.,0.,0.), (3.,2.,1.)], BLUE.mix(0.2), BLUE);
+chart_context.draw_series(std::iter::once(cuboid)).unwrap();
 ```
 
 The result is a semi-transparent cuboid with blue edges:
 
 ![](https://cdn.jsdelivr.net/gh/facorread/plotters-doc-data@b6703f7/apidoc/cuboid.svg)
 */
-pub struct Cubiod<X, Y, Z> {
+pub struct Cuboid<X, Y, Z> {
     face_style: ShapeStyle,
     edge_style: ShapeStyle,
     vert: [(X, Y, Z); 8],
 }
 
-impl<X: Clone, Y: Clone, Z: Clone> Cubiod<X, Y, Z> {
+impl<X: Clone, Y: Clone, Z: Clone> Cuboid<X, Y, Z> {
     /**
     Creates a cuboid.
 
-    See [`Cubiod`] for more information and examples.
+    See [`Cuboid`] for more information and examples.
     */
     #[allow(clippy::redundant_clone)]
     pub fn new<FS: Into<ShapeStyle>, ES: Into<ShapeStyle>>(
@@ -58,7 +58,7 @@ impl<X: Clone, Y: Clone, Z: Clone> Cubiod<X, Y, Z> {
 }
 
 impl<'a, X: 'a, Y: 'a, Z: 'a> PointCollection<'a, (X, Y, Z), BackendCoordAndZ>
-    for &'a Cubiod<X, Y, Z>
+    for &'a Cuboid<X, Y, Z>
 {
     type Point = &'a (X, Y, Z);
     type IntoIter = &'a [(X, Y, Z)];
@@ -67,7 +67,7 @@ impl<'a, X: 'a, Y: 'a, Z: 'a> PointCollection<'a, (X, Y, Z), BackendCoordAndZ>
     }
 }
 
-impl<X, Y, Z, DB: DrawingBackend> Drawable<DB, BackendCoordAndZ> for Cubiod<X, Y, Z> {
+impl<X, Y, Z, DB: DrawingBackend> Drawable<DB, BackendCoordAndZ> for Cuboid<X, Y, Z> {
     fn draw<I: Iterator<Item = (BackendCoord, i32)>>(
         &self,
         points: I,
@@ -106,3 +106,7 @@ impl<X, Y, Z, DB: DrawingBackend> Drawable<DB, BackendCoordAndZ> for Cubiod<X, Y
         Ok(())
     }
 }
+
+#[deprecated(note = "Use Cuboid instead.")]
+/// Use [`Cuboid`] instead. This type definition is only for backward-compatibility.
+pub type Cubiod<X, Y, Z> = Cuboid<X, Y, Z>;
