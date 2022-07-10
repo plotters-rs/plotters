@@ -1,4 +1,9 @@
-/target
-.*.sw*
+# According to the new guideline from the cargo team, we should ignore the lock file for libraries.
+**/Cargo.lock
+
+# Build diectories
 **/target
+
+# Editor/IDE temporary files
+.*.sw*
 .vscode/*
