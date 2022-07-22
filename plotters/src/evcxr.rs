@@ -51,9 +51,9 @@ pub fn evcxr_bitmap_figure<
     size: (u32, u32),
     draw: Draw,
 ) -> SVGWrapper {
-    let pixel_size = 3;
+    const PIXEL_SIZE : usize = 3;
     let mut buf = Vec::new();
-    buf.resize((size.0 as usize) * (size.1 as usize) * pixel_size, 0);
+    buf.resize((size.0 as usize) * (size.1 as usize) * PIXEL_SIZE, 0);
     let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();
     draw(root).expect("Drawing failure");
     let mut buffer = "".to_string();
@@ -63,5 +63,5 @@ pub fn evcxr_bitmap_figure<
             .blit_bitmap((0, 0), size, &buf)
             .expect("Failure converting to SVG");
     }
-    SVGWrapper(buffer.clone(), "".to_string())
+    SVGWrapper(buffer, "".to_string())
 }
