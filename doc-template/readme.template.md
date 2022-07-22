@@ -12,21 +12,16 @@
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
-<a href="https://travis-ci.org/38/plotters">
-	<img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
-</a>
-<a href="https://codecov.io/gh/38/plotters">
-    <img style="display: inline! important" src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
-</a>
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends, 
 including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 
 
 - A new Plotters Developer's Guide is working in progress. The preview version is available at [here](https://plotters-rs.github.io/book).
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
-- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
+- To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
-- Plotters now moved all backend code to sperate repository, check [FAQ list](#faq-list) for details
+- Plotters now moved all backend code to sperate repositories, check [FAQ list](#faq-list) for details
+- Some interesting [demo projects](#demo-projects) are available, feel free to try them out.
 
 ## Gallery
 
@@ -34,6 +29,12 @@ $$gallery$$
 
 
 $$[TOC]$$
+
+## Dependencies
+
+### Ubuntu Linux
+
+ ```sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev```
 
 ## Quick Start
 
@@ -50,6 +51,14 @@ $$../examples/quick_start.rs$$
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/0.png)
+
+## Demo Projects
+
+To learn how to use Plotters in different scenarios by checking out the following demo projects:
+
+- WebAssembly + Plotters: [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
+- minifb + Plotters: [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
+- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters/plotters-gtk-demo) 
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -111,7 +120,7 @@ jupyter notebook
 
 And select the notebook called `evcxr-jupyter-integration.ipynb`.
 
-Also, there's a static HTML version of this notebook available at the [this location](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+Also, there's a static HTML version of this notebook available at the [this location](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html)
 
 ## Plotting in Rust
 
@@ -138,8 +147,8 @@ very useful for visualization on a web page and would have a huge performance im
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+There's a small demo for Plotters + WASM available at [here](https://github.com/plotters-rs/plotters-wasm-demo). 
+To play with the deployed version, follow this [link](https://plotters-rs.github.io/wasm-demo/www/index.html).
 
 
 ## What types of figure are supported?
@@ -223,7 +232,10 @@ $$../examples/chart.rs$$
 
 ### Development Version
 
-To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.toml`
+Find the latest development version of Plotters on [GitHub](https://github.com/38/plotters.git).
+Clone the repository and learn more about the Plotters API and ways to contribute. Your help is needed!
+
+If you want to add the development version of Plotters to your project, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -323,10 +335,10 @@ The following list is a complete list of features that can be opt in and out.
 * How to check if a backend writes file successfully ?
 
 	The behavior of Plotters backend is consistent with standard library. 
-	When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically 
-	whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored. 
+    When the backend instance is being dropped, [`crate::drawing::DrawingArea::present()`] or `Backend::present()` is called automatically 
+    whenever is needed. When the `present()` method is called from `drop`, any error will be silently ignored.
 
-	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+    In the case that error handling is important, you need manually call the `present()` method before the backend gets dropped.
 	For more information, please see the examples.
 
 $$style$$

@@ -1,0 +1,22 @@
+name: Plotters SVG Backend
+
+on: [push, pull_request]
+
+jobs:
+  build_and_test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v1
+      with:
+          submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          override: true
+    - uses: actions-rs/cargo@v1
+      with:
+          command: test
+          args: --verbose --package=plotters-svg

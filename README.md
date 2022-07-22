@@ -12,37 +12,30 @@
 <a href="https://plotters-rs.github.io/rustdoc/plotters/">
 	<img style="display: inline! important" src="https://img.shields.io/badge/docs-development-lightgrey.svg"></img>
 </a>
-<a href="https://travis-ci.org/38/plotters">
-	<img style="display: inline! important" src="https://travis-ci.org/38/plotters.svg?branch=master"></img>
-</a>
-<a href="https://codecov.io/gh/38/plotters">
-    <img style="display: inline! important" src="https://codecov.io/gh/38/plotters/branch/master/graph/badge.svg" />
-</a>
-
-![Minimum Rust version 1.46](https://img.shields.io/badge/rustc-1.46+-06a096.svg)
 
 Plotters is drawing library designed for rendering figures, plots, and charts, in pure rust. Plotters supports various types of back-ends, 
 including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly. 
 
 - A new Plotters Developer's Guide is working in progress. The preview version is available at [here](https://plotters-rs.github.io/book).
 - To try Plotters with interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
-- To view the WASM example, go to this [link](https://plumberserver.com/plotters-wasm-demo/index.html)
+- To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
 - Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plotting on Console with a customized backend.
-- Plotters now moved all backend code to sperate repository, check [FAQ list](#faq-list) for details
+- Plotters now moved all backend code to sperate repositories, check [FAQ list](#faq-list) for details
+- Some interesting [demo projects](#demo-projects) are available, feel free to try them out.
 
 ## Gallery
 
 To view the source code for each example, please click on the example image.
 
-<a href="https://github.com/38/plotters/blob/master/examples/chart.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/chart.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/sample.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/stock.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/stock.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/stock.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/histogram.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/histogram.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/histogram.png" class="galleryItem" width=200px></img>
 </a>
 
@@ -54,7 +47,7 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console-2.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/mandelbrot.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/mandelbrot.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
 
@@ -63,86 +56,85 @@ To view the source code for each example, please click on the example image.
 </a>
 
 
-<a href="https://github.com/plotters-rs/plotters-piston/blob/master/examples/cpustat.rs">
+<a href="https://github.com/plotters-rs/plotters-piston/blob/master/plotters/examples/cpustat.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/normal-dist.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/normal-dist.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/two-scales.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/two-scales.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/matshow.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/matshow.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/matshow.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/sierpinski.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/sierpinski.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/sierpinski.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/normal-dist2.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/normal-dist2.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/errorbar.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/errorbar.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/slc-temp.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/slc-temp.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/slc-temp.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/area-chart.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/area-chart.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/area-chart.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/snowflake.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/snowflake.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/snowflake.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/animation.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/animation.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/animation.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/console.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/console.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console-example.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/console.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/console.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/blit-bitmap.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/blit-bitmap.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/blit-bitmap.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/boxplot.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/boxplot.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/3d-plot.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot.svg" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/3d-plot2.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot2.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot2.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/examples/tick_control.rs">
+<a href="https://github.com/38/plotters/blob/master/plotters/examples/tick_control.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/tick_control.svg" class="galleryItem" width=200px></img>
-</a>
-<a href="https://github.com/38/plotters/blob/master/examples/pie.rs">
-	<img src="https://plotters-rs.github.io/plotters-doc-data/pie_chart.png" class="galleryItem" width=200px></img>
 </a>
 
 
 ## Table of Contents
   * [Gallery](#gallery)
-  * [Dependecies](#dependencies)
+  * [Dependencies](#dependencies)
+    + [Ubuntu Linux](#ubuntu-linux)
   * [Quick Start](#quick-start)
+  * [Demo Projects](#demo-projects)
   * [Trying with Jupyter evcxr Kernel Interactively](#trying-with-jupyter-evcxr-kernel-interactively)
   * [Interactive Tutorial with Jupyter Notebook](#interactive-tutorial-with-jupyter-notebook)
   * [Plotting in Rust](#plotting-in-rust)
@@ -159,8 +151,6 @@ To view the source code for each example, please click on the example image.
     + [Reducing Depending Libraries && Turning Off Backends](#reducing-depending-libraries--turning-off-backends)
     + [List of Features](#list-of-features)
   * [FAQ List](#faq-list)
-
-
 
 ## Dependencies
 
@@ -213,6 +203,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 ![](https://plotters-rs.github.io/plotters-doc-data/0.png)
+
+## Demo Projects
+
+To learn how to use Plotters in different scenarios by checking out the following demo projects:
+
+- WebAssembly + Plotters: [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
+- minifb + Plotters: [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
+- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters-rs/plotters-gtk-demo) 
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -274,7 +272,7 @@ jupyter notebook
 
 And select the notebook called `evcxr-jupyter-integration.ipynb`.
 
-Also, there's a static HTML version of this notebook available at the [this location](https://plumberserver.com/plotters-docs/evcxr-jupyter-integration.html)
+Also, there's a static HTML version of this notebook available at the [this location](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html)
 
 ## Plotting in Rust
 
@@ -301,8 +299,8 @@ very useful for visualization on a web page and would have a huge performance im
 Plotters currently supports backend that uses the HTML5 canvas. To use the WASM support, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
-There's a small demo for Plotters + WASM under `examples/wasm-demo` directory of this repo. 
-To play with the deployed version, follow this [link](https://plumberserver.com/plotters-wasm-demo/index.html).
+There's a small demo for Plotters + WASM available at [here](https://github.com/plotters-rs/plotters-wasm-demo). 
+To play with the deployed version, follow this [link](https://plotters-rs.github.io/wasm-demo/www/index.html).
 
 
 ## What types of figure are supported?
@@ -353,7 +351,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for (area, color) in child_drawing_areas.into_iter().zip(0..) {
         area.fill(&Palette99::pick(color))?;
     }
-    root.present()?;
+    root_drawing_area.present()?;
     Ok(())
 }
 ```
@@ -491,7 +489,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Development Version
 
-To use the latest development version, pull https://github.com/38/plotters.git. In `Cargo.toml`
+Find the latest development version of Plotters on [GitHub](https://github.com/38/plotters.git).
+Clone the repository and learn more about the Plotters API and ways to contribute. Your help is needed!
+
+If you want to add the development version of Plotters to your project, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -528,7 +529,7 @@ The following list is a complete list of features that can be opt in and out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap\_backend  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
+| bitmap\_encoder  | Allow `BitMapBackend` save the result to bitmap files | image, rusttype, font-kit | Yes |
 | svg\_backend     | Enable `SVGBackend` Support | None | Yes |
 | bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
@@ -591,9 +592,10 @@ The following list is a complete list of features that can be opt in and out.
 * How to check if a backend writes file successfully ?
 
 	The behavior of Plotters backend is consistent with standard library. 
-	When the backend instance is being dropped, `DrawingArea::present` or `Backend::present` is called automatically 
-	whenever is needed. When the `persent` method is called from `drop`, any error will be sliently ignored. 
+    When the backend instance is being dropped, [`crate::drawing::DrawingArea::present()`] or `Backend::present()` is called automatically 
+    whenever is needed. When the `present()` method is called from `drop`, any error will be silently ignored.
 
-	In the case that error handling is important, you need manually call `present` method before the backend gets dropped.
+    In the case that error handling is important, you need manually call the `present()` method before the backend gets dropped.
 	For more information, please see the examples.
+
 
