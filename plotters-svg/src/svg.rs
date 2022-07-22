@@ -487,18 +487,19 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         (w, h): (u32, u32),
         src: &'b [u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
-        use image::png::PNGEncoder;
+        use image::codecs::png::PngEncoder;
+        use image::ImageEncoder;
 
         let mut data = vec![0; 0];
 
         {
             let cursor = Cursor::new(&mut data);
 
-            let encoder = PNGEncoder::new(cursor);
+            let encoder = PngEncoder::new(cursor);
 
-            let color = image::ColorType::RGB(8);
+            let color = image::ColorType::Rgb8;
 
-            encoder.encode(src, w, h, color).map_err(|e| {
+            encoder.write_image(src, w, h, color).map_err(|e| {
                 DrawingErrorKind::DrawingError(Error::new(
                     std::io::ErrorKind::Other,
                     format!("Image error: {}", e),

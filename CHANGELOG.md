@@ -2,6 +2,10 @@
 
 ## Plotters 0.3.3 (?)
 
+### Improved
+
+- The EvcxR integration now supports bitmap output. (Thanks to @lisanhu) 
+
 ## Plotters 0.3.2 (2022-07-05)
 
 ### Added

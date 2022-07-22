@@ -1,5 +1,7 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
+use plotters_backend::DrawingBackend;
+use plotters_bitmap::BitMapBackend;
 use plotters_svg::SVGBackend;
 
 /// The wrapper for the generated SVG
@@ -39,4 +41,27 @@ pub fn evcxr_figure<
     let root = SVGBackend::with_string(&mut buffer, size).into_drawing_area();
     draw(root).expect("Drawing failure");
     SVGWrapper(buffer, "".to_string())
+}
+
+/// Start drawing an evcxr figure
+#[cfg(all(feature = "evcxr_bitmap"))]
+pub fn evcxr_bitmap_figure<
+    Draw: FnOnce(DrawingArea<BitMapBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
+>(
+    size: (u32, u32),
+    draw: Draw,
+) -> SVGWrapper {
+    let pixel_size = 3;
+    let mut buf = Vec::new();
+    buf.resize((size.0 as usize) * (size.1 as usize) * pixel_size, 0);
+    let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();
+    draw(root).expect("Drawing failure");
+    let mut buffer = "".to_string();
+    {
+        let mut svg_root = SVGBackend::with_string(&mut buffer, size);
+        svg_root
+            .blit_bitmap((0, 0), size, &buf)
+            .expect("Failure converting to SVG");
+    }
+    SVGWrapper(buffer.clone(), "".to_string())
 }
