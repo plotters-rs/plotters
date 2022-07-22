@@ -1,8 +1,8 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
-use plotters_svg::SVGBackend;
 use plotters_backend::DrawingBackend;
 use plotters_bitmap::BitMapBackend;
+use plotters_svg::SVGBackend;
 
 /// The wrapper for the generated SVG
 pub struct SVGWrapper(String, String);
@@ -71,7 +71,6 @@ pub fn evcxr_figure<
 //     }
 // }
 
-
 /// Start drawing an evcxr figure
 #[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
 pub fn evcxr_bitmap_figure<
@@ -88,8 +87,9 @@ pub fn evcxr_bitmap_figure<
     let mut buffer = "".to_string();
     {
         let mut svg_root = SVGBackend::with_string(&mut buffer, size);
-        svg_root.blit_bitmap((0, 0), size, &buf).expect("Failure converting to SVG");
+        svg_root
+            .blit_bitmap((0, 0), size, &buf)
+            .expect("Failure converting to SVG");
     }
     SVGWrapper(buffer.clone(), "".to_string())
 }
-
