@@ -99,7 +99,8 @@ fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 
 # Misc
 datetime = ["chrono"]
-evcxr = ["svg_backend", "plotters-svg/bitmap_encoder"]
+evcxr = ["svg_backend"]
+evcxr_bitmap = ["evcxr", "bitmap_backend", "plotters-svg/bitmap_encoder"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 [dev-dependencies]
