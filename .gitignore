@@ -1,11 +1,4 @@
 /target
-**/*.rs.bk
-Cargo.lock
 .*.sw*
-backup/*
-**/Cargo.lock
 **/target
-examples/wasm-demo/www/pkg
-examples/.ipynb_checkpoints/
-tarpaulin-report.html
 .vscode/*

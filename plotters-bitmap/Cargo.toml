@@ -1,0 +1,43 @@
+[package]
+name = "plotters-bitmap"
+version = "0.3.3"
+authors = ["Hao Hou <haohou302@gmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Plotters Bitmap Backend"
+homepage = "https://plotters-rs.github.io"
+repository = "https://github.com/plotters-rs/plotters"
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+gif = { version = "0.11.2", optional = true }
+
+[dependencies.plotters-backend]
+path = "../plotters-backend"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
+version = "0.24.3"
+optional = true
+default-features = false
+features = ["jpeg", "png", "bmp"]
+
+[features]
+default = ["image_encoder", "gif_backend"]
+image_encoder = ["image"]
+gif_backend = ["gif", "image_encoder"]
+
+[dev-dependencies.plotters]
+default_features = false
+features = ["ttf", "line_series", "bitmap_backend"]
+path = "../plotters"
+
+[dev-dependencies]
+criterion = "0.3.6"
+rayon = "1.5.1"
+
+[[bench]]
+name = "benchmark"
+harness = false
+path = "benches/main.rs"
