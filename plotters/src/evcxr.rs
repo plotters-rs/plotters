@@ -1,10 +1,8 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
-use image::{png::PngEncoder, ImageBuffer, ImageError, Pixel, Rgb, RgbImage};
-use plotters_bitmap::BitMapBackend;
 use plotters_svg::SVGBackend;
 use plotters_backend::DrawingBackend;
-use std::ops::Deref;
+use plotters_bitmap::BitMapBackend;
 
 /// The wrapper for the generated SVG
 pub struct SVGWrapper(String, String);
@@ -73,20 +71,7 @@ impl std::fmt::Debug for BitMapWrapper {
     }
 }
 
-// #[cfg(feature = "evcxr_bitmap_figure")]
-#[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
-fn encode_png<P, Container>(img: &ImageBuffer<P, Container>) -> Result<Vec<u8>, ImageError>
-where
-    P: Pixel<Subpixel = u8> + 'static,
-    Container: Deref<Target = [P::Subpixel]>,
-{
-    let mut buf = Vec::new();
-    let encoder = PngEncoder::new(&mut buf);
-    encoder.encode(img, img.width(), img.height(), P::COLOR_TYPE)?;
-    Ok(buf)
-}
 
-// #[cfg(feature = "evcxr_bitmap_figure")]
 /// Start drawing an evcxr figure
 #[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
 pub fn evcxr_bitmap_figure<
@@ -100,24 +85,11 @@ pub fn evcxr_bitmap_figure<
     buf.resize((size.0 as usize) * (size.1 as usize) * pixel_size, 0);
     let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();
     draw(root).expect("Drawing failure");
-    let img = RgbImage::from_raw(size.0, size.1, buf).unwrap();
     let mut buffer = "".to_string();
-    let svg_root = SVGBackend::with_string(&mut buffer, size).into_drawing_area();
-    svg_root.blit_bitmap((0, 0), size, buf).expect("Failure converting to SVG");
-    // draw(svg_root).expect("Failure converting bitmap to SVG");
-    // let enc_buf = encode_png(&img).unwrap();
-    // let buffer = base64::encode(&enc_buf);
-    SVGWrapper(buffer, "".to_string())
+    {
+        let mut svg_root = SVGBackend::with_string(&mut buffer, size);
+        svg_root.blit_bitmap((0, 0), size, &buf).expect("Failure converting to SVG");
+    }
+    SVGWrapper(buffer.clone(), "".to_string())
 }
 
-// #[cfg(feature = "evcxr_bitmap_figure")]
-// pub fn evcxr_animation<
-//     Draw: FnOnce(DrawingArea<SVGBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
-// >(
-//     drawing_area: &DrawingArea<SVGBackend, Shift>,
-//     draws: Draw,
-//     frames: usize,
-//     interval: usize,
-// ) -> SVGWrapper {
-//     todo!();
-// }
