@@ -43,33 +43,33 @@ pub fn evcxr_figure<
     SVGWrapper(buffer, "".to_string())
 }
 
-#[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
-pub struct BitMapWrapper(String, String);
+// #[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
+// pub struct BitMapWrapper(String, String);
 
-#[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
-impl BitMapWrapper {
-    pub fn evcxr_display(&self) {
-        println!("{:?}", self);
-    }
+// #[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
+// impl BitMapWrapper {
+//     pub fn evcxr_display(&self) {
+//         println!("{:?}", self);
+//     }
 
-    pub fn style<S: Into<String>>(mut self, style: S) -> Self {
-        self.1 = style.into();
-        self
-    }
-}
+//     pub fn style<S: Into<String>>(mut self, style: S) -> Self {
+//         self.1 = style.into();
+//         self
+//     }
+// }
 
 // #[cfg(feature = "evcxr_bitmap_figure")]
-#[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
-impl std::fmt::Debug for BitMapWrapper {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let enc = self.0.as_str();
-        write!(
-            formatter,
-            "EVCXR_BEGIN_CONTENT text/html\n<img style=\"{}\" src=\"data:image/png;base64,{}\"/>\nEVCXR_END_CONTENT",
-            self.1, enc
-        )
-    }
-}
+// #[cfg(all(feature = "evcxr", feature = "bitmap_backend"))]
+// impl std::fmt::Debug for BitMapWrapper {
+//     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+//         let enc = self.0.as_str();
+//         write!(
+//             formatter,
+//             "EVCXR_BEGIN_CONTENT text/html\n<img style=\"{}\" src=\"data:image/png;base64,{}\"/>\nEVCXR_END_CONTENT",
+//             self.1, enc
+//         )
+//     }
+// }
 
 
 /// Start drawing an evcxr figure
