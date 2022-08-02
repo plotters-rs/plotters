@@ -269,6 +269,13 @@ impl DrawingBackend for MockedBackend {
 
 impl Drop for MockedBackend {
     fn drop(&mut self) {
+        // `self.drop_check` is typically a testing function; it can panic.
+        // The current `drop` call may be a part of stack unwinding caused
+        // by another panic. If so, we should never call it.
+        if std::thread::panicking() {
+            return;
+        }
+
         let mut temp = None;
         std::mem::swap(&mut temp, &mut self.drop_check);
 
