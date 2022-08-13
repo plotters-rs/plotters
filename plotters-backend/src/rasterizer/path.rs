@@ -34,8 +34,8 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
         f64::from(triple[1].1) + d * b_n.1,
     );
 
-    // If they are actually the same point, then the 3 points are colinear, so just emit the point.
-    if a_p.0 as i32 == b_p.0 as i32 && a_p.1 as i32 == b_p.1 as i32 {
+    // Check if 3 points are colinear. If so, just emit the point.
+    if a_t.1 * b_t.0 == a_t.0 * b_t.1 {
         buf.push((a_p.0 as i32, a_p.1 as i32));
         return;
     }
