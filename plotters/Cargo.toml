@@ -2,7 +2,7 @@
 name = "plotters"
 version = "0.3.3"
 authors = ["Hao Hou <haohou302@gmail.com>"]
-edition = "2021"
+edition = "2018"
 license = "MIT"
 description = "A Rust drawing library focus on data plotting for both WASM and native applications"
 repository = "https://github.com/plotters-rs/plotters"
