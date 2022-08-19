@@ -1,10 +1,14 @@
 # Changelog
 
-## Plotters 0.3.3 (?)
+## Plotters 0.3.3 (2022-08-19)
 
 ### Improved
 
-- The EvcxR integration now supports bitmap output. (Thanks to @lisanhu) 
+- The EvcxR integration now supports bitmap output. (Thanks to @lisanhu)
+
+### Fixed
+
+- Fix the plotters crate's edition requirement
 
 ## Plotters 0.3.2 (2022-07-05)
 
