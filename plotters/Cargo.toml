@@ -74,7 +74,7 @@ all_series = ["area_series", "line_series", "point_series", "surface_series"]
 all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
 
 # Tier 1 Backends
-bitmap_backend = ["plotters-bitmap", "ttf"]
+bitmap_backend = ["plotters-bitmap"]
 bitmap_encoder = ["plotters-bitmap/image_encoder"]
 bitmap_gif = ["plotters-bitmap/gif_backend"]
 svg_backend = ["plotters-svg"]

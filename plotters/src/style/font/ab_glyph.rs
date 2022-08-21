@@ -1,12 +1,13 @@
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
+use ::ab_glyph::{Font, FontRef, ScaleFont};
 use ::core::fmt::{self, Display};
-use ::std::error::Error;
-use ::std::collections::HashMap;
-use ::std::sync::RwLock;
 use ::once_cell::sync::Lazy;
-use ::ab_glyph::{FontRef, Font, ScaleFont};
+use ::std::collections::HashMap;
+use ::std::error::Error;
+use ::std::sync::RwLock;
 
-static FONTS: Lazy<RwLock<HashMap<String, FontRef<'static>>>> = Lazy::new(|| RwLock::new(HashMap::new()));
+static FONTS: Lazy<RwLock<HashMap<String, FontRef<'static>>>> =
+    Lazy::new(|| RwLock::new(HashMap::new()));
 pub struct InvalidFont {
     _priv: (),
 }
@@ -21,7 +22,7 @@ pub fn register_font(name: &str, bytes: &'static [u8]) -> Result<(), InvalidFont
 
 #[derive(Clone)]
 pub struct FontDataInternal {
-    font_ref: FontRef<'static>
+    font_ref: FontRef<'static>,
 }
 
 #[derive(Debug, Clone)]
@@ -45,7 +46,12 @@ impl FontData for FontDataInternal {
     type ErrorType = FontError;
     fn new(family: FontFamily<'_>, style: FontStyle) -> Result<Self, Self::ErrorType> {
         Ok(Self {
-            font_ref: FONTS.read().unwrap().get(family.as_str()).ok_or(FontError::FontUnavailable)?.clone()
+            font_ref: FONTS
+                .read()
+                .unwrap()
+                .get(family.as_str())
+                .ok_or(FontError::FontUnavailable)?
+                .clone(),
         })
     }
     // TODO: ngl, it makes no sense that this uses the same error type as `new`
@@ -77,8 +83,7 @@ impl FontData for FontDataInternal {
         mut draw: DrawFunc,
     ) -> Result<Result<(), E>, Self::ErrorType> {
         let font = self.font_ref.as_scaled(size as f32);
-        let mut draw = |x: u32, y: u32, c| {
-            let (x, y) = (x as i32, y as i32);
+        let mut draw = |x: i32, y: i32, c| {
             let (base_x, base_y) = pos;
             draw(base_x + x, base_y + y, c)
         };
@@ -93,23 +98,20 @@ impl FontData for FontDataInternal {
             if let Some(q) = font.outline_glyph(glyph) {
                 use ::std::panic::{self, AssertUnwindSafe};
                 let rect = q.px_bounds();
-                // Vertically center the things.
-                let y_shift = (size as f32 - rect.height()) / 2.0;
-                let y_shift = y_shift as u32;
+                let y_shift = ((size as f32) / 2.0 + rect.min.y) as i32;
+                let x_shift = x_shift as i32;
                 let res = panic::catch_unwind(AssertUnwindSafe(|| {
                     q.draw(|x, y, c| {
-                        if let Err(_) = draw(x + (x_shift as u32), y + y_shift, c) {
+                        if let Err(_) = draw(x as i32 + x_shift, y as i32 + y_shift, c) {
                             panic!("fail")
                         }
                     });
                 }));
                 if let Err(_) = res {
-                    return Err(FontError::Unknown)
+                    return Err(FontError::Unknown);
                 }
-                x_shift += font.h_advance(font.glyph_id(c));
-            } else {
-                x_shift += font.h_advance(font.glyph_id(c));
             }
+            x_shift += font.h_advance(font.glyph_id(c));
         }
         Ok(Ok(()))
     }
