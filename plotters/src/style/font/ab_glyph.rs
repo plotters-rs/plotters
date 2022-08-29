@@ -56,7 +56,7 @@ impl Error for FontError {}
 impl FontData for FontDataInternal {
     // TODO: can we rename this to `Error`?
     type ErrorType = FontError;
-    fn new(family: FontFamily<'_>, style: FontStyle) -> Result<Self, Self::ErrorType> {
+    fn new(family: FontFamily<'_>, _style: FontStyle) -> Result<Self, Self::ErrorType> {
         Ok(Self {
             font_ref: FONTS
                 .read()
@@ -69,7 +69,7 @@ impl FontData for FontDataInternal {
     // TODO: ngl, it makes no sense that this uses the same error type as `new`
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let pixel_per_em = size / 1.24;
-        let units_per_em = self.font_ref.units_per_em().unwrap();
+        // let units_per_em = self.font_ref.units_per_em().unwrap();
         let font = self.font_ref.as_scaled(size as f32);
 
         let mut x_pixels = 0f32;
@@ -108,14 +108,13 @@ impl FontData for FontDataInternal {
             prev = Some(c);
             let glyph = font.scaled_glyph(c);
             if let Some(q) = font.outline_glyph(glyph) {
-                use ::std::panic::{self, AssertUnwindSafe};
                 let rect = q.px_bounds();
                 let y_shift = ((size as f32) / 2.0 + rect.min.y) as i32;
                 let x_shift = x_shift as i32;
                 let mut buf = vec![];
                 q.draw(|x, y, c| buf.push((x, y, c)));
                 for (x, y, c) in buf {
-                    draw(x as i32 + x_shift, y as i32 + y_shift, c).map_err(|e| {
+                    draw(x as i32 + x_shift, y as i32 + y_shift, c).map_err(|_e| {
                         // Note: If ever `plotters` adds a tracing or logging crate,
                         // this would be a good place to use it.
                         FontError::Unknown
