@@ -12,7 +12,19 @@ pub struct InvalidFont {
     _priv: (),
 }
 
+// Note for future contributors: There is nothing fundamental about the static reference requirement here.
+// It would be reasonably easy to add a function which accepts an owned buffer,
+// or even a reference counted buffer, instead.
 /// Register a font in the fonts table.
+///
+/// The `name` parameter gives the name this font shall be referred to
+/// in the other APIs, like `"sans-serif"`.
+///
+/// The `bytes` parameter should be the complete contents
+/// of an OpenType font file, like:
+/// ```
+/// include_bytes!("FiraGO-Regular.otf")
+/// ```
 pub fn register_font(name: &str, bytes: &'static [u8]) -> Result<(), InvalidFont> {
     let font = FontRef::try_from_slice(bytes).map_err(|_| InvalidFont { _priv: () })?;
     let mut lock = FONTS.write().unwrap();
@@ -100,15 +112,14 @@ impl FontData for FontDataInternal {
                 let rect = q.px_bounds();
                 let y_shift = ((size as f32) / 2.0 + rect.min.y) as i32;
                 let x_shift = x_shift as i32;
-                let res = panic::catch_unwind(AssertUnwindSafe(|| {
-                    q.draw(|x, y, c| {
-                        if let Err(_) = draw(x as i32 + x_shift, y as i32 + y_shift, c) {
-                            panic!("fail")
-                        }
-                    });
-                }));
-                if let Err(_) = res {
-                    return Err(FontError::Unknown);
+                let mut buf = vec![];
+                q.draw(|x, y, c| buf.push((x, y, c)));
+                for (x, y, c) in buf {
+                    draw(x as i32 + x_shift, y as i32 + y_shift, c).map_err(|e| {
+                        // Note: If ever `plotters` adds a tracing or logging crate,
+                        // this would be a good place to use it.
+                        FontError::Unknown
+                    })?;
                 }
             }
             x_shift += font.h_advance(font.glyph_id(c));
