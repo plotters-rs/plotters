@@ -22,7 +22,7 @@ pub struct InvalidFont {
 ///
 /// The `bytes` parameter should be the complete contents
 /// of an OpenType font file, like:
-/// ```
+/// ```ignore
 /// include_bytes!("FiraGO-Regular.otf")
 /// ```
 pub fn register_font(name: &str, bytes: &'static [u8]) -> Result<(), InvalidFont> {

@@ -22,7 +22,7 @@ use ttf::FontDataInternal;
 mod ab_glyph;
 #[cfg(all(
     not(target_arch = "wasm32"), not(target_os = "wasi"),
-    feature = "ab_glyph_"
+    feature = "ab_glyph_", not(feature = "ttf")
 ))]
 use self::ab_glyph::FontDataInternal;
 #[cfg(all(
@@ -31,8 +31,6 @@ use self::ab_glyph::FontDataInternal;
 ))]
 pub use self::ab_glyph::register_font;
 
-#[cfg(all(not(target_arch = "wasm32"), not(feature = "ttf"), not(feature = "ab_glyph_")))]
-mod naive;
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
     not(feature = "ttf"), not(feature = "ab_glyph_")
