@@ -100,7 +100,7 @@ ttf = ["font-kit", "ttf-parser", "lazy_static", "pathfinder_geometry"]
 # Can be useful for cross compiling, especially considering fontconfig has lots of C dependencies
 fontconfig-dlopen = ["font-kit/source-fontconfig-dlopen"]
 
-ab_glyph_ = ["ab_glyph", "once_cell"]
+ab_glyph = ["dep:ab_glyph", "once_cell"]
 
 # Misc
 datetime = ["chrono"]
