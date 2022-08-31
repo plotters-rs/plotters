@@ -1,13 +1,34 @@
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
-use ::ab_glyph::{Font, FontRef, ScaleFont};
-use ::core::fmt::{self, Display};
-use ::once_cell::sync::Lazy;
-use ::std::collections::HashMap;
-use ::std::error::Error;
-use ::std::sync::RwLock;
+use ab_glyph::{Font, FontRef, ScaleFont};
+use core::fmt::{self, Display};
+use once_cell::sync::Lazy;
+use std::collections::HashMap;
+use std::error::Error;
+use std::sync::RwLock;
 
-static FONTS: Lazy<RwLock<HashMap<String, FontRef<'static>>>> =
-    Lazy::new(|| RwLock::new(HashMap::new()));
+struct FontMap {
+    map: HashMap<String, FontRef<'static>>,
+}
+impl FontMap {
+    fn new() -> Self {
+        Self {
+            map: HashMap::with_capacity(4),
+        }
+    }
+    fn insert(&mut self, style: FontStyle, font: FontRef<'static>) -> Option<FontRef<'static>> {
+        self.map.insert(style.as_str().to_string(), font)
+    }
+    // fn get(&self, style: FontStyle) -> Option<&FontRef<'static>> {
+    //     self.map.get(style.as_str())
+    // }
+    fn get_fallback(&self, style: FontStyle) -> Option<&FontRef<'static>> {
+        self.map
+            .get(style.as_str())
+            .or_else(|| self.map.get(FontStyle::Normal.as_str()))
+    }
+}
+
+static FONTS: Lazy<RwLock<HashMap<String, FontMap>>> = Lazy::new(|| RwLock::new(HashMap::new()));
 pub struct InvalidFont {
     _priv: (),
 }
@@ -25,10 +46,16 @@ pub struct InvalidFont {
 /// ```ignore
 /// include_bytes!("FiraGO-Regular.otf")
 /// ```
-pub fn register_font(name: &str, bytes: &'static [u8]) -> Result<(), InvalidFont> {
+pub fn register_font(
+    name: &str,
+    style: FontStyle,
+    bytes: &'static [u8],
+) -> Result<(), InvalidFont> {
     let font = FontRef::try_from_slice(bytes).map_err(|_| InvalidFont { _priv: () })?;
     let mut lock = FONTS.write().unwrap();
-    lock.insert(name.to_string(), font);
+    lock.entry(name.to_string())
+        .or_insert_with(|| FontMap::new())
+        .insert(style, font);
     Ok(())
 }
 
@@ -56,12 +83,14 @@ impl Error for FontError {}
 impl FontData for FontDataInternal {
     // TODO: can we rename this to `Error`?
     type ErrorType = FontError;
-    fn new(family: FontFamily<'_>, _style: FontStyle) -> Result<Self, Self::ErrorType> {
+    fn new(family: FontFamily<'_>, style: FontStyle) -> Result<Self, Self::ErrorType> {
         Ok(Self {
             font_ref: FONTS
                 .read()
                 .unwrap()
                 .get(family.as_str())
+                .map(|fam| fam.get_fallback(style))
+                .flatten()
                 .ok_or(FontError::FontUnavailable)?
                 .clone(),
         })
