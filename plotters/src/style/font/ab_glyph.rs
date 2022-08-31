@@ -89,8 +89,7 @@ impl FontData for FontDataInternal {
                 .read()
                 .unwrap()
                 .get(family.as_str())
-                .map(|fam| fam.get_fallback(style))
-                .flatten()
+                .and_then(|fam| fam.get_fallback(style))
                 .ok_or(FontError::FontUnavailable)?
                 .clone(),
         })
