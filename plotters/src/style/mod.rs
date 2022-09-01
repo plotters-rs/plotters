@@ -20,7 +20,7 @@ pub use colors::full_palette;
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };
-#[cfg(all(not(target_arch = "wasm32"), feature = "ab_glyph_"))]
+#[cfg(all(not(target_arch = "wasm32"), feature = "ab_glyph"))]
 pub use font::register_font;
 
 pub use shape::ShapeStyle;
