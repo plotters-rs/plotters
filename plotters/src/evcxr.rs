@@ -1,8 +1,10 @@
 use crate::coord::Shift;
 use crate::drawing::{DrawingArea, IntoDrawingArea};
 use plotters_backend::DrawingBackend;
-use plotters_bitmap::BitMapBackend;
 use plotters_svg::SVGBackend;
+
+#[cfg(feature = "evcxr_bitmap")]
+use plotters_bitmap::BitMapBackend;
 
 /// The wrapper for the generated SVG
 pub struct SVGWrapper(String, String);
@@ -44,7 +46,7 @@ pub fn evcxr_figure<
 }
 
 /// Start drawing an evcxr figure
-#[cfg(all(feature = "evcxr_bitmap"))]
+#[cfg(feature = "evcxr_bitmap")]
 pub fn evcxr_bitmap_figure<
     Draw: FnOnce(DrawingArea<BitMapBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
 >(
