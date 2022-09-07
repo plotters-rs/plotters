@@ -1,4 +1,3 @@
 [workspace]
 members = ["plotters", "plotters-backend", "plotters-bitmap", "plotters-svg"]
 default-members = ["plotters"]
-

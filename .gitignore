@@ -7,3 +7,4 @@
 # Editor/IDE temporary files
 .*.sw*
 .vscode/*
+Cargo.lock

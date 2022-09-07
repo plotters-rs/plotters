@@ -14,8 +14,15 @@ readme = "README.md"
 [dependencies.plotters-backend]
 path = "../plotters-backend"
 
+[dependencies.image]
+version = "0.24.2"
+optional = true
+default-features = false
+features = ["jpeg", "png", "bmp"]
+
 [features]
 debug = []
+bitmap_encoder = ["image"]
 
 [dev-dependencies.plotters]
 default_features = false
