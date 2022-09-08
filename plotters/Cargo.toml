@@ -17,17 +17,19 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.20", optional = true }
 
 [dependencies.plotters-backend]
-path = "../plotters-backend"
+#path = "../plotters-backend"
+version = "0.3"
 
 [dependencies.plotters-bitmap]
 default_features = false
 optional = true
-path = "../plotters-bitmap"
+#path = "../plotters-bitmap"
+version = "0.3"
 
 [dependencies.plotters-svg]
 version = "^0.3"
 optional = true
-path = "../plotters-svg"
+#path = "../plotters-svg"
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies]
 ttf-parser = { version = "0.15.0", optional = true }
