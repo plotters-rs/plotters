@@ -1,6 +1,15 @@
 # Changelog
 
-## Plotters 0.3.4 (?)
+## Plotters 0.3.4 (2022-09-08)
+
+### Fixed
+
+- EvcxR feature compiling issue without bitmap backend enabled
+
+### Improved
+
+- Color types manipulations
+
 
 ## Plotters 0.3.3 (2022-08-19)
 
