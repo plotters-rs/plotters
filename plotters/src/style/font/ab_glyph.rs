@@ -54,7 +54,7 @@ pub fn register_font(
     let font = FontRef::try_from_slice(bytes).map_err(|_| InvalidFont { _priv: () })?;
     let mut lock = FONTS.write().unwrap();
     lock.entry(name.to_string())
-        .or_insert_with(|| FontMap::new())
+        .or_insert_with(FontMap::new)
         .insert(style, font);
     Ok(())
 }
