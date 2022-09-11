@@ -25,7 +25,6 @@ optional = true
 path = "../plotters-bitmap"
 
 [dependencies.plotters-svg]
-version = "^0.3"
 optional = true
 path = "../plotters-svg"
 
