@@ -226,7 +226,7 @@ extern crate plotters;
 use plotters::prelude::*;
 
 let figure = evcxr_figure((640, 480), |root| {
-    root.fill(&WHITE)?;
+    root.fill(&WHITE);
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)
