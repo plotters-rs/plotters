@@ -76,12 +76,6 @@ impl Color for RGBAColor {
     }
 }
 
-impl From<RGBColor> for RGBAColor {
-    fn from(rgb: RGBColor) -> Self {
-        Self(rgb.0, rgb.1, rgb.2, 1.0)
-    }
-}
-
 /// A color in the given palette
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
 pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
