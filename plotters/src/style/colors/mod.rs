@@ -1,8 +1,8 @@
 //! Basic predefined colors.
 use super::{RGBAColor, RGBColor};
 
-// Macro for allowing dynamic creation of doc attributes.
 // Taken from https://stackoverflow.com/questions/60905060/prevent-line-break-in-doc-test
+/// Macro for allowing dynamic creation of doc attributes.
 #[macro_export]
 macro_rules! doc {
     {
