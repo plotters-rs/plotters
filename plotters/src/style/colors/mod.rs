@@ -3,6 +3,7 @@ use super::{RGBAColor, RGBColor};
 
 // Macro for allowing dynamic creation of doc attributes.
 // Taken from https://stackoverflow.com/questions/60905060/prevent-line-break-in-doc-test
+#[macro_export]
 macro_rules! doc {
     {
         $(#[$m:meta])*
