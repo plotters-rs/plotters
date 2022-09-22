@@ -360,7 +360,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Elements
 
-In Plotters, elements are the building blocks of figures. All elements are able to drawn on a drawing area.
+In Plotters, elements are the building blocks of figures. All elements are able to be drawn on a drawing area.
 There are different types of built-in elements, like lines, texts, circles, etc.
 You can also define your own element in the application code.
 
