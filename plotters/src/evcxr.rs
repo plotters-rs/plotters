@@ -53,7 +53,7 @@ pub fn evcxr_bitmap_figure<
     size: (u32, u32),
     draw: Draw,
 ) -> SVGWrapper {
-    const PIXEL_SIZE : usize = 3;
+    const PIXEL_SIZE: usize = 3;
     let mut buf = Vec::new();
     buf.resize((size.0 as usize) * (size.1 as usize) * PIXEL_SIZE, 0);
     let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();

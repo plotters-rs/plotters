@@ -87,7 +87,7 @@ impl Rect {
             .map(|(a, b)| (*a, *b))
             .collect();
 
-        // Justify: this is actually needed. Because we need to return a iterator that have 
+        // Justify: this is actually needed. Because we need to return a iterator that have
         // static life time, thus we need to copy the value to a buffer and then turn the buffer
         // into a iterator.
         #[allow(clippy::needless_collect)]
@@ -97,14 +97,12 @@ impl Rect {
             .map(|(a, b)| (*a, *b))
             .collect();
 
-        ysegs
-            .into_iter()
-            .flat_map(move |(y0, y1)| {
-                xsegs
-                    .clone()
-                    .into_iter()
-                    .map(move |(x0, x1)| Self { x0, y0, x1, y1 })
-            })
+        ysegs.into_iter().flat_map(move |(y0, y1)| {
+            xsegs
+                .clone()
+                .into_iter()
+                .map(move |(x0, x1)| Self { x0, y0, x1, y1 })
+        })
     }
 
     /// Make the coordinate in the range of the rectangle

@@ -58,7 +58,7 @@ To learn how to use Plotters in different scenarios by checking out the followin
 
 - WebAssembly + Plotters: [plotters-wasm-demo](https://github.com/plotters-rs/plotters-wasm-demo)
 - minifb + Plotters: [plotters-minifb-demo](https://github.com/plotters-rs/plotters-minifb-demo)
-- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters/plotters-gtk-demo) 
+- GTK + Plotters: [plotters-gtk-demo](https://github.com/plotters-rs/plotters-gtk-demo) 
 
 
 ## Trying with Jupyter evcxr Kernel Interactively
@@ -74,7 +74,7 @@ extern crate plotters;
 use plotters::prelude::*;
 
 let figure = evcxr_figure((640, 480), |root| {
-    root.fill(&WHITE);
+    root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("y=x^2", ("Arial", 50).into_font())
         .margin(5)

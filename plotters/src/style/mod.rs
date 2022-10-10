@@ -17,11 +17,11 @@ pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YEL
 #[cfg(feature = "full_palette")]
 pub use colors::full_palette;
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "ab_glyph"))]
+pub use font::register_font;
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };
-#[cfg(all(not(target_arch = "wasm32"), feature = "ab_glyph"))]
-pub use font::register_font;
 
 pub use shape::ShapeStyle;
 pub use size::{AsRelative, RelativeSize, SizeDesc};
