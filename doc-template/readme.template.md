@@ -159,7 +159,7 @@ Currently, we support line series, point series, candlestick series, and histogr
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
 
-## Concepts by examples
+## Concepts by example
 
 ### Drawing Backends
 Plotters can use different drawing backends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
