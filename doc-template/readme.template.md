@@ -289,7 +289,7 @@ It is pure Rust, and easier to cross compile.
 To use this, you *must* call `plotters::style::register_font` before
 using any `plotters` functions which require the ability to render text.
 This function only exists when the `ab_glyph` feature is enabled.
-```rust
+```rust,ignore
 /// Register a font in the fonts table.
 ///
 /// The `name` parameter gives the name this font shall be referred to
