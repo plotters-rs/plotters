@@ -82,9 +82,7 @@ impl FontExt {
             _ => unreachable!(),
         };
         let face = unsafe {
-            std::mem::transmute::<_, Option<Face<'static>>>(
-                ttf_parser::Face::parse(data, idx).ok(),
-            )
+            std::mem::transmute::<_, Option<Face<'static>>>(ttf_parser::Face::parse(data, idx).ok())
         };
         Self { inner: font, face }
     }

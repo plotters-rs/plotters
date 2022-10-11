@@ -1,4 +1,4 @@
-# Plotters - A Rust drawing library focusing on data plotting for both WASM and native applications  🦀📈🚀
+# Plotters - A Rust drawing library focusing on data plotting for both WASM and native applications 🦀📈🚀
 
 <a href="https://crates.io/crates/plotters">
     <img style="display: inline!important" src="https://img.shields.io/crates/v/plotters.svg"></img>
@@ -140,7 +140,7 @@ To view the source code for each example, please click on the example image.
   * [Plotting in Rust](#plotting-in-rust)
   * [Plotting on HTML5 canvas with WASM Backend](#plotting-on-html5-canvas-with-wasm-backend)
   * [What types of figure are supported?](#what-types-of-figure-are-supported)
-  * [Concepts by example](#concepts-by-examples)
+  * [Concepts by example](#concepts-by-example)
     + [Drawing Backends](#drawing-backends)
     + [Drawing Area](#drawing-area)
     + [Elements](#elements)
@@ -215,7 +215,7 @@ To learn how to use Plotters in different scenarios, check out the following dem
 
 ## Trying with Jupyter evcxr Kernel Interactively
 
-Plotters now supports integration with `evcxr` and is able to interactively drawing plots in Jupyter Notebook.
+Plotters now supports integration with `evcxr` and is able to interactively draw plots in Jupyter Notebook.
 The feature `evcxr` should be enabled when including Plotters to Jupyter Notebook.
 
 The following code shows a minimal example of this.
@@ -276,8 +276,7 @@ Also, there's a static HTML version of this notebook available at [this location
 
 ## Plotting in Rust
 
-Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages,
-Rust is one of the best languages fits the need.
+Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages, Rust is one of the best languages that fits the need.
 
 * **Easy to use** Rust has a very good iterator system built into the standard library. With the help of iterators,
 plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
@@ -292,16 +291,15 @@ within a single program. You can also integrate the
 figure rendering code into your application to handle a huge amount of data and visualize it in real-time.
 
 * **WebAssembly Support** Rust is one of the languages with the best WASM support. Plotting in Rust could be 
-very useful for visualization on a web page and would have a huge performance improvement compared to Javascript.
+very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## Plotting on HTML5 canvas with WASM Backend
 
-Plotters currently supports a backend that uses the HTML5 canvas. To use WASM support, you can simply use 
+Plotters currently supports a backend that uses the HTML5 canvas. To use WASM, you can simply use 
 `CanvasBackend` instead of other backend and all other API remains the same!
 
 There's a small demo for Plotters + WASM available at [here](https://github.com/plotters-rs/plotters-wasm-demo). 
 To play with the deployed version, follow this [link](https://plotters-rs.github.io/wasm-demo/www/index.html).
-
 
 ## What types of figure are supported?
 
@@ -313,7 +311,7 @@ Currently, we support line series, point series, candlestick series, and histogr
 And the library is designed to be able to render multiple figure into a single image.
 But Plotter is aimed to be a platform that is fully extendable to support any other types of figure.
 
-## Concepts by examples
+## Concepts by example
 
 ### Drawing Backends
 Plotters can use different drawing backends, including SVG, BitMap, and even real-time rendering. For example, a bitmap drawing backend.
@@ -338,7 +336,7 @@ Plotters uses a concept called drawing area for layout purpose.
 Plotters supports integrating multiple figures into a single image.
 This is done by creating sub-drawing-areas.
 
-Besides that, the drawing area also allows customized coordinate system, by doing so, the coordinate mapping is done by the drawing area automatically.
+Besides that, the drawing area also allows for a customized coordinate system, by doing so, the coordinate mapping is done by the drawing area automatically.
 
 ```rust
 use plotters::prelude::*;
@@ -626,3 +624,5 @@ pub fn register_font(
 
     In the case that error handling is important, you need manually call the `present()` method before the backend gets dropped.
 	For more information, please see the examples.
+
+
