@@ -535,9 +535,38 @@ The following list is a complete list of features that can be opt in and out.
 
 - Font manipulation features
 
-| Name    |  Description | Additional Dependency |Default?|
-|---------|--------------|--------|------------|
-| ttf | Allows TrueType font support | rusttype, font-kit | Yes |
+| Name     | Description                              | Additional Dependency | Default? |
+|----------|------------------------------------------|-----------------------|----------|
+| ttf      | Allows TrueType font support             | font-kit              | Yes      |
+| ab_glyph | Skips loading system fonts, unlike `ttf` | ab_glyph              | No       |
+
+`ab_glyph` supports TrueType and OpenType fonts, but does not attempt to
+load fonts provided by the system on which it is running.
+It is pure Rust, and easier to cross compile.
+To use this, you *must* call `plotters::style::register_font` before
+using any `plotters` functions which require the ability to render text.
+This function only exists when the `ab_glyph` feature is enabled.
+```rust
+/// Register a font in the fonts table.
+///
+/// The `name` parameter gives the name this font shall be referred to
+/// in the other APIs, like `"sans-serif"`.
+///
+/// Unprovided font styles for a given name will fallback to `FontStyle::Normal`
+/// if that is available for that name, when other functions lookup fonts which
+/// are registered with this function.
+///
+/// The `bytes` parameter should be the complete contents
+/// of an OpenType font file, like:
+/// ```ignore
+/// include_bytes!("FiraGO-Regular.otf")
+/// ```
+pub fn register_font(
+    name: &str,
+    style: FontStyle,
+    bytes: &'static [u8],
+) -> Result<(), InvalidFont>
+```
 
 - Coordinate features
 
