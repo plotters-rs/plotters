@@ -41,6 +41,10 @@ pub struct InvalidFont {
 /// The `name` parameter gives the name this font shall be referred to
 /// in the other APIs, like `"sans-serif"`.
 ///
+/// Unprovided font styles for a given name will fallback to `FontStyle::Normal`
+/// if that is available for that name, when other functions lookup fonts which
+/// are registered with this function.
+///
 /// The `bytes` parameter should be the complete contents
 /// of an OpenType font file, like:
 /// ```ignore
