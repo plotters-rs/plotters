@@ -3,7 +3,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("plotters-doc-data/5.png", (640, 480)).into_drawing_area();
     root.fill(&WHITE);
     let root = root.margin(10, 10, 10, 10);
-    // After this point, we should be able to draw construct a chart context
+    // After this point, we should be able to construct a chart context
     let mut chart = ChartBuilder::on(&root)
         // Set the caption of the chart
         .caption("This is our first plot", ("sans-serif", 40).into_font())
