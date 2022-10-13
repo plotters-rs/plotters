@@ -1168,4 +1168,52 @@ mod test {
             assert_eq!(coord1.index_of(&coord1.from_index(i).unwrap()).unwrap(), i);
         }
     }
+    
+    #[test]
+    fn test_datetime_with_unmap() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = Utc.ymd(2023, 1,1,).and_hms(8, 0, 0);
+        let mid = Utc.ymd(2022, 1, 1).and_hms(8, 0, 0);
+        let coord: RangedDate<chrono::DateTime<_>> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+    
+    #[test]
+    fn test_naivedatetime_with_unmap() {
+        let start_time = chrono::NaiveDate::from_ymd(2021, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let end_time = chrono::NaiveDate::from_ymd(2023, 1,1,).and_hms_milli(8, 0, 0, 0);
+        let mid = chrono::NaiveDate::from_ymd(2022, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let coord: RangedDate<chrono::NaiveDateTime> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+    
+    #[test]
+    fn test_date_with_unmap() {
+        let start_date = Utc.ymd(2021, 1, 1);
+        let end_date= Utc.ymd(2023, 1,1,);
+        let mid = Utc.ymd(2022, 1, 1);
+        let coord: RangedDate<chrono::Date<_>> = (start_date..end_date).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+    
+    #[test]
+    fn test_naivedate_with_unmap() {
+        let start_date = chrono::NaiveDate::from_ymd(2021, 1, 1);
+        let end_date= chrono::NaiveDate::from_ymd(2023, 1,1,);
+        let mid = chrono::NaiveDate::from_ymd(2022, 1, 1);
+        let coord: RangedDate<chrono::NaiveDate> = (start_date..end_date).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
 }
