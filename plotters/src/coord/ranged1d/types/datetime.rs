@@ -4,12 +4,12 @@ use std::ops::{Add, Range, Sub};
 
 use crate::coord::ranged1d::{
     AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
-    ValueFormatter,
+    ReversibleRanged, ValueFormatter,
 };
 
 /// The trait that describe some time value. This is the uniformed abstraction that works
 /// for both Date, DateTime and Duration, etc.
-pub trait TimeValue: Eq {
+pub trait TimeValue: Eq + Sized {
     type DateType: Datelike + PartialOrd;
 
     /// Returns the date that is no later than the time
@@ -20,6 +20,8 @@ pub trait TimeValue: Eq {
     fn earliest_after_date(date: Self::DateType) -> Self;
     /// Returns the duration between two time value
     fn subtract(&self, other: &Self) -> Duration;
+    /// Add duration to time value
+    fn add(&self, duration: &Duration) -> Self;
     /// Instantiate a date type for current time value;
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
     /// Cast current date type into this type
@@ -46,6 +48,25 @@ pub trait TimeValue: Eq {
 
         (f64::from(limit.1 - limit.0) * value_days / total_days) as i32 + limit.0
     }
+    
+    /// Map pixel to coord spec
+    fn unmap_coord(point: i32, begin: &Self, end: &Self, limit: (i32, i32)) -> Self {
+        let total_span = end.subtract(begin);
+        let offset = (point - limit.0) as i64;
+        
+        // Check if nanoseconds fit in i64
+        if let Some(total_ns) = total_span.num_nanoseconds() {
+            if i64::MAX/total_ns < offset.abs() {
+                let nano_seconds = offset*total_ns/((limit.1-limit.0) as i64);
+                return begin.add(&Duration::nanoseconds(nano_seconds));
+            }
+        }
+        
+        // Otherwise, use days
+        let total_days = total_span.num_days() as f64;
+        let days = (((offset as f64)*total_days)/((limit.1-limit.0) as f64)) as i64;
+        begin.add(&Duration::days(days))
+    }
 }
 
 impl TimeValue for NaiveDate {
@@ -61,6 +82,9 @@ impl TimeValue for NaiveDate {
     }
     fn subtract(&self, other: &NaiveDate) -> Duration {
         *self - *other
+    }
+    fn add(&self, other: &Duration) -> NaiveDate {
+        self.clone() + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -85,6 +109,9 @@ impl<Z: TimeZone> TimeValue for Date<Z> {
     }
     fn subtract(&self, other: &Date<Z>) -> Duration {
         self.clone() - other.clone()
+    }
+    fn add(&self, other: &Duration) -> Date<Z> {
+        self.clone() + other.clone()
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -115,6 +142,9 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
     fn subtract(&self, other: &DateTime<Z>) -> Duration {
         self.clone() - other.clone()
     }
+    fn add(&self, other: &Duration) -> DateTime<Z> {
+        self.clone() + *other
+    }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         self.timezone().ymd(year, month, date)
@@ -143,6 +173,9 @@ impl TimeValue for NaiveDateTime {
 
     fn subtract(&self, other: &NaiveDateTime) -> Duration {
         *self - *other
+    }
+    fn add(&self, other: &Duration) -> NaiveDateTime {
+        *self + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -660,6 +693,19 @@ where
             .into_iter()
             .map(DT::from_date)
             .collect()
+    }
+}
+
+impl<DT> ReversibleRanged for RangedDateTime<DT>
+where
+    DT: Datelike + Timelike + TimeValue + Clone + PartialOrd,
+    DT: Add<Duration, Output = DT>,
+    DT: Sub<DT, Output = Duration>,
+    RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
+{
+    /// Perform the reverse mapping
+    fn unmap(&self, input: i32, limit: (i32, i32)) -> Option<Self::ValueType> {
+        Some(TimeValue::unmap_coord(input, &self.0, &self.1, limit))
     }
 }
 
