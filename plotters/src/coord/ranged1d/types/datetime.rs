@@ -56,9 +56,14 @@ pub trait TimeValue: Eq + Sized {
 
         // Check if nanoseconds fit in i64
         if let Some(total_ns) = total_span.num_nanoseconds() {
-            let factor = total_ns / ((limit.1 - limit.0) as i64);
-            if i64::MAX / factor > offset.abs() {
-                let nano_seconds = offset * factor;
+            let pixel_span = (limit.1 - limit.0) as i64;
+            let factor = total_ns / pixel_span;
+            let remainder = total_ns % pixel_span;
+            if factor == 0
+                || i64::MAX / factor > offset.abs()
+                || (remainder == 0 && i64::MAX / factor >= offset.abs())
+            {
+                let nano_seconds = offset * factor + (remainder * offset) / pixel_span;
                 return begin.add(&Duration::nanoseconds(nano_seconds));
             }
         }
@@ -85,7 +90,7 @@ impl TimeValue for NaiveDate {
         *self - *other
     }
     fn add(&self, other: &Duration) -> NaiveDate {
-        self.clone() + *other
+        *self + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -112,7 +117,7 @@ impl<Z: TimeZone> TimeValue for Date<Z> {
         self.clone() - other.clone()
     }
     fn add(&self, other: &Duration) -> Date<Z> {
-        self.clone() + other.clone()
+        self.clone() + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -1221,7 +1226,7 @@ mod test {
         let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
         let end_time = Utc.ymd(2023, 1, 1).and_hms(8, 0, 0);
         let mid = Utc.ymd(2022, 1, 1).and_hms(8, 0, 0);
-        let coord: RangedDate<chrono::DateTime<_>> = (start_time..end_time).into();
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
         let value = coord.unmap(pos, (1000, 2000));
@@ -1230,10 +1235,10 @@ mod test {
 
     #[test]
     fn test_naivedatetime_with_unmap() {
-        let start_time = chrono::NaiveDate::from_ymd(2021, 1, 1).and_hms_milli(8, 0, 0, 0);
-        let end_time = chrono::NaiveDate::from_ymd(2023, 1, 1).and_hms_milli(8, 0, 0, 0);
-        let mid = chrono::NaiveDate::from_ymd(2022, 1, 1).and_hms_milli(8, 0, 0, 0);
-        let coord: RangedDate<chrono::NaiveDateTime> = (start_time..end_time).into();
+        let start_time = NaiveDate::from_ymd(2021, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let end_time = NaiveDate::from_ymd(2023, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let mid = NaiveDate::from_ymd(2022, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
         let value = coord.unmap(pos, (1000, 2000));
@@ -1245,7 +1250,7 @@ mod test {
         let start_date = Utc.ymd(2021, 1, 1);
         let end_date = Utc.ymd(2023, 1, 1);
         let mid = Utc.ymd(2022, 1, 1);
-        let coord: RangedDate<chrono::Date<_>> = (start_date..end_date).into();
+        let coord: RangedDate<Date<_>> = (start_date..end_date).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
         let value = coord.unmap(pos, (1000, 2000));
@@ -1254,13 +1259,37 @@ mod test {
 
     #[test]
     fn test_naivedate_with_unmap() {
-        let start_date = chrono::NaiveDate::from_ymd(2021, 1, 1);
-        let end_date = chrono::NaiveDate::from_ymd(2023, 1, 1);
-        let mid = chrono::NaiveDate::from_ymd(2022, 1, 1);
-        let coord: RangedDate<chrono::NaiveDate> = (start_date..end_date).into();
+        let start_date = NaiveDate::from_ymd(2021, 1, 1);
+        let end_date = NaiveDate::from_ymd(2023, 1, 1);
+        let mid = NaiveDate::from_ymd(2022, 1, 1);
+        let coord: RangedDate<NaiveDate> = (start_date..end_date).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
         let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_datetime_unmap_for_nanoseconds() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = start_time + Duration::nanoseconds(1900);
+        let mid = start_time + Duration::nanoseconds(950);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_datetime_unmap_for_nanoseconds_small_period() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = start_time + Duration::nanoseconds(400);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let value = coord.unmap(2000, (1000, 2000));
+        assert_eq!(value, Some(end_time));
+        let mid = start_time + Duration::nanoseconds(200);
+        let value = coord.unmap(500, (0, 1000));
         assert_eq!(value, Some(mid));
     }
 }
