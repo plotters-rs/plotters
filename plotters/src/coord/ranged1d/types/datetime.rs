@@ -4,12 +4,12 @@ use std::ops::{Add, Range, Sub};
 
 use crate::coord::ranged1d::{
     AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
-    ValueFormatter,
+    ReversibleRanged, ValueFormatter,
 };
 
 /// The trait that describe some time value. This is the uniformed abstraction that works
 /// for both Date, DateTime and Duration, etc.
-pub trait TimeValue: Eq {
+pub trait TimeValue: Eq + Sized {
     type DateType: Datelike + PartialOrd;
 
     /// Returns the date that is no later than the time
@@ -20,6 +20,8 @@ pub trait TimeValue: Eq {
     fn earliest_after_date(date: Self::DateType) -> Self;
     /// Returns the duration between two time value
     fn subtract(&self, other: &Self) -> Duration;
+    /// Add duration to time value
+    fn add(&self, duration: &Duration) -> Self;
     /// Instantiate a date type for current time value;
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
     /// Cast current date type into this type
@@ -46,6 +48,31 @@ pub trait TimeValue: Eq {
 
         (f64::from(limit.1 - limit.0) * value_days / total_days) as i32 + limit.0
     }
+
+    /// Map pixel to coord spec
+    fn unmap_coord(point: i32, begin: &Self, end: &Self, limit: (i32, i32)) -> Self {
+        let total_span = end.subtract(begin);
+        let offset = (point - limit.0) as i64;
+
+        // Check if nanoseconds fit in i64
+        if let Some(total_ns) = total_span.num_nanoseconds() {
+            let pixel_span = (limit.1 - limit.0) as i64;
+            let factor = total_ns / pixel_span;
+            let remainder = total_ns % pixel_span;
+            if factor == 0
+                || i64::MAX / factor > offset.abs()
+                || (remainder == 0 && i64::MAX / factor >= offset.abs())
+            {
+                let nano_seconds = offset * factor + (remainder * offset) / pixel_span;
+                return begin.add(&Duration::nanoseconds(nano_seconds));
+            }
+        }
+
+        // Otherwise, use days
+        let total_days = total_span.num_days() as f64;
+        let days = (((offset as f64) * total_days) / ((limit.1 - limit.0) as f64)) as i64;
+        begin.add(&Duration::days(days))
+    }
 }
 
 impl TimeValue for NaiveDate {
@@ -61,6 +88,9 @@ impl TimeValue for NaiveDate {
     }
     fn subtract(&self, other: &NaiveDate) -> Duration {
         *self - *other
+    }
+    fn add(&self, other: &Duration) -> NaiveDate {
+        *self + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -85,6 +115,9 @@ impl<Z: TimeZone> TimeValue for Date<Z> {
     }
     fn subtract(&self, other: &Date<Z>) -> Duration {
         self.clone() - other.clone()
+    }
+    fn add(&self, other: &Duration) -> Date<Z> {
+        self.clone() + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -115,6 +148,9 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
     fn subtract(&self, other: &DateTime<Z>) -> Duration {
         self.clone() - other.clone()
     }
+    fn add(&self, other: &Duration) -> DateTime<Z> {
+        self.clone() + *other
+    }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
         self.timezone().ymd(year, month, date)
@@ -143,6 +179,9 @@ impl TimeValue for NaiveDateTime {
 
     fn subtract(&self, other: &NaiveDateTime) -> Duration {
         *self - *other
+    }
+    fn add(&self, other: &Duration) -> NaiveDateTime {
+        *self + *other
     }
 
     fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
@@ -663,6 +702,19 @@ where
     }
 }
 
+impl<DT> ReversibleRanged for RangedDateTime<DT>
+where
+    DT: Datelike + Timelike + TimeValue + Clone + PartialOrd,
+    DT: Add<Duration, Output = DT>,
+    DT: Sub<DT, Output = Duration>,
+    RangedDate<DT::DateType>: Ranged<ValueType = DT::DateType>,
+{
+    /// Perform the reverse mapping
+    fn unmap(&self, input: i32, limit: (i32, i32)) -> Option<Self::ValueType> {
+        Some(TimeValue::unmap_coord(input, &self.0, &self.1, limit))
+    }
+}
+
 /// The coordinate that for duration of time
 #[derive(Clone)]
 pub struct RangedDuration(Duration, Duration);
@@ -1167,5 +1219,77 @@ mod test {
             assert_eq!(coord1.from_index(i).unwrap().year(), 2000 + i as i32);
             assert_eq!(coord1.index_of(&coord1.from_index(i).unwrap()).unwrap(), i);
         }
+    }
+
+    #[test]
+    fn test_datetime_with_unmap() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = Utc.ymd(2023, 1, 1).and_hms(8, 0, 0);
+        let mid = Utc.ymd(2022, 1, 1).and_hms(8, 0, 0);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_naivedatetime_with_unmap() {
+        let start_time = NaiveDate::from_ymd(2021, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let end_time = NaiveDate::from_ymd(2023, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let mid = NaiveDate::from_ymd(2022, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_date_with_unmap() {
+        let start_date = Utc.ymd(2021, 1, 1);
+        let end_date = Utc.ymd(2023, 1, 1);
+        let mid = Utc.ymd(2022, 1, 1);
+        let coord: RangedDate<Date<_>> = (start_date..end_date).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_naivedate_with_unmap() {
+        let start_date = NaiveDate::from_ymd(2021, 1, 1);
+        let end_date = NaiveDate::from_ymd(2023, 1, 1);
+        let mid = NaiveDate::from_ymd(2022, 1, 1);
+        let coord: RangedDate<NaiveDate> = (start_date..end_date).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_datetime_unmap_for_nanoseconds() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = start_time + Duration::nanoseconds(1900);
+        let mid = start_time + Duration::nanoseconds(950);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let pos = coord.map(&mid, (1000, 2000));
+        assert_eq!(pos, 1500);
+        let value = coord.unmap(pos, (1000, 2000));
+        assert_eq!(value, Some(mid));
+    }
+
+    #[test]
+    fn test_datetime_unmap_for_nanoseconds_small_period() {
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = start_time + Duration::nanoseconds(400);
+        let coord: RangedDateTime<_> = (start_time..end_time).into();
+        let value = coord.unmap(2000, (1000, 2000));
+        assert_eq!(value, Some(end_time));
+        let mid = start_time + Duration::nanoseconds(200);
+        let value = coord.unmap(500, (0, 1000));
+        assert_eq!(value, Some(mid));
     }
 }
