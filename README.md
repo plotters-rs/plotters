@@ -19,7 +19,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 - A new Plotters Developer's Guide is a work in progress. The preview version is available [here](https://plotters-rs.github.io/book).
 - Try Plotters with an interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
-- Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plot on console with a customized backend.
+- Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/plotters-rs/plotters/blob/master/plotters/examples/console.rs) for how to plot on console with a customized backend.
 - Plotters has moved all backend code to separate repositories, check [FAQ list](#faq-list) for details
 - Some interesting [demo projects](#demo-projects) are available, feel free to try them out.
 
@@ -27,19 +27,19 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 
 To view the source code for each example, please click on the example image.
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/chart.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/chart.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/sample.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/stock.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/stock.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/stock.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/histogram.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/histogram.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/histogram.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters#quick-start">
+<a href="https://github.com/plotters-rs/plotters#quick-start">
     <img src="https://plotters-rs.github.io/plotters-doc-data/0.png" class="galleryItem" width=200px></img>
 </a>
 
@@ -47,11 +47,11 @@ To view the source code for each example, please click on the example image.
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console-2.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/mandelbrot.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/mandelbrot.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/mandelbrot.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters#trying-with-jupyter-evcxr-kernel-interactively">
+<a href="https://github.com/plotters-rs/plotters#trying-with-jupyter-evcxr-kernel-interactively">
     <img src="https://plotters-rs.github.io/plotters-doc-data/evcxr_animation.gif" class="galleryItem" width=200px></img>
 </a>
 
@@ -60,71 +60,71 @@ To view the source code for each example, please click on the example image.
     <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/normal-dist.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/normal-dist.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/two-scales.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/two-scales.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/matshow.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/matshow.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/matshow.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/sierpinski.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/sierpinski.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/sierpinski.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/normal-dist2.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/normal-dist2.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/normal-dist2.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/errorbar.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/errorbar.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/errorbar.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/slc-temp.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/slc-temp.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/slc-temp.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/area-chart.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/area-chart.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/area-chart.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/snowflake.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/snowflake.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/snowflake.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/animation.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/animation.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/animation.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/console.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/console.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console-example.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/console.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/console.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/console.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/blit-bitmap.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/blit-bitmap.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/blit-bitmap.png" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/boxplot.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/boxplot.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/boxplot.svg" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/3d-plot.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot.svg" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot2.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/3d-plot2.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/3d-plot2.gif" class="galleryItem" width=200px></img>
 </a>
 
-<a href="https://github.com/38/plotters/blob/master/plotters/examples/tick_control.rs">
+<a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/tick_control.rs">
 	<img src="https://plotters-rs.github.io/plotters-doc-data/tick_control.svg" class="galleryItem" width=200px></img>
 </a>
 
@@ -221,7 +221,7 @@ The feature `evcxr` should be enabled when including Plotters to Jupyter Noteboo
 The following code shows a minimal example of this.
 
 ```text
-:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
+:dep plotters = { git = "https://github.com/plotters-rs/plotters", default_features = false, features = ["evcxr"] }
 extern crate plotters;
 use plotters::prelude::*;
 
@@ -487,14 +487,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Development Version
 
-Find the latest development version of Plotters on [GitHub](https://github.com/38/plotters.git).
+Find the latest development version of Plotters on [GitHub](https://github.com/plotters-rs/plotters.git).
 Clone the repository and learn more about the Plotters API and ways to contribute. Your help is needed!
 
 If you want to add the development version of Plotters to your project, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-plotters = { git = "https://github.com/38/plotters.git" }
+plotters = { git = "https://github.com/plotters-rs/plotters.git" }
 ```
 
 ### Reducing Depending Libraries && Turning Off Backends
@@ -508,7 +508,7 @@ For example, the following dependency description would avoid compiling with bit
 
 ```toml
 [dependencies]
-plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
+plotters = { git = "https://github.com/plotters-rs/plotters.git", default_features = false, features = ["svg"] }
 ```
 
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.

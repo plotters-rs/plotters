@@ -22,7 +22,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
 - A new Plotters Developer's Guide is a work in progress. The preview version is available [here](https://plotters-rs.github.io/book).
 - Try Plotters with an interactive Jupyter notebook, or view [here](https://plotters-rs.github.io/plotters-doc-data/evcxr-jupyter-integration.html) for the static HTML version.
 - To view the WASM example, go to this [link](https://plotters-rs.github.io/wasm-demo/www/index.html)
-- Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/38/plotters/blob/master/examples/console.rs) for how to plot on console with a customized backend.
+- Currently we have all the internal code ready for console plotting, but a console based backend is still not ready. See [this example](https://github.com/plotters-rs/plotters/blob/master/plotters/examples/console.rs) for how to plot on console with a customized backend.
 - Plotters has moved all backend code to separate repositories, check [FAQ list](#faq-list) for details
 - Some interesting [demo projects](#demo-projects) are available, feel free to try them out.
 
@@ -34,7 +34,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Multiple Plot
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/chart.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/chart.rs">[code]</a>
     </div>
 </div>
 
@@ -44,7 +44,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Candlestick Plot
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/stock.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/stock.rs">[code]</a>
     </div>
 </div>
 
@@ -54,7 +54,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
        Histogram
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/histogram.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/histogram.rs">[code]</a>
     </div>
 </div>
 
@@ -82,7 +82,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Mandelbrot set
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/mandelbrot.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/mandelbrot.rs">[code]</a>
     </div>
 </div>
 
@@ -112,7 +112,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Histogram with Scatter
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/normal-dist.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/normal-dist.rs">[code]</a>
     </div>
 </div>
 
@@ -122,7 +122,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Dual Y-Axis Example
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/two-scales.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/two-scales.rs">[code]</a>
     </div>
 </div>
 
@@ -132,7 +132,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The Matplotlib Matshow Example
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/matshow.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/matshow.rs">[code]</a>
     </div>
 </div>
 
@@ -142,7 +142,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The Sierpinski Carpet
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/sierpinski.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/sierpinski.rs">[code]</a>
     </div>
 </div>
 
@@ -152,7 +152,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The 1D Gaussian Distribution
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/nomal-dist2.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/nomal-dist2.rs">[code]</a>
     </div>
 </div>
 
@@ -162,7 +162,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The 1D Gaussian Distribution
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/errorbar.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/errorbar.rs">[code]</a>
     </div>
 </div>
 
@@ -172,7 +172,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Monthly Time Coordinate
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/slc-temp.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/slc-temp.rs">[code]</a>
     </div>
 </div>
 
@@ -182,7 +182,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Monthly Time Coordinate
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/area-chart.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/area-chart.rs">[code]</a>
     </div>
 </div>
 
@@ -192,7 +192,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Koch Snowflake
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/snowflake.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/snowflake.rs">[code]</a>
     </div>
 </div>
 
@@ -203,7 +203,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Koch Snowflake Animation
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/animation.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/animation.rs">[code]</a>
     </div>
 </div>
 
@@ -214,7 +214,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Drawing on a Console
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/console.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/console.rs">[code]</a>
     </div>
 </div>
 
@@ -224,7 +224,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         Drawing bitmap on chart
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/blit-bitmap.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/blit-bitmap.rs">[code]</a>
     </div>
 </div>
 
@@ -234,7 +234,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The boxplot demo
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/boxplot.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/boxplot.rs">[code]</a>
     </div>
 </div>
 
@@ -244,7 +244,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         3D plot rendering
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/3d-plot.rs">[code]</a>
     </div>
 </div>
 
@@ -254,7 +254,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         2-Var Gussian Distribution PDF
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/3d-plot2.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/3d-plot2.rs">[code]</a>
     </div>
 </div>
 
@@ -264,7 +264,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         COVID-19 Visualization
-        <a href="https://github.com/38/plotters/blob/master/plotters/examples/tick_control.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/tick_control.rs">[code]</a>
     </div>
 </div>
 
@@ -361,7 +361,7 @@ The feature `evcxr` should be enabled when including Plotters to Jupyter Noteboo
 The following code shows a minimal example of this.
 
 ```text
-:dep plotters = { git = "https://github.com/38/plotters", default_features = false, features = ["evcxr"] }
+:dep plotters = { git = "https://github.com/plotters-rs/plotters", default_features = false, features = ["evcxr"] }
 extern crate plotters;
 use plotters::prelude::*;
 
@@ -627,14 +627,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Development Version
 
-Find the latest development version of Plotters on [GitHub](https://github.com/38/plotters.git).
+Find the latest development version of Plotters on [GitHub](https://github.com/plotters-rs/plotters.git).
 Clone the repository and learn more about the Plotters API and ways to contribute. Your help is needed!
 
 If you want to add the development version of Plotters to your project, add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-plotters = { git = "https://github.com/38/plotters.git" }
+plotters = { git = "https://github.com/plotters-rs/plotters.git" }
 ```
 
 ### Reducing Depending Libraries && Turning Off Backends
@@ -648,7 +648,7 @@ For example, the following dependency description would avoid compiling with bit
 
 ```toml
 [dependencies]
-plotters = { git = "https://github.com/38/plotters.git", default_features = false, features = ["svg"] }
+plotters = { git = "https://github.com/plotters-rs/plotters.git", default_features = false, features = ["svg"] }
 ```
 
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.

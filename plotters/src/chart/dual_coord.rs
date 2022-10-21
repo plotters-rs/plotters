@@ -20,7 +20,7 @@ use plotters_backend::{BackendCoord, DrawingBackend};
 /// This situation is quite common, for example, we with two different coodinate system.
 /// For instance this example <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png"></img>
 /// This is done by attaching  a second coordinate system to ChartContext by method [ChartContext::set_secondary_coord](struct.ChartContext.html#method.set_secondary_coord).
-/// For instance of dual coordinate charts, see [this example](https://github.com/38/plotters/blob/master/examples/two-scales.rs#L15).
+/// For instance of dual coordinate charts, see [this example](https://github.com/plotters-rs/plotters/blob/master/examples/two-scales.rs#L15).
 /// Note: `DualCoordChartContext` is always deref to the chart context.
 /// - If you want to configure the secondary axis, method [DualCoordChartContext::configure_secondary_axes](struct.DualCoordChartContext.html#method.configure_secondary_axes)
 /// - If you want to draw a series using secondary coordinate system, use [DualCoordChartContext::draw_secondary_series](struct.DualCoordChartContext.html#method.draw_secondary_series). And method [ChartContext::draw_series](struct.ChartContext.html#method.draw_series) will always use primary coordinate spec.
