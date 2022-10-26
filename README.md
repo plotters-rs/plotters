@@ -56,7 +56,7 @@ To view the source code for each example, please click on the example image.
 </a>
 
 
-<a href="https://github.com/plotters-rs/plotters-piston/blob/master/plotters/examples/cpustat.rs">
+<a href="https://github.com/plotters-rs/plotters-piston/blob/master/examples/cpustat.rs">
     <img src="https://plotters-rs.github.io/plotters-doc-data/plotters-piston.gif" class="galleryItem" width=200px></img>
 </a>
 
