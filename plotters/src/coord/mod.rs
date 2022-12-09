@@ -52,6 +52,11 @@ pub mod cartesian {
     pub use super::ranged3d::Cartesian3d;
 }
 
+/// Groups Polar ranged coordinates
+pub mod polar {
+    pub use super::ranged2d::polar::{Polar2d, }; //MeshCircle};
+}
+
 mod translate;
 pub use translate::{CoordTranslate, ReverseCoordTranslate};
 
