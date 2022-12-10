@@ -4,7 +4,7 @@ use plotters_backend::DrawingBackend;
 
 use crate::chart::ChartContext;
 use crate::coord::{
-    polar::{Polar2d, MeshCircle},
+    polar::{Polar2d},
     cartesian::MeshLine,
     ranged1d::{KeyPointHint, Ranged},
     Shift,
@@ -16,52 +16,56 @@ use crate::style::{
     FontTransform, ShapeStyle, TextStyle,
 };
 
-impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Polar2d<X, Y>> {
-    /// The actual function that draws the mesh lines.
-    /// It also returns the label that suppose to be there.
-    #[allow(clippy::type_complexity)]
-    fn draw_mesh_lines<FmtLabel, YH: KeyPointHint, XH: KeyPointHint>(
+impl<'a, DB: DrawingBackend, R: Ranged, T: Ranged> ChartContext<'a, DB, Polar2d<R, T>> {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn draw_mesh<FmtLabel, TH: KeyPointHint, RH: KeyPointHint>(
         &mut self,
-        (r, c): (YH, XH),
-        (x_mesh, y_mesh): (bool, bool),
+        (r, c): (TH, RH),
         mesh_line_style: &ShapeStyle,
-        mut fmt_label: FmtLabel,
-    ) -> Result<(Vec<(i32, String)>, Vec<(i32, String)>), DrawingAreaErrorKind<DB::ErrorType>>
+        x_label_style: &TextStyle,
+        y_label_style: &TextStyle,
+        fmt_label: FmtLabel,
+        x_mesh: bool,
+        y_mesh: bool,
+        x_label_offset: i32,
+        y_label_offset: i32,
+        x_axis: bool,
+        y_axis: bool,
+        axis_style: &ShapeStyle,
+        axis_desc_style: &TextStyle,
+        x_desc: Option<String>,
+        y_desc: Option<String>,
+        x_tick_size: [i32; 2],
+        y_tick_size: [i32; 2],
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
     where
-        FmtLabel: FnMut(&X, &Y, &MeshLine<X, Y>) -> Option<String>,
+        FmtLabel: FnMut(&R, &T, &MeshLine<R, T>) -> Option<String>,
     {
-        let mut x_labels = vec![];
-        let mut y_labels = vec![];
-        let xr = self.drawing_area.as_coord_spec().x_spec();
-        let yr = self.drawing_area.as_coord_spec().y_spec();
-        self.drawing_area.draw_mesh(
-            |b, l| {
-                let draw = match l {
-                    MeshLine::XMesh((x, _), _, _) => {
-                        if let Some(label_text) = fmt_label(xr, yr, &l) {
-                            x_labels.push((x, label_text));
-                        }
-                        x_mesh
-                    }
-                    MeshLine::YMesh((_, y), _, _) => {
-                        if let Some(label_text) = fmt_label(xr, yr, &l) {
-                            y_labels.push((y, label_text));
-                        }
-                        y_mesh
-                    }
-                };
-                if draw {
-                    l.draw(b, mesh_line_style)
-                } else {
-                    Ok(())
-                }
-            },
-            r,
-            c,
+        self.draw_axis_and_labels(
+            self.x_label_area[0].as_ref(),
+            if x_axis { Some(axis_style) } else { None },
+            &[(0_i32, "Hello".to_string())],
+            x_label_style,
+            x_label_offset,
+            (0, -1 + 0 as i16 * 2),
+            x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+            x_tick_size[0],
         )?;
-        Ok((x_labels, y_labels))
-    }
 
+        self.draw_axis_and_labels(
+            self.y_label_area[0].as_ref(),
+            if y_axis { Some(axis_style) } else { None },
+            &[(0_i32, "Hello".to_string())],
+            y_label_style,
+            y_label_offset,
+            (-1 + 0 as i16 * 2, 0),
+            y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
+            y_tick_size[0],
+        )?;
+
+        Ok(())
+    }
+    
     fn draw_axis(
         &self,
         area: &DrawingArea<DB, Shift>,
@@ -314,57 +318,4 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Polar2d<
         Ok(())
     }
 
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn draw_mesh<FmtLabel, YH: KeyPointHint, XH: KeyPointHint>(
-        &mut self,
-        (r, c): (YH, XH),
-        mesh_line_style: &ShapeStyle,
-        x_label_style: &TextStyle,
-        y_label_style: &TextStyle,
-        fmt_label: FmtLabel,
-        x_mesh: bool,
-        y_mesh: bool,
-        x_label_offset: i32,
-        y_label_offset: i32,
-        x_axis: bool,
-        y_axis: bool,
-        axis_style: &ShapeStyle,
-        axis_desc_style: &TextStyle,
-        x_desc: Option<String>,
-        y_desc: Option<String>,
-        x_tick_size: [i32; 2],
-        y_tick_size: [i32; 2],
-    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
-    where
-        FmtLabel: FnMut(&X, &Y, &MeshLine<X, Y>) -> Option<String>,
-    {
-        let (x_labels, y_labels) =
-            self.draw_mesh_lines((r, c), (x_mesh, y_mesh), mesh_line_style, fmt_label)?;
-
-        for idx in 0..2 {
-            self.draw_axis_and_labels(
-                self.x_label_area[idx].as_ref(),
-                if x_axis { Some(axis_style) } else { None },
-                &x_labels[..],
-                x_label_style,
-                x_label_offset,
-                (0, -1 + idx as i16 * 2),
-                x_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                x_tick_size[idx],
-            )?;
-
-            self.draw_axis_and_labels(
-                self.y_label_area[idx].as_ref(),
-                if y_axis { Some(axis_style) } else { None },
-                &y_labels[..],
-                y_label_style,
-                y_label_offset,
-                (-1 + idx as i16 * 2, 0),
-                y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
-                y_tick_size[idx],
-            )?;
-        }
-
-        Ok(())
-    }
 }

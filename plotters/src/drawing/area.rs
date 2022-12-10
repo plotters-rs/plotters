@@ -1,4 +1,5 @@
 use crate::coord::cartesian::{Cartesian2d, MeshLine};
+use crate::coord::polar::{Polar2d};
 use crate::coord::ranged1d::{KeyPointHint, Ranged};
 use crate::coord::{CoordTranslate, Shift};
 use crate::element::{CoordMapper, Drawable, PointCollection};
@@ -213,6 +214,31 @@ impl<DB: DrawingBackend, X: Ranged, Y: Ranged> DrawingArea<DB, Cartesian2d<X, Y>
         self.coord.get_y_range()
     }
 
+    /// Get the range of X of the backend coordinate for current drawing area
+    pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
+        self.coord.get_x_axis_pixel_range()
+    }
+
+    /// Get the range of Y of the backend coordinate for current drawing area
+    pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
+        self.coord.get_y_axis_pixel_range()
+    }
+}
+
+impl<DB: DrawingBackend, R: Ranged, T: Ranged> DrawingArea<DB, Polar2d<R, T>> {
+    /// Draw the mesh on a area
+    pub fn draw_mesh<DrawFunc, RH: KeyPointHint, TH: KeyPointHint>(
+        &self,
+        mut draw_func: DrawFunc,
+        r_count_max: RH,
+        theta_count_max: TH,
+    ) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>>
+    where
+        DrawFunc: FnMut(&mut DB, MeshLine<R, T>) -> Result<(), DrawingErrorKind<DB::ErrorType>>,
+    {
+        Ok(())
+    }
+    
     /// Get the range of X of the backend coordinate for current drawing area
     pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
         self.coord.get_x_axis_pixel_range()

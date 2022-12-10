@@ -9,7 +9,7 @@ use crate::element::{CoordMapper, Drawable, PointCollection};
 
 pub(super) mod cartesian2d;
 pub(super) mod cartesian3d;
-//pub(super) mod polar2d;
+pub(super) mod polar2d;
 pub(super) use cartesian3d::Coord3D;
 
 /**

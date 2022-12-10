@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use plotters_backend::{BackendCoord, DrawingBackend};
 
-use crate::chart::{ChartContext, DualCoordChartContext, MeshStyle};
+use crate::chart::{ChartContext, DualCoordChartContext, PolarMeshStyle};
 use crate::coord::{
     cartesian::Cartesian2d,
     polar::Polar2d,
@@ -39,10 +39,8 @@ where
             false
         }
     }
-
-    /// Initialize a mesh configuration object and mesh drawing can be finalized by calling
-    /// the function `MeshStyle::draw`.
-    pub fn configure_mesh(&mut self) -> MeshStyle<'a, '_, X, Y, DB> {
-        MeshStyle::new(self)
+    
+    pub fn configure_mesh(&mut self) -> PolarMeshStyle<'a, '_, R, T, DB> {
+        PolarMeshStyle::new(self)
     }
 }

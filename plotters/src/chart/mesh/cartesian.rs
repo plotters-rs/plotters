@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use super::builder::LabelAreaPosition;
-use super::context::ChartContext;
+use crate::chart::builder::LabelAreaPosition;
+use crate::chart::context::ChartContext;
 use crate::coord::cartesian::{Cartesian2d, MeshLine};
 use crate::coord::ranged1d::{BoldPoints, LightPoints, Ranged, ValueFormatter};
 use crate::drawing::DrawingAreaErrorKind;
@@ -23,7 +23,7 @@ where
     X: ValueFormatter<XT>,
     Y: ValueFormatter<YT>,
 {
-    pub(super) fn new(target: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
+    pub fn new(target: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
         let mut style = target.configure_mesh();
         style.draw_x_mesh = false;
         style.draw_y_mesh = false;
@@ -176,7 +176,7 @@ where
     Y: Ranged<ValueType = YT> + ValueFormatter<YT>,
     DB: DrawingBackend,
 {
-    pub(crate) fn new(chart: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
+    pub fn new(chart: &'b mut ChartContext<'a, DB, Cartesian2d<X, Y>>) -> Self {
         let base_tick_size = (5u32).percent().max(5).in_pixels(chart.plotting_area());
 
         let mut x_tick_size = [base_tick_size, base_tick_size];

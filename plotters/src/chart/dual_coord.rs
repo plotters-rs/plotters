@@ -3,7 +3,7 @@ use std::borrow::{Borrow, BorrowMut};
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
-use super::mesh::SecondaryMeshStyle;
+use super::mesh::cartesian::SecondaryMeshStyle;
 use super::{ChartContext, ChartState, SeriesAnno};
 
 use crate::coord::cartesian::Cartesian2d;

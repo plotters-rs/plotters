@@ -23,7 +23,8 @@ mod state;
 pub use builder::{ChartBuilder, LabelAreaPosition};
 pub use context::ChartContext;
 pub use dual_coord::{DualCoordChartContext, DualCoordChartState};
-pub use mesh::{MeshStyle, SecondaryMeshStyle};
+pub use mesh::cartesian::{MeshStyle, SecondaryMeshStyle};
+pub use mesh::polar::{PolarMeshStyle};
 pub use series::{SeriesAnno, SeriesLabelPosition, SeriesLabelStyle};
 pub use state::ChartState;
 

@@ -37,34 +37,12 @@ impl<R: Ranged, T: Ranged> Polar2d<R, T> {
             back_theta: (actual.1.start, actual.1.end),
         }
     }
-}
-
-/// Represent a coordinate mesh for the two ranged value coordinate system
-pub enum MeshLine<'a, R: Ranged, T: Ranged> {
-    /// r(radius) mesh: circles (radius, 
-    RMesh(BackendCoord, &'a R::ValueType),
-    /// t(theta) mesh: lines (start, stop, 
-    TMesh(BackendCoord, BackendCoord, &'a T::ValueType),
-}
-
-impl<'a, R: Ranged, T: Ranged> MeshLine<'a, R, T> {
-    /// Draw a single mesh line onto the backend
-    pub fn draw<DB: DrawingBackend>(
-        &self,
-        backend: &mut DB,
-        style: &ShapeStyle,
-    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
-        match self {
-            MeshLine::RMesh(radius, _) => {
-                // radius mesh: circle
-                // backend.draw_circle(0, radius, style)
-                todo!()
-            },
-            MeshLine::TMesh(start, stop, _) => {
-                // theta mesh: lines
-                backend.draw_line(*start, *stop, style)
-            },
-        }
+    pub fn get_x_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_r.axis_pixel_range(self.back_r)
+    }
+    
+    pub fn get_y_axis_pixel_range(&self) -> Range<i32> {
+        self.logic_theta.axis_pixel_range(self.back_theta)
     }
 }
 

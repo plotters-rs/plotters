@@ -449,17 +449,10 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         ChartContext<'a, DB, Polar2d<R::CoordDescType, T::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>>
     { 
-        /*
-        // title placement follows Cartesian2d placement
-        let (title_dx, title_dy) = if let Some((ref title, ref style)) = self.title {
-            let (origin_dx, origin_dy) = drawing_area.get_base_pixel();
-            drawing_area = drawing_area.titled(title, style.clone())?;
-            let (current_dx, current_dy) = drawing_area.get_base_pixel();
-            (current_dx - origin_dx, current_dy - origin_dy)
-        } else {
-            (0, 0)
-        };
+        let mut label_areas = [None, None, None, None];
 
+        let mut drawing_area = DrawingArea::clone(self.root_area);
+        
         if *self.margin.iter().max().unwrap_or(&0) > 0 {
             drawing_area = drawing_area.margin(
                 self.margin[0] as i32,
@@ -471,6 +464,16 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
         let (w, h) = drawing_area.dim_in_pixel();
         
+        // title placement follows Cartesian2d placement
+        let (title_dx, title_dy) = if let Some((ref title, ref style)) = self.title {
+            let (origin_dx, origin_dy) = drawing_area.get_base_pixel();
+            drawing_area = drawing_area.titled(title, style.clone())?;
+            let (current_dx, current_dy) = drawing_area.get_base_pixel();
+            (current_dx - origin_dx, current_dy - origin_dy)
+        } else {
+            (0, 0)
+        };
+
         let mut actual_drawing_area_pos = [0, h as i32, 0, w as i32];
 
         const DIR: [(i16, i16); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
@@ -553,20 +556,21 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
         std::mem::swap(&mut x_label_area[1], &mut label_areas[1]);
         std::mem::swap(&mut y_label_area[0], &mut label_areas[2]);
         std::mem::swap(&mut y_label_area[1], &mut label_areas[3]);
-        */
-        let drawing_area = DrawingArea::clone(self.root_area);
-        let pixel_range = drawing_area.get_pixel_range();
 
         Ok(ChartContext {
-            x_label_area: [None, None],
-            y_label_area: [None, None],
+            x_label_area,
+            y_label_area,
             drawing_area: drawing_area.apply_coord_spec(Polar2d::new(
                 r_spec, 
                 theta_spec,
                 pixel_range,
             )),
             series_anno: vec![],
-            drawing_area_pos: (0_i32, 0_i32),
+            drawing_area_pos: (
+                actual_drawing_area_pos[2] + title_dx + self.margin[2] as i32,
+                actual_drawing_area_pos[0] + title_dy + self.margin[0] as i32,
+
+            ),
         })
     }
     
