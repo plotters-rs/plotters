@@ -105,7 +105,7 @@ impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
 ///  will use the pixel-based approach to draw other types of low-level shapes.
 pub trait DrawingBackend: Sized {
     /// The error type reported by the backend
-    type ErrorType: Error + Send + Sync;
+    type ErrorType: Error + Send + Sync + 'static;
 
     /// Get the dimension of the drawing backend in pixels
     fn get_size(&self) -> (u32, u32);

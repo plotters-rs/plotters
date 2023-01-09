@@ -151,10 +151,7 @@ impl DrawingBackend for TextDrawingBackend {
 
 fn draw_chart<DB: DrawingBackend>(
     b: DrawingArea<DB, plotters::coord::Shift>,
-) -> Result<(), Box<dyn Error>>
-where
-    DB::ErrorType: 'static,
-{
+) -> Result<(), Box<dyn Error>> {
     let mut chart = ChartBuilder::on(&b)
         .margin(1)
         .caption("Sine and Cosine", ("sans-serif", (10).percent_height()))
