@@ -140,7 +140,7 @@ impl ProjectionMatrix {
 }
 
 /// The helper struct to build a projection matrix
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct ProjectionMatrixBuilder {
     /// Specifies the yaw of the 3D coordinate system
     pub yaw: f64,
@@ -150,6 +150,7 @@ pub struct ProjectionMatrixBuilder {
     pub scale: f64,
     pivot_before: (i32, i32, i32),
     pivot_after: (i32, i32),
+    transformation_queue: Vec<ProjectionMatrix>,
 }
 
 impl Default for ProjectionMatrixBuilder {
@@ -160,6 +161,7 @@ impl Default for ProjectionMatrixBuilder {
             scale: 1.0,
             pivot_after: (0, 0),
             pivot_before: (0, 0, 0),
+            transformation_queue: [].to_vec(),
         }
     }
 }
@@ -178,6 +180,12 @@ impl ProjectionMatrixBuilder {
         self
     }
 
+    /// Adds matrix to list of transformations to apply
+    pub fn add_transform(&mut self, projection: ProjectionMatrix) -> &mut Self {
+        self.transformation_queue.push(projection);
+        self
+    }
+
     /// Build the matrix based on the configuration
     pub fn into_matrix(self) -> ProjectionMatrix {
         let mut ret = if self.pivot_before == (0, 0, 0) {
@@ -186,6 +194,10 @@ impl ProjectionMatrixBuilder {
             let (x, y, z) = self.pivot_before;
             ProjectionMatrix::shift(-x as f64, -y as f64, -z as f64) * ProjectionMatrix::default()
         };
+
+        for transform in self.transformation_queue {
+            ret = ret * transform;
+        }
 
         if self.yaw.abs() > 1e-20 {
             ret = ret * ProjectionMatrix::rotate(0.0, self.yaw, 0.0);
