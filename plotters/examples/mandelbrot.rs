@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for (x, y, c) in mandelbrot_set(xr, yr, (pw as usize, ph as usize), 100) {
         if c != 100 {
-            plotting_area.draw_pixel((x, y), &HSLColor(c as f64 / 100.0, 1.0, 0.5))?;
+            plotting_area.draw_pixel((x, y), &MandelbrotHSL::get_color(c as f64 / 100.0))?;
         } else {
             plotting_area.draw_pixel((x, y), &BLACK)?;
         }
