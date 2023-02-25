@@ -2,7 +2,7 @@ use crate::style::{HSLColor,RGBAColor,RGBColor};
 
 use num_traits::{Float,ToPrimitive,FromPrimitive};
 
-pub trait ColorScale<ColorType: crate::prelude::Color, FloatType=f32>
+pub trait ColorMap<ColorType: crate::prelude::Color, FloatType=f32>
 where
     FloatType: Float,
 {
@@ -32,7 +32,7 @@ macro_rules! define_colors_from_list_of_values_or_directly{
 
 macro_rules! implement_linear_interpolation_color_map{
     ($color_scale_name:ident, $color_type:tt) => {
-        impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive> ColorScale<$color_type, FloatType> for $color_scale_name {
+        impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive> ColorMap<$color_type, FloatType> for $color_scale_name {
             fn get_color_normalized(&self, h: FloatType, min: FloatType, max: FloatType) -> $color_type {
                 // Ensure that we do have a value in bounds
                 let h = h.max(min).min(max);
