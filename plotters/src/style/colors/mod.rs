@@ -58,3 +58,5 @@ define_color!(TRANSPARENT, 0, 0, 0, 0.0, "Transparent");
 
 #[cfg(feature = "full_palette")]
 pub mod full_palette;
+#[cfg(feature = "colormaps")]
+pub mod colormaps;

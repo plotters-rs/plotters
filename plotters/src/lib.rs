@@ -852,6 +852,9 @@ pub mod prelude {
     #[cfg(feature = "full_palette")]
     pub use crate::style::full_palette;
 
+    #[cfg(feature = "colormaps")]
+    pub use crate::style::colors::colormaps::*;
+
     pub use crate::style::{
         AsRelative, Color, FontDesc, FontFamily, FontStyle, FontTransform, HSLColor, IntoFont,
         IntoTextStyle, Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBAColor,
