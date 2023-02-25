@@ -89,3 +89,74 @@ macro_rules! define_linear_interpolation_color_map{
         implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
     }
 }
+
+
+define_linear_interpolation_color_map!{
+    ViridisRGBA,
+    RGBAColor,
+    ( 68,   1,  84, 1.0),
+    ( 70,  50, 127, 1.0),
+    ( 54,  92, 141, 1.0),
+    ( 39, 127, 143, 1.0),
+    ( 31, 162, 136, 1.0),
+    ( 74, 194, 110, 1.0),
+    (160, 219,  57, 1.0),
+    (254, 232,  37, 1.0)
+}
+
+
+define_linear_interpolation_color_map!{
+    ViridisRGB,
+    RGBColor,
+    ( 68,   1,  84),
+    ( 70,  50, 127),
+    ( 54,  92, 141),
+    ( 39, 127, 143),
+    ( 31, 162, 136),
+    ( 74, 194, 110),
+    (160, 219,  57),
+    (254, 232,  37)
+}
+
+
+define_linear_interpolation_color_map!{
+    BlackWhite,
+    RGBColor,
+    (  0,   0,   0),
+    (255, 255,   255)
+}
+
+
+define_linear_interpolation_color_map!{
+    MandelbrotHSL,
+    HSLColor,
+    (0.0, 1.0, 0.5),
+    (1.0, 1.0, 0.5)
+}
+
+
+define_linear_interpolation_color_map!{
+    VulcanoHSL,
+    HSLColor,
+    (2.0/3.0, 1.0, 0.7),
+    (    0.0, 1.0, 0.7)
+}
+
+
+use super::full_palette::*;
+define_linear_interpolation_color_map!{
+    Bone,
+    RGBColor,
+    BLACK,
+    BLUE,
+    WHITE
+}
+
+
+define_linear_interpolation_color_map!{
+    Copper,
+    RGBColor,
+    BLACK,
+    BROWN,
+    ORANGE
+}
