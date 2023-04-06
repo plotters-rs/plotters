@@ -250,6 +250,16 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 (cx, cy + label_offset)
             };
 
+            let h_pos = if matches!(label_style.pos.h_pos, HPos::Default) {
+                h_pos
+            } else {
+                label_style.pos.h_pos
+            };
+            let v_pos = if matches!(label_style.pos.v_pos, VPos::Default) {
+                v_pos
+            } else {
+                label_style.pos.v_pos
+            };
             let label_style = &label_style.pos(Pos::new(h_pos, v_pos));
             area.draw_text(t, label_style, (text_x, text_y))?;
 

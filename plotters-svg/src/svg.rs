@@ -395,13 +395,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         let (x0, y0) = pos;
         let text_anchor = match style.anchor().h_pos {
-            HPos::Left => "start",
+            HPos::Left | HPos::Default => "start",
             HPos::Right => "end",
             HPos::Center => "middle",
         };
 
         let dy = match style.anchor().v_pos {
-            VPos::Top => "0.76em",
+            VPos::Top | VPos::Default => "0.76em",
             VPos::Center => "0.5ex",
             VPos::Bottom => "-0.5ex",
         };

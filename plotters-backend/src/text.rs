@@ -62,6 +62,9 @@ pub mod text_anchor {
     /// The horizontal position of the anchor point relative to the text.
     #[derive(Clone, Copy)]
     pub enum HPos {
+        /// Default value (Left), except chart axes that might provide a different pos.
+        /// Use another variant to override the default positionning
+        Default,
         /// Anchor point is on the left side of the text
         Left,
         /// Anchor point is on the right side of the text
@@ -73,6 +76,9 @@ pub mod text_anchor {
     /// The vertical position of the anchor point relative to the text.
     #[derive(Clone, Copy)]
     pub enum VPos {
+        /// Default value (Top), except chart axes that might provide a different pos
+        /// Use another variant to override the default positionning
+        Default,
         /// Anchor point is on the top of the text
         Top,
         /// Anchor point is in the vertical center of the text
@@ -117,8 +123,8 @@ pub mod text_anchor {
         /// ```
         pub fn default() -> Self {
             Pos {
-                h_pos: HPos::Left,
-                v_pos: VPos::Top,
+                h_pos: HPos::Default,
+                v_pos: VPos::Default,
             }
         }
     }
