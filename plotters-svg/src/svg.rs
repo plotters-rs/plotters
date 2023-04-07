@@ -8,12 +8,12 @@ use plotters_backend::{
     FontStyle, FontTransform,
 };
 
+use std::fmt::Write as _;
 use std::fs::File;
 #[allow(unused_imports)]
 use std::io::Cursor;
 use std::io::{BufWriter, Error, Write};
 use std::path::Path;
-use std::fmt::Write as _;
 
 fn make_svg_color(color: BackendColor) -> String {
     let (r, g, b) = color.rgb;
@@ -458,6 +458,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             }
             FontTransform::Rotate270 => {
                 attrs.push(("transform", format!("rotate(270, {}, {})", x0, y0)));
+            }
+            FontTransform::RotateAngle(deg) => {
+                attrs.push(("transform", format!("rotate({deg}, {x0}, {y0})")))
             }
             _ => {}
         }
