@@ -67,7 +67,7 @@ impl PixelFormat for RGBPixel {
         // Since we should always make sure the RGB payload occupies the logic lower bits
         // thus, this type purning should work for both LE and BE CPUs
         #[rustfmt::skip]
-        let (p1, p2, p3): (u64, u64, u64) = unsafe {
+        let [p1, p2, p3]: [u64; 3] = unsafe {
             std::mem::transmute([
                 u16::from(r), u16::from(b), u16::from(g), u16::from(r), // QW1
                 u16::from(b), u16::from(g), u16::from(r), u16::from(b), // QW2
@@ -76,7 +76,7 @@ impl PixelFormat for RGBPixel {
         };
 
         #[rustfmt::skip]
-        let (q1, q2, q3): (u64, u64, u64) = unsafe {
+        let [q1, q2, q3]: [u64; 3] = unsafe {
             std::mem::transmute([
                 u16::from(g), u16::from(r), u16::from(b), u16::from(g), // QW1
                 u16::from(r), u16::from(b), u16::from(g), u16::from(r), // QW2
@@ -94,8 +94,8 @@ impl PixelFormat for RGBPixel {
             let start_ptr = &mut dst[start * Self::PIXEL_SIZE] as *mut u8 as *mut [u8; 24];
             let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 8) };
             for p in slice.iter_mut() {
-                let ptr = p as *mut [u8; 24] as *mut (u64, u64, u64);
-                let (d1, d2, d3) = unsafe { ptr.read_unaligned() };
+                let ptr = p as *mut [u8; 24] as *mut [u64; 3];
+                let [d1, d2, d3] = unsafe { ptr.read_unaligned() };
                 let (mut h1, mut h2, mut h3) = ((d1 >> 8) & M, (d2 >> 8) & M, (d3 >> 8) & M);
                 let (mut l1, mut l2, mut l3) = (d1 & M, d2 & M, d3 & M);
 
@@ -120,7 +120,7 @@ impl PixelFormat for RGBPixel {
                 }
 
                 unsafe {
-                    ptr.write_unaligned((h1 | l1, h2 | l2, h3 | l3));
+                    ptr.write_unaligned([h1 | l1, h2 | l2, h3 | l3]);
                 }
             }
 
@@ -207,7 +207,7 @@ impl PixelFormat for RGBPixel {
                         // TODO: Consider using AVX instructions when possible
                         let ptr = p as *mut [u8; 24] as *mut u64;
                         unsafe {
-                            let (d1, d2, d3): (u64, u64, u64) = std::mem::transmute([
+                            let [d1, d2, d3]: [u64; 3] = std::mem::transmute([
                                 r, g, b, r, g, b, r, g, // QW1
                                 b, r, g, b, r, g, b, r, // QW2
                                 g, b, r, g, b, r, g, b, // QW3
