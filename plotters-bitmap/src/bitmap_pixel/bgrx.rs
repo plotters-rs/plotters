@@ -87,7 +87,7 @@ impl PixelFormat for BGRXPixel {
             let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 2) };
             for rp in slice.iter_mut() {
                 let ptr = rp as *mut [u8; 8] as *mut u64;
-                let d1 = unsafe { *ptr };
+                let d1 = unsafe { ptr.read_unaligned() };
                 let mut h = (d1 >> 8) & M;
                 let mut l = d1 & M;
 
@@ -104,7 +104,7 @@ impl PixelFormat for BGRXPixel {
                 }
 
                 unsafe {
-                    *ptr = h | l;
+                    ptr.write_unaligned(h | l);
                 }
             }
 
@@ -196,7 +196,7 @@ impl PixelFormat for BGRXPixel {
                             let d: u64 = std::mem::transmute([
                                 b, g, r, 0, b, g, r, 0, // QW1
                             ]);
-                            *ptr = d;
+                            ptr.write_unaligned(d);
                         }
                     }
 
