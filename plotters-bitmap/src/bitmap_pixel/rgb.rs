@@ -212,9 +212,9 @@ impl PixelFormat for RGBPixel {
                                 b, r, g, b, r, g, b, r, // QW2
                                 g, b, r, g, b, r, g, b, // QW3
                             ]);
-                            *ptr = d1;
-                            *ptr.offset(1) = d2;
-                            *ptr.offset(2) = d3;
+                            ptr.write_unaligned(d1);
+                            ptr.offset(1).write_unaligned(d2);
+                            ptr.offset(2).write_unaligned(d3);
                         }
                     }
 
