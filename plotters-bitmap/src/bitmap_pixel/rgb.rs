@@ -95,7 +95,7 @@ impl PixelFormat for RGBPixel {
             let slice = unsafe { std::slice::from_raw_parts_mut(start_ptr, (count - 1) / 8) };
             for p in slice.iter_mut() {
                 let ptr = p as *mut [u8; 24] as *mut (u64, u64, u64);
-                let (d1, d2, d3) = unsafe { *ptr };
+                let (d1, d2, d3) = unsafe { ptr.read_unaligned() };
                 let (mut h1, mut h2, mut h3) = ((d1 >> 8) & M, (d2 >> 8) & M, (d3 >> 8) & M);
                 let (mut l1, mut l2, mut l3) = (d1 & M, d2 & M, d3 & M);
 
