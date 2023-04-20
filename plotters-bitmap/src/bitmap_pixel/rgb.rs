@@ -120,7 +120,7 @@ impl PixelFormat for RGBPixel {
                 }
 
                 unsafe {
-                    *ptr = (h1 | l1, h2 | l2, h3 | l3);
+                    ptr.write_unaligned((h1 | l1, h2 | l2, h3 | l3));
                 }
             }
 
