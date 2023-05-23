@@ -75,24 +75,43 @@ macro_rules! calculate_new_color_value(
     };
 );
 
+fn calculate_relative_difference_index_lower_upper<
+    FloatType: Float + FromPrimitive + ToPrimitive,
+>(
+    h: FloatType,
+    min: FloatType,
+    max: FloatType,
+    n_colors: usize,
+) -> (FloatType, usize, usize) {
+    // Ensure that we do have a value in bounds
+    let h = num_traits::clamp(h, min, max);
+    // Next calculate a normalized value between 0.0 and 1.0
+    let t = (h - min) / (max - min);
+    let approximate_index =
+        t * (FloatType::from_usize(n_colors).unwrap() - FloatType::one()).max(FloatType::zero());
+    // Calculate which index are the two most nearest of the supplied value
+    let index_lower = approximate_index.floor().to_usize().unwrap();
+    let index_upper = approximate_index.ceil().to_usize().unwrap();
+    // Calculate the relative difference, ie. is the actual value more towards the color of index_upper or index_lower?
+    let relative_difference = approximate_index.ceil() - approximate_index;
+    return (relative_difference, index_lower, index_upper);
+}
 
 macro_rules! implement_color_scale_for_derived_ColorMap{
     ($($color_type:tt),+) => {
         $(
             impl<FloatType: Float + FromPrimitive + ToPrimitive> ColorMap<$color_type, FloatType> for DerivedColorMap<$color_type> {
                 fn get_color_normalized(&self, h: FloatType, min: FloatType, max: FloatType) -> $color_type {
-                    // Ensure that we do have a value in bounds
-                    let h = h.max(min).min(max);
-                    // Make sure that we really have a minimal value which is smaller than the maximal value
-                    assert_eq!(min<max, true);
-                    // Next calculate a normalized value between 0.0 and 1.0
-                    let t = (h - min)/(max-min);
-                    let approximate_index = t * (FloatType::from_usize(self.colors.len()).unwrap() - FloatType::one()).max(FloatType::zero());
-                    // Calculate which index are the two most nearest of the supplied value
-                    let index_lower = approximate_index.floor().to_usize().unwrap();
-                    let index_upper = approximate_index.ceil().to_usize().unwrap();
-                    // Calculate the relative difference, ie. is the actual value more towards the color of index_upper or index_lower?
-                    let relative_difference = approximate_index.ceil() - approximate_index;
+                    let (
+                        relative_difference,
+                        index_lower,
+                        index_upper
+                    ) = calculate_relative_difference_index_lower_upper(
+                        h,
+                        min,
+                        max,
+                        self.colors.len()
+                    );
                     // Interpolate the final color linearly
                     calculate_new_color_value!(relative_difference, self.colors, index_upper, index_lower, $color_type)
                 }
@@ -119,23 +138,27 @@ macro_rules! define_colors_from_list_of_values_or_directly{
     };
 }
 
-
-macro_rules! implement_linear_interpolation_color_map{
+macro_rules! implement_linear_interpolation_color_map {
     ($color_scale_name:ident, $color_type:tt) => {
-        impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive> ColorMap<$color_type, FloatType> for $color_scale_name {
-            fn get_color_normalized(&self, h: FloatType, min: FloatType, max: FloatType) -> $color_type {
-                // Ensure that we do have a value in bounds
-                let h = h.max(min).min(max);
-                // Make sure that we really have a minimal value which is smaller than the maximal value
-                assert_eq!(min<max, true);
-                // Next calculate a normalized value between 0.0 and 1.0
-                let t = (h - min)/(max-min);
-                let approximate_index = t * (FloatType::from_usize(Self::COLORS.len()).unwrap() - FloatType::one()).max(FloatType::zero());
-                // Calculate which index are the two most nearest of the supplied value
-                let index_lower = approximate_index.floor().to_usize().unwrap();
-                let index_upper = approximate_index.ceil().to_usize().unwrap();
-                // Calculate the relative difference, ie. is the actual value more towards the color of index_upper or index_lower?
-                let relative_difference = approximate_index.ceil() - approximate_index;
+        impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive>
+            ColorMap<$color_type, FloatType> for $color_scale_name
+        {
+            fn get_color_normalized(
+                &self,
+                h: FloatType,
+                min: FloatType,
+                max: FloatType,
+            ) -> $color_type {
+                let (
+                    relative_difference,
+                    index_lower,
+                    index_upper
+                ) = calculate_relative_difference_index_lower_upper(
+                    h,
+                    min,
+                    max,
+                    Self::COLORS.len()
+                );
                 // Interpolate the final color linearly
                 calculate_new_color_value!(relative_difference, Self::COLORS, index_upper, index_lower, $color_type)
             }
