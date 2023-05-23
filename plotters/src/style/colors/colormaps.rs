@@ -36,7 +36,7 @@ pub struct DerivedColorMap<ColorType> {
 
 impl<ColorType: crate::style::Color + Clone> DerivedColorMap<ColorType> {
     pub fn new(colors: &[ColorType]) -> Self {
-        DerivedColorMap { colors: colors.iter().map(|color| color.clone()).collect::<Vec<_>>() }
+        DerivedColorMap { colors: colors.iter().cloned().collect() }
     }
 }
 
