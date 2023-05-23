@@ -97,8 +97,8 @@ fn calculate_relative_difference_index_lower_upper<
     return (relative_difference, index_lower, index_upper);
 }
 
-macro_rules! implement_color_scale_for_derived_ColorMap{
-    ($($color_type:tt),+) => {
+macro_rules! implement_color_scale_for_derived_color_map{
+    ($($color_type:ident),+) => {
         $(
             impl<FloatType: Float + FromPrimitive + ToPrimitive> ColorMap<$color_type, FloatType> for DerivedColorMap<$color_type> {
                 fn get_color_normalized(&self, h: FloatType, min: FloatType, max: FloatType) -> $color_type {
@@ -130,7 +130,7 @@ macro_rules! count {
 
 
 macro_rules! define_colors_from_list_of_values_or_directly{
-    ($color_type:tt, $(($($color_value:expr),+)),+) => {
+    ($color_type:ident, $(($($color_value:expr),+)),+) => {
         [$($color_type($($color_value),+)),+]
     };
     ($($color_complete:tt),+) => {
@@ -139,7 +139,7 @@ macro_rules! define_colors_from_list_of_values_or_directly{
 }
 
 macro_rules! implement_linear_interpolation_color_map {
-    ($color_scale_name:ident, $color_type:tt) => {
+    ($color_scale_name:ident, $color_type:ident) => {
         impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive>
             ColorMap<$color_type, FloatType> for $color_scale_name
         {
@@ -181,7 +181,7 @@ macro_rules! implement_linear_interpolation_color_map {
 
 #[macro_export]
 macro_rules! define_linear_interpolation_color_map{
-    ($color_scale_name:ident, $color_type:tt, $(($($color_value:expr),+)),*) => {
+    ($color_scale_name:ident, $color_type:ident, $(($($color_value:expr),+)),*) => {
         pub struct $color_scale_name {}
 
         impl $color_scale_name {
@@ -192,7 +192,7 @@ macro_rules! define_linear_interpolation_color_map{
 
         implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
     };
-    ($color_scale_name:ident, $color_type:tt, $($color_complete:tt),+) => {
+    ($color_scale_name:ident, $color_type:ident, $($color_complete:tt),+) => {
         pub struct $color_scale_name {}
 
         impl $color_scale_name {
