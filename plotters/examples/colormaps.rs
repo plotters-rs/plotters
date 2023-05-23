@@ -2,13 +2,12 @@ use plotters::prelude::*;
 
 const OUT_FILE_NAME: &'static str = "plotters-doc-data/colormaps.png";
 
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let colormaps_rgb: [(Box<dyn ColorMap<RGBColor>>, &str); 4] = [
-        (Box::new(ViridisRGB {}),"Viridis"),
-        (Box::new(BlackWhite {}),"BlackWhite"),
-        (Box::new(Bone {}),"Bone"),
-        (Box::new(Copper {}),"Copper"),
+        (Box::new(ViridisRGB {}), "Viridis"),
+        (Box::new(BlackWhite {}), "BlackWhite"),
+        (Box::new(Bone {}), "Bone"),
+        (Box::new(Copper {}), "Copper"),
     ];
 
     let colormaps_hsl: [(Box<dyn ColorMap<HSLColor>>, &str); 2] = [
@@ -25,7 +24,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut chart = ChartBuilder::on(&root)
         .caption("Demonstration of predefined colormaps", ("sans-serif", 20))
-        .build_cartesian_2d(-150.0..size_x as f32+50.0, 0.0..3.0*(n_colormaps as f32))?;
+        .build_cartesian_2d(
+            -150.0..size_x as f32 + 50.0,
+            0.0..3.0 * (n_colormaps as f32),
+        )?;
 
     use plotters::style::text_anchor::*;
     let centered = Pos::new(HPos::Center, VPos::Center);
@@ -54,7 +56,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     plot_colormaps!(colormaps_rgb);
     plot_colormaps!(colormaps_hsl);
-
 
     // To avoid the IO failure being ignored silently, we manually call the present function
     root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
