@@ -41,9 +41,7 @@ impl<ColorType: crate::style::Color + Clone> DerivedColorMap<ColorType> {
     /// This function lets the user define a new colormap by simply specifying colors in the correct order.
     /// For calculation of the color values, the colors will be spaced evenly apart.
     pub fn new(colors: &[ColorType]) -> Self {
-        DerivedColorMap {
-            colors: colors.iter().map(|color| color.clone()).collect::<Vec<_>>(),
-        }
+        DerivedColorMap { colors: colors.iter().cloned().collect() }
     }
 }
 
