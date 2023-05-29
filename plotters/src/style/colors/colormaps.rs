@@ -41,7 +41,9 @@ impl<ColorType: crate::style::Color + Clone> DerivedColorMap<ColorType> {
     /// This function lets the user define a new colormap by simply specifying colors in the correct order.
     /// For calculation of the color values, the colors will be spaced evenly apart.
     pub fn new(colors: &[ColorType]) -> Self {
-        DerivedColorMap { colors: colors.iter().cloned().collect() }
+        DerivedColorMap {
+            colors: colors.to_vec(),
+        }
     }
 }
 
@@ -98,7 +100,7 @@ fn calculate_relative_difference_index_lower_upper<
     let index_upper = approximate_index.ceil().to_usize().unwrap();
     // Calculate the relative difference, ie. is the actual value more towards the color of index_upper or index_lower?
     let relative_difference = approximate_index.ceil() - approximate_index;
-    return (relative_difference, index_lower, index_upper);
+    (relative_difference, index_lower, index_upper)
 }
 
 macro_rules! implement_color_scale_for_derived_color_map{
