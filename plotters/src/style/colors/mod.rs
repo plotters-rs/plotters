@@ -56,5 +56,10 @@ define_color!(CYAN, 0, 255, 255, "Cyan");
 define_color!(MAGENTA, 255, 0, 255, "Magenta");
 define_color!(TRANSPARENT, 0, 0, 0, 0.0, "Transparent");
 
+#[cfg(feature = "colormaps")]
+/// Colormaps can be used to simply go from a scalar value to a color value which will be more/less
+/// intense corresponding to the value of the supplied scalar.
+/// These colormaps can also be defined by the user and be used with lower and upper bounds.
+pub mod colormaps;
 #[cfg(feature = "full_palette")]
 pub mod full_palette;

@@ -36,9 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 (-15..=15).map(|x| x as f64 / 5.0),
                 pdf,
             )
-            .style_func(&|&v| {
-                (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
-            }),
+            .style_func(&|&v| (VulcanoHSL::get_color(v / 5.0)).into()),
         )?;
 
         root.present()?;
