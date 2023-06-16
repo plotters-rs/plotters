@@ -361,7 +361,7 @@ The feature `evcxr` should be enabled when including Plotters to Jupyter Noteboo
 The following code shows a minimal example of this.
 
 ```text
-:dep plotters = { version = "^0.3.4", default_features = false, features = ["evcxr", "all_series", "all_elements"] }
+:dep plotters = { version = "^0.3.5", default_features = false, features = ["evcxr", "all_series", "all_elements"] }
 extern crate plotters;
 use plotters::prelude::*;
 

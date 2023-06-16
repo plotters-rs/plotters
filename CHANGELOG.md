@@ -1,5 +1,17 @@
 # Changelog
 
+## Plotters 0.3.5 (2023-06-16)
+
+### Added 
+
+- Add ab_glyph font backend
+- Color maps
+
+### Fixed
+
+- Fix broken unaligned read in unsafe code
+- A lot of broken links and typos
+
 ## Plotters 0.3.4 (2022-09-08)
 
 ### Fixed
