@@ -85,14 +85,14 @@ pub fn calculate_relative_difference_index_lower_upper<
     h: FloatType,
     min: FloatType,
     max: FloatType,
-    n_colors: usize,
+    n_steps: usize,
 ) -> (FloatType, usize, usize) {
     // Ensure that we do have a value in bounds
     let h = num_traits::clamp(h, min, max);
     // Next calculate a normalized value between 0.0 and 1.0
     let t = (h - min) / (max - min);
     let approximate_index =
-        t * (FloatType::from_usize(n_colors).unwrap() - FloatType::one()).max(FloatType::zero());
+        t * (FloatType::from_usize(n_steps).unwrap() - FloatType::one()).max(FloatType::zero());
     // Calculate which index are the two most nearest of the supplied value
     let index_lower = approximate_index.floor().to_usize().unwrap();
     let index_upper = approximate_index.ceil().to_usize().unwrap();
