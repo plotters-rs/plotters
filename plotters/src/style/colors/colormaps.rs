@@ -275,7 +275,7 @@ pub use crate::define_linear_interpolation_color_map;
 macro_rules! define_linear_interpolation_color_map{
     ($color_scale_name:ident, $color_type:ident, $doc:expr, $(($($color_value:expr),+)),*) => {
         #[doc = $doc]
-        pub struct $color_scale_name {}
+        pub struct $color_scale_name;
 
         impl $color_scale_name {
             // const COLORS: [$color_type; $number_colors] = [$($color_type($($color_value),+)),+];
@@ -287,7 +287,7 @@ macro_rules! define_linear_interpolation_color_map{
     };
     ($color_scale_name:ident, $color_type:ident, $doc:expr, $($color_complete:tt),+) => {
         #[doc = $doc]
-        pub struct $color_scale_name {}
+        pub struct $color_scale_name;
 
         impl $color_scale_name {
             const COLORS: [$color_type; $crate::count!($($color_complete)*)] = $crate::define_colors_from_list_of_values_or_directly!{$($color_complete),+};
