@@ -117,7 +117,7 @@ macro_rules! implement_color_scale_for_derived_color_map{
                         self.colors.len()
                     );
                     // Interpolate the final color linearly
-                    calculate_new_color_value!(
+                    $crate::calculate_new_color_value!(
                         relative_difference,
                         self.colors,
                         index_upper,
@@ -134,7 +134,7 @@ implement_color_scale_for_derived_color_map! {RGBAColor, RGBColor, HSLColor}
 
 macro_rules! count {
     () => (0usize);
-    ($x:tt $($xs:tt)* ) => (1usize + count!($($xs)*));
+    ($x:tt $($xs:tt)* ) => (1usize + $crate::count!($($xs)*));
 }
 
 macro_rules! define_colors_from_list_of_values_or_directly{
@@ -171,7 +171,7 @@ macro_rules! implement_linear_interpolation_color_map {
                     Self::COLORS.len()
                 );
                 // Interpolate the final color linearly
-                calculate_new_color_value!(
+                $crate::calculate_new_color_value!(
                     relative_difference,
                     Self::COLORS,
                     index_upper,
@@ -218,21 +218,21 @@ macro_rules! define_linear_interpolation_color_map{
 
         impl $color_scale_name {
             // const COLORS: [$color_type; $number_colors] = [$($color_type($($color_value),+)),+];
-            // const COLORS: [$color_type; count!($(($($color_value:expr),+))*)] = [$($color_type($($color_value),+)),+];
-            const COLORS: [$color_type; count!($(($($color_value:expr),+))*)] = define_colors_from_list_of_values_or_directly!{$color_type, $(($($color_value),+)),*};
+            // const COLORS: [$color_type; $crate::count!($(($($color_value:expr),+))*)] = [$($color_type($($color_value),+)),+];
+            const COLORS: [$color_type; $crate::count!($(($($color_value:expr),+))*)] = $crate::define_colors_from_list_of_values_or_directly!{$color_type, $(($($color_value),+)),*};
         }
 
-        implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
+        $crate::implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
     };
     ($color_scale_name:ident, $color_type:ident, $doc:expr, $($color_complete:tt),+) => {
         #[doc = $doc]
         pub struct $color_scale_name {}
 
         impl $color_scale_name {
-            const COLORS: [$color_type; count!($($color_complete)*)] = define_colors_from_list_of_values_or_directly!{$($color_complete),+};
+            const COLORS: [$color_type; $crate::count!($($color_complete)*)] = $crate::define_colors_from_list_of_values_or_directly!{$($color_complete),+};
         }
 
-        implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
+        $crate::implement_linear_interpolation_color_map!{$color_scale_name, $color_type}
     }
 }
 
