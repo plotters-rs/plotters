@@ -45,6 +45,8 @@ impl<ColorType: crate::style::Color + Clone> DerivedColorMap<ColorType> {
     }
 }
 
+#[macro_export]
+#[doc(hidden)]
 macro_rules! calculate_new_color_value(
     ($relative_difference:expr, $colors:expr, $index_upper:expr, $index_lower:expr, RGBColor) => {
         RGBColor(
@@ -79,6 +81,20 @@ macro_rules! calculate_new_color_value(
     };
 );
 
+/// Helper function to calculate the lower and upper index nearest to a provided float value.
+///
+/// Used to obtain colors from a colorscale given a value h between 0.0 and 1.0.
+/// It also returns the relative difference which can then be used to calculate a linear interpolation between the two nearest colors.
+/// ```
+/// # use plotters::prelude::*;
+/// let r = calculate_relative_difference_index_lower_upper(1.2, 1.0, 3.0, 4);
+/// let (relative_difference, lower_index, upper_index) = r;
+///
+/// assert_eq!(relative_difference, 0.7000000000000001);
+/// assert_eq!(lower_index, 0);
+/// assert_eq!(upper_index, 1);
+/// ```
+#[doc(hidden)]
 pub fn calculate_relative_difference_index_lower_upper<
     FloatType: num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive,
 >(
@@ -132,11 +148,33 @@ macro_rules! implement_color_scale_for_derived_color_map{
 
 implement_color_scale_for_derived_color_map! {RGBAColor, RGBColor, HSLColor}
 
+#[doc(inline)]
+pub use crate::count;
+
+#[macro_export]
+#[doc(hidden)]
+/// Counts the number of arguments which are separated by spaces
+///
+/// This macro is used internally to determine the size of an array to hold all new colors.
+/// ```
+/// # use plotters::count;
+/// let counted = count!{Plotting is fun};
+/// assert_eq!(counted, 3);
+///
+/// let counted2 = count!{0_usize was my favourite 1_f64 last century};
+/// assert_eq!(counted2, 7);
+///
+/// let new_array = ["Hello"; count!(Plotting is fun)];
+/// assert_eq!(new_array, ["Hello"; 3]);
+/// ```
 macro_rules! count {
     () => (0usize);
     ($x:tt $($xs:tt)* ) => (1usize + $crate::count!($($xs)*));
 }
 
+#[macro_export]
+#[doc(hidden)]
+/// Converts a given color identifier and a sequence of colors to an array of them.
 macro_rules! define_colors_from_list_of_values_or_directly{
     ($color_type:ident, $(($($color_value:expr),+)),+) => {
         [$($color_type($($color_value),+)),+]
@@ -209,8 +247,31 @@ macro_rules! implement_linear_interpolation_color_map {
     };
 }
 
+#[doc(inline)]
+pub use crate::define_linear_interpolation_color_map;
+
 #[macro_export]
-/// Macro to create a new colormap with evenly spaced colors at compile-time.
+#[doc(hidden)]
+/// Create a new colormap with evenly spaced colors and interpolates between them automatically.
+///
+/// This macro works by taking a identifier (name) for the colormap, the type of color to specify, a
+/// docstring and a list of colors and constructs an empty struct on which it implements the [ColorMap] trait.
+///
+/// ```
+/// use plotters::prelude::*;
+/// define_linear_interpolation_color_map! {
+///     BlackWhite,
+///     RGBColor,
+///     "Simple chromatic colormap from black to white.",
+///     (  0,   0,   0),
+///     (255, 255,   255)
+/// }
+///
+/// assert_eq!(BlackWhite::get_color(0.0), RGBColor(0,0,0));
+/// ```
+///
+/// Hint: Some helper macros and functions have been deliberately hidden from end users.
+/// Look for them in the source code if you are interested.
 macro_rules! define_linear_interpolation_color_map{
     ($color_scale_name:ident, $color_type:ident, $doc:expr, $(($($color_value:expr),+)),*) => {
         #[doc = $doc]
