@@ -1,11 +1,9 @@
 use crate::style::{HSLColor, RGBAColor, RGBColor};
 
-use num_traits::{Float, FromPrimitive, ToPrimitive};
-
 /// Converts scalar values to colors.
 pub trait ColorMap<ColorType: crate::prelude::Color, FloatType = f32>
 where
-    FloatType: Float,
+    FloatType: num_traits::Float,
 {
     /// Takes a scalar value 0.0 <= h <= 1.0 and returns the corresponding color.
     /// Typically color-scales are named according to which color-type they return.
@@ -81,8 +79,8 @@ macro_rules! calculate_new_color_value(
     };
 );
 
-fn calculate_relative_difference_index_lower_upper<
-    FloatType: Float + FromPrimitive + ToPrimitive,
+pub fn calculate_relative_difference_index_lower_upper<
+    FloatType: num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive,
 >(
     h: FloatType,
     min: FloatType,
@@ -106,7 +104,7 @@ fn calculate_relative_difference_index_lower_upper<
 macro_rules! implement_color_scale_for_derived_color_map{
     ($($color_type:ident),+) => {
         $(
-            impl<FloatType: Float + FromPrimitive + ToPrimitive> ColorMap<$color_type, FloatType> for DerivedColorMap<$color_type> {
+            impl<FloatType: num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive> ColorMap<$color_type, FloatType> for DerivedColorMap<$color_type> {
                 fn get_color_normalized(&self, h: FloatType, min: FloatType, max: FloatType) -> $color_type {
                     let (
                         relative_difference,
@@ -148,9 +146,12 @@ macro_rules! define_colors_from_list_of_values_or_directly{
     };
 }
 
+#[macro_export]
+#[doc(hidden)]
+/// Implements the [ColorMap] trait on a given color scale.
 macro_rules! implement_linear_interpolation_color_map {
     ($color_scale_name:ident, $color_type:ident) => {
-        impl<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive>
+        impl<FloatType: std::fmt::Debug + num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive>
             ColorMap<$color_type, FloatType> for $color_scale_name
         {
             fn get_color_normalized(
@@ -184,7 +185,7 @@ macro_rules! implement_linear_interpolation_color_map {
             #[doc = "Get color value from `"]
             #[doc = stringify!($color_scale_name)]
             #[doc = "` by supplying a parameter 0.0 <= h <= 1.0"]
-            pub fn get_color<FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive>(
+            pub fn get_color<FloatType: std::fmt::Debug + num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive>(
                 h: FloatType,
             ) -> $color_type {
                 let color_scale = $color_scale_name {};
@@ -195,7 +196,7 @@ macro_rules! implement_linear_interpolation_color_map {
             #[doc = stringify!($color_scale_name)]
             #[doc = "` by supplying lower and upper bounds min, max and a parameter h where min <= h <= max"]
             pub fn get_color_normalized<
-                FloatType: std::fmt::Debug + Float + FromPrimitive + ToPrimitive,
+                FloatType: std::fmt::Debug + num_traits::Float + num_traits::FromPrimitive + num_traits::ToPrimitive,
             >(
                 h: FloatType,
                 min: FloatType,
