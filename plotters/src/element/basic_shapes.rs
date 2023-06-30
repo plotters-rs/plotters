@@ -131,6 +131,118 @@ fn test_path_element() {
     .expect("Drawing Failure");
 }
 
+/// An element of a series of connected lines in dash style.
+///
+/// It's similar to [`PathElement`] but has a dash style.
+pub struct DashedPathElement<I: Iterator + Clone, Size: SizeDesc> {
+    points: I,
+    size: Size,
+    spacing: Size,
+    style: ShapeStyle,
+}
+
+impl<I: Iterator + Clone, Size: SizeDesc> DashedPathElement<I, Size> {
+    /// Create a new path
+    /// - `points`: The iterator of the points
+    /// - `size`: The dash size
+    /// - `spacing`: The dash-to-dash spacing (gap size)
+    /// - `style`: The shape style
+    /// - returns the created element
+    pub fn new<I0, S>(points: I0, size: Size, spacing: Size, style: S) -> Self
+    where
+        I0: IntoIterator<IntoIter = I>,
+        S: Into<ShapeStyle>,
+    {
+        Self {
+            points: points.into_iter(),
+            size,
+            spacing,
+            style: style.into(),
+        }
+    }
+}
+
+impl<'a, I: Iterator + Clone, Size: SizeDesc> PointCollection<'a, I::Item>
+    for &'a DashedPathElement<I, Size>
+{
+    type Point = I::Item;
+    type IntoIter = I;
+    fn point_iter(self) -> Self::IntoIter {
+        self.points.clone()
+    }
+}
+
+impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
+    for DashedPathElement<I0, Size>
+{
+    fn draw<I: Iterator<Item = BackendCoord>>(
+        &self,
+        mut points: I,
+        backend: &mut DB,
+        ps: (u32, u32),
+    ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
+        let to_i = |(x, y): (f32, f32)| (x.round() as i32, y.round() as i32);
+        let to_f = |(x, y): (i32, i32)| (x as f32, y as f32);
+        let mut start = match points.next() {
+            Some(c) => to_f(c),
+            None => return Ok(()),
+        };
+        let size = self.size.in_pixels(&ps).max(0) as f32;
+        let spacing = self.spacing.in_pixels(&ps).max(0) as f32;
+        for curr in points {
+            let curr_f = to_f(curr);
+            let (dx, dy) = (curr_f.0 - start.0, curr_f.1 - start.1);
+            let mut d = dx.hypot(dy);
+            let scale = size / d;
+            let gap_scale = spacing / d;
+            while d >= size {
+                // solid line
+                let end = (start.0 + dx * scale, start.1 + dy * scale);
+                backend.draw_path([to_i(start), to_i(end)], &self.style)?;
+                // spacing
+                start = (end.0 + dx * gap_scale, end.1 + dy * gap_scale);
+                d -= size + spacing;
+            }
+            // the last point
+            if d > 0. {
+                backend.draw_path([to_i(start), curr], &self.style)?;
+            }
+            start = curr_f;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn test_dashed_path_element() {
+    use crate::prelude::*;
+    let check_list = std::cell::RefCell::new(vec![
+        [(100, 100), (100, 105)],
+        [(100, 107), (100, 112)],
+        [(100, 114), (100, 119)],
+        [(100, 121), (100, 126)],
+    ]);
+    let da = crate::create_mocked_drawing_area(300, 300, |m| {
+        m.check_draw_path(move |c, s, path| {
+            assert_eq!(c, BLUE.to_rgba());
+            assert_eq!(s, 7);
+            assert_eq!(path, check_list.borrow_mut().remove(0));
+        });
+        m.drop_check(|b| {
+            assert_eq!(b.num_draw_path_call, 4);
+            assert_eq!(b.draw_count, 4);
+        });
+    });
+    da.draw(&DashedPathElement::new(
+        vec![(100, 100), (100, 103), (100, 120)],
+        5.,
+        2.,
+        BLUE.stroke_width(7),
+    ))
+    .expect("Drawing Failure");
+}
+
 /// A rectangle element
 pub struct Rectangle<Coord> {
     points: [Coord; 2],
