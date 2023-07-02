@@ -144,8 +144,8 @@ mod test {
             });
 
             m.drop_check(|b| {
-                assert_eq!(b.num_draw_path_call, 51);
-                assert_eq!(b.draw_count, 51);
+                assert_eq!(b.num_draw_path_call, 26);
+                assert_eq!(b.draw_count, 26);
             });
         });
 

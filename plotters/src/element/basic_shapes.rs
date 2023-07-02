@@ -189,6 +189,7 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
         };
         let size = self.size.in_pixels(&ps).max(0) as f32;
         let spacing = self.spacing.in_pixels(&ps).max(0) as f32;
+        let mut is_previous_solid = false;
         for curr in points {
             let curr_f = to_f(curr);
             let (dx, dy) = (curr_f.0 - start.0, curr_f.1 - start.1);
@@ -199,6 +200,11 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
             // 1) o-- --  o  (need to patch last one)
             // 2) o-- -- o   (ignore the last one)
             // 3) o o        (points are too dense)
+            if is_previous_solid {
+                start.0 += dx * gap_scale;
+                start.1 += dy * gap_scale;
+                d -= spacing;
+            }
             while d >= size {
                 // Solid line
                 let end = (start.0 + dx * scale, start.1 + dy * scale);
@@ -210,8 +216,10 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
             // Finish the last segment
             // 1) o-- -- -o  (patched)
             // 2) o-o        (become solid line)
-            if d > 0. {
-                backend.draw_path([to_i(start), curr], &self.style)?;
+            let line = [to_i(start), curr];
+            is_previous_solid = d > 0. && line[0] != line[1];
+            if is_previous_solid {
+                backend.draw_path(line, &self.style)?;
             }
             // Move to the current point
             start = curr_f;
@@ -226,14 +234,15 @@ fn test_dashed_path_element() {
     use crate::prelude::*;
     let check_list = std::cell::RefCell::new(vec![
         [(100, 100), (100, 103)],
-        [(100, 103), (100, 108)],
-        [(100, 110), (100, 115)],
-        [(100, 117), (100, 120)],
+        [(100, 105), (100, 110)],
+        [(100, 112), (100, 117)],
+        [(100, 119), (100, 120)],
     ]);
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_path(move |c, s, path| {
             assert_eq!(c, BLUE.to_rgba());
             assert_eq!(s, 7);
+            dbg!(&path);
             assert_eq!(path, check_list.borrow_mut().remove(0));
         });
         m.drop_check(|b| {
