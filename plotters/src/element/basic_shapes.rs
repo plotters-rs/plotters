@@ -195,18 +195,25 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
             let mut d = dx.hypot(dy).max(f32::EPSILON);
             let scale = size / d;
             let gap_scale = spacing / d;
+            // Start drawing until last segment
+            // 1) o-- --  o  (need to patch last one)
+            // 2) o-- -- o   (ignore the last one)
+            // 3) o o        (points are too dense)
             while d >= size {
-                // solid line
+                // Solid line
                 let end = (start.0 + dx * scale, start.1 + dy * scale);
                 backend.draw_path([to_i(start), to_i(end)], &self.style)?;
-                // spacing
+                // Spacing
                 start = (end.0 + dx * gap_scale, end.1 + dy * gap_scale);
                 d -= size + spacing;
             }
-            // the last point
+            // Finish the last segment
+            // 1) o-- -- -o  (patched)
+            // 2) o-o        (become solid line)
             if d > 0. {
                 backend.draw_path([to_i(start), curr], &self.style)?;
             }
+            // Move to the current point
             start = curr_f;
         }
         Ok(())
