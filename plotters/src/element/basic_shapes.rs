@@ -192,7 +192,7 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
         for curr in points {
             let curr_f = to_f(curr);
             let (dx, dy) = (curr_f.0 - start.0, curr_f.1 - start.1);
-            let mut d = dx.hypot(dy);
+            let mut d = dx.hypot(dy).max(f32::EPSILON);
             let scale = size / d;
             let gap_scale = spacing / d;
             while d >= size {
@@ -218,10 +218,10 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
 fn test_dashed_path_element() {
     use crate::prelude::*;
     let check_list = std::cell::RefCell::new(vec![
-        [(100, 100), (100, 105)],
-        [(100, 107), (100, 112)],
-        [(100, 114), (100, 119)],
-        [(100, 121), (100, 126)],
+        [(100, 100), (100, 103)],
+        [(100, 103), (100, 108)],
+        [(100, 110), (100, 115)],
+        [(100, 117), (100, 120)],
     ]);
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_path(move |c, s, path| {

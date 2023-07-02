@@ -144,8 +144,8 @@ mod test {
             });
 
             m.drop_check(|b| {
-                assert_eq!(b.num_draw_path_call, 11);
-                assert_eq!(b.draw_count, 11);
+                assert_eq!(b.num_draw_path_call, 51);
+                assert_eq!(b.draw_count, 51);
             });
         });
 
@@ -161,7 +161,7 @@ mod test {
             .expect("Drawing Error");
         chart
             .draw_series(DashedLineSeries::new(
-                (0..=50).map(|x| (x, x)),
+                (0..=50).map(|x| (0, x)),
                 10,
                 5,
                 RED.stroke_width(3),
