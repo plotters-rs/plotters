@@ -152,18 +152,22 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 points.push(coord);
                 offset_theta += radian_increment;
             }
+            // final point of the wedge may not fall exactly on a radian, so add it extra
+            let final_coord = theta_to_ordinal_coord(*self.radius, theta_final, self.center);
+            points.push(final_coord);
+
             if self.donut_hole > 0.0 {
                 while offset_theta >= slice_start {
                     let coord = theta_to_ordinal_coord(self.donut_hole, offset_theta, self.center);
                     points.push(coord);
                     offset_theta -= radian_increment;
                 }
+                // final point of the wedge may not fall exactly on a radian, so add it extra
+                let final_coord_inner =
+                    theta_to_ordinal_coord(self.donut_hole, slice_start, self.center);
+                points.push(final_coord_inner);
             }
-            // final point of the wedge may not fall exactly on a radian, so add it extra
-            if self.donut_hole == 0.0 {
-                let final_coord = theta_to_ordinal_coord(*self.radius, theta_final, self.center);
-                points.push(final_coord);
-            }
+
             // next wedge calculation will start from previous wedges's last radian
             offset_theta = theta_final;
 
