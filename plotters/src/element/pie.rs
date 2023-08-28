@@ -31,6 +31,7 @@ pub struct Pie<'a, Coord, Label: Display> {
     label_style: TextStyle<'a>,
     label_offset: f64,
     percentage_style: Option<TextStyle<'a>>,
+    donut_hole: f64, // radius of the hole in case of a donut chart
 }
 
 impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
@@ -62,6 +63,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
             label_style,
             label_offset: radius_5pct,
             percentage_style: None,
+            donut_hole: 0.0,
         }
     }
 
@@ -91,6 +93,15 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
     pub fn percentages<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
         self.percentage_style = Some(label_style.into());
     }
+
+    /// Enables creating a donut chart with a hole of the specified radius.
+    ///
+    /// The passed value must be greater than zero and lower than the chart overall radius, otherwise it'll be ignored.
+    pub fn donut_hole(&mut self, hole_radius: f64) {
+        if hole_radius > 0.0 && hole_radius < *self.radius {
+            self.donut_hole = hole_radius;
+        }
+    }
 }
 
 impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32), Label> {
@@ -118,12 +129,18 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 .get(index)
                 .ok_or_else(|| DrawingErrorKind::FontError(Box::new(PieError::LengthMismatch)))?;
             // start building wedge line against the previous edge
-            let mut points = vec![*self.center];
+            let mut points = if self.donut_hole == 0.0 {
+                vec![*self.center]
+            } else {
+                vec![]
+            };
             let ratio = slice / self.total;
             let theta_final = ratio * 2.0 * PI + offset_theta; // end radian for the wedge
 
             // calculate middle for labels before mutating offset
             let middle_theta = ratio * PI + offset_theta;
+
+            let slice_start = offset_theta;
 
             // calculate every fraction of radian for the wedge, offsetting for every iteration, clockwise
             //
@@ -138,6 +155,19 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
             // final point of the wedge may not fall exactly on a radian, so add it extra
             let final_coord = theta_to_ordinal_coord(*self.radius, theta_final, self.center);
             points.push(final_coord);
+
+            if self.donut_hole > 0.0 {
+                while offset_theta >= slice_start {
+                    let coord = theta_to_ordinal_coord(self.donut_hole, offset_theta, self.center);
+                    points.push(coord);
+                    offset_theta -= radian_increment;
+                }
+                // final point of the wedge may not fall exactly on a radian, so add it extra
+                let final_coord_inner =
+                    theta_to_ordinal_coord(self.donut_hole, slice_start, self.center);
+                points.push(final_coord_inner);
+            }
+
             // next wedge calculation will start from previous wedges's last radian
             offset_theta = theta_final;
 
@@ -163,8 +193,9 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 let label_size = backend.estimate_text_size(&perc_label, percentage_style)?;
                 let text_x_mid = (label_size.0 as f64 / 2.0).round() as i32;
                 let text_y_mid = (label_size.1 as f64 / 2.0).round() as i32;
+                let perc_radius = (self.radius + self.donut_hole) / 2.0;
                 let perc_coord = theta_to_ordinal_coord(
-                    self.radius / 2.0,
+                    perc_radius,
                     middle_theta,
                     &(self.center.0 - text_x_mid, self.center.1 - text_y_mid),
                 );
