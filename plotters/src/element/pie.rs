@@ -189,11 +189,7 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 let label_size = backend.estimate_text_size(&perc_label, percentage_style)?;
                 let text_x_mid = (label_size.0 as f64 / 2.0).round() as i32;
                 let text_y_mid = (label_size.1 as f64 / 2.0).round() as i32;
-                let perc_radius = if self.donut_hole == 0.0 {
-                    self.radius / 2.0
-                } else {
-                    (self.radius + self.donut_hole) / 2.0
-                };
+                let perc_radius = (self.radius + self.donut_hole) / 2.0;
                 let perc_coord = theta_to_ordinal_coord(
                     perc_radius,
                     middle_theta,
