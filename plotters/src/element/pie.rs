@@ -31,7 +31,7 @@ pub struct Pie<'a, Coord, Label: Display> {
     label_style: TextStyle<'a>,
     label_offset: f64,
     percentage_style: Option<TextStyle<'a>>,
-    donut_hole: &'a f64, // radius of the hole in case of a donut chart
+    donut_hole: f64, // radius of the hole in case of a donut chart
 }
 
 impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
@@ -63,7 +63,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
             label_style,
             label_offset: radius_5pct,
             percentage_style: None,
-            donut_hole: &0.0,
+            donut_hole: 0.0,
         }
     }
 
@@ -97,8 +97,8 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
     /// Enables creating a donut chart with a hole of the specified radius.
     ///
     /// The passed value must be greater than zero and lower than the chart overall radius, otherwise it'll be ignored.
-    pub fn donut_hole(&mut self, hole_radius: &'a f64) {
-        if hole_radius > &0.0 && hole_radius < self.radius {
+    pub fn donut_hole(&mut self, hole_radius: f64) {
+        if hole_radius > 0.0 && hole_radius < *self.radius {
             self.donut_hole = hole_radius;
         }
     }
@@ -129,7 +129,7 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 .get(index)
                 .ok_or_else(|| DrawingErrorKind::FontError(Box::new(PieError::LengthMismatch)))?;
             // start building wedge line against the previous edge
-            let mut points = if self.donut_hole == &0.0 {
+            let mut points = if self.donut_hole == 0.0 {
                 vec![*self.center]
             } else {
                 vec![]
@@ -152,15 +152,15 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 points.push(coord);
                 offset_theta += radian_increment;
             }
-            if self.donut_hole > &0.0 {
+            if self.donut_hole > 0.0 {
                 while offset_theta >= slice_start {
-                    let coord = theta_to_ordinal_coord(*self.donut_hole, offset_theta, self.center);
+                    let coord = theta_to_ordinal_coord(self.donut_hole, offset_theta, self.center);
                     points.push(coord);
                     offset_theta -= radian_increment;
                 }
             }
             // final point of the wedge may not fall exactly on a radian, so add it extra
-            if self.donut_hole == &0.0 {
+            if self.donut_hole == 0.0 {
                 let final_coord = theta_to_ordinal_coord(*self.radius, theta_final, self.center);
                 points.push(final_coord);
             }
@@ -189,7 +189,7 @@ impl<'a, DB: DrawingBackend, Label: Display> Drawable<DB> for Pie<'a, (i32, i32)
                 let label_size = backend.estimate_text_size(&perc_label, percentage_style)?;
                 let text_x_mid = (label_size.0 as f64 / 2.0).round() as i32;
                 let text_y_mid = (label_size.1 as f64 / 2.0).round() as i32;
-                let perc_radius = if self.donut_hole == &0.0 {
+                let perc_radius = if self.donut_hole == 0.0 {
                     self.radius / 2.0
                 } else {
                     (self.radius + self.donut_hole) / 2.0
