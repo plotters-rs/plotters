@@ -132,12 +132,16 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
     // Then we need to check if the data cache contains the font data
     let cache = DATA_CACHE.read().unwrap();
     if let Some(data) = cache.get(Borrow::<str>::borrow(&key)) {
-        data.clone().map(|handle| {
+        let font_ext = data.clone().map(|handle| {
             handle
                 .load()
                 .map(FontExt::new)
                 .map_err(|e| FontError::FontLoadError(Arc::new(e)))
         })?;
+
+        if font_ext.is_err() {
+          return font_ext;
+        }
     }
     drop(cache);
 
