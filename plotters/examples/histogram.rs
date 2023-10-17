@@ -1,5 +1,5 @@
 use plotters::prelude::*;
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/histogram.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/histogram.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
 
@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .disable_x_mesh()
-        .bold_line_style(&WHITE.mix(0.3))
+        .bold_line_style(WHITE.mix(0.3))
         .y_desc("Count")
         .x_desc("Bucket")
         .axis_desc_style(("sans-serif", 15))

@@ -171,13 +171,13 @@ mod test {
         let mut chart = cs.clone().restore(&drawing_area);
 
         chart
-            .draw_series(std::iter::once(Circle::new((5, 5), 5, &RED)))
+            .draw_series(std::iter::once(Circle::new((5, 5), 5, RED)))
             .expect("Drawing error");
         chart
-            .draw_secondary_series(std::iter::once(Circle::new((0.3, 0.8), 5, &GREEN)))
+            .draw_secondary_series(std::iter::once(Circle::new((0.3, 0.8), 5, GREEN)))
             .expect("Drawing error")
             .label("Test label")
-            .legend(|(x, y)| Rectangle::new([(x - 10, y - 5), (x, y + 5)], &GREEN));
+            .legend(|(x, y)| Rectangle::new([(x - 10, y - 5), (x, y + 5)], GREEN));
 
         chart
             .configure_series_labels()
@@ -215,7 +215,7 @@ mod test {
         let mut chart = cs.clone().restore(&drawing_area);
 
         chart
-            .draw_series(std::iter::once(Circle::new((5, 5, 5), 5, &RED)))
+            .draw_series(std::iter::once(Circle::new((5, 5, 5), 5, RED)))
             .expect("Drawing error");
     }
 }

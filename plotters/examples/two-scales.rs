@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/twoscale.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/twoscale.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &BLUE,
         ))?
         .label("y = 1.02^x^2")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE));
 
     chart
         .draw_secondary_series(LineSeries::new(
@@ -41,11 +41,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &RED,
         ))?
         .label("y = sin(2x)")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED));
 
     chart
         .configure_series_labels()
-        .background_style(&RGBColor(128, 128, 128))
+        .background_style(RGBColor(128, 128, 128))
         .draw()?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function

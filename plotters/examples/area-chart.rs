@@ -4,7 +4,7 @@ use rand::SeedableRng;
 use rand_distr::{Distribution, Normal};
 use rand_xorshift::XorShiftRng;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/area-chart.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/area-chart.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data: Vec<_> = {
         let norm_dist = Normal::new(500.0, 100.0).unwrap();
@@ -38,9 +38,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         AreaSeries::new(
             (0..).zip(data.iter()).map(|(x, y)| (x, *y)),
             0.0,
-            &RED.mix(0.2),
+            RED.mix(0.2),
         )
-        .border_style(&RED),
+        .border_style(RED),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function

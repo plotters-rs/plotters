@@ -5,7 +5,7 @@ use image::{imageops::FilterType, ImageFormat};
 use std::fs::File;
 use std::io::BufReader;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/blit-bitmap.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/blit-bitmap.png";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();

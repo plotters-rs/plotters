@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/full_palette.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/full_palette.png";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (2000, 850)).into_drawing_area();

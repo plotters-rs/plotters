@@ -8,7 +8,7 @@ use itertools::Itertools;
 
 use num_traits::sign::Signed;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/errorbar.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/errorbar.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data = generate_random_data();
     let down_sampled = down_sample(&data[..]);
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .draw_series(LineSeries::new(data, &GREEN.mix(0.3)))?
         .label("Raw Data")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &GREEN));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], GREEN));
 
     chart.draw_series(LineSeries::new(
         down_sampled.iter().map(|(x, _, y, _)| (*x, *y)),
@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }),
         )?
         .label("Down-sampled")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE));
 
     chart
         .configure_series_labels()

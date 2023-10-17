@@ -64,7 +64,7 @@ fn test_pixel_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Pixel::new((150, 152), &RED))
+    da.draw(&Pixel::new((150, 152), RED))
         .expect("Drawing Failure");
 }
 
@@ -126,7 +126,7 @@ fn test_path_element() {
     });
     da.draw(&PathElement::new(
         vec![(100, 101), (105, 107), (150, 157)],
-        Into::<ShapeStyle>::into(&BLUE).stroke_width(5),
+        Into::<ShapeStyle>::into(BLUE).stroke_width(5),
     ))
     .expect("Drawing Failure");
 }
@@ -199,7 +199,7 @@ fn test_rect_element() {
         let da = crate::create_mocked_drawing_area(300, 300, |m| {
             m.check_draw_rect(|c, s, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
-                assert_eq!(f, false);
+                assert!(!f);
                 assert_eq!(s, 5);
                 assert_eq!([u, d], [(100, 101), (105, 107)]);
             });
@@ -219,7 +219,7 @@ fn test_rect_element() {
         let da = crate::create_mocked_drawing_area(300, 300, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!([u, d], [(100, 101), (105, 107)]);
             });
             m.drop_check(|b| {
@@ -284,7 +284,7 @@ fn test_circle_element() {
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_circle(|c, _, f, s, r| {
             assert_eq!(c, BLUE.to_rgba());
-            assert_eq!(f, false);
+            assert!(!f);
             assert_eq!(s, (150, 151));
             assert_eq!(r, 20);
         });
@@ -293,7 +293,7 @@ fn test_circle_element() {
             assert_eq!(b.draw_count, 1);
         });
     });
-    da.draw(&Circle::new((150, 151), 20, &BLUE))
+    da.draw(&Circle::new((150, 151), 20, BLUE))
         .expect("Drawing Failure");
 }
 
@@ -353,6 +353,6 @@ fn test_polygon_element() {
         });
     });
 
-    da.draw(&Polygon::new(points.clone(), &BLUE))
+    da.draw(&Polygon::new(points.clone(), BLUE))
         .expect("Drawing Failure");
 }

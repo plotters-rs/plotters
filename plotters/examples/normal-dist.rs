@@ -4,7 +4,7 @@ use rand::SeedableRng;
 use rand_distr::{Distribution, Normal};
 use rand_xorshift::XorShiftRng;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/normal-dist.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/normal-dist.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 

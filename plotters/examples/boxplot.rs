@@ -21,7 +21,7 @@ fn read_data<BR: BufRead>(reader: BR) -> HashMap<(String, String), Vec<f64>> {
     ds
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/boxplot.svg";
+const OUT_FILE_NAME: &str = "plotters-doc-data/boxplot.svg";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = SVGBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let dataset: Vec<(String, String, Quartiles)> = ds
         .iter()
-        .map(|(k, v)| (k.0.clone(), k.1.clone(), Quartiles::new(&v)))
+        .map(|(k, v)| (k.0.clone(), k.1.clone(), Quartiles::new(v)))
         .collect();
 
     let host_list: Vec<_> = dataset
@@ -60,11 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         entry.0.push((x.0.clone(), &x.2));
     }
 
-    let values: Vec<f32> = dataset
-        .iter()
-        .map(|x| x.2.values().to_vec())
-        .flatten()
-        .collect();
+    let values: Vec<f32> = dataset.iter().flat_map(|x| x.2.values().to_vec()).collect();
     let values_range = fitting_range(values.iter());
 
     let mut chart = ChartBuilder::on(&upper)
@@ -81,13 +77,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_desc("Ping, ms")
         .y_desc("Host")
         .y_labels(host_list.len())
-        .light_line_style(&WHITE)
+        .light_line_style(WHITE)
         .draw()?;
 
     for (label, (values, style, offset)) in &series {
         chart
             .draw_series(values.iter().map(|x| {
-                Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), &x.1)
+                Boxplot::new_horizontal(SegmentValue::CenterOf(&x.0), x.1)
                     .width(20)
                     .whisker_width(0.5)
                     .style(style)
@@ -100,7 +96,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .configure_series_labels()
         .position(SeriesLabelPosition::UpperRight)
         .background_style(WHITE.filled())
-        .border_style(&BLACK.mix(0.5))
+        .border_style(BLACK.mix(0.5))
         .legend_area_size(22)
         .draw()?;
 
@@ -120,7 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .iter()
             .chain(quartiles_b.values().iter()),
     );
-    let mut chart = ChartBuilder::on(&left)
+    let mut chart = ChartBuilder::on(left)
         .x_label_area_size(40)
         .y_label_area_size(40)
         .caption("Vertical Boxplot", ("sans-serif", 20))
@@ -129,19 +125,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             values_range.start - 10.0..values_range.end + 10.0,
         )?;
 
-    chart.configure_mesh().light_line_style(&WHITE).draw()?;
+    chart.configure_mesh().light_line_style(WHITE).draw()?;
     chart.draw_series(vec![
         Boxplot::new_vertical(SegmentValue::CenterOf(&"a"), &quartiles_a),
         Boxplot::new_vertical(SegmentValue::CenterOf(&"b"), &quartiles_b),
     ])?;
 
-    let mut chart = ChartBuilder::on(&right)
+    let mut chart = ChartBuilder::on(right)
         .x_label_area_size(40)
         .y_label_area_size(40)
         .caption("Horizontal Boxplot", ("sans-serif", 20))
         .build_cartesian_2d(-30f32..90f32, 0..3)?;
 
-    chart.configure_mesh().light_line_style(&WHITE).draw()?;
+    chart.configure_mesh().light_line_style(WHITE).draw()?;
     chart.draw_series(vec![
         Boxplot::new_horizontal(1, &quartiles_a),
         Boxplot::new_horizontal(2, &Quartiles::new(&[30])),

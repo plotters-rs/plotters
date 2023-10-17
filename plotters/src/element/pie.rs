@@ -261,7 +261,7 @@ mod test {
         center.1 += 1;
         radius += 1.0;
         assert!(colors.get(0).is_none());
-        assert!(labels.get(0).is_none());
+        assert!(labels.first().is_none());
         assert_eq!(radius, 801.0);
     }
 }

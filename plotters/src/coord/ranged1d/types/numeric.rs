@@ -354,14 +354,14 @@ mod test {
     fn test_key_points() {
         let kp = compute_i32_key_points((0, 999), 28);
 
-        assert!(kp.len() > 0);
+        assert!(!kp.is_empty());
         assert!(kp.len() <= 28);
 
         let kp = compute_f64_key_points((-1.2, 1.2), 1);
         assert!(kp.len() == 1);
 
         let kp = compute_f64_key_points((-1.2, 1.2), 0);
-        assert!(kp.len() == 0);
+        assert!(kp.is_empty());
     }
 
     #[test]
@@ -404,7 +404,7 @@ mod test {
     fn test_small_coord() {
         let coord: RangedCoordf64 = (0.0..1e-25).into();
         let points = coord.key_points(10);
-        assert!(points.len() > 0);
+        assert!(!points.is_empty());
     }
 
     #[test]
@@ -448,6 +448,6 @@ mod test {
     fn regression_test_issue_304_intmax_keypoint_no_panic() {
         let coord: RangedCoordu32 = (0..u32::MAX).into();
         let p = coord.key_points(10);
-        assert!(p.len() > 0 && p.len() <= 10);
+        assert!(!p.is_empty() && p.len() <= 10);
     }
 }
