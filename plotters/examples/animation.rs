@@ -17,7 +17,7 @@ fn snowflake_iter(points: &[(f64, f64)]) -> Vec<(f64, f64)> {
     ret
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/animation.gif";
+const OUT_FILE_NAME: &str = "plotters-doc-data/animation.gif";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::gif(OUT_FILE_NAME, (800, 600), 1_000)?.into_drawing_area();
 
@@ -45,11 +45,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         chart.draw_series(std::iter::once(Polygon::new(
             snowflake_vertices.clone(),
-            &RED.mix(0.2),
+            RED.mix(0.2),
         )))?;
 
         snowflake_vertices.push(snowflake_vertices[0]);
-        chart.draw_series(std::iter::once(PathElement::new(snowflake_vertices, &RED)))?;
+        chart.draw_series(std::iter::once(PathElement::new(snowflake_vertices, RED)))?;
 
         root.present()?;
     }

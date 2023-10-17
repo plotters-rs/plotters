@@ -1,5 +1,5 @@
 use plotters::prelude::*;
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/3d-plot.svg";
+const OUT_FILE_NAME: &str = "plotters-doc-data/3d-plot.svg";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let area = SVGBackend::new(OUT_FILE_NAME, (1024, 760)).into_drawing_area();
 
@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let z_axis = (-3.0..3.0).step(0.1);
 
     let mut chart = ChartBuilder::on(&area)
-        .caption(format!("3D Plot Test"), ("sans", 20))
+        .caption("3D Plot Test".to_string(), ("sans", 20))
         .build_cartesian_3d(x_axis.clone(), -3.0..3.0, z_axis.clone())?;
 
     chart.with_projection(|mut pb| {
@@ -44,12 +44,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &BLACK,
         ))?
         .label("Line")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLACK));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLACK));
 
-    chart
-        .configure_series_labels()
-        .border_style(&BLACK)
-        .draw()?;
+    chart.configure_series_labels().border_style(BLACK).draw()?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
     area.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");

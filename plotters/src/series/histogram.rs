@@ -180,7 +180,7 @@ where
         let mut buffer = HashMap::<usize, A>::new();
         for (x, y) in iter.into_iter() {
             if let Some(x) = self.br.index_of(&x.into()) {
-                *buffer.entry(x).or_insert_with(Default::default) += y;
+                *buffer.entry(x).or_default() += y;
             }
         }
         self.iter = buffer.into_iter();

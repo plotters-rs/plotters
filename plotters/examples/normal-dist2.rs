@@ -6,7 +6,7 @@ use rand_xorshift::XorShiftRng;
 
 use num_traits::sign::Signed;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/normal-dist2.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/normal-dist2.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sd = 0.60;
 

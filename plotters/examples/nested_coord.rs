@@ -1,5 +1,5 @@
 use plotters::prelude::*;
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/nested_coord.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/nested_coord.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (640, 480)).into_drawing_area();
 
