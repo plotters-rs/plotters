@@ -138,7 +138,6 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
                 .map(FontExt::new)
                 .map_err(|e| FontError::FontLoadError(Arc::new(e)))
         })??;
-
     }
     drop(cache);
 
