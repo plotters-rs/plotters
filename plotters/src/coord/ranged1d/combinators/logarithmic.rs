@@ -46,11 +46,14 @@ impl_log_scalable!(i, u8);
 impl_log_scalable!(i, u16);
 impl_log_scalable!(i, u32);
 impl_log_scalable!(i, u64);
+impl_log_scalable!(i, usize);
 
 impl_log_scalable!(i, i8);
 impl_log_scalable!(i, i16);
 impl_log_scalable!(i, i32);
 impl_log_scalable!(i, i64);
+impl_log_scalable!(i, i128);
+impl_log_scalable!(i, isize);
 
 impl_log_scalable!(f, f32);
 impl_log_scalable!(f, f64);
