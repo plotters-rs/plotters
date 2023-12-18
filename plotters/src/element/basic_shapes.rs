@@ -189,40 +189,38 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
         };
         let size = self.size.in_pixels(&ps).max(0) as f32;
         let spacing = self.spacing.in_pixels(&ps).max(0) as f32;
-        let mut is_previous_solid = false;
+        let mut dist = 0.;
+        let mut is_solid = true;
+        let mut queue = vec![to_i(start)];
         for curr in points {
             let curr_f = to_f(curr);
             let (dx, dy) = (curr_f.0 - start.0, curr_f.1 - start.1);
-            let mut d = dx.hypot(dy).max(f32::EPSILON);
-            let scale = size / d;
-            let gap_scale = spacing / d;
-            // Start drawing until last segment
-            // 1) o-- --  o  (need to patch last one)
-            // 2) o-- -- o   (ignore the last one)
-            // 3) o o        (points are too dense)
-            if is_previous_solid {
-                start.0 += dx * gap_scale;
-                start.1 += dy * gap_scale;
-                d -= spacing;
+            let d = dx.hypot(dy).max(f32::EPSILON);
+            dist += d;
+            if is_solid {
+                if dist < size {
+                    queue.push(curr);
+                    start = curr_f;
+                } else {
+                    let t = (dist - size) / d;
+                    start = (start.0 + dx * t, start.1 + dy * t);
+                    queue.push(to_i(start));
+                    backend.draw_path(queue.drain(..), &self.style)?;
+                    dist = 0.;
+                    is_solid = false;
+                }
+            } else if dist < spacing {
+                start = curr_f;
+            } else {
+                let t = (dist - spacing) / d;
+                start = (start.0 + dx * t, start.1 + dy * t);
+                queue.push(to_i(start));
+                dist = 0.;
+                is_solid = true;
             }
-            while d >= size {
-                // Solid line
-                let end = (start.0 + dx * scale, start.1 + dy * scale);
-                backend.draw_path([to_i(start), to_i(end)], &self.style)?;
-                // Spacing
-                start = (end.0 + dx * gap_scale, end.1 + dy * gap_scale);
-                d -= size + spacing;
-            }
-            // Finish the last segment
-            // 1) o-- -- -o  (patched)
-            // 2) o-o        (become solid line)
-            let line = [to_i(start), curr];
-            is_previous_solid = d > 0. && line[0] != line[1];
-            if is_previous_solid {
-                backend.draw_path(line, &self.style)?;
-            }
-            // Move to the current point
-            start = curr_f;
+        }
+        if queue.len() > 1 {
+            backend.draw_path(queue, &self.style)?;
         }
         Ok(())
     }
