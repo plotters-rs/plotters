@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/sample.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/sample.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();
 
@@ -28,16 +28,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     cc.draw_series(LineSeries::new(x_axis.values().map(|x| (x, x.sin())), &RED))?
         .label("Sine")
-        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
+        .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], RED));
 
     cc.draw_series(LineSeries::new(
         x_axis.values().map(|x| (x, x.cos())),
         &BLUE,
     ))?
     .label("Cosine")
-    .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &BLUE));
+    .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], BLUE));
 
-    cc.configure_series_labels().border_style(&BLACK).draw()?;
+    cc.configure_series_labels().border_style(BLACK).draw()?;
 
     /*
     // It's possible to use a existing pointing element
@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let drawing_areas = lower.split_evenly((1, 2));
 
     for (drawing_area, idx) in drawing_areas.iter().zip(1..) {
-        let mut cc = ChartBuilder::on(&drawing_area)
+        let mut cc = ChartBuilder::on(drawing_area)
             .x_label_area_size(30)
             .y_label_area_size(30)
             .margin_right(20)

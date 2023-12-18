@@ -548,7 +548,7 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, WHITE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (0, 0));
                 assert_eq!(d, (1024, 768));
             });
@@ -573,7 +573,7 @@ mod drawing_area_tests {
                     let colors = colors.clone();
                     m.check_draw_rect(move |c, _, f, u, d| {
                         assert_eq!(c, colors[col * 3 + row].to_rgba());
-                        assert_eq!(f, true);
+                        assert!(f);
                         assert_eq!(u, (300 * row as i32 + 2.min(row) as i32, 300 * col as i32));
                         assert_eq!(
                             d,
@@ -605,14 +605,14 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, RED.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (0, 0));
                 assert_eq!(d, (345, 768));
             });
 
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (345, 0));
                 assert_eq!(d, (1024, 768));
             });
@@ -633,14 +633,14 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, RED.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (0, 0));
                 assert_eq!(d, (1024, 345));
             });
 
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, BLUE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (0, 345));
                 assert_eq!(d, (1024, 768));
             });
@@ -658,7 +658,7 @@ mod drawing_area_tests {
 
     #[test]
     fn test_split_grid() {
-        let colors = vec![
+        let colors = [
             &RED, &BLUE, &YELLOW, &WHITE, &BLACK, &MAGENTA, &CYAN, &BLUE, &RED,
         ];
         let breaks: [i32; 5] = [100, 200, 300, 400, 500];
@@ -675,7 +675,7 @@ mod drawing_area_tests {
                                     full
                                 } else {
                                     breaks[id as usize - 1]
-                                }) as i32
+                                })
                             };
 
                             let expected_u = (get_bp(1024, nxb, col), get_bp(768, nyb, row));
@@ -686,7 +686,7 @@ mod drawing_area_tests {
 
                             m.check_draw_rect(move |c, _, f, u, d| {
                                 assert_eq!(c, expected_color.to_rgba());
-                                assert_eq!(f, true);
+                                assert!(f);
                                 assert_eq!(u, expected_u);
                                 assert_eq!(d, expected_d);
                             });
@@ -720,7 +720,7 @@ mod drawing_area_tests {
             });
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, WHITE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u.0, 0);
                 assert!(u.1 > 0);
                 assert_eq!(d, (1024, 768));
@@ -744,7 +744,7 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_rect(|c, _, f, u, d| {
                 assert_eq!(c, WHITE.to_rgba());
-                assert_eq!(f, true);
+                assert!(f);
                 assert_eq!(u, (3, 1));
                 assert_eq!(d, (1024 - 4, 768 - 2));
             });
@@ -795,7 +795,7 @@ mod drawing_area_tests {
         let drawing_area = create_mocked_drawing_area(1000, 1200, |m| {
             let mut counter = 0;
             m.check_draw_rect(move |c, _, f, u, d| {
-                assert_eq!(f, true);
+                assert!(f);
 
                 match counter {
                     0 => {

@@ -132,12 +132,12 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
     // Then we need to check if the data cache contains the font data
     let cache = DATA_CACHE.read().unwrap();
     if let Some(data) = cache.get(Borrow::<str>::borrow(&key)) {
-        return data.clone().map(|handle| {
+        data.clone().map(|handle| {
             handle
                 .load()
                 .map(FontExt::new)
                 .map_err(|e| FontError::FontLoadError(Arc::new(e)))
-        })?;
+        })??;
     }
     drop(cache);
 
@@ -266,8 +266,8 @@ impl FontData for FontDataInternal {
                     .rasterize_glyph(
                         &mut canvas,
                         glyph_id,
-                        em as f32,
-                        Transform2F::from_translation(Vector2F::new(0.0, em as f32)),
+                        em,
+                        Transform2F::from_translation(Vector2F::new(0.0, em)),
                         HintingOptions::None,
                         RasterizationOptions::GrayscaleAa,
                     )
@@ -314,6 +314,6 @@ mod test {
 
         // TODO: Check they are the same
 
-        return Ok(());
+        Ok(())
     }
 }

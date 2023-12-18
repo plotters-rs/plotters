@@ -156,7 +156,7 @@ mod test {
         chart
             .draw_series(LineSeries::new(
                 (0..100).map(|x| (x, x)),
-                RED.stroke_width(3),
+                Into::<ShapeStyle>::into(RED).stroke_width(3),
             ))
             .expect("Drawing Error");
         chart
@@ -164,7 +164,7 @@ mod test {
                 (0..=50).map(|x| (0, x)),
                 10,
                 5,
-                RED.stroke_width(3),
+                Into::<ShapeStyle>::into(RED).stroke_width(3),
             ))
             .expect("Drawing Error");
     }

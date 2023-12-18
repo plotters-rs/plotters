@@ -828,7 +828,7 @@ impl Ranged for RangedDuration {
 #[allow(clippy::inconsistent_digit_grouping)]
 fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
     let min_ns_per_point = total_ns as f64 / max_points as f64;
-    let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);
+    let actual_ns_per_point: u64 = (10u64).pow(min_ns_per_point.log10().floor() as u32);
 
     fn determine_actual_ns_per_point(
         total_ns: u64,
@@ -850,7 +850,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
 
     if actual_ns_per_point < 1_000_000_000 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             actual_ns_per_point,
             &[1, 2, 5],
             10,
@@ -858,7 +858,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         ))
     } else if actual_ns_per_point < 3600_000_000_000 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             1_000_000_000,
             &[1, 2, 5, 10, 15, 20, 30],
             60,
@@ -866,7 +866,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         ))
     } else if actual_ns_per_point < 3600_000_000_000 * 24 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             3600_000_000_000,
             &[1, 2, 4, 8, 12],
             24,
@@ -875,7 +875,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
     } else if !sub_daily {
         if actual_ns_per_point < 3600_000_000_000 * 24 * 10 {
             Some(determine_actual_ns_per_point(
-                total_ns as u64,
+                total_ns,
                 3600_000_000_000 * 24,
                 &[1, 2, 5, 7],
                 10,
@@ -883,7 +883,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
             ))
         } else {
             Some(determine_actual_ns_per_point(
-                total_ns as u64,
+                total_ns,
                 3600_000_000_000 * 24 * 10,
                 &[1, 2, 5],
                 10,
@@ -1115,7 +1115,7 @@ mod test {
     #[test]
     fn test_datetime_nano_range() {
         let start = Utc.ymd(2019, 1, 1).and_hms(0, 0, 0);
-        let end = start.clone() + Duration::nanoseconds(100);
+        let end = start + Duration::nanoseconds(100);
         let coord: RangedDateTime<_> = (start..end).into();
 
         let kps = coord.key_points(50);

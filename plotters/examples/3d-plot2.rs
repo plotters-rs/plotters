@@ -3,12 +3,12 @@ fn pdf(x: f64, y: f64) -> f64 {
     const SDX: f64 = 0.1;
     const SDY: f64 = 0.1;
     const A: f64 = 5.0;
-    let x = x as f64 / 10.0;
-    let y = y as f64 / 10.0;
+    let x = x / 10.0;
+    let y = y / 10.0;
     A * (-x * x / 2.0 / SDX / SDX - y * y / 2.0 / SDY / SDY).exp()
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/3d-plot2.gif";
+const OUT_FILE_NAME: &str = "plotters-doc-data/3d-plot2.gif";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::gif(OUT_FILE_NAME, (600, 400), 100)?.into_drawing_area();
 

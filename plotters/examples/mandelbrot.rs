@@ -1,7 +1,7 @@
 use plotters::prelude::*;
 use std::ops::Range;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/mandelbrot.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/mandelbrot.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new(OUT_FILE_NAME, (800, 600)).into_drawing_area();
 
@@ -51,7 +51,7 @@ fn mandelbrot_set(
         (real.end - real.start) / samples.0 as f64,
         (complex.end - complex.start) / samples.1 as f64,
     );
-    return (0..(samples.0 * samples.1)).map(move |k| {
+    (0..(samples.0 * samples.1)).map(move |k| {
         let c = (
             real.start + step.0 * (k % samples.0) as f64,
             complex.start + step.1 * (k / samples.0) as f64,
@@ -62,8 +62,8 @@ fn mandelbrot_set(
             z = (z.0 * z.0 - z.1 * z.1 + c.0, 2.0 * z.0 * z.1 + c.1);
             cnt += 1;
         }
-        return (c.0, c.1, cnt);
-    });
+        (c.0, c.1, cnt)
+    })
 }
 #[test]
 fn entry_point() {

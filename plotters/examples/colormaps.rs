@@ -1,6 +1,6 @@
 use plotters::prelude::*;
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/colormaps.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/colormaps.png";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let colormaps_rgb: [(Box<dyn ColorMap<RGBColor>>, &str); 4] = [

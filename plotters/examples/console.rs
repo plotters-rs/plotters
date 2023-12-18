@@ -183,7 +183,7 @@ where
     Ok(())
 }
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/console-example.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/console-example.png";
 fn main() -> Result<(), Box<dyn Error>> {
     draw_chart(TextDrawingBackend(vec![PixelState::Empty; 5000]).into_drawing_area())?;
     let b = BitMapBackend::new(OUT_FILE_NAME, (1024, 768)).into_drawing_area();

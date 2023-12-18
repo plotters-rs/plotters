@@ -1,6 +1,6 @@
 use plotters::{prelude::*, style::full_palette::ORANGE};
 
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/pie-chart.png";
+const OUT_FILE_NAME: &str = "plotters-doc-data/pie-chart.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root_area = BitMapBackend::new(&OUT_FILE_NAME, (950, 700)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();

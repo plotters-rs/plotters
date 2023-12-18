@@ -101,18 +101,14 @@ impl SeriesLabelPosition {
         (
             match self {
                 UpperLeft | MiddleLeft | LowerLeft => 5,
-                UpperMiddle | MiddleMiddle | LowerMiddle => {
-                    (area_dim.0 as i32 - label_dim.0 as i32) / 2
-                }
-                UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 as i32 - 5,
+                UpperMiddle | MiddleMiddle | LowerMiddle => (area_dim.0 as i32 - label_dim.0) / 2,
+                UpperRight | MiddleRight | LowerRight => area_dim.0 as i32 - label_dim.0 - 5,
                 Coordinate(x, _) => *x,
             },
             match self {
                 UpperLeft | UpperMiddle | UpperRight => 5,
-                MiddleLeft | MiddleMiddle | MiddleRight => {
-                    (area_dim.1 as i32 - label_dim.1 as i32) / 2
-                }
-                LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 as i32 - 5,
+                MiddleLeft | MiddleMiddle | MiddleRight => (area_dim.1 as i32 - label_dim.1) / 2,
+                LowerLeft | LowerMiddle | LowerRight => area_dim.1 as i32 - label_dim.1 - 5,
                 Coordinate(_, y) => *y,
             },
         )

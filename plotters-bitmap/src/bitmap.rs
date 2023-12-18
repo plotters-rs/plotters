@@ -91,7 +91,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
 
     /// Create a new bitmap backend which only lives in-memory
     ///
-    /// When this is used, the bitmap backend will write to a user provided [u8] array (or Vec<u8>)
+    /// When this is used, the bitmap backend will write to a user provided [u8] array (or `Vec<u8>`)
     /// in RGB pixel format.
     ///
     /// Note: This function provides backward compatibility for those code that assumes Plotters

@@ -2,7 +2,7 @@ use plotters::{
     coord::ranged1d::{KeyPointHint, NoDefaultFormatting, ValueFormatter},
     prelude::*,
 };
-const OUT_FILE_NAME: &'static str = "plotters-doc-data/customized_coord.svg";
+const OUT_FILE_NAME: &str = "plotters-doc-data/customized_coord.svg";
 
 struct CustomizedX(u32);
 
