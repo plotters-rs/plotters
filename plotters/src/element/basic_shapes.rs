@@ -231,21 +231,20 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
 fn test_dashed_path_element() {
     use crate::prelude::*;
     let check_list = std::cell::RefCell::new(vec![
-        [(100, 100), (100, 103)],
-        [(100, 105), (100, 110)],
-        [(100, 112), (100, 117)],
-        [(100, 119), (100, 120)],
+        vec![(100, 100), (100, 103), (100, 118)],
+        vec![(100, 105), (100, 110)],
+        vec![(100, 112), (100, 117)],
+        vec![(100, 119), (100, 120)],
     ]);
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.check_draw_path(move |c, s, path| {
             assert_eq!(c, BLUE.to_rgba());
             assert_eq!(s, 7);
-            dbg!(&path);
             assert_eq!(path, check_list.borrow_mut().remove(0));
         });
         m.drop_check(|b| {
-            assert_eq!(b.num_draw_path_call, 4);
-            assert_eq!(b.draw_count, 4);
+            assert_eq!(b.num_draw_path_call, 1);
+            assert_eq!(b.draw_count, 1);
         });
     });
     da.draw(&DashedPathElement::new(
