@@ -1,8 +1,15 @@
 use plotters::prelude::*;
 
-use chrono::{TimeZone, Utc};
+use chrono::NaiveDate;
 
 use std::error::Error;
+
+// it's safe to use unwrap because we use known good values in test cases
+macro_rules! create_date {
+    ($year:expr, $month:expr, $day:expr) => {
+        NaiveDate::from_ymd_opt($year, $month, $day).unwrap()
+    };
+}
 
 const OUT_FILE_NAME: &'static str = "plotters-doc-data/slc-temp.png";
 fn main() -> Result<(), Box<dyn Error>> {
@@ -20,11 +27,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         .set_label_area_size(LabelAreaPosition::Right, 60)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .build_cartesian_2d(
-            (Utc.ymd(2010, 1, 1)..Utc.ymd(2018, 12, 1)).monthly(),
+            (create_date!(2010, 1, 1)..create_date!(2018, 12, 1)).monthly(),
             14.0..104.0,
         )?
         .set_secondary_coord(
-            (Utc.ymd(2010, 1, 1)..Utc.ymd(2018, 12, 1)).monthly(),
+            (create_date!(2010, 1, 1)..create_date!(2018, 12, 1)).monthly(),
             -10.0..40.0,
         );
 
@@ -42,13 +49,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         .draw()?;
 
     chart.draw_series(LineSeries::new(
-        DATA.iter().map(|(y, m, t)| (Utc.ymd(*y, *m, 1), *t)),
+        DATA.iter().map(|(y, m, t)| (create_date!(*y, *m, 1), *t)),
         &BLUE,
     ))?;
 
     chart.draw_series(
         DATA.iter()
-            .map(|(y, m, t)| Circle::new((Utc.ymd(*y, *m, 1), *t), 3, BLUE.filled())),
+            .map(|(y, m, t)| Circle::new((create_date!(*y, *m, 1), *t), 3, BLUE.filled())),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
