@@ -418,6 +418,20 @@ impl<Coord> Rectangle<Coord> {
         self.margin = (t, b, l, r);
         self
     }
+
+    /// Get the points of the rectangle
+    /// - returns the element points
+    pub fn get_points(&self) -> (&Coord, &Coord) {
+        (&self.points[0], &self.points[1])
+    }
+
+    /// Set the style of the rectangle
+    /// - `style`: The shape style
+    /// - returns a mut reference to the rectangle
+    pub fn set_style<S: Into<ShapeStyle>>(&mut self, style: S) -> &mut Self {
+        self.style = style.into();
+        self
+    }
 }
 
 impl<'a, Coord> PointCollection<'a, Coord> for &'a Rectangle<Coord> {
