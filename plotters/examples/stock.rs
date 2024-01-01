@@ -1,11 +1,9 @@
-use chrono::offset::{Local, TimeZone};
-use chrono::{Date, Duration};
+use chrono::{DateTime, Duration, NaiveDate};
 use plotters::prelude::*;
-fn parse_time(t: &str) -> Date<Local> {
-    Local
-        .datetime_from_str(&format!("{} 0:0", t), "%Y-%m-%d %H:%M")
+fn parse_time(t: &str) -> NaiveDate {
+    DateTime::parse_from_str(&format!("{} 0:0", t), "%Y-%m-%d %H:%M")
         .unwrap()
-        .date()
+        .date_naive()
 }
 const OUT_FILE_NAME: &'static str = "plotters-doc-data/stock.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {

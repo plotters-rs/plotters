@@ -14,7 +14,7 @@ exclude = ["doc-template", "plotters-doc-data"]
 
 [dependencies]
 num-traits = "0.2.14"
-chrono = { version = "0.4.19", optional = true }
+chrono = { version = "0.4.31", optional = true }
 
 [dependencies.plotters-backend]
 path = "../plotters-backend"
