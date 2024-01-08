@@ -26,7 +26,7 @@ pub use area_series::AreaSeries;
 #[cfg(feature = "histogram")]
 pub use histogram::Histogram;
 #[cfg(feature = "line_series")]
-pub use line_series::LineSeries;
+pub use line_series::{DashedLineSeries, LineSeries};
 #[cfg(feature = "point_series")]
 pub use point_series::PointSeries;
 #[cfg(feature = "surface_series")]
