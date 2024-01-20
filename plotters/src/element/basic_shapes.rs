@@ -188,35 +188,43 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
             None => return Ok(()),
         };
         let size = self.size.in_pixels(&ps).max(0) as f32;
+        if size == 0. {
+            return Ok(());
+        }
         let spacing = self.spacing.in_pixels(&ps).max(0) as f32;
         let mut dist = 0.;
         let mut is_solid = true;
         let mut queue = vec![to_i(start)];
         for curr in points {
-            let curr_f = to_f(curr);
-            let (dx, dy) = (curr_f.0 - start.0, curr_f.1 - start.1);
-            let d = dx.hypot(dy).max(f32::EPSILON);
-            dist += d;
-            if is_solid {
-                if dist < size {
-                    queue.push(curr);
-                    start = curr_f;
-                } else {
-                    let t = (dist - size) / d;
+            let end = to_f(curr);
+            // Loop for solid and spacing
+            while start != end {
+                let (dx, dy) = (end.0 - start.0, end.1 - start.1);
+                let d = dx.hypot(dy);
+                let size = if is_solid { size } else { spacing };
+                let left = size - dist;
+                // Set next point to `start`
+                if left < d {
+                    let t = left / d;
                     start = (start.0 + dx * t, start.1 + dy * t);
-                    queue.push(to_i(start));
-                    backend.draw_path(queue.drain(..), &self.style)?;
-                    dist = 0.;
-                    is_solid = false;
+                    dist += left;
+                } else {
+                    start = end;
+                    dist += d;
                 }
-            } else if dist < spacing {
-                start = curr_f;
-            } else {
-                let t = (dist - spacing) / d;
-                start = (start.0 + dx * t, start.1 + dy * t);
-                queue.push(to_i(start));
-                dist = 0.;
-                is_solid = true;
+                // Draw if needed
+                if is_solid {
+                    queue.push(to_i(start));
+                }
+                if size <= dist {
+                    if is_solid {
+                        backend.draw_path(queue.drain(..), &self.style)?;
+                    } else {
+                        queue.push(to_i(start));
+                    }
+                    dist = 0.;
+                    is_solid = !is_solid;
+                }
             }
         }
         if queue.len() > 1 {
@@ -231,9 +239,9 @@ impl<I0: Iterator + Clone, Size: SizeDesc, DB: DrawingBackend> Drawable<DB>
 fn test_dashed_path_element() {
     use crate::prelude::*;
     let check_list = std::cell::RefCell::new(vec![
-        vec![(100, 100), (100, 103), (100, 118)],
-        vec![(100, 105), (100, 110)],
-        vec![(100, 112), (100, 117)],
+        vec![(100, 100), (100, 103), (100, 105)],
+        vec![(100, 107), (100, 112)],
+        vec![(100, 114), (100, 119)],
         vec![(100, 119), (100, 120)],
     ]);
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
@@ -243,8 +251,8 @@ fn test_dashed_path_element() {
             assert_eq!(path, check_list.borrow_mut().remove(0));
         });
         m.drop_check(|b| {
-            assert_eq!(b.num_draw_path_call, 1);
-            assert_eq!(b.draw_count, 1);
+            assert_eq!(b.num_draw_path_call, 3);
+            assert_eq!(b.draw_count, 3);
         });
     });
     da.draw(&DashedPathElement::new(
