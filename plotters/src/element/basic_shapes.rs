@@ -343,8 +343,7 @@ where
             while start != end {
                 let (dx, dy) = (end.0 - start.0, end.1 - start.1);
                 let d = dx.hypot(dy);
-                let size = spacing;
-                let left = size - dist;
+                let left = spacing - dist;
                 // Set next point to `start`
                 if left < d {
                     let t = left / d;
@@ -355,7 +354,7 @@ where
                     dist += d;
                 }
                 // Draw if needed
-                if size <= dist {
+                if spacing <= dist {
                     let start_i = to_i(start);
                     (self.func)(start_i)
                         .into_dyn()
