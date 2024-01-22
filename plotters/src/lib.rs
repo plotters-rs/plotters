@@ -844,7 +844,7 @@ pub mod prelude {
     #[cfg(feature = "surface_series")]
     pub use crate::series::SurfaceSeries;
     #[cfg(feature = "line_series")]
-    pub use crate::series::{DashedLineSeries, LineSeries};
+    pub use crate::series::{DashedLineSeries, DottedLineSeries, LineSeries};
 
     // Styles
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
