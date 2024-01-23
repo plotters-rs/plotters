@@ -285,6 +285,7 @@ pub struct DottedPathElement<I: Iterator + Clone, Size: SizeDesc, Marker> {
 impl<I: Iterator + Clone, Size: SizeDesc, Marker> DottedPathElement<I, Size, Marker> {
     /// Create a new path
     /// - `points`: The iterator of the points
+    /// - `shift`: The shift of the first markers
     /// - `spacing`: The spacing between markers
     /// - `func`: The marker function
     /// - returns the created element

@@ -139,6 +139,7 @@ pub struct DottedLineSeries<I: Iterator + Clone, Size: SizeDesc, Marker> {
 impl<I: Iterator + Clone, Size: SizeDesc, Marker> DottedLineSeries<I, Size, Marker> {
     /// Create a new line series from
     /// - `points`: The iterator of the points
+    /// - `shift`: The shift of the first markers
     /// - `spacing`: The spacing between markers
     /// - `func`: The marker function
     /// - returns the created element
