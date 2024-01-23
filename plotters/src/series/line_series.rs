@@ -131,6 +131,7 @@ impl<I: Iterator + Clone, Size: SizeDesc> IntoIterator for DashedLineSeries<I, S
 /// A dotted line series, map an iterable object to the dotted line element.
 pub struct DottedLineSeries<I: Iterator + Clone, Size: SizeDesc, Marker> {
     points: I,
+    shift: Size,
     spacing: Size,
     func: Box<dyn Fn(BackendCoord) -> Marker>,
 }
@@ -141,13 +142,14 @@ impl<I: Iterator + Clone, Size: SizeDesc, Marker> DottedLineSeries<I, Size, Mark
     /// - `spacing`: The spacing between markers
     /// - `func`: The marker function
     /// - returns the created element
-    pub fn new<I0, F>(points: I0, spacing: Size, func: F) -> Self
+    pub fn new<I0, F>(points: I0, shift: Size, spacing: Size, func: F) -> Self
     where
         I0: IntoIterator<IntoIter = I>,
         F: Fn(BackendCoord) -> Marker + 'static,
     {
         Self {
             points: points.into_iter(),
+            shift,
             spacing,
             func: Box::new(func),
         }
@@ -161,7 +163,12 @@ impl<I: Iterator + Clone, Size: SizeDesc, Marker: 'static> IntoIterator
     type IntoIter = std::iter::Once<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        std::iter::once(DottedPathElement::new(self.points, self.spacing, self.func))
+        std::iter::once(DottedPathElement::new(
+            self.points,
+            self.shift,
+            self.spacing,
+            self.func,
+        ))
     }
 }
 
@@ -184,7 +191,7 @@ mod test {
 
             m.drop_check(|b| {
                 assert_eq!(b.num_draw_path_call, 8);
-                assert_eq!(b.draw_count, 28);
+                assert_eq!(b.draw_count, 27);
             });
         });
 
@@ -208,7 +215,7 @@ mod test {
             .expect("Drawing Error");
         let mk_f = |c| Circle::new(c, 3, Into::<ShapeStyle>::into(RED).filled());
         chart
-            .draw_series(DottedLineSeries::new((0..=50).map(|x| (x, 0)), 5, mk_f))
+            .draw_series(DottedLineSeries::new((0..=50).map(|x| (x, 0)), 5, 5, mk_f))
             .expect("Drawing Error");
     }
 }

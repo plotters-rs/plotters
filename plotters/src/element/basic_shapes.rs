@@ -277,6 +277,7 @@ fn test_dashed_path_element() {
 /// It's similar to [`PathElement`] but use a marker function to draw markers with spacing.
 pub struct DottedPathElement<I: Iterator + Clone, Size: SizeDesc, Marker> {
     points: I,
+    shift: Size,
     spacing: Size,
     func: Box<dyn Fn(BackendCoord) -> Marker>,
 }
@@ -287,13 +288,14 @@ impl<I: Iterator + Clone, Size: SizeDesc, Marker> DottedPathElement<I, Size, Mar
     /// - `spacing`: The spacing between markers
     /// - `func`: The marker function
     /// - returns the created element
-    pub fn new<I0, F>(points: I0, spacing: Size, func: F) -> Self
+    pub fn new<I0, F>(points: I0, shift: Size, spacing: Size, func: F) -> Self
     where
         I0: IntoIterator<IntoIter = I>,
         F: Fn(BackendCoord) -> Marker + 'static,
     {
         Self {
             points: points.into_iter(),
+            shift,
             spacing,
             func: Box::new(func),
         }
@@ -324,18 +326,11 @@ where
         ps: (u32, u32),
     ) -> Result<(), DrawingErrorKind<DB::ErrorType>> {
         let mut start = match points.next() {
-            Some(start_i) => {
-                (self.func)(start_i)
-                    .into_dyn()
-                    .draw(std::iter::once(start_i), backend, ps)?;
-                to_f(start_i)
-            }
+            Some(c) => to_f(c),
             None => return Ok(()),
         };
+        let mut shift = self.shift.in_pixels(&ps).max(0) as f32;
         let spacing = self.spacing.in_pixels(&ps).max(0) as f32;
-        if spacing == 0. {
-            return Ok(());
-        }
         let mut dist = 0.;
         for curr in points {
             let end = to_f(curr);
@@ -343,6 +338,7 @@ where
             while start != end {
                 let (dx, dy) = (end.0 - start.0, end.1 - start.1);
                 let d = dx.hypot(dy);
+                let spacing = if shift == 0. { spacing } else { shift };
                 let left = spacing - dist;
                 // Set next point to `start`
                 if left < d {
@@ -360,6 +356,7 @@ where
                         .into_dyn()
                         .draw(std::iter::once(start_i), backend, ps)?;
                     dist = 0.;
+                    shift = 0.;
                 }
             }
         }
@@ -374,11 +371,12 @@ fn test_dotted_path_element() {
     let da = crate::create_mocked_drawing_area(300, 300, |m| {
         m.drop_check(|b| {
             assert_eq!(b.num_draw_path_call, 0);
-            assert_eq!(b.draw_count, 8);
+            assert_eq!(b.draw_count, 7);
         });
     });
     da.draw(&DottedPathElement::new(
         vec![(100, 100), (105, 105), (150, 150)],
+        5,
         10,
         |c| Circle::new(c, 5, Into::<ShapeStyle>::into(RED).filled()),
     ))
