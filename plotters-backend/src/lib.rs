@@ -308,9 +308,9 @@ pub trait DrawingBackend: Sized {
                     break;
                 }
                 // FIXME: This assume we have RGB image buffer
-                let r = src[(dx + dy * w) as usize * 3];
-                let g = src[(dx + dy * w) as usize * 3 + 1];
-                let b = src[(dx + dy * w) as usize * 3 + 2];
+                let r = src[(dx + dy * iw) as usize * 3];
+                let g = src[(dx + dy * iw) as usize * 3 + 1];
+                let b = src[(dx + dy * iw) as usize * 3 + 2];
                 let color = BackendColor {
                     alpha: 1.0,
                     rgb: (r, g, b),
