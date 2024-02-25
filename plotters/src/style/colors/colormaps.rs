@@ -245,7 +245,7 @@ macro_rules! implement_linear_interpolation_color_map {
 }
 
 #[doc(inline)]
-pub use crate::define_linear_interpolation_color_map;
+pub use crate::def_linear_colormap;
 
 #[macro_export]
 #[doc(hidden)]
@@ -256,7 +256,7 @@ pub use crate::define_linear_interpolation_color_map;
 ///
 /// ```
 /// use plotters::prelude::*;
-/// define_linear_interpolation_color_map! {
+/// def_linear_colormap! {
 ///     BlackWhite,
 ///     RGBColor,
 ///     "Simple chromatic colormap from black to white.",
@@ -269,7 +269,7 @@ pub use crate::define_linear_interpolation_color_map;
 ///
 /// Hint: Some helper macros and functions have been deliberately hidden from end users.
 /// Look for them in the source code if you are interested.
-macro_rules! define_linear_interpolation_color_map{
+macro_rules! def_linear_colormap{
     ($color_scale_name:ident, $color_type:ident, $doc:expr, $(($($color_value:expr),+)),*) => {
         #[doc = $doc]
         pub struct $color_scale_name;
@@ -294,7 +294,7 @@ macro_rules! define_linear_interpolation_color_map{
     }
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     ViridisRGBA,
     RGBAColor,
     "A colormap optimized for visually impaired people (RGBA format).
@@ -310,7 +310,7 @@ define_linear_interpolation_color_map! {
     (254, 232,  37, 1.0)
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     ViridisRGB,
     RGBColor,
     "A colormap optimized for visually impaired people (RGB Format).
@@ -326,7 +326,7 @@ define_linear_interpolation_color_map! {
     (254, 232,  37)
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     BlackWhite,
     RGBColor,
     "Simple chromatic colormap from black to white.",
@@ -334,7 +334,7 @@ define_linear_interpolation_color_map! {
     (255, 255,   255)
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     MandelbrotHSL,
     HSLColor,
     "Colormap created to replace the one used in the mandelbrot example.",
@@ -342,7 +342,7 @@ define_linear_interpolation_color_map! {
     (1.0, 1.0, 0.5)
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     VulcanoHSL,
     HSLColor,
     "A vulcanic colormap that display red/orange and black colors",
@@ -351,7 +351,7 @@ define_linear_interpolation_color_map! {
 }
 
 use super::full_palette::*;
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     Bone,
     RGBColor,
     "Dark colormap going from black over blue to white.",
@@ -360,7 +360,7 @@ define_linear_interpolation_color_map! {
     WHITE
 }
 
-define_linear_interpolation_color_map! {
+def_linear_colormap! {
     Copper,
     RGBColor,
     "Friendly black to brown colormap.",
