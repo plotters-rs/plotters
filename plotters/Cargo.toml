@@ -132,3 +132,8 @@ wasm-bindgen-test = "0.3.24"
 name = "benchmark"
 harness = false
 path = "benches/main.rs"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "doc_cfg"]
+

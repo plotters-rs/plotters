@@ -4,6 +4,7 @@ use plotters_backend::DrawingBackend;
 use plotters_svg::SVGBackend;
 
 #[cfg(feature = "evcxr_bitmap")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr_bitmap")))]
 use plotters_bitmap::BitMapBackend;
 
 /// The wrapper for the generated SVG
@@ -47,6 +48,7 @@ pub fn evcxr_figure<
 
 /// Start drawing an evcxr figure
 #[cfg(feature = "evcxr_bitmap")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr_bitmap")))]
 pub fn evcxr_bitmap_figure<
     Draw: FnOnce(DrawingArea<BitMapBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
 >(
