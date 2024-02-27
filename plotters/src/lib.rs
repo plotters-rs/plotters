@@ -1,4 +1,5 @@
 #![warn(missing_docs)]
+#![cfg_attr(doc_cfg, feature(doc_cfg))]
 /*!
 
 # Plotters - A Rust drawing library focusing on data plotting for both WASM and native applications 🦀📈🚀
@@ -796,12 +797,14 @@ pub mod style;
 
 /// Evaluation Context for Rust. See [the evcxr crate](https://crates.io/crates/evcxr) for more information.
 #[cfg(feature = "evcxr")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
 pub mod evcxr;
 
 #[cfg(test)]
 pub use crate::drawing::{check_color, create_mocked_drawing_area};
 
 #[cfg(feature = "palette_ext")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "palette_ext")))]
 pub use palette;
 
 /// The module imports the most commonly used types and modules in Plotters
@@ -825,6 +828,7 @@ pub mod prelude {
     pub use crate::coord::combinators::LogRange;
 
     #[cfg(feature = "chrono")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "chrono")))]
     pub use crate::coord::types::{
         IntoMonthly, IntoYearly, RangedDate, RangedDateTime, RangedDuration,
     };
@@ -836,23 +840,30 @@ pub mod prelude {
 
     // Series helpers
     #[cfg(feature = "area_series")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "area_series")))]
     pub use crate::series::AreaSeries;
     #[cfg(feature = "histogram")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "histogram")))]
     pub use crate::series::Histogram;
     #[cfg(feature = "point_series")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "point_series")))]
     pub use crate::series::PointSeries;
     #[cfg(feature = "surface_series")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "surface_series")))]
     pub use crate::series::SurfaceSeries;
     #[cfg(feature = "line_series")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "line_series")))]
     pub use crate::series::{DashedLineSeries, DottedLineSeries, LineSeries};
 
     // Styles
     pub use crate::style::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YELLOW};
 
     #[cfg(feature = "full_palette")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "full_palette")))]
     pub use crate::style::full_palette;
 
     #[cfg(feature = "colormaps")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "colormaps")))]
     pub use crate::style::colors::colormaps::*;
 
     pub use crate::style::{
@@ -868,13 +879,17 @@ pub mod prelude {
     };
 
     #[cfg(feature = "boxplot")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "boxplot")))]
     pub use crate::element::Boxplot;
     #[cfg(feature = "candlestick")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "candlestick")))]
     pub use crate::element::CandleStick;
     #[cfg(feature = "errorbar")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "errorbar")))]
     pub use crate::element::ErrorBar;
 
     #[cfg(feature = "bitmap_backend")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "bitmap_backend")))]
     pub use crate::element::BitMapElement;
 
     // Data
@@ -882,6 +897,7 @@ pub mod prelude {
 
     // TODO: This should be deprecated and completely removed
     #[cfg(feature = "deprecated_items")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "deprecated_items")))]
     #[allow(deprecated)]
     pub use crate::element::Path;
 
@@ -893,13 +909,16 @@ pub mod prelude {
         Result<T, crate::drawing::DrawingAreaErrorKind<D::ErrorType>>;
 
     #[cfg(feature = "evcxr")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "evcxr")))]
     pub use crate::evcxr::evcxr_figure;
 
     // Re-export tier 1 backends for backward compatibility
     #[cfg(feature = "bitmap_backend")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "bitmap_backend")))]
     pub use plotters_bitmap::BitMapBackend;
 
     #[cfg(feature = "svg_backend")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "svg_backend")))]
     pub use plotters_svg::SVGBackend;
 }
 
@@ -907,11 +926,13 @@ pub mod prelude {
 pub mod backend {
     pub use plotters_backend::DrawingBackend;
     #[cfg(feature = "bitmap_backend")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "bitmap_backend")))]
     pub use plotters_bitmap::{
         bitmap_pixel::{BGRXPixel, PixelFormat, RGBPixel},
         BitMapBackend,
     };
     #[cfg(feature = "svg_backend")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "svg_backend")))]
     pub use plotters_svg::SVGBackend;
 }
 
