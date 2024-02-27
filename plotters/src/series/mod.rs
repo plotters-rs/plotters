@@ -29,7 +29,7 @@ pub use area_series::AreaSeries;
 pub use histogram::Histogram;
 #[cfg(feature = "line_series")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "line_series")))]
-pub use line_series::{DashedLineSeries, LineSeries};
+pub use line_series::{DashedLineSeries, DottedLineSeries, LineSeries};
 #[cfg(feature = "point_series")]
 #[cfg_attr(doc_cfg, doc(cfg(feature = "point_series")))]
 pub use point_series::PointSeries;
