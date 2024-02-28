@@ -95,16 +95,18 @@ where
             let logic_pos = Coord3D::build_coord([&pos[0], &pos[1], &pos[2]]);
             let mut font = font.clone();
 
-            match dir.0.cmp(&0) {
-                Ordering::Less => font.pos = Pos::new(HPos::Right, VPos::Center),
-                Ordering::Greater => font.pos = Pos::new(HPos::Left, VPos::Center),
-                _ => (),
-            }
+            if font.pos.is_none() {
+                match dir.0.cmp(&0) {
+                    Ordering::Less => font.pos = Some(Pos::new(HPos::Right, VPos::Center)),
+                    Ordering::Greater => font.pos = Some(Pos::new(HPos::Left, VPos::Center)),
+                    _ => (),
+                }
 
-            match dir.1.cmp(&0) {
-                Ordering::Less => font.pos = Pos::new(HPos::Center, VPos::Bottom),
-                Ordering::Greater => font.pos = Pos::new(HPos::Center, VPos::Top),
-                _ => (),
+                match dir.1.cmp(&0) {
+                    Ordering::Less => font.pos = Some(Pos::new(HPos::Center, VPos::Bottom)),
+                    Ordering::Greater => font.pos = Some(Pos::new(HPos::Center, VPos::Top)),
+                    _ => (),
+                }
             }
 
             let element = EmptyElement::at(logic_pos)

@@ -113,7 +113,7 @@ impl<'a> FontDesc<'a> {
         TextStyle {
             font: self.clone(),
             color: color.to_backend_color(),
-            pos: Pos::default(),
+            pos: None,
         }
     }
 

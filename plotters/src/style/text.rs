@@ -13,7 +13,7 @@ pub struct TextStyle<'a> {
     /// The text color
     pub color: BackendColor,
     /// The anchor point position
-    pub pos: text_anchor::Pos,
+    pub pos: Option<text_anchor::Pos>,
 }
 
 /// Trait for values that can be converted into `TextStyle` values
@@ -191,7 +191,7 @@ impl<'a> TextStyle<'a> {
         Self {
             font: self.font.clone(),
             color: self.color,
-            pos,
+            pos: Some(pos),
         }
     }
 }
@@ -276,7 +276,7 @@ impl<'a, T: Into<FontDesc<'a>>> From<T> for TextStyle<'a> {
         Self {
             font: font.into(),
             color: BLACK.to_backend_color(),
-            pos: text_anchor::Pos::default(),
+            pos: Some(text_anchor::Pos::default()),
         }
     }
 }
@@ -304,7 +304,7 @@ impl<'a> BackendTextStyle for TextStyle<'a> {
         self.font.layout_box(text)
     }
 
-    fn anchor(&self) -> text_anchor::Pos {
+    fn anchor(&self) -> Option<text_anchor::Pos> {
         self.pos
     }
 

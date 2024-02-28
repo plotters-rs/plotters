@@ -394,13 +394,14 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         }
 
         let (x0, y0) = pos;
-        let text_anchor = match style.anchor().h_pos {
+        let anchor = style.anchor().unwrap_or_default();
+        let text_anchor = match anchor.h_pos {
             HPos::Left => "start",
             HPos::Right => "end",
             HPos::Center => "middle",
         };
 
-        let dy = match style.anchor().v_pos {
+        let dy = match anchor.v_pos {
             VPos::Top => "0.76em",
             VPos::Center => "0.5ex",
             VPos::Bottom => "-0.5ex",
@@ -410,12 +411,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         {
             let ((fx0, fy0), (fx1, fy1)) =
                 font.layout_box(text).map_err(DrawingErrorKind::FontError)?;
-            let x0 = match style.anchor().h_pos {
+            let x0 = match anchor.h_pos {
                 HPos::Left => x0,
                 HPos::Center => x0 - fx1 / 2 + fx0 / 2,
                 HPos::Right => x0 - fx1 + fx0,
             };
-            let y0 = match style.anchor().v_pos {
+            let y0 = match anchor.v_pos {
                 VPos::Top => y0,
                 VPos::Center => y0 - fy1 / 2 + fy0 / 2,
                 VPos::Bottom => y0 - fy1 + fy0,

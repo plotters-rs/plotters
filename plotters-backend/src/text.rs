@@ -107,7 +107,6 @@ pub mod text_anchor {
         pub fn new(h_pos: HPos, v_pos: VPos) -> Self {
             Pos { h_pos, v_pos }
         }
-
     }
 }
 
@@ -214,8 +213,8 @@ pub trait BackendTextStyle {
         FontStyle::Normal
     }
 
-    fn anchor(&self) -> text_anchor::Pos {
-        text_anchor::Pos::default()
+    fn anchor(&self) -> Option<text_anchor::Pos> {
+        None
     }
 
     fn family(&self) -> FontFamily;
