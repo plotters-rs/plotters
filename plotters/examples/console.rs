@@ -131,12 +131,13 @@ impl DrawingBackend for TextDrawingBackend {
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         let (width, height) = self.estimate_text_size(text, style)?;
         let (width, height) = (width as i32, height as i32);
-        let dx = match style.anchor().h_pos {
+        let style = style.anchor().unwrap_or_default();
+        let dx = match style.h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
             HPos::Center => -width / 2,
         };
-        let dy = match style.anchor().v_pos {
+        let dy = match style.v_pos {
             VPos::Top => 0,
             VPos::Center => -height / 2,
             VPos::Bottom => -height,

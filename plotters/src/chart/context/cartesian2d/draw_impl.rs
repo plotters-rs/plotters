@@ -248,7 +248,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             };
 
             let label_style_with_new_pos = label_style.pos(Pos::new(h_pos, v_pos));
-            let label_style = match label_style.anchor() {
+            let label_style = match label_style.pos {
                 Some(_) => label_style,
                 None => &label_style_with_new_pos,
             };
