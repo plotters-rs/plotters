@@ -565,4 +565,27 @@ mod test {
         chart.caption("This is a test case", ("serif", 10));
         assert_eq!(chart.title.as_ref().unwrap().1.font.get_name(), "serif");
     }
+
+    #[test]
+    fn test_zero_limit_with_log_scale() {
+        let drawing_area = create_mocked_drawing_area(640, 480, |_| {});
+
+        let mut chart = ChartBuilder::on(&drawing_area)
+            .build_cartesian_2d(0f32..10f32, (1e-6f32..1f32).log_scale())
+            .unwrap();
+
+        let data = vec![
+            (2f32, 1e-4f32),
+            (4f32, 1e-3f32),
+            (6f32, 1e-2f32),
+            (8f32, 1e-1f32),
+        ];
+
+        chart
+            .draw_series(
+                data.iter()
+                    .map(|&(x, y)| Rectangle::new([(x - 0.5, 0.0), (x + 0.5, y)], RED.filled())),
+            )
+            .unwrap();
+    }
 }
