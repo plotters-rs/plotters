@@ -87,6 +87,14 @@ macro_rules! make_numeric_coord {
                     return limit.1;
                 }
 
+                if logic_length.is_infinite() {
+                    if logic_length.is_sign_positive() {
+                        return limit.1;
+                    } else {
+                        return limit.0;
+                    }
+                }
+
                 if actual_length > 0 {
                     return limit.0 + (actual_length as f64 * logic_length + 1e-3).floor() as i32;
                 } else {
