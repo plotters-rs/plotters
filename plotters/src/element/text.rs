@@ -126,31 +126,93 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
         if max_width == 0 || line.is_empty() {
             func(line);
         } else {
-            let mut remaining = &line[0..];
+            let mut indices = line.char_indices().map(|(idx, _)| idx).peekable();
+            let font2 = font.clone();
 
-            while !remaining.is_empty() {
-                let mut left = 0;
-                while left < remaining.len() {
-                    let width = font.box_size(&remaining[0..=left]).unwrap_or((0, 0)).0 as i32;
+            let it = std::iter::from_fn(|| {
+                let start_idx = match indices.next() {
+                    Some(idx) => idx,
+                    None => return None,
+                };
 
+                // iterate over indices
+                while let Some(idx) = indices.next() {
+                    let substring = &line[start_idx..idx];
+                    let width = font2.box_size(substring).unwrap_or((0, 0)).0 as i32;
                     if width > max_width as i32 {
                         break;
                     }
-                    left += 1;
                 }
 
-                if left == 0 {
-                    left += 1;
-                }
+                let end_idx = match indices.peek() {
+                    Some(idx) => *idx,
+                    None => line.bytes().len(),
+                };
 
-                let cur_line = &remaining[..left];
-                remaining = &remaining[left..];
+                Some(&line[start_idx..end_idx])
+            });
 
-                func(cur_line);
+            for chunk in it {
+                func(chunk);
             }
         }
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test_multi_layout() {
+    use plotters_backend::{FontFamily, FontStyle};
+
+    let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
+
+    layout_multiline_text("öäabcde", 40, font, |txt| {
+        println!("Got: {}", txt);
+        assert!(txt == "öäabc" || txt == "de");
+    });
+
+    let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
+    layout_multiline_text("öä", 40, font, |txt| {
+        println!("Got: {}", txt);
+        assert_eq!(txt, "öä")
+    });
+}
+
+// fn layout_multiline_text<'a, F: FnMut(&'a str)>(
+//     text: &'a str,
+//     max_width: u32,
+//     font: FontDesc<'a>,
+//     mut func: F,
+// ) {
+//     for line in text.lines() {
+//         if max_width == 0 || line.is_empty() {
+//             func(line);
+//         } else {
+//             let mut remaining = &line[0..];
+
+//             while !remaining.is_empty() {
+//                 let mut left = 0;
+//                 while left < remaining.len() {
+//                     let width = font.box_size(&remaining[0..=left]).unwrap_or((0, 0)).0 as i32;
+
+//                     if width > max_width as i32 {
+//                         break;
+//                     }
+//                     left += 1;
+//                 }
+
+//                 if left == 0 {
+//                     left += 1;
+//                 }
+
+//                 let cur_line = &remaining[..left];
+//                 remaining = &remaining[left..];
+
+//                 func(cur_line);
+//             }
+//         }
+//     }
+// }
 
 impl<'a, T: Borrow<str>> MultiLineText<'a, BackendCoord, T> {
     /// Compute the line layout
