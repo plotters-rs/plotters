@@ -116,6 +116,11 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
     }
 }
 
+
+// Rewrite of the layout function for multiline-text. It crashes when UTF-8 is used 
+// instead of ASCII. Solution taken from:
+// https://stackoverflow.com/questions/68122526/splitting-a-utf-8-string-into-chunks
+// and modified for our purposes.
 fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     text: &'a str,
     max_width: u32,
