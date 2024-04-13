@@ -6,7 +6,7 @@ use image::ImageError;
 pub enum BitMapBackendError {
     /// The buffer provided is invalid, for example, wrong pixel buffer size
     InvalidBuffer,
-    /// Some IO error occurs while the bitmap maniuplation
+    /// Some IO error occurs while the bitmap manipulation
     IOError(std::io::Error),
     #[cfg(all(feature = "gif", not(target_arch = "wasm32"), feature = "image"))]
     GifEncodingError(gif::EncodingError),

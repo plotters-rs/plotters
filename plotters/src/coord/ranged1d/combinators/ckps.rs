@@ -11,7 +11,7 @@ use crate::coord::ranged1d::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged
 /// This decorator allows customized tick mark specifiied by vector.
 /// See [BindKeyPoints::with_key_points](trait.BindKeyPoints.html#tymethod.with_key_points)
 /// for details.
-/// Note: For any coordinate spec wrapped by this decorator, the maxium number of labels configured by
+/// Note: For any coordinate spec wrapped by this decorator, the maximum number of labels configured by
 /// MeshStyle will be ignored and the key point function will always returns the entire vector
 pub struct WithKeyPoints<Inner: Ranged> {
     inner: Inner,
@@ -122,7 +122,7 @@ where
 impl<T: AsRangedCoord> BindKeyPoints for T {}
 
 /// The coordinate decorator that allows customized keypoint algorithms.
-/// Normally, all the coordinate spec implements its own key point algorith
+/// Normally, all the coordinate spec implements its own key point algorithm
 /// But this decorator allows you override the pre-defined key point algorithm.
 ///
 /// To use this decorator, see [BindKeyPointMethod::with_key_point_func](trait.BindKeyPointMethod.html#tymethod.with_key_point_func)

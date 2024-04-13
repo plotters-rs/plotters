@@ -7,7 +7,7 @@ where
 {
     /// Takes a scalar value 0.0 <= h <= 1.0 and returns the corresponding color.
     /// Typically color-scales are named according to which color-type they return.
-    /// To use upper and lower bounds with ths function see [get_color_normalized](ColorMap::get_color_normalized).
+    /// To use upper and lower bounds with this function see [get_color_normalized](ColorMap::get_color_normalized).
     fn get_color(&self, h: FloatType) -> ColorType {
         self.get_color_normalized(h, FloatType::zero(), FloatType::one())
     }

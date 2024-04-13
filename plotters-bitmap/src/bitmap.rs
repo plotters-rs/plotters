@@ -28,7 +28,7 @@ use target::{Buffer, Target};
 /// `BitMapBackend`, not just `drop` it or allow it to go out of scope.
 ///
 /// If the `BitMapBackend` is just dropped, it will make a best effort attempt to write the
-/// generated charts to the output file, but any errors that occcur (such as inability to
+/// generated charts to the output file, but any errors that occur (such as inability to
 /// create the output file) will be silently ignored.
 pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     /// The path to the image
@@ -95,7 +95,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
     /// in RGB pixel format.
     ///
     /// Note: This function provides backward compatibility for those code that assumes Plotters
-    /// uses RGB pixel format and maniuplates the in-memory framebuffer.
+    /// uses RGB pixel format and manipulates the in-memory framebuffer.
     /// For more pixel format option, use `with_buffer_and_format` instead.
     ///
     /// - `buf`: The buffer to operate
@@ -141,7 +141,7 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
     /// multi-threading rendering.
     ///
     /// - `area_size`: The size of the area
-    /// - **returns**: The splitted backends that can be rendered in parallel
+    /// - **returns**: The split backends that can be rendered in parallel
     pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<P>> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();

@@ -183,7 +183,7 @@ mod test {
             m.check_draw_path(|c, s, _path| {
                 assert_eq!(c, RED.to_rgba());
                 assert_eq!(s, 3);
-                // TODO when cleanup the backend coordinate defination, then we uncomment the
+                // TODO when cleanup the backend coordinate definition, then we uncomment the
                 // following check
                 //for i in 0..100 {
                 //    assert_eq!(path[i], (i as i32 * 2, 199 - i as i32 * 2));
