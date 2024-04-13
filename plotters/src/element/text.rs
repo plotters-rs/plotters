@@ -164,8 +164,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     }
 }
 
-#[cfg(test)]
-#[cfg(ttf)]
+#[cfg(feature = "ttf")]
 #[test]
 fn test_multi_layout() {
     use plotters_backend::{FontFamily, FontStyle};
