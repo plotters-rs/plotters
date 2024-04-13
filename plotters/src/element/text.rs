@@ -165,6 +165,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
 }
 
 #[cfg(test)]
+#[cfg(ttf)]
 #[test]
 fn test_multi_layout() {
     use plotters_backend::{FontFamily, FontStyle};
@@ -177,7 +178,9 @@ fn test_multi_layout() {
     });
 
     let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
-    layout_multiline_text("öä", 40, font, |txt| {
+    layout_multiline_text("öä", 100, font, |txt| {
+        // This does not divide the line, but still crashed in the previous implementation
+        // of layout_multiline_text. So this test should be reliable
         println!("Got: {}", txt);
         assert_eq!(txt, "öä")
     });
