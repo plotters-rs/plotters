@@ -185,42 +185,6 @@ fn test_multi_layout() {
     });
 }
 
-// fn layout_multiline_text<'a, F: FnMut(&'a str)>(
-//     text: &'a str,
-//     max_width: u32,
-//     font: FontDesc<'a>,
-//     mut func: F,
-// ) {
-//     for line in text.lines() {
-//         if max_width == 0 || line.is_empty() {
-//             func(line);
-//         } else {
-//             let mut remaining = &line[0..];
-
-//             while !remaining.is_empty() {
-//                 let mut left = 0;
-//                 while left < remaining.len() {
-//                     let width = font.box_size(&remaining[0..=left]).unwrap_or((0, 0)).0 as i32;
-
-//                     if width > max_width as i32 {
-//                         break;
-//                     }
-//                     left += 1;
-//                 }
-
-//                 if left == 0 {
-//                     left += 1;
-//                 }
-
-//                 let cur_line = &remaining[..left];
-//                 remaining = &remaining[left..];
-
-//                 func(cur_line);
-//             }
-//         }
-//     }
-// }
-
 impl<'a, T: Borrow<str>> MultiLineText<'a, BackendCoord, T> {
     /// Compute the line layout
     pub fn compute_line_layout(&self) -> FontResult<Vec<LayoutBox>> {
