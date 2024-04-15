@@ -61,7 +61,7 @@ pub use discrete::{DiscreteRanged, IntoSegmentedCoord, SegmentValue, SegmentedCo
 
 /// Since stable Rust doesn't have specialization, it's very hard to make our own trait that
 /// automatically implemented the value formatter. This trait uses as a marker indicates if we
-/// should automatically implement the default value formater based on it's `Debug` trait
+/// should automatically implement the default value formatter based on it's `Debug` trait
 pub trait DefaultValueFormatOption {}
 
 /// This makes the ranged coord uses the default `Debug` based formatting
@@ -115,7 +115,7 @@ impl KeyPointWeight {
 /// The trait for a hint provided to the key point algorithm used by the coordinate specs.
 /// The most important constraint is the `max_num_points` which means the algorithm could emit no more than specific number of key points
 /// `weight` is used to determine if this is used as a bold grid line or light grid line
-/// `bold_points` returns the max number of coresponding bold grid lines
+/// `bold_points` returns the max number of corresponding bold grid lines
 pub trait KeyPointHint {
     /// Returns the max number of key points
     fn max_num_points(&self) -> usize;

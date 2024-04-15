@@ -218,7 +218,7 @@ use crate::drawing::Rect;
 ///
 /// However,
 /// [Generic Associated Types](https://github.com/rust-lang/rfcs/blob/master/text/1598-generic_associated_types.md)
-/// is far away from stablize.
+/// is far away from stabilize.
 /// So currently we have the following workaround:
 ///
 /// Instead of implement the PointCollection trait on the element type itself, it implements on the

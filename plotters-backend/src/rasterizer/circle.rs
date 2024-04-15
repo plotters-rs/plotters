@@ -53,9 +53,9 @@ fn draw_part_c<
     let (x0, x1) = ((-half_size).ceil() as i32, half_size.floor() as i32);
 
     for x in x0..x1 {
-        let outter_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
+        let outer_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
         let inner_y0 = r as f64 - 1.0;
-        let mut y1 = outter_y0.min(inner_y0);
+        let mut y1 = outer_y0.min(inner_y0);
         let y0 = ((r as f64) * (r as f64) - x as f64 * x as f64).sqrt();
 
         if y0 > y1 {
@@ -69,9 +69,9 @@ fn draw_part_c<
     }
 
     for x in x1 + 1..r {
-        let outter_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
+        let outer_y0 = ((r_limit as f64) * (r_limit as f64) - x as f64 * x as f64).sqrt();
         let inner_y0 = r as f64 - 1.0;
-        let y0 = outter_y0.min(inner_y0);
+        let y0 = outer_y0.min(inner_y0);
         let y1 = x as f64;
 
         if y1 < y0 {
@@ -220,8 +220,8 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
     ));
 
     let d_inner = ((radius.1 as f64) / (2f64).sqrt()) as i32;
-    let d_outter = (((radius.0 as f64) / (2f64).sqrt()) as i32).min(radius.1 as i32 - 1);
-    let d_outter_actually = (radius.1 as i32).min(
+    let d_outer = (((radius.0 as f64) / (2f64).sqrt()) as i32).min(radius.1 as i32 - 1);
+    let d_outer_actually = (radius.1 as i32).min(
         (radius.0 as f64 * radius.0 as f64 - radius.1 as f64 * radius.1 as f64 / 2.0)
             .sqrt()
             .ceil() as i32,
@@ -229,43 +229,43 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
 
     check_result!(b.draw_line(
         (center.0 - d_inner, center.1 - d_inner),
-        (center.0 - d_outter, center.1 - d_outter),
+        (center.0 - d_outer, center.1 - d_outer),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 + d_inner, center.1 - d_inner),
-        (center.0 + d_outter, center.1 - d_outter),
+        (center.0 + d_outer, center.1 - d_outer),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 - d_inner, center.1 + d_inner),
-        (center.0 - d_outter, center.1 + d_outter),
+        (center.0 - d_outer, center.1 + d_outer),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 + d_inner, center.1 + d_inner),
-        (center.0 + d_outter, center.1 + d_outter),
+        (center.0 + d_outer, center.1 + d_outer),
         &style.color()
     ));
 
     check_result!(b.draw_line(
         (center.0 - d_inner, center.1 + d_inner),
-        (center.0 - d_outter_actually, center.1 + d_inner),
+        (center.0 - d_outer_actually, center.1 + d_inner),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 + d_inner, center.1 - d_inner),
-        (center.0 + d_inner, center.1 - d_outter_actually),
+        (center.0 + d_inner, center.1 - d_outer_actually),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 + d_inner, center.1 + d_inner),
-        (center.0 + d_inner, center.1 + d_outter_actually),
+        (center.0 + d_inner, center.1 + d_outer_actually),
         &style.color()
     ));
     check_result!(b.draw_line(
         (center.0 + d_inner, center.1 + d_inner),
-        (center.0 + d_outter_actually, center.1 + d_inner),
+        (center.0 + d_outer_actually, center.1 + d_inner),
         &style.color()
     ));
 

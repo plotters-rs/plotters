@@ -4,7 +4,7 @@
 
 To run any example, from within the repo, run `cargo run --example <example_name>` where `<example name>` is the name of the file without the `.rs` extension.
 
-All the examples assumes the directory [plotters-doc-data](https://github.com/38/plotters-doc-data) exists, otherwise those example crashs.
+All the examples assumes the directory [plotters-doc-data](https://github.com/38/plotters-doc-data) exists, otherwise those example crashes.
 
 The output of these example files are used to generate the [plotters-doc-data](https://github.com/38/plotters-doc-data) repo that populates the sample images in the main README.
 We also rely on the output of examples to detect potential layout changes.

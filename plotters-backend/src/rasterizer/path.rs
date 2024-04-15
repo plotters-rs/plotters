@@ -64,7 +64,7 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
     let mut x = f64::INFINITY;
     let mut y = f64::INFINITY;
 
-    // Well if the determinant is not 0, then we can actuall get a intersection point.
+    // Well if the determinant is not 0, then we can actually get a intersection point.
     if (a0 * b1 - a1 * b0).abs() > f64::EPSILON {
         let u = (c0 * b1 - c1 * b0) / (a0 * b1 - a1 * b0);
 
@@ -74,7 +74,7 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
 
     let cross_product = a_t.0 * b_t.1 - a_t.1 * b_t.0;
     if (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0) {
-        // Then we are at the outter side of the angle, so we need to consider a cap.
+        // Then we are at the outer side of the angle, so we need to consider a cap.
         let dist_square = (x - triple[1].0 as f64).powi(2) + (y - triple[1].1 as f64).powi(2);
         // If the point is too far away from the line, we need to cap it.
         if dist_square > d * d * 16.0 {
