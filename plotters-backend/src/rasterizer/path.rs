@@ -55,7 +55,7 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
     let b1 = -b_t.1;
     let c1 = b_p.1 - a_p.1;
 
-    // If the determinant is 0, then we cannot actuall get a intersection point.
+    // If the determinant is 0, then we cannot actually get a intersection point.
     // n that case, the two lines are parallel and we just emit the point a_p \approx b_p
     if ( a0 * b1 - a1 * b0).abs() <= f64::EPSILON {
         buf.push((a_p.0 as i32, a_p.1 as i32));
@@ -67,14 +67,19 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
         let y = a_p.1 + u * a_t.1;
         
         let cross_product = a_t.0 * b_t.1 - a_t.1 * b_t.0;
-        if (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0) {
+        let is_outside_the_angle = (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0);
+        if is_outside_the_angle {
             // Then we are at the outter side of the angle, so we need to consider a cap.
             let dist_square = (x - triple[1].0 as f64).powi(2) + (y - triple[1].1 as f64).powi(2);
-            // If the point is too far away from the line, we need to cap it.
-            if dist_square > d * d * 16.0 {
+            let needs_capping = dist_square > d * d * 16.0;
+            if  needs_capping {
+                // If the point is too far away from the line, we need to cap it to make it look okay
                 buf.push((a_p.0.round() as i32, a_p.1.round() as i32));
                 buf.push((b_p.0.round() as i32, b_p.1.round() as i32));
                 return;
+            } else {
+                // We are at the outer side of the angle, at an appropriate distance, so we just emit the point.
+                buf.push((x.round() as i32, y.round() as i32));
             }
         } else {
             // We are at the inner side of the angle, so we just emit the point.
