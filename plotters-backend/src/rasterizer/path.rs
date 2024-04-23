@@ -14,13 +14,23 @@ fn get_dir_vector(from: BackendCoord, to: BackendCoord, flag: bool) -> ((f64, f6
     }
 }
 
-// Compute the polygonized vertex of the given angle
-// d is the distance between the polygon edge and the actual line.
-// d can be negative, this will emit a vertex on the other side of the line.
+/// Consider two line segments between three points: t1-t2-t3
+/// Imagine the line bends to the right, and we run along the line on the right hand side.
+/// In that case, we make an "inside corner" at t2.
+/// This function would compute the point close to t2 that makes the line have thickness `d`
+///
+/// For "outside corners" (the line bends to the left), we sometimes get too pointy corners
+/// if there is just one new point. In that case, we add a cap to make the corner look better.
+/// In that case, the function emits two points.
+///
+/// The function will return values via the `buf` parameter, after clearing it.
+///
+/// d can be negative, this will emit a vertex on the other side of the line.
+///
 fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<BackendCoord>) {
     buf.clear();
 
-    // Compute the tanginal and normal vectors of the given straight line.
+    // Compute the tangential and normal vectors of the given straight line.
     let (a_t, a_n) = get_dir_vector(triple[0], triple[1], false);
     let (b_t, b_n) = get_dir_vector(triple[2], triple[1], true);
 
@@ -55,24 +65,25 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
     let b1 = -b_t.1;
     let c1 = b_p.1 - a_p.1;
 
-    // If the determinant is 0, then we cannot actually get a intersection point.
-    // n that case, the two lines are parallel and we just emit the point a_p \approx b_p
-    if ( a0 * b1 - a1 * b0).abs() <= f64::EPSILON {
+    // If the determinant is 0, then we cannot actually get an intersection point.
+    // In that case, the two lines are parallel and we just emit the point a_p, which is
+    // approximately equal to b_p
+    if (a0 * b1 - a1 * b0).abs() <= f64::EPSILON {
         buf.push((a_p.0 as i32, a_p.1 as i32));
         return;
-    }
-    else{
+    } else {
         let u = (c0 * b1 - c1 * b0) / (a0 * b1 - a1 * b0);
         let x = a_p.0 + u * a_t.0;
         let y = a_p.1 + u * a_t.1;
-        
+
         let cross_product = a_t.0 * b_t.1 - a_t.1 * b_t.0;
-        let is_outside_the_angle = (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0);
+        let is_outside_the_angle =
+            (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0);
         if is_outside_the_angle {
-            // Then we are at the outter side of the angle, so we need to consider a cap.
+            // We are at the outer side of the angle, so we need to consider a cap.
             let dist_square = (x - triple[1].0 as f64).powi(2) + (y - triple[1].1 as f64).powi(2);
             let needs_capping = dist_square > d * d * 16.0;
-            if  needs_capping {
+            if needs_capping {
                 // If the point is too far away from the line, we need to cap it to make it look okay
                 buf.push((a_p.0.round() as i32, a_p.1.round() as i32));
                 buf.push((b_p.0.round() as i32, b_p.1.round() as i32));
@@ -86,8 +97,6 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
             buf.push((x.round() as i32, y.round() as i32));
         }
     }
-
-
 }
 
 fn traverse_vertices<'a>(
