@@ -161,3 +161,20 @@ pub fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCo
 
     ret
 }
+
+
+#[cfg(test)]
+mod test
+{
+    use super::*;
+    /// Test for regression with respect to https://github.com/plotters-rs/plotters/issues/562
+    #[test]
+    fn test_no_inf_in_compute_polygon_vertex() {
+        let path = [(335, 386), (338, 326), (340, 286)];
+        let mut buf = Vec::new();
+        compute_polygon_vertex(&path, 2.0, buf.as_mut());
+        assert!(!buf.is_empty());
+        let nani32 = f64::INFINITY as i32;
+        assert!(!buf.iter().any(|&v| v.0 == nani32 || v.1 == nani32));
+    }
+}
