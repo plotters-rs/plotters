@@ -50,7 +50,7 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> From<ChartContext<'a, DB, CT>> 
 
 impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
     /// Convert a chart context into a chart state, by doing so, the chart context is consumed and
-    /// a saved chart state is created for later use. This is typically used in incrmental rendering. See documentation of `ChartState` for more detailed example.
+    /// a saved chart state is created for later use. This is typically used in incremental rendering. See documentation of `ChartState` for more detailed example.
     pub fn into_chart_state(self) -> ChartState<CT> {
         self.into()
     }

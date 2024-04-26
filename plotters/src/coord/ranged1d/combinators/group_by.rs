@@ -82,16 +82,16 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
         let idx_iter = (0..hint.bold_points()).map(|x| x * interval);
 
         if hint.weight().allow_light_points() && count < hint.bold_points() * 2 {
-            let outter_ticks = idx_iter;
-            let outter_tick_size = interval * self.1;
-            let inner_ticks_per_group = hint.max_num_points() / outter_ticks.len();
+            let outer_ticks = idx_iter;
+            let outer_tick_size = interval * self.1;
+            let inner_ticks_per_group = hint.max_num_points() / outer_ticks.len();
             let inner_ticks =
-                (outter_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
-            let inner_ticks: Vec<_> = (0..(outter_tick_size / inner_ticks))
+                (outer_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
+            let inner_ticks: Vec<_> = (0..(outer_tick_size / inner_ticks))
                 .map(move |x| x * inner_ticks)
                 .collect();
             let size = self.0.size();
-            return outter_ticks
+            return outer_ticks
                 .flat_map(|base| inner_ticks.iter().map(move |&ofs| base * self.1 + ofs))
                 .take_while(|&idx| idx < size)
                 .map(|x| self.0.from_index(x).unwrap())

@@ -15,7 +15,7 @@ more and more backend is supported, those backend implementation cause a huge ma
 
 For example, when `cairo-rs` crate is updated, plotters should release a new version with updated `cairo-rs` dependency for 
 our cairo backend. However, most of the users doesn't actually use this backend and pushing new version for updating cairo backend
-seems to be annoying for most of the people. As more and more backend is added, the depdendency is out of control.
+seems to be annoying for most of the people. As more and more backend is added, the dependency is out of control.
 
 ### Details
 
@@ -74,7 +74,7 @@ Plotters 0.3 ships with tons of improvement made in the coordinate abstraction a
 
 * `chrono::NaiveDate` and `chrono::NaiveDateTime` are now supported 
 * Better abstraction of discrete coordinates 
-* Linspace coordinate, which can be used converting a continous coorindate into a discrete buckets
+* Linspace coordinate, which can be used converting a continuous coorindate into a discrete buckets
 * Nested coordinate
 * Slices can now be used as cooradnite specification, which allows people define an axis of category.
 * 3D Coordinate is now supported

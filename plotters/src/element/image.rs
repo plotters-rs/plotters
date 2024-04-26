@@ -123,7 +123,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
         })
     }
 
-    /// Create a new bitmap element with a shared borrowed buffer. This means if we want to modifiy
+    /// Create a new bitmap element with a shared borrowed buffer. This means if we want to modify
     /// the content of the image, the buffer is automatically copied
     ///
     /// - `pos`: The left upper coordinate of the elelent

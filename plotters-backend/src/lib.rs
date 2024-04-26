@@ -3,7 +3,7 @@
   Plotters project, please check the [main crate](https://crates.io/crates/plotters).
 
   This is the crate that used as the connector between Plotters and different backend crates. Since Plotters 0.3, all the backends has been
-  hosted as seperate crates for the usability and maintainability reasons.
+  hosted as separate crates for the usability and maintainability reasons.
 
   At the same time, Plotters is now supporting third-party backends and all the backends are now supports "plug-and-play":
   To use a external backend, just depends on both the Plotters main crate and the third-party backend crate.
@@ -16,7 +16,7 @@
 
   If the backend only implements [DrawingBackend::draw_pixel](trait.DrawingBackend.html#tymethod.draw_pixel), the default CPU rasterizer will be
   used to give your backend ability of drawing different shapes. For those backend that supports advanced drawing instructions, such as, GPU
-  acelerated shape drawing, all the provided trait method can be overriden from the specific backend code.
+  accelerated shape drawing, all the provided trait method can be overridden from the specific backend code.
 
   If your backend have text rendering ability, you may want to override the [DrawingBackend::estimate_text_size](trait.DrawingBackend.html#tymethod.estimate_text_size)
   to avoid wrong spacing, since the Plotters default text handling code may behaves differently from the backend in terms of text rendering.
@@ -48,12 +48,12 @@
   - For dynamic drawing, frames are defined by invocation of `DrawingBackend::present`, everything prior the invocation should belongs to previous frame
 
   # Compatibility Note
-  Since Plotters v0.3, plotters use the "plug-and-play" schema to import backends, this requires both Plotters and the backend crates depdens on a
+  Since Plotters v0.3, plotters use the "plug-and-play" schema to import backends, this requires both Plotters and the backend crates depends on a
   same version of `plotters-backend` crate. This crate (`plotters-backend`) will enforce that any revision (means the last number in a version number)
   won't contains breaking change - both on the Plotters side and backend side.
 
   Plotters main crate is always importing the backend crate with version specification `plotters-backend = "^<major>.<minor>*"`.
-  It's highly recommended that all the external crates follows the same rule to import `plotters-backend` depdendency, to avoid protential breaking
+  It's highly recommended that all the external crates follows the same rule to import `plotters-backend` dependency, to avoid potential breaking
   caused by `plotters-backend` crates gets a revision update.
 
   We also impose a versioning rule with `plotters` and some backends:

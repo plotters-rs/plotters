@@ -20,8 +20,8 @@ where
 
     /// Map a value to the index
     ///
-    /// Note: This function doesn't guareentee return None when the value is out of range.
-    /// The only way to confirm the value is in the range is to examing the return value isn't
+    /// Note: This function doesn't guarantee return None when the value is out of range.
+    /// The only way to confirm the value is in the range is to examining the return value isn't
     /// larger than self.size.
     ///
     /// - `value`: The value to map
@@ -30,11 +30,11 @@ where
 
     /// Reverse map the index to the value
     ///
-    /// Note: This function doesn't guareentee returning None when the index is out of range.
+    /// Note: This function doesn't guarantee returning None when the index is out of range.
     ///
     /// - `value`: The index to map
     /// - **returns** The value
-    // TODO: This doesn't follows rust's naming convention - however, this is a protential breaking
+    // TODO: This doesn't follows rust's naming convention - however, this is a potential breaking
     // change, so postpone the fix to the next major release
     #[allow(clippy::wrong_self_convention)]
     fn from_index(&self, index: usize) -> Option<Self::ValueType>;
@@ -87,13 +87,13 @@ where
 }
 
 /// A `SegmentedCoord` is a decorator on any discrete coordinate specification.
-/// This decorator will convert the discrete coordiante in two ways:
-/// - Add an extra dummy element after all the values in origianl discrete coordinate
-/// - Logically each value `v` from original coordinate system is mapped into an segment `[v, v+1)` where `v+1` denotes the sucessor of the `v`
+/// This decorator will convert the discrete coordinate in two ways:
+/// - Add an extra dummy element after all the values in original discrete coordinate
+/// - Logically each value `v` from original coordinate system is mapped into an segment `[v, v+1)` where `v+1` denotes the successor of the `v`
 /// - Introduce two types of values `SegmentValue::Exact(value)` which denotes the left end of value's segment and `SegmentValue::CenterOf(value)` which refers the center of the segment.
 /// This is used in histogram types, which uses a discrete coordinate as the buckets. The segmented coord always emits `CenterOf(value)` key points, thus it allows all the label and tick marks
 /// of the coordinate rendered in the middle of each segment.
-/// The coresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
+/// The corresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
 #[derive(Clone)]
 pub struct SegmentedCoord<D: DiscreteRanged>(D);
 

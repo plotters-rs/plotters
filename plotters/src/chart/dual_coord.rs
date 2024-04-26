@@ -17,7 +17,7 @@ use crate::element::{Drawable, PointCollection};
 use plotters_backend::{BackendCoord, DrawingBackend};
 
 /// The chart context that has two coordinate system attached.
-/// This situation is quite common, for example, we with two different coodinate system.
+/// This situation is quite common, for example, we with two different coordinate system.
 /// For instance this example <img src="https://plotters-rs.github.io/plotters-doc-data/twoscale.png"></img>
 /// This is done by attaching  a second coordinate system to ChartContext by method [ChartContext::set_secondary_coord](struct.ChartContext.html#method.set_secondary_coord).
 /// For instance of dual coordinate charts, see [this example](https://github.com/plotters-rs/plotters/blob/master/examples/two-scales.rs#L15).

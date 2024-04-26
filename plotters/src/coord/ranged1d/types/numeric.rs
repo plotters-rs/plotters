@@ -422,7 +422,7 @@ mod test {
     }
 
     #[test]
-    fn regession_test_issue_358_key_points_no_hang() {
+    fn regression_test_issue_358_key_points_no_hang() {
         let coord: RangedCoordf64 = (-200.0..801.0).into();
         let points = coord.key_points(500);
         assert!(points.len() <= 500);

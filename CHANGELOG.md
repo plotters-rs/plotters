@@ -41,7 +41,7 @@
 
 ### Improved
 
-- Improved documentaiton for predefined colors. (Thanks to @siefkenj)
+- Improved documentation for predefined colors. (Thanks to @siefkenj)
 - Introduce the full Material Design 2014 Color Palette. (Thanks to @siefkenj)
 - Massive documentation improvements (Thanks to @facorread and many others)
 
@@ -60,19 +60,19 @@
 
 ### Fixed
 
-- Infinte loop / panic when the axis range is zero
+- Infinite loop / panic when the axis range is zero
 - UB in minifb example (thanks to TheEdward162)
 - Examples that uses old APIs (thanks to chrisduerr)
 
 ## Plotters 0.3.0 (2020-09-03)
 
-This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.md) for more detials.
+This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.md) for more details.
 
 ### Added
 
 - The plotters backend API crate is introduced which allows third-party backend.
 - Allow slice used as a coordinate if the item type implements `PartialOrd`.
-- Linspace coordinate type, which allows define a discrete coordinate on continous value types (such as f32, DateTime, etc) with a step specification
+- Linspace coordinate type, which allows define a discrete coordinate on continuous value types (such as f32, DateTime, etc) with a step specification
 - Nested coordinate type, now we support define pair of category and nested values as nested coordinate.
 - Introduce backend crates: plotters-bitmap, plotters-svg, plotters-cairo, plotters-canvas, plotters-console
 - 3D Plotting features
@@ -83,7 +83,7 @@ This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.
 
 ### Improvement
 
-- Enhanced key point algorithms: New key point hint trait are used for key point algorithms && many improvment on key point algorithms for different types
+- Enhanced key point algorithms: New key point hint trait are used for key point algorithms && many improvement on key point algorithms for different types
 - Renamed `MeshStyle::line\_style\_1` and `MeshStyle::line\_style\_2` to `bold\_line\_style` and `light\_line\_style`
 - Reorganize the "plotters::coord" namespace
 - Improved discrete coordinate trait
@@ -128,7 +128,7 @@ This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.
 - Incremental Rendering by saving the previous chart context into a state and restore it on a different drawing area.
 - BoxPlot support (See boxplot example for more details) (Thanks to @nuald)
 - Category coordinate spec which allows use a list of given values as coordinate (Thanks to @nuald)
-- New text positioning model which allows develvoper sepecify the anchor point. This is critical for layouting SVG correctly. See `plotters::style::text::text_anchor` for details. (Thanks to @nuald)
+- New text positioning model which allows develvoper specify the anchor point. This is critical for layouting SVG correctly. See `plotters::style::text::text_anchor` for details. (Thanks to @nuald)
 
 ### Improved
 
@@ -147,9 +147,9 @@ This is the next major release of Plotters, see [release notes](./RELEASE-NOTES.
 
 - Font description is greatly improved, general font family is supported: `serif`, `serif-sans`, `monospace` (Thanks to @Tatrix)
 - Tested the font loading on Linux, OSX and Windowns. Make font loading more reliable.
-- `BitMapBackend` isn't depdends on `image` crate now. Only the image encoding part relies on the `image` crate
+- `BitMapBackend` isn't depends on `image` crate now. Only the image encoding part relies on the `image` crate
 - Refactored WASM demo use ES6 and `wasm-pack` (Thanks to @Tatrix)
-- Label style for X axis and Y axis can be set seperately now using `x\_label\_style` and `y\_label\_style`. (Thanks to @zhiburt)
+- Label style for X axis and Y axis can be set separately now using `x\_label\_style` and `y\_label\_style`. (Thanks to @zhiburt)
 
 ## Plotters 0.2.10 (2019-10-23)
 
