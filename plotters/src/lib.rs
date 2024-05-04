@@ -153,7 +153,7 @@ including bitmap, vector graph, piston window, GTK/Cairo and WebAssembly.
     </a>
     <div class="galleryText">
         The 1D Gaussian Distribution
-        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/nomal-dist2.rs">[code]</a>
+        <a href="https://github.com/plotters-rs/plotters/blob/master/plotters/examples/normal-dist2.rs">[code]</a>
     </div>
 </div>
 
