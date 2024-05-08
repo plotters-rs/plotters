@@ -34,8 +34,8 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
         f64::from(triple[1].1) + d * b_n.1,
     );
 
-    // Check if 3 points are colinear. If so, just emit the point.
-    if a_t.1 * b_t.0 == a_t.0 * b_t.1 {
+    // Check if 3 points are colinear, up to precision. If so, just emit the point.
+    if (a_t.1 * b_t.0 - a_t.0 * b_t.1).abs() <= f64::EPSILON {
         buf.push((a_p.0 as i32, a_p.1 as i32));
         return;
     }
@@ -61,16 +61,10 @@ fn compute_polygon_vertex(triple: &[BackendCoord; 3], d: f64, buf: &mut Vec<Back
     let b1 = -b_t.1;
     let c1 = b_p.1 - a_p.1;
 
-    let mut x = f64::INFINITY;
-    let mut y = f64::INFINITY;
-
-    // Well if the determinant is not 0, then we can actually get a intersection point.
-    if (a0 * b1 - a1 * b0).abs() > f64::EPSILON {
-        let u = (c0 * b1 - c1 * b0) / (a0 * b1 - a1 * b0);
-
-        x = a_p.0 + u * a_t.0;
-        y = a_p.1 + u * a_t.1;
-    }
+    // Since the points are not collinear, the determinant is not 0, and we can get a intersection point.
+    let u = (c0 * b1 - c1 * b0) / (a0 * b1 - a1 * b0);
+    let x = a_p.0 + u * a_t.0;
+    let y = a_p.1 + u * a_t.1;
 
     let cross_product = a_t.0 * b_t.1 - a_t.1 * b_t.0;
     if (cross_product < 0.0 && d < 0.0) || (cross_product > 0.0 && d > 0.0) {
@@ -148,4 +142,32 @@ pub fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCo
     traverse_vertices(vertices.iter().rev(), stroke_width, |v| ret.push(v));
 
     ret
+}
+
+#[cfg(test)]
+mod test
+{
+    use super::*;
+
+    /// Test for regression with respect to https://github.com/plotters-rs/plotters/issues/562
+    #[test]
+    fn test_no_inf_in_compute_polygon_vertex() {
+        let path = [(335, 386), (338, 326), (340, 286)];
+        let mut buf = Vec::new();
+        compute_polygon_vertex(&path, 2.0, buf.as_mut());
+        assert!(!buf.is_empty());
+        let nani32 = f64::INFINITY as i32;
+        assert!(!buf.iter().any(|&v| v.0 == nani32 || v.1 == nani32));
+    }
+
+    /// Correct 90 degree turn to the right
+    #[test]
+    fn standard_corner() {
+        let path = [(10, 10), (20, 10), (20, 20)];
+        let mut buf = Vec::new();
+        compute_polygon_vertex(&path, 2.0, buf.as_mut());
+        assert!(!buf.is_empty());
+        let buf2 = vec![(18, 12)];
+        assert_eq!(buf,buf2);
+    }
 }
