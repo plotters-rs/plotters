@@ -1,5 +1,19 @@
 # Changelog
 
+## Plotters 0.3.6 (2024-05-20)
+
+### Added
+
+- Add Clone and PartialEq traits to SeriesLabelPosition and ShapeStyle
+- Add function to draw and save an evcxr figure
+- Add dotted line style
+
+### Fixed
+
+- Fix bug with infinite size for collinear line segments as coordinates
+- Fix overflow in blit_bitmap
+- Fix dashed line algorithm
+
 ## Plotters 0.3.5 (2023-06-16)
 
 ### Added 

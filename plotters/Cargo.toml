@@ -1,6 +1,6 @@
 [package]
 name = "plotters"
-version = "0.3.5"
+version = "0.3.6"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -17,17 +17,17 @@ num-traits = "0.2.14"
 chrono = { version = "0.4.20", optional = true }
 
 [dependencies.plotters-backend]
-version = "0.3.5"
+version = "0.3.6"
 path = "../plotters-backend"
 
 [dependencies.plotters-bitmap]
-version = "0.3.3"
+version = "0.3.6"
 default_features = false
 optional = true
 path = "../plotters-bitmap"
 
 [dependencies.plotters-svg]
-version = "0.3.5"
+version = "0.3.6"
 optional = true
 path = "../plotters-svg"
 
