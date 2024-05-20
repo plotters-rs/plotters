@@ -110,7 +110,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     }
 
     if to.0 > batch_limit && y < f64::from(to.1) {
-        let x = batch_limit as i32 + 1;
+        let x = batch_limit + 1;
         if 1.0 + y.floor() - y > 1e-5 {
             check_result!(put_pixel((x, y as i32), 1.0 + y.floor() - y));
         }

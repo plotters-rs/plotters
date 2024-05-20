@@ -779,7 +779,7 @@ impl Ranged for RangedDuration {
 
                 while current < self.1 {
                     ret.push(current);
-                    current = current + Duration::nanoseconds(period as i64);
+                    current += Duration::nanoseconds(period as i64);
                 }
 
                 return ret;
@@ -818,7 +818,7 @@ impl Ranged for RangedDuration {
 
         while current < self.1 {
             ret.push(current);
-            current = current + Duration::days(i64::from(days_per_tick));
+            current += Duration::days(i64::from(days_per_tick));
         }
 
         ret

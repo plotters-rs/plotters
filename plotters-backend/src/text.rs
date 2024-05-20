@@ -107,7 +107,6 @@ pub mod text_anchor {
         pub fn new(h_pos: HPos, v_pos: VPos) -> Self {
             Pos { h_pos, v_pos }
         }
-
     }
 }
 

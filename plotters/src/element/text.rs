@@ -116,8 +116,7 @@ impl<'a, Coord, T: Borrow<str>> MultiLineText<'a, Coord, T> {
     }
 }
 
-
-// Rewrite of the layout function for multiline-text. It crashes when UTF-8 is used 
+// Rewrite of the layout function for multiline-text. It crashes when UTF-8 is used
 // instead of ASCII. Solution taken from:
 // https://stackoverflow.com/questions/68122526/splitting-a-utf-8-string-into-chunks
 // and modified for our purposes.
@@ -132,7 +131,6 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
             func(line);
         } else {
             let mut indices = line.char_indices().map(|(idx, _)| idx).peekable();
-            let font2 = font.clone();
 
             let it = std::iter::from_fn(|| {
                 let start_idx = match indices.next() {
@@ -141,9 +139,9 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
                 };
 
                 // iterate over indices
-                while let Some(idx) = indices.next() {
+                for idx in indices.by_ref() {
                     let substring = &line[start_idx..idx];
-                    let width = font2.box_size(substring).unwrap_or((0, 0)).0 as i32;
+                    let width = font.box_size(substring).unwrap_or((0, 0)).0 as i32;
                     if width > max_width as i32 {
                         break;
                     }
@@ -164,7 +162,9 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     }
 }
 
-#[cfg(feature = "ttf")]
+// Only run the test on Linux because the default font is different
+// on other platforms, causing different multiline splits.
+#[cfg(all(feature = "ttf", target_os = "linux"))]
 #[test]
 fn test_multi_layout() {
     use plotters_backend::{FontFamily, FontStyle};

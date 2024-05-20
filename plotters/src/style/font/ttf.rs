@@ -124,7 +124,7 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
         font_object_cache
             .borrow()
             .get(Borrow::<str>::borrow(&key))
-            .map(Clone::clone)
+            .cloned()
     }) {
         return Ok(font_object);
     }

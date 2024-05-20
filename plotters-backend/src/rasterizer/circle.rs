@@ -168,7 +168,6 @@ fn draw_annulus<B: DrawingBackend, S: BackendStyle>(
             radius.0 as f64 - a0,
             a1.floor(),
             |h, (f, t)| {
-                let h = h as i32;
                 let f = f as i32;
                 let t = t as i32;
                 check_result!(b.draw_line(

@@ -145,8 +145,7 @@ pub fn polygonize(vertices: &[BackendCoord], stroke_width: u32) -> Vec<BackendCo
 }
 
 #[cfg(test)]
-mod test
-{
+mod test {
     use super::*;
 
     /// Test for regression with respect to https://github.com/plotters-rs/plotters/issues/562
@@ -168,6 +167,6 @@ mod test
         compute_polygon_vertex(&path, 2.0, buf.as_mut());
         assert!(!buf.is_empty());
         let buf2 = vec![(18, 12)];
-        assert_eq!(buf,buf2);
+        assert_eq!(buf, buf2);
     }
 }

@@ -16,9 +16,9 @@ use num_traits::{One, Zero};
 /// let range = fitting_range(&data);
 /// assert_eq!(range, std::ops::Range { start: -2, end: 14 });
 /// ```
-pub fn fitting_range<'a, T: 'a, I: IntoIterator<Item = &'a T>>(iter: I) -> Range<T>
+pub fn fitting_range<'a, T, I: IntoIterator<Item = &'a T>>(iter: I) -> Range<T>
 where
-    T: Zero + One + PartialOrd + Clone,
+    T: 'a + Zero + One + PartialOrd + Clone,
 {
     let (mut lb, mut ub) = (None, None);
 

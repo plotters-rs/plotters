@@ -233,8 +233,8 @@ pub trait DrawingBackend: Sized {
             .layout_box(text)
             .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
         let ((min_x, min_y), (max_x, max_y)) = layout;
-        let width = (max_x - min_x) as i32;
-        let height = (max_y - min_y) as i32;
+        let width = max_x - min_x;
+        let height = max_y - min_y;
         let dx = match style.anchor().h_pos {
             HPos::Left => 0,
             HPos::Right => -width,
@@ -247,7 +247,7 @@ pub trait DrawingBackend: Sized {
         };
         let trans = style.transform();
         let (w, h) = self.get_size();
-        match style.draw(text, (0, 0), |x, y, color| {
+        let drawing_result = style.draw(text, (0, 0), |x, y, color| {
             let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y);
             let (x, y) = (pos.0 + x, pos.1 + y);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
@@ -255,7 +255,8 @@ pub trait DrawingBackend: Sized {
             } else {
                 Ok(())
             }
-        }) {
+        });
+        match drawing_result {
             Ok(drawing_result) => drawing_result,
             Err(font_error) => Err(DrawingErrorKind::FontError(Box::new(font_error))),
         }

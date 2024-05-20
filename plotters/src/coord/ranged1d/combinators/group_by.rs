@@ -85,8 +85,7 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
             let outer_ticks = idx_iter;
             let outer_tick_size = interval * self.1;
             let inner_ticks_per_group = hint.max_num_points() / outer_ticks.len();
-            let inner_ticks =
-                (outer_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
+            let inner_ticks = (outer_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
             let inner_ticks: Vec<_> = (0..(outer_tick_size / inner_ticks))
                 .map(move |x| x * inner_ticks)
                 .collect();

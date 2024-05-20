@@ -315,7 +315,7 @@ where
     }
 
     fn from_index(&self, idx: usize) -> Option<T::ValueType> {
-        self.grid_value.get(idx).map(Clone::clone)
+        self.grid_value.get(idx).cloned()
     }
 }
 

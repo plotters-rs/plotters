@@ -213,7 +213,7 @@ where
         } else {
             self.vidx_1 += 1;
             self.vidx_2 = 1;
-            if let (Some(b0), Some(b1)) = (self.free_var_2.get(0), self.free_var_2.get(1)) {
+            if let (Some(b0), Some(b1)) = (self.free_var_2.first(), self.free_var_2.get(1)) {
                 (b0, b1)
             } else {
                 return None;

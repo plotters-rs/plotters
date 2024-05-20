@@ -79,7 +79,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
         self.start_radian = start_angle.to_radians();
     }
 
-    ///
+    /// Set the label style.
     pub fn label_style<T: Into<TextStyle<'a>>>(&mut self, label_style: T) {
         self.label_style = label_style.into();
     }

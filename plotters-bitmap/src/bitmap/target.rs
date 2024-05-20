@@ -24,7 +24,7 @@ impl<'a> Buffer<'a> {
         match self {
             #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
             Buffer::Owned(buf) => &mut buf[..],
-            Buffer::Borrowed(buf) => *buf,
+            Buffer::Borrowed(buf) => buf,
         }
     }
 }

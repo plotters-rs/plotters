@@ -17,11 +17,11 @@ use std::path::Path;
 
 fn make_svg_color(color: BackendColor) -> String {
     let (r, g, b) = color.rgb;
-    return format!("#{:02X}{:02X}{:02X}", r, g, b);
+    format!("#{:02X}{:02X}{:02X}", r, g, b)
 }
 
 fn make_svg_opacity(color: BackendColor) -> String {
-    return format!("{}", color.alpha);
+    format!("{}", color.alpha)
 }
 
 enum Target<'a> {
