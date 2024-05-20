@@ -4,3 +4,4 @@
 .vscode/*
 Cargo.lock
 .idea
+plotters/*.svg
