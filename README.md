@@ -165,8 +165,9 @@ To use Plotters, you can simply add Plotters into your `Cargo.toml`
 [dependencies]
 plotters = "0.3.3"
 ```
+Create the subdirectory `<Cargo project dir>/plotters-doc-data`
 
-And the following code draws a quadratic function. `src/main.rs`,
+And the following code draws a quadratic function. `src/main.rs` writes the chart to `plotters-doc-data/0.png`
 
 ```rust
 use plotters::prelude::*;
