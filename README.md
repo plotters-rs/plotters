@@ -158,6 +158,10 @@ To view the source code for each example, please click on the example image.
 
  ```sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev```
 
+### Fedora Linux
+
+ ```sudo dnf install pkgconf freetype-devel fontconfig-devel```
+
 ## Quick Start
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
