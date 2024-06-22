@@ -1,6 +1,6 @@
 use crate::{
     element::{Drawable, PointCollection},
-    style::{IntoFont, RGBAColor, TextStyle, BLACK},
+    style::{IntoFont, RGBColor, TextStyle, BLACK},
 };
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::{error::Error, f64::consts::PI, fmt::Display};
@@ -24,7 +24,7 @@ pub struct Pie<'a, Coord, Label: Display> {
     center: &'a Coord, // cartesian coord
     radius: &'a f64,
     sizes: &'a [f64],
-    colors: &'a [RGBAColor],
+    colors: &'a [RGBColor],
     labels: &'a [Label],
     total: f64,
     start_radian: f64,
@@ -41,7 +41,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
         center: &'a (i32, i32),
         radius: &'a f64,
         sizes: &'a [f64],
-        colors: &'a [RGBAColor],
+        colors: &'a [RGBColor],
         labels: &'a [Label],
     ) -> Self {
         // fold iterator to pre-calculate total from given slice sizes
