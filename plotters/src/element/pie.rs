@@ -71,7 +71,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
     /// Default is set to start at 0, which is aligned on the x axis.
     /// ```
     /// use plotters::prelude::*;
-    /// let mut pie = Pie::new(&(50,50), &10.0, &[50.0, 25.25, 20.0, 5.5], &[RED, BLUE, GREEN, WHITE], &["Red", "Blue", "Green", "White"]);
+    /// let mut pie = Pie::new(&(50,50), &10.0, &[50.0, 25.25, 20.0, 5.5], &[RED.mix(0.9), BLUE.mix(0.8), GREEN.mix(0.7), WHITE.mix(0.5)], &["Red", "Blue", "Green", "White"]);
     /// pie.start_angle(-90.0);  // retract to a right angle, so it starts aligned to a vertical Y axis.
     /// ```
     pub fn start_angle(&mut self, start_angle: f64) {
