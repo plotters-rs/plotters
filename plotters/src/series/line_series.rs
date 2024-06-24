@@ -45,8 +45,7 @@ impl<DB: DrawingBackend, Coord: Clone + 'static> Iterator for LineSeries<DB, Coo
                 let idx = self.point_idx;
                 self.point_idx += 1;
                 return Some(
-                    Circle::new(self.data[idx].clone(), self.point_size, self.style)
-                        .into_dyn(),
+                    Circle::new(self.data[idx].clone(), self.point_size, self.style).into_dyn(),
                 );
             }
             let mut data = vec![];

@@ -10,7 +10,7 @@
 // the question mark operator has a huge performance impact due to LLVM unable to handle it.
 // So the question is if this trick is still useful, or LLVM is smart enough to handle it since
 // then.
-// 
+//
 // --
 // Original comment:
 //

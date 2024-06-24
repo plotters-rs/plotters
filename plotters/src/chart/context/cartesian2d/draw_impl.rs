@@ -119,10 +119,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 y1 = axis_range.end;
             }
 
-            area.draw(&PathElement::new(
-                vec![(x0, y0), (x1, y1)],
-                *axis_style,
-            ))?;
+            area.draw(&PathElement::new(vec![(x0, y0), (x1, y1)], *axis_style))?;
         }
 
         Ok(axis_range)

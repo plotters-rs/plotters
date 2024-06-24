@@ -250,9 +250,7 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
                 continue;
             }
 
-            funcs.push(
-                draw_func.unwrap_or(&|p: BackendCoord| EmptyElement::at(p).into_dyn()),
-            );
+            funcs.push(draw_func.unwrap_or(&|p: BackendCoord| EmptyElement::at(p).into_dyn()));
             label_element.push_line(label_text);
         }
 

@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let radius = 300.0;
     let sizes = vec![66.0, 33.0];
     let _rgba = RGBAColor(0, 50, 255, 1.0);
-    let colors = vec![RGBColor(0, 50, 255), CYAN];
+    let colors = vec![RGBColor(0, 50, 255).to_rgba(), CYAN.to_rgba()];
     let labels = vec!["Pizza", "Pacman"];
 
     let mut pie = Pie::new(&center, &radius, &sizes, &colors, &labels);
