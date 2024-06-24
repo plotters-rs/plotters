@@ -1,6 +1,6 @@
 use crate::{
     element::{Drawable, PointCollection},
-    style::{IntoFont, RGBColor, TextStyle, BLACK},
+    style::{IntoFont, RGBAColor, TextStyle, BLACK},
 };
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
 use std::{error::Error, f64::consts::PI, fmt::Display};
@@ -24,7 +24,7 @@ pub struct Pie<'a, Coord, Label: Display> {
     center: &'a Coord, // cartesian coord
     radius: &'a f64,
     sizes: &'a [f64],
-    colors: &'a [RGBColor],
+    colors: &'a [RGBAColor],
     labels: &'a [Label],
     total: f64,
     start_radian: f64,
@@ -40,7 +40,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
         center: &'a (i32, i32),
         radius: &'a f64,
         sizes: &'a [f64],
-        colors: &'a [RGBColor],
+        colors: &'a [RGBAColor],
         labels: &'a [Label],
     ) -> Self {
         // fold iterator to pre-calculate total from given slice sizes
@@ -69,7 +69,7 @@ impl<'a, Label: Display> Pie<'a, (i32, i32), Label> {
     /// Default is set to start at 0, which is aligned on the x axis.
     /// ```
     /// use plotters::prelude::*;
-    /// let mut pie = Pie::new(&(50,50), &10.0, &[50.0, 25.25, 20.0, 5.5], &[RED, BLUE, GREEN, WHITE], &["Red", "Blue", "Green", "White"]);
+    /// let mut pie = Pie::new(&(50,50), &10.0, &[50.0, 25.25, 20.0, 5.5], &[RED.to_rgba(), BLUE.to_rgba(), GREEN.to_rgba(), WHITE.to_rgba()], &["Red", "Blue", "Green", "White"]);
     /// pie.start_angle(-90.0);  // retract to a right angle, so it starts aligned to a vertical Y axis.
     /// ```
     pub fn start_angle(&mut self, start_angle: f64) {
