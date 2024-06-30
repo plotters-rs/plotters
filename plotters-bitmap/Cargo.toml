@@ -30,7 +30,7 @@ image_encoder = ["image"]
 gif_backend = ["gif", "image_encoder"]
 
 [dev-dependencies.plotters]
-default_features = false
+default-features = false
 features = ["ttf", "line_series", "bitmap_backend"]
 path = "../plotters"
 

@@ -26,6 +26,6 @@ debug = []
 bitmap_encoder = ["image"]
 
 [dev-dependencies.plotters]
-default_features = false
+default-features = false
 features = ["ttf"]
 path = "../plotters"
