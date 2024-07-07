@@ -34,7 +34,7 @@ impl FontData for FontDataInternal {
         let body = document.body().unwrap();
         let span = document.create_element("span").unwrap();
         span.set_text_content(Some(text));
-        span.set_attribute("style", &format!("display: inline-block; font-family:{}; font-size: {}px; position: fixed; top: 100%", self.0, size)).unwrap();
+        span.set_attribute("style", &format!("display: inline-block; font-family:{}; font-style:{}; font-size: {}px; position: fixed; top: 100%", self.0, self.1, size)).unwrap();
         let span = span.into();
         body.append_with_node_1(&span).unwrap();
         let elem = JsCast::dyn_into::<HtmlElement>(span).unwrap();

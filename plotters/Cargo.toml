@@ -22,7 +22,7 @@ path = "../plotters-backend"
 
 [dependencies.plotters-bitmap]
 version = "0.3.6"
-default_features = false
+default-features = false
 optional = true
 path = "../plotters-bitmap"
 

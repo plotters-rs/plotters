@@ -54,13 +54,13 @@ Thus, if plotters is imported with default feature set, there would require no c
 should be make with your `Crates.toml`: 
 
 ```toml
-plotters = {version = "0.3", default_features = false, features = ["bitmap_backend", "svg_backend"]} # Instead of using feature "bitmap" and "svg"
+plotters = {version = "0.3", default-features = false, features = ["bitmap_backend", "svg_backend"]} # Instead of using feature "bitmap" and "svg"
 ```
 
 For non tier 1 backends, manmually import is required (Please note tier on backends can be imported in same way). For example:
 
 ```toml
-plotters = {version = "0.3", default_features = false} # Instead of having features = ["cairo"] at this point
+plotters = {version = "0.3", default-features = false} # Instead of having features = ["cairo"] at this point
 plotters-cairo = "0.3" # We should import the cairo backend in this way.
 ```
 

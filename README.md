@@ -158,6 +158,10 @@ To view the source code for each example, please click on the example image.
 
  ```sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev```
 
+### Fedora Linux
+
+ ```sudo dnf install pkgconf freetype-devel fontconfig-devel```
+
 ## Quick Start
 
 To use Plotters, you can simply add Plotters into your `Cargo.toml`
@@ -165,8 +169,9 @@ To use Plotters, you can simply add Plotters into your `Cargo.toml`
 [dependencies]
 plotters = "0.3.3"
 ```
+Create the subdirectory `<Cargo project dir>/plotters-doc-data`
 
-And the following code draws a quadratic function. `src/main.rs`,
+And the following code draws a quadratic function. `src/main.rs` writes the chart to `plotters-doc-data/0.png`
 
 ```rust
 use plotters::prelude::*;
@@ -221,7 +226,7 @@ The feature `evcxr` should be enabled when including Plotters to Jupyter Noteboo
 The following code shows a minimal example of this.
 
 ```text
-:dep plotters = { version = "^0.3.6", default_features = false, features = ["evcxr", "all_series", "all_elements"] }
+:dep plotters = { version = "^0.3.6", default-features = false, features = ["evcxr", "all_series", "all_elements"] }
 extern crate plotters;
 use plotters::prelude::*;
 
@@ -499,7 +504,7 @@ plotters = { git = "https://github.com/plotters-rs/plotters.git" }
 
 ### Reducing Depending Libraries && Turning Off Backends
 Plotters now supports use features to control the backend dependencies. By default, `BitMapBackend` and `SVGBackend` are supported,
-use `default_features = false` in the dependency description in `Cargo.toml` and you can cherry-pick the backend implementations.
+use `default-features = false` in the dependency description in `Cargo.toml` and you can cherry-pick the backend implementations.
 
 - `svg` Enable the `SVGBackend`
 - `bitmap` Enable the `BitMapBackend`
@@ -508,16 +513,16 @@ For example, the following dependency description would avoid compiling with bit
 
 ```toml
 [dependencies]
-plotters = { git = "https://github.com/plotters-rs/plotters.git", default_features = false, features = ["svg"] }
+plotters = { git = "https://github.com/plotters-rs/plotters.git", default-features = false, features = ["svg"] }
 ```
 
 The library also allows consumers to make use of the [`Palette`](https://crates.io/crates/palette/) crate's color types by default.
-This behavior can also be turned off by setting `default_features = false`.
+This behavior can also be turned off by setting `default-features = false`.
 
 ### List of Features
 
 This is the full list of features that is defined by `Plotters` crate. 
-Use `default_features = false` to disable those default enabled features,
+Use `default-features = false` to disable those default enabled features,
 and then you should be able to cherry-pick what features you want to include into `Plotters` crate. 
 By doing so, you can minimize the number of dependencies down to only `itertools` and compile time is less than 6s.
 
