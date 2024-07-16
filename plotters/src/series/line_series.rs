@@ -86,7 +86,43 @@ impl<DB: DrawingBackend, Coord> LineSeries<DB, Coord> {
     }
 }
 
-/// A dashed line series, map an iterable object to the dashed line element.
+/// A dashed line series, map an iterable object to the dashed line element. Can be used to draw simple dashed and dotted lines. 
+///
+/// If you want to use more complex shapes as points in the line, you can use `plotters::series::line_series::DottedLineSeries`.
+///
+/// # Examples
+///
+/// Dashed line:
+/// ```Rust
+/// chart_context
+///     .draw_series(DashedLineSeries::new(
+///         data_series,
+///         5, /* size = length of dash */
+///         10, /* spacing */
+///         ShapeStyle {
+///             color: BLACK.mix(1.0),
+///             filled: false,
+///             stroke_width: 1,
+///         },
+///     ))
+///     .unwrap();
+/// ```
+///
+/// Dotted line: (keep `size` and `stroke_width` the same to achieve dots)
+/// ```Rust
+/// chart_context
+///     .draw_series(DashedLineSeries::new(
+///         data_series,
+///         1, /* size = length of dash */
+///         4, /* spacing, best to keep this at least 1 larger than size */
+///         ShapeStyle {
+///             color: BLACK.mix(1.0),
+///             filled: false,
+///             stroke_width: 1,
+///         },
+///     ))
+///     .unwrap();
+/// ```
 pub struct DashedLineSeries<I: Iterator + Clone, Size: SizeDesc> {
     points: I,
     size: Size,
