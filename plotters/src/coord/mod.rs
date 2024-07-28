@@ -1,7 +1,7 @@
 /*!
 
 One of the key features of Plotters is flexible coordinate system abstraction and this module
-provides all the abstraction used for the coordinate abstarction of Plotters.
+provides all the abstraction used for the coordinate abstraction of Plotters.
 
 Generally speaking, the coordinate system in Plotters is responsible for mapping logic data points into
 pixel based backend coordinate. This task is abstracted by a simple trait called
