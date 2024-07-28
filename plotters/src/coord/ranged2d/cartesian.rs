@@ -4,7 +4,7 @@
  This module provides the 2D cartesian coordinate system, which is composed by two independent
  ranged 1D coordinate specification.
 
- This types of coordinate system is used by the chart constructed with [ChartBuilder::build_cartesian_2d](../../chart/ChartBuilder.html#method.build_cartesian_2d).
+ This type of coordinate system is used by the chart constructed with [ChartBuilder::build_cartesian_2d](../../chart/ChartBuilder.html#method.build_cartesian_2d).
 */
 
 use crate::coord::ranged1d::{KeyPointHint, Ranged, ReversibleRanged};
