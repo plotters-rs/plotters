@@ -15,13 +15,9 @@ use std::io::Cursor;
 use std::io::{BufWriter, Error, Write};
 use std::path::Path;
 
-fn make_svg_color(color: BackendColor) -> String {
-    let (r, g, b) = color.rgb;
-    format!("#{:02X}{:02X}{:02X}", r, g, b)
-}
-
-fn make_svg_opacity(color: BackendColor) -> String {
-    format!("{}", color.alpha)
+struct Rgb(u8, u8, u8);
+fn make_svg_color(color: BackendColor) -> Rgb {
+    Rgb(color.rgb.0, color.rgb.1, color.rgb.2)
 }
 
 enum Target<'a> {
@@ -38,6 +34,7 @@ impl Target<'_> {
     }
 }
 
+#[derive(Clone)]
 enum SVGTag {
     Svg,
     Circle,
@@ -73,34 +70,155 @@ pub struct SVGBackend<'a> {
     saved: bool,
 }
 
-impl<'a> SVGBackend<'a> {
-    fn escape_and_push(buf: &mut String, value: &str) {
-        value.chars().for_each(|c| match c {
+trait FormatEscaped {
+    fn format_escaped(buf: &mut String, s: Self);
+}
+macro_rules! impl_format_escaped_tuple {
+    ($($idx:tt $t:tt),+) => {
+        impl<$($t,)+> FormatEscaped for ($($t,)+)
+        where
+            $($t: FormatEscaped,)+
+        {
+            fn format_escaped(buf: &mut String, tup: Self) {
+                $(
+                    FormatEscaped::format_escaped(buf, tup.$idx);
+                )+
+            }
+        }
+    };
+}
+impl_format_escaped_tuple!(0 A);
+impl_format_escaped_tuple!(0 A, 1 B);
+impl_format_escaped_tuple!(0 A, 1 B, 2 C);
+impl_format_escaped_tuple!(0 A, 1 B, 2 C, 3 D);
+impl_format_escaped_tuple!(0 A, 1 B, 2 C, 3 D, 4 E);
+impl_format_escaped_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F);
+impl_format_escaped_tuple!(0 A, 1 B, 2 C, 3 D, 4 E, 5 F, 6 G);
+
+macro_rules! impl_format_escaped_plain {
+    ($($t:ty),*) => {
+        $(
+        impl FormatEscaped for $t {
+            fn format_escaped(buf: &mut String, s: Self) {
+                let _ = write!(buf, "{}", s);
+            }
+        }
+        )*
+    };
+}
+
+impl_format_escaped_plain!(u32, i32, f32, f64);
+impl FormatEscaped for &str {
+    fn format_escaped(buf: &mut String, s: &str) {
+        for c in s.chars() {
+            FormatEscaped::format_escaped(buf, c);
+        }
+    }
+}
+
+impl FormatEscaped for Rgb {
+    fn format_escaped(buf: &mut String, Rgb(r, g, b): Rgb) {
+        let _ = write!(buf, "#{:02X}{:02X}{:02X}", r, g, b);
+    }
+}
+
+impl<T: FormatEscaped> FormatEscaped for Option<T> {
+    fn format_escaped(buf: &mut String, opt: Option<T>) {
+        match opt {
+            None => {
+                FormatEscaped::format_escaped(buf, "none");
+            }
+            Some(x) => {
+                FormatEscaped::format_escaped(buf, x);
+            }
+        }
+    }
+}
+
+impl FormatEscaped for char {
+    fn format_escaped(buf: &mut String, c: char) {
+        match c {
             '<' => buf.push_str("&lt;"),
             '>' => buf.push_str("&gt;"),
             '&' => buf.push_str("&amp;"),
             '"' => buf.push_str("&quot;"),
             '\'' => buf.push_str("&apos;"),
             other => buf.push(other),
-        });
+        };
     }
-    fn open_tag(&mut self, tag: SVGTag, attr: &[(&str, &str)], close: bool) {
-        let buf = self.target.get_mut();
+}
+
+struct FormatEscapedIter<I>(I);
+impl<I: IntoIterator<Item: FormatEscaped>> FormatEscaped for FormatEscapedIter<I> {
+    fn format_escaped(buf: &mut String, iter: FormatEscapedIter<I>) {
+        let iter = iter.0.into_iter();
+        for item in iter {
+            FormatEscaped::format_escaped(buf, item);
+        }
+    }
+}
+
+enum Value {}
+enum Init {}
+struct AttrWriter<'a, State> {
+    buf: &'a mut String,
+    tag: SVGTag,
+    tag_stack: &'a mut Vec<SVGTag>,
+    state: std::marker::PhantomData<State>,
+}
+
+/// Used for opening a tag and then optionally writing some attributes. The expected workflow is
+/// to call [open_tag](AttrWriter::open_tag), then zero or more times calling
+/// [write_key](AttrWriter::write_key) followed optionally by `[write_value](AttrWriter::write_value)`
+/// and finally calling one of [close](AttrWriter::close) (to close a self-closing tag)
+/// or [finish_without_closing](AttrWriter::finish_without_closing) (to schedule writing
+//  writing the closing tag for later).
+impl<'a> AttrWriter<'a, Init> {
+    fn open_tag(buf: &'a mut String, tag: SVGTag, tag_stack: &'a mut Vec<SVGTag>) -> Self {
         buf.push('<');
         buf.push_str(tag.to_tag_name());
-        for (key, value) in attr {
-            buf.push(' ');
-            buf.push_str(key);
-            buf.push_str("=\"");
-            Self::escape_and_push(buf, value);
-            buf.push('\"');
+        AttrWriter {
+            buf,
+            tag,
+            tag_stack,
+            state: Default::default(),
         }
-        if close {
-            buf.push_str("/>\n");
-        } else {
-            self.tag_stack.push(tag);
-            buf.push_str(">\n");
+    }
+
+    fn write_key<'s>(&'s mut self, key: &str) -> AttrWriter<'s, Value> {
+        self.buf.push(' ');
+        self.buf.push_str(key);
+        AttrWriter {
+            buf: self.buf,
+            tag: self.tag.clone(),
+            tag_stack: self.tag_stack,
+            state: Default::default(),
         }
+    }
+
+    fn close(self) {
+        self.buf.push_str("/>\n");
+    }
+
+    fn finish_without_closing(self) {
+        self.tag_stack.push(self.tag);
+        self.buf.push_str(">\n");
+    }
+}
+
+impl<'a> AttrWriter<'a, Value> {
+    fn write_value(self, value: impl FormatEscaped) {
+        self.buf.push_str("=\"");
+        FormatEscaped::format_escaped(self.buf, value);
+        self.buf.push('"');
+    }
+}
+
+impl<'a> SVGBackend<'a> {
+    fn escape_and_push(buf: &mut String, value: &str) {
+        value
+            .chars()
+            .for_each(|c| FormatEscaped::format_escaped(buf, c));
     }
 
     fn close_tag(&mut self) -> bool {
@@ -114,17 +232,22 @@ impl<'a> SVGBackend<'a> {
         false
     }
 
+    /// Opens a tag and provides facilities for writing attrs and closing the tag
+    fn open_tag(&mut self, tag: SVGTag) -> AttrWriter<'_, Init> {
+        AttrWriter::open_tag(self.target.get_mut(), tag, &mut self.tag_stack)
+    }
+
     fn init_svg_file(&mut self, size: (u32, u32)) {
-        self.open_tag(
-            SVGTag::Svg,
-            &[
-                ("width", &format!("{}", size.0)),
-                ("height", &format!("{}", size.1)),
-                ("viewBox", &format!("0 0 {} {}", size.0, size.1)),
-                ("xmlns", "http://www.w3.org/2000/svg"),
-            ],
-            false,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Svg);
+        attrwriter.write_key("width").write_value(size.0);
+        attrwriter.write_key("height").write_value(size.1);
+        attrwriter
+            .write_key("viewBox")
+            .write_value(("0 0 ", size.0, ' ', size.1));
+        attrwriter
+            .write_key("xmlns")
+            .write_value("http://www.w3.org/2000/svg");
+        attrwriter.finish_without_closing();
     }
 
     /// Create a new SVG drawing backend
@@ -192,19 +315,17 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if color.alpha == 0.0 {
             return Ok(());
         }
-        self.open_tag(
-            SVGTag::Rectangle,
-            &[
-                ("x", &format!("{}", point.0)),
-                ("y", &format!("{}", point.1)),
-                ("width", "1"),
-                ("height", "1"),
-                ("stroke", "none"),
-                ("opacity", &make_svg_opacity(color)),
-                ("fill", &make_svg_color(color)),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Rectangle);
+        attrwriter.write_key("x").write_value(point.0);
+        attrwriter.write_key("y").write_value(point.1);
+        attrwriter.write_key("width").write_value("1");
+        attrwriter.write_key("height").write_value("1");
+        attrwriter.write_key("stroke").write_value("none");
+        attrwriter.write_key("opacity").write_value(color.alpha);
+        attrwriter
+            .write_key("fill")
+            .write_value(make_svg_color(color));
+        attrwriter.close();
         Ok(())
     }
 
@@ -217,19 +338,21 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
-        self.open_tag(
-            SVGTag::Line,
-            &[
-                ("opacity", &make_svg_opacity(style.color())),
-                ("stroke", &make_svg_color(style.color())),
-                ("stroke-width", &format!("{}", style.stroke_width())),
-                ("x1", &format!("{}", from.0)),
-                ("y1", &format!("{}", from.1)),
-                ("x2", &format!("{}", to.0)),
-                ("y2", &format!("{}", to.1)),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Line);
+        attrwriter
+            .write_key("opacity")
+            .write_value(style.color().alpha);
+        attrwriter
+            .write_key("stroke")
+            .write_value(make_svg_color(style.color()));
+        attrwriter
+            .write_key("stroke-width")
+            .write_value(style.stroke_width());
+        attrwriter.write_key("x1").write_value(from.0);
+        attrwriter.write_key("y1").write_value(from.1);
+        attrwriter.write_key("x2").write_value(to.0);
+        attrwriter.write_key("y2").write_value(to.1);
+        attrwriter.close();
         Ok(())
     }
 
@@ -244,26 +367,28 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             return Ok(());
         }
 
+        let color = make_svg_color(style.color());
         let (fill, stroke) = if !fill {
-            ("none".to_string(), make_svg_color(style.color()))
+            (None, Some(color))
         } else {
-            (make_svg_color(style.color()), "none".to_string())
+            (Some(color), None)
         };
 
-        self.open_tag(
-            SVGTag::Rectangle,
-            &[
-                ("x", &format!("{}", upper_left.0)),
-                ("y", &format!("{}", upper_left.1)),
-                ("width", &format!("{}", bottom_right.0 - upper_left.0)),
-                ("height", &format!("{}", bottom_right.1 - upper_left.1)),
-                ("opacity", &make_svg_opacity(style.color())),
-                ("fill", &fill),
-                ("stroke", &stroke),
-            ],
-            true,
-        );
-
+        let mut attrwriter = self.open_tag(SVGTag::Rectangle);
+        attrwriter.write_key("x").write_value(upper_left.0);
+        attrwriter.write_key("y").write_value(upper_left.1);
+        attrwriter
+            .write_key("width")
+            .write_value(bottom_right.0 - upper_left.0);
+        attrwriter
+            .write_key("height")
+            .write_value(bottom_right.1 - upper_left.1);
+        attrwriter
+            .write_key("opacity")
+            .write_value(style.color().alpha);
+        attrwriter.write_key("fill").write_value(fill);
+        attrwriter.write_key("stroke").write_value(stroke);
+        attrwriter.close();
         Ok(())
     }
 
@@ -275,23 +400,23 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
-        self.open_tag(
-            SVGTag::Polyline,
-            &[
-                ("fill", "none"),
-                ("opacity", &make_svg_opacity(style.color())),
-                ("stroke", &make_svg_color(style.color())),
-                ("stroke-width", &format!("{}", style.stroke_width())),
-                (
-                    "points",
-                    &path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                        write!(s, "{},{} ", x, y).ok();
-                        s
-                    }),
-                ),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Polyline);
+        attrwriter.write_key("fill").write_value("none");
+        attrwriter
+            .write_key("opacity")
+            .write_value(style.color().alpha);
+        attrwriter
+            .write_key("stroke")
+            .write_value(make_svg_color(style.color()));
+        attrwriter
+            .write_key("stroke-width")
+            .write_value(style.stroke_width());
+        attrwriter
+            .write_key("points")
+            .write_value(FormatEscapedIter(
+                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+            ));
+        attrwriter.close();
         Ok(())
     }
 
@@ -303,21 +428,20 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
-        self.open_tag(
-            SVGTag::Polygon,
-            &[
-                ("opacity", &make_svg_opacity(style.color())),
-                ("fill", &make_svg_color(style.color())),
-                (
-                    "points",
-                    &path.into_iter().fold(String::new(), |mut s, (x, y)| {
-                        write!(s, "{},{} ", x, y).ok();
-                        s
-                    }),
-                ),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Polygon);
+        attrwriter
+            .write_key("opacity")
+            .write_value(style.color().alpha);
+        attrwriter
+            .write_key("fill")
+            .write_value(make_svg_color(style.color()));
+        attrwriter
+            .write_key("points")
+            .write_value(FormatEscapedIter(
+                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+            ));
+        attrwriter.close();
+
         Ok(())
     }
 
@@ -331,24 +455,25 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
+        let color = make_svg_color(style.color());
         let (stroke, fill) = if !fill {
-            (make_svg_color(style.color()), "none".to_string())
+            (Some(color), None)
         } else {
-            ("none".to_string(), make_svg_color(style.color()))
+            (None, Some(color))
         };
-        self.open_tag(
-            SVGTag::Circle,
-            &[
-                ("cx", &format!("{}", center.0)),
-                ("cy", &format!("{}", center.1)),
-                ("r", &format!("{}", radius)),
-                ("opacity", &make_svg_opacity(style.color())),
-                ("fill", &fill),
-                ("stroke", &stroke),
-                ("stroke-width", &format!("{}", style.stroke_width())),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Circle);
+        attrwriter.write_key("cx").write_value(center.0);
+        attrwriter.write_key("cy").write_value(center.1);
+        attrwriter.write_key("r").write_value(radius);
+        attrwriter
+            .write_key("opacity")
+            .write_value(style.color().alpha);
+        attrwriter.write_key("fill").write_value(fill);
+        attrwriter.write_key("stroke").write_value(stroke);
+        attrwriter
+            .write_key("stroke-width")
+            .write_value(style.stroke_width());
+        attrwriter.close();
         Ok(())
     }
 
@@ -401,46 +526,54 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                 .unwrap();
         }
 
-        let mut attrs = vec![
-            ("x", format!("{}", x0)),
-            ("y", format!("{}", y0)),
-            ("dy", dy.to_owned()),
-            ("text-anchor", text_anchor.to_string()),
-            ("font-family", style.family().as_str().to_string()),
-            ("font-size", format!("{}", style.size() / 1.24)),
-            ("opacity", make_svg_opacity(color)),
-            ("fill", make_svg_color(color)),
-        ];
+        let mut attrwriter = self.open_tag(SVGTag::Text);
+        attrwriter.write_key("x").write_value(x0);
+        attrwriter.write_key("y").write_value(y0);
+        attrwriter.write_key("dy").write_value(dy);
+        attrwriter.write_key("text-anchor").write_value(text_anchor);
+        attrwriter
+            .write_key("font-family")
+            .write_value(style.family().as_str());
+        attrwriter
+            .write_key("font-size")
+            .write_value(style.size() / 1.24);
+        attrwriter.write_key("opacity").write_value(color.alpha);
+        attrwriter
+            .write_key("fill")
+            .write_value(make_svg_color(color));
 
         match style.style() {
             FontStyle::Normal => {}
-            FontStyle::Bold => attrs.push(("font-weight", "bold".to_string())),
-            other_style => attrs.push(("font-style", other_style.as_str().to_string())),
+            FontStyle::Bold => {
+                attrwriter.write_key("font-weight").write_value("bold");
+            }
+            other_style => {
+                attrwriter
+                    .write_key("font-style")
+                    .write_value(other_style.as_str());
+            }
         };
 
         let trans = style.transform();
         match trans {
             FontTransform::Rotate90 => {
-                attrs.push(("transform", format!("rotate(90, {}, {})", x0, y0)))
+                attrwriter
+                    .write_key("transform")
+                    .write_value(("rotate(90, ", x0, ", ", y0, ')'));
             }
             FontTransform::Rotate180 => {
-                attrs.push(("transform", format!("rotate(180, {}, {})", x0, y0)));
+                attrwriter
+                    .write_key("transform")
+                    .write_value(("rotate(180, ", x0, ", ", y0, ')'));
             }
             FontTransform::Rotate270 => {
-                attrs.push(("transform", format!("rotate(270, {}, {})", x0, y0)));
+                attrwriter
+                    .write_key("transform")
+                    .write_value(("rotate(270, ", x0, ", ", y0, ')'));
             }
             _ => {}
         }
-
-        self.open_tag(
-            SVGTag::Text,
-            attrs
-                .iter()
-                .map(|(a, b)| (*a, b.as_ref()))
-                .collect::<Vec<_>>()
-                .as_ref(),
-            false,
-        );
+        attrwriter.finish_without_closing();
 
         Self::escape_and_push(self.target.get_mut(), text);
         self.target.get_mut().push('\n');
@@ -519,17 +652,13 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             buf.push('=');
         }
 
-        self.open_tag(
-            SVGTag::Image,
-            &[
-                ("x", &format!("{}", pos.0)),
-                ("y", &format!("{}", pos.1)),
-                ("width", &format!("{}", w)),
-                ("height", &format!("{}", h)),
-                ("href", buf.as_str()),
-            ],
-            true,
-        );
+        let mut attrwriter = self.open_tag(SVGTag::Image);
+        attrwriter.write_key("x").write_value(pos.0);
+        attrwriter.write_key("y").write_value(pos.1);
+        attrwriter.write_key("width").write_value(w);
+        attrwriter.write_key("height").write_value(h);
+        attrwriter.write_key("href").write_value(buf.as_str());
+        attrwriter.close();
 
         Ok(())
     }
