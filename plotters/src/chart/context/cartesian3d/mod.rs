@@ -106,9 +106,9 @@ where
     /// Override the 3D projection matrix. This function allows to override the default projection
     /// matrix.
     /// - `pf`: A function that takes the default projection matrix configuration and returns the
-    /// projection matrix. This function will allow you to adjust the pitch, yaw angle and the
-    /// centeral point of the projection, etc. You can also build a projection matrix which is not
-    /// relies on the default configuration as well.
+    ///   projection matrix. This function will allow you to adjust the pitch, yaw angle and the
+    ///   centeral point of the projection, etc. You can also build a projection matrix which is not
+    ///   relies on the default configuration as well.
     pub fn with_projection<P: FnOnce(ProjectionMatrixBuilder) -> ProjectionMatrix>(
         &mut self,
         pf: P,

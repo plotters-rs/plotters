@@ -36,7 +36,7 @@ impl PixelFormat for BGRXPixel {
         a: f64,
     ) {
         let (w, h) = target.get_size();
-        let a = a.min(1.0).max(0.0);
+        let a = a.clamp(0.0, 1.0);
         if a == 0.0 {
             return;
         }

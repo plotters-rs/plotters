@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(5)
         .top_x_label_area_size(40)
         .y_label_area_size(40)
-        .build_cartesian_2d(0i32..15i32, 15i32..0i32)?;
+        .build_cartesian_2d(0i32..15i32, 0i32..15i32)?;
 
     chart
         .configure_mesh()

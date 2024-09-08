@@ -91,9 +91,10 @@ where
 /// - Add an extra dummy element after all the values in original discrete coordinate
 /// - Logically each value `v` from original coordinate system is mapped into an segment `[v, v+1)` where `v+1` denotes the successor of the `v`
 /// - Introduce two types of values `SegmentValue::Exact(value)` which denotes the left end of value's segment and `SegmentValue::CenterOf(value)` which refers the center of the segment.
-/// This is used in histogram types, which uses a discrete coordinate as the buckets. The segmented coord always emits `CenterOf(value)` key points, thus it allows all the label and tick marks
-/// of the coordinate rendered in the middle of each segment.
-/// The corresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
+///   This is used in histogram types, which uses a discrete coordinate as the buckets.
+///   The segmented coord always emits `CenterOf(value)` key points, thus it allows all the label and tick marks
+///   of the coordinate rendered in the middle of each segment.
+///   The corresponding trait [IntoSegmentedCoord](trait.IntoSegmentedCoord.html) is used to apply this decorator to coordinates.
 #[derive(Clone)]
 pub struct SegmentedCoord<D: DiscreteRanged>(D);
 

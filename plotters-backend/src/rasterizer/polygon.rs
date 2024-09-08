@@ -49,7 +49,7 @@ impl Edge {
 
 impl PartialOrd for Edge {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.get_slave_pos().partial_cmp(&other.get_slave_pos())
+        Some(self.cmp(other))
     }
 }
 

@@ -4,6 +4,7 @@ version = "0.3.6"
 authors = ["Hao Hou <haohou302@gmail.com>"]
 edition = "2018"
 license = "MIT"
+msrv = "1.56"
 description = "A Rust drawing library focus on data plotting for both WASM and native applications"
 repository = "https://github.com/plotters-rs/plotters"
 homepage = "https://plotters-rs.github.io/"
@@ -11,6 +12,10 @@ keywords = ["WebAssembly", "Visualization", "Plotting", "Drawing"]
 categories = ["visualization", "wasm"]
 readme = "../README.md"
 exclude = ["doc-template", "plotters-doc-data"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(doc_cfg)'] }
+deprecated = { level = "allow" }
 
 [dependencies]
 num-traits = "0.2.14"

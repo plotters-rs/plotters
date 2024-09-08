@@ -258,12 +258,12 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
 
     /// Compute the relative size based on the drawing area's height
     pub fn relative_to_height(&self, p: f64) -> f64 {
-        f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.min(1.0).max(0.0))
+        f64::from((self.rect.y1 - self.rect.y0).max(0)) * (p.clamp(0.0, 1.0))
     }
 
     /// Compute the relative size based on the drawing area's width
     pub fn relative_to_width(&self, p: f64) -> f64 {
-        f64::from((self.rect.x1 - self.rect.x0).max(0)) * (p.min(1.0).max(0.0))
+        f64::from((self.rect.x1 - self.rect.x0).max(0)) * (p.clamp(0.0, 1.0))
     }
 
     /// Get the pixel range of this area
@@ -669,13 +669,13 @@ mod drawing_area_tests {
                     for row in 0..=nyb {
                         for col in 0..=nxb {
                             let get_bp = |full, limit, id| {
-                                (if id == 0 {
+                                if id == 0 {
                                     0
                                 } else if id > limit {
                                     full
                                 } else {
                                     breaks[id as usize - 1]
-                                })
+                                }
                             };
 
                             let expected_u = (get_bp(1024, nxb, col), get_bp(768, nyb, row));

@@ -1,7 +1,6 @@
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::i32;
 use std::sync::{Arc, RwLock};
 
 use lazy_static::lazy_static;
@@ -82,7 +81,9 @@ impl FontExt {
             _ => unreachable!(),
         };
         let face = unsafe {
-            std::mem::transmute::<_, Option<Face<'static>>>(ttf_parser::Face::parse(data, idx).ok())
+            std::mem::transmute::<Option<_>, Option<Face<'static>>>(
+                ttf_parser::Face::parse(data, idx).ok(),
+            )
         };
         Self { inner: font, face }
     }

@@ -19,7 +19,7 @@ impl Quartiles {
         assert!(0_f64 <= pct);
         let hundred = 100_f64;
         assert!(pct <= hundred);
-        if (pct - hundred).abs() < std::f64::EPSILON {
+        if (pct - hundred).abs() < f64::EPSILON {
             return s[s.len() - 1].into();
         }
         let length = (s.len() - 1) as f64;
