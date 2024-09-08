@@ -27,11 +27,6 @@ fn make_svg_opacity(color: BackendColor) -> String {
 enum Target<'a> {
     File(String, &'a Path),
     Buffer(&'a mut String),
-    // TODO: At this point we won't make the breaking change
-    // so the u8 buffer is still supported. But in 0.3, we definitely
-    // should get rid of this.
-    #[cfg(feature = "deprecated_items")]
-    U8Buffer(String, &'a mut Vec<u8>),
 }
 
 impl Target<'_> {
@@ -39,8 +34,6 @@ impl Target<'_> {
         match self {
             Target::File(ref mut buf, _) => buf,
             Target::Buffer(buf) => buf,
-            #[cfg(feature = "deprecated_items")]
-            Target::U8Buffer(ref mut buf, _) => buf,
         }
     }
 }
@@ -147,24 +140,6 @@ impl<'a> SVGBackend<'a> {
         ret
     }
 
-    /// Create a new SVG drawing backend and store the document into a u8 vector
-    #[cfg(feature = "deprecated_items")]
-    #[deprecated(
-        note = "This will be replaced by `with_string`, consider use `with_string` to avoid breaking change in the future"
-    )]
-    pub fn with_buffer(buf: &'a mut Vec<u8>, size: (u32, u32)) -> Self {
-        let mut ret = Self {
-            target: Target::U8Buffer(String::default(), buf),
-            size,
-            tag_stack: vec![],
-            saved: false,
-        };
-
-        ret.init_svg_file(size);
-
-        ret
-    }
-
     /// Create a new SVG drawing backend and store the document into a String buffer
     pub fn with_string(buf: &'a mut String, size: (u32, u32)) -> Self {
         let mut ret = Self {
@@ -203,11 +178,6 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
                         .map_err(DrawingErrorKind::DrawingError)?;
                 }
                 Target::Buffer(_) => {}
-                #[cfg(feature = "deprecated_items")]
-                Target::U8Buffer(ref actual, ref mut target) => {
-                    target.clear();
-                    target.extend_from_slice(actual.as_bytes());
-                }
             }
             self.saved = true;
         }
@@ -481,11 +451,11 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
     }
 
     #[cfg(all(not(target_arch = "wasm32"), feature = "image"))]
-    fn blit_bitmap<'b>(
+    fn blit_bitmap(
         &mut self,
         pos: BackendCoord,
         (w, h): (u32, u32),
-        src: &'b [u8],
+        src: &[u8],
     ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
         use image::codecs::png::PngEncoder;
         use image::ImageEncoder;
@@ -508,9 +478,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         }
 
         let padding = (3 - data.len() % 3) % 3;
-        for _ in 0..padding {
-            data.push(0);
-        }
+        data.resize(data.len() + padding, 0);
 
         let mut rem_bits = 0;
         let mut rem_num = 0;

@@ -48,8 +48,7 @@ pub fn evcxr_figure<
     SVGWrapper(buffer, "".to_string())
 }
 
-// An evcxr figure that can save to the local file system and render in a notebook.
-
+/// An evcxr figure that can save to the local file system and render in a notebook.
 pub fn evcxr_figure_with_saving<
     Draw: FnOnce(DrawingArea<SVGBackend, Shift>) -> Result<(), Box<dyn std::error::Error>>,
 >(
@@ -77,8 +76,9 @@ pub fn evcxr_bitmap_figure<
     draw: Draw,
 ) -> SVGWrapper {
     const PIXEL_SIZE: usize = 3;
-    let mut buf = Vec::new();
-    buf.resize((size.0 as usize) * (size.1 as usize) * PIXEL_SIZE, 0);
+
+    let mut buf = vec![0; (size.0 as usize) * (size.1 as usize) * PIXEL_SIZE];
+
     let root = BitMapBackend::with_buffer(&mut buf, size).into_drawing_area();
     draw(root).expect("Drawing failure");
     let mut buffer = "".to_string();

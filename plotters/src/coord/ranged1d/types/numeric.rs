@@ -125,7 +125,7 @@ macro_rules! gen_key_points_comp {
 
             assert!(!(range.0.is_nan() || range.1.is_nan()));
 
-            if (range.0 - range.1).abs() < std::f64::EPSILON {
+            if (range.0 - range.1).abs() < f64::EPSILON {
                 return vec![range.0 as $type];
             }
 
@@ -141,7 +141,7 @@ macro_rules! gen_key_points_comp {
                 } else {
                     a - (a / b).ceil() * b
                 };
-                if (ret - b).abs() < std::f64::EPSILON {
+                if (ret - b).abs() < f64::EPSILON {
                     0.0
                 } else {
                     ret
@@ -191,7 +191,7 @@ macro_rules! gen_key_points_comp {
             let left_base = (left / value_granularity).floor() * value_granularity;
             let mut left_relative = left - left_base;
             let right = range.1 - rem_euclid(range.1, scale);
-            while (right - left_relative - left_base) >= -std::f64::EPSILON {
+            while (right - left_relative - left_base) >= -f64::EPSILON {
                 let new_left_relative =
                     (left_relative / value_granularity).round() * value_granularity;
                 if new_left_relative < 0.0 {

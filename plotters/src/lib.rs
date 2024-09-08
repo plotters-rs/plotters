@@ -1,4 +1,5 @@
 #![warn(missing_docs)]
+#![allow(clippy::type_complexity)]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 /*!
 
@@ -420,19 +421,19 @@ Also, there's a static HTML version of this notebook available at [this location
 Rust is a perfect language for data visualization. Although there are many mature visualization libraries in many different languages, Rust is one of the best languages that fits the need.
 
 * **Easy to use** Rust has a very good iterator system built into the standard library. With the help of iterators,
-plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
-can be very easy to use.
+  plotting in Rust can be as easy as most of the high-level programming languages. The Rust based plotting library
+  can be very easy to use.
 
 * **Fast** If you need to render a figure with trillions of data points,
-Rust is a good choice. Rust's performance allows you to combine the data processing step
-and rendering step into a single application. When plotting in high-level programming languages,
-e.g. Javascript or Python, data points must be down-sampled before feeding into the plotting
-program because of the performance considerations. Rust is fast enough to do the data processing and visualization
-within a single program. You can also integrate the
-figure rendering code into your application to handle a huge amount of data and visualize it in real-time.
+  Rust is a good choice. Rust's performance allows you to combine the data processing step
+  and rendering step into a single application. When plotting in high-level programming languages,
+  e.g. Javascript or Python, data points must be down-sampled before feeding into the plotting
+  program because of the performance considerations. Rust is fast enough to do the data processing and visualization
+  within a single program. You can also integrate the
+  figure rendering code into your application to handle a huge amount of data and visualize it in real-time.
 
 * **WebAssembly Support** Rust is one of the languages with the best WASM support. Plotting in Rust could be
-very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
+  very useful for visualization on a web page and would have a huge performance improvement comparing to Javascript.
 
 ## Plotting on HTML5 canvas with WASM Backend
 
@@ -802,10 +803,6 @@ pub mod evcxr;
 
 #[cfg(test)]
 pub use crate::drawing::{check_color, create_mocked_drawing_area};
-
-#[cfg(feature = "palette_ext")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "palette_ext")))]
-pub use palette;
 
 /// The module imports the most commonly used types and modules in Plotters
 pub mod prelude {

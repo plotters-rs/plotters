@@ -89,7 +89,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// - `size`: The size of the bitmap
     /// - `buf`: The buffer to use
     /// - **returns**: The newly created image element, if the buffer isn't fit the image
-    /// dimension, this will returns an `None`.
+    ///   dimension, this will returns an `None`.
     pub fn with_owned_buffer(pos: Coord, size: (u32, u32), buf: Vec<u8>) -> Option<Self> {
         if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
             return None;
@@ -109,7 +109,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// - `size`: The size of the bitmap
     /// - `buf`: The buffer to use
     /// - **returns**: The newly created image element, if the buffer isn't fit the image
-    /// dimension, this will returns an `None`.
+    ///   dimension, this will returns an `None`.
     pub fn with_mut(pos: Coord, size: (u32, u32), buf: &'a mut [u8]) -> Option<Self> {
         if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
             return None;
@@ -130,7 +130,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// - `size`: The size of the bitmap
     /// - `buf`: The buffer to use
     /// - **returns**: The newly created image element, if the buffer isn't fit the image
-    /// dimension, this will returns an `None`.
+    ///   dimension, this will returns an `None`.
     pub fn with_ref(pos: Coord, size: (u32, u32), buf: &'a [u8]) -> Option<Self> {
         if buf.len() < (size.0 * size.1) as usize * P::PIXEL_SIZE {
             return None;

@@ -137,9 +137,9 @@ impl Color for HSLColor {
     #[allow(clippy::many_single_char_names)]
     fn to_backend_color(&self) -> BackendColor {
         let (h, s, l) = (
-            self.0.min(1.0).max(0.0),
-            self.1.min(1.0).max(0.0),
-            self.2.min(1.0).max(0.0),
+            self.0.clamp(0.0, 1.0),
+            self.1.clamp(0.0, 1.0),
+            self.2.clamp(0.0, 1.0),
         );
 
         if s == 0.0 {

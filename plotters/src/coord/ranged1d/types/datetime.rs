@@ -163,9 +163,11 @@ impl<Z: TimeZone> TimeValue for DateTime<Z> {
 
 impl TimeValue for NaiveDateTime {
     type DateType = NaiveDate;
+
     fn date_floor(&self) -> NaiveDate {
         self.date()
     }
+
     fn date_ceil(&self) -> NaiveDate {
         if self.time().num_seconds_from_midnight() > 0 {
             self.date() + Duration::days(1)
@@ -173,6 +175,7 @@ impl TimeValue for NaiveDateTime {
             self.date()
         }
     }
+
     fn earliest_after_date(date: NaiveDate) -> NaiveDateTime {
         date.and_hms(0, 0, 0)
     }

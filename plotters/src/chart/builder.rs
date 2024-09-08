@@ -194,7 +194,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     Sets the size of the X label area at the bottom of the chart.
 
     - `size`: The desired size of the X label area in backend units (pixels).
-    If set to 0, the X label area is removed.
+      If set to 0, the X label area is removed.
 
     See [`ChartBuilder::on()`] for more information and examples.
     */
@@ -206,7 +206,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     Sets the size of the Y label area to the left of the chart.
 
     - `size`: The desired size of the Y label area in backend units (pixels).
-    If set to 0, the Y label area is removed.
+      If set to 0, the Y label area is removed.
 
     See [`ChartBuilder::on()`] for more information and examples.
     */
@@ -218,7 +218,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     Sets the size of the X label area at the top of the chart.
 
     - `size`: The desired size of the top X label area in backend units (pixels).
-    If set to 0, the top X label area is removed.
+      If set to 0, the top X label area is removed.
 
     See [`ChartBuilder::on()`] for more information and examples.
     */
@@ -230,7 +230,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     Sets the size of the Y label area to the right of the chart.
 
     - `size`: The desired size of the Y label area in backend units (pixels).
-    If set to 0, the Y label area to the right is removed.
+      If set to 0, the Y label area to the right is removed.
 
     See [`ChartBuilder::on()`] for more information and examples.
     */
@@ -243,7 +243,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
 
     - `pos`: The position of the desired label area to adjust
     - `size`: The desired size of the label area in backend units (pixels).
-    If set to 0, the label area is removed.
+      If set to 0, the label area is removed.
 
     See [`ChartBuilder::on()`] for more information and examples.
     */

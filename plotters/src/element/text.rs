@@ -1,5 +1,4 @@
 use std::borrow::Borrow;
-use std::i32;
 
 use super::{Drawable, PointCollection};
 use crate::style::{FontDesc, FontResult, LayoutBox, TextStyle};

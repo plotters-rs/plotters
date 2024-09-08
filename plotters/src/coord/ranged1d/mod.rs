@@ -186,12 +186,12 @@ pub trait Ranged {
     /// This marker decides if Plotters default [ValueFormatter](trait.ValueFormatter.html) implementation should be used.
     /// This associated type can be one of the following two types:
     /// - [DefaultFormatting](struct.DefaultFormatting.html) will allow Plotters to automatically impl
-    /// the formatter based on `Debug` trait, if `Debug` trait is not impl for the `Self::Value`,
-    /// [ValueFormatter](trait.ValueFormatter.html) will not impl unless you impl it manually.
+    ///   the formatter based on `Debug` trait, if `Debug` trait is not impl for the `Self::Value`,
+    ///   [ValueFormatter](trait.ValueFormatter.html) will not impl unless you impl it manually.
     ///
     /// - [NoDefaultFormatting](struct.NoDefaultFormatting.html) Disable the automatic `Debug`
-    /// based value formatting. Thus you have to impl the
-    /// [ValueFormatter](trait.ValueFormatter.html) manually.
+    ///   based value formatting. Thus you have to impl the
+    ///   [ValueFormatter](trait.ValueFormatter.html) manually.
     ///
     type FormatOption: DefaultValueFormatOption;
 

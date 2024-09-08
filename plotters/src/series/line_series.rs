@@ -86,7 +86,7 @@ impl<DB: DrawingBackend, Coord> LineSeries<DB, Coord> {
     }
 }
 
-/// A dashed line series, map an iterable object to the dashed line element. Can be used to draw simple dashed and dotted lines. 
+/// A dashed line series, map an iterable object to the dashed line element. Can be used to draw simple dashed and dotted lines.
 ///
 /// If you want to use more complex shapes as points in the line, you can use `plotters::series::line_series::DottedLineSeries`.
 ///

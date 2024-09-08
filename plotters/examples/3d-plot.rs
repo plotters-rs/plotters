@@ -9,7 +9,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let z_axis = (-3.0..3.0).step(0.1);
 
     let mut chart = ChartBuilder::on(&area)
-        .caption("3D Plot Test".to_string(), ("sans", 20))
+        .caption("3D Plot Test", ("sans", 20))
         .build_cartesian_3d(x_axis.clone(), -3.0..3.0, z_axis.clone())?;
 
     chart.with_projection(|mut pb| {
