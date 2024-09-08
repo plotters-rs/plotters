@@ -589,17 +589,17 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             FontTransform::Rotate90 => {
                 attrwriter
                     .write_key("transform")
-                    .write_value(("rotate(90,", x0, ',', y0, ')'));
+                    .write_value(("rotate(90, ", x0, ", ", y0, ')'));
             }
             FontTransform::Rotate180 => {
                 attrwriter
                     .write_key("transform")
-                    .write_value(("rotate(180,", x0, ',', y0, ')'));
+                    .write_value(("rotate(180, ", x0, ", ", y0, ')'));
             }
             FontTransform::Rotate270 => {
                 attrwriter
                     .write_key("transform")
-                    .write_value(("rotate(270,", x0, ',', y0, ')'));
+                    .write_value(("rotate(270, ", x0, ", ", y0, ')'));
             }
             _ => {}
         }
