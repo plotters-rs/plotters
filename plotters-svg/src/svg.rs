@@ -443,7 +443,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .write_value(style.stroke_width());
         attrwriter
             .write_key("points")
-            .write_value(FormatEscapedIter(path.into_iter().map(|c| (c.0, ',', c.1))));
+            .write_value(FormatEscapedIter(
+                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+            ));
         attrwriter.close();
         Ok(())
     }
@@ -465,7 +467,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .write_value(make_svg_color(style.color()));
         attrwriter
             .write_key("points")
-            .write_value(FormatEscapedIter(path.into_iter()));
+            .write_value(FormatEscapedIter(
+                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+            ));
         attrwriter.close();
 
         Ok(())
