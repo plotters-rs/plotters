@@ -285,12 +285,12 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     #[deprecated(
         note = "`build_ranged` has been renamed to `build_cartesian_2d` and is to be removed in the future."
     )]
-    pub fn build_ranged<X: AsRangedCoord, Y: AsRangedCoord>(
+    pub fn build_ranged<'c, X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
     ) -> Result<
-        ChartContext<'a, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
+        ChartContext<'c, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
         self.build_cartesian_2d(x_spec, y_spec)
@@ -306,12 +306,12 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     See [`ChartBuilder::on()`] and [`ChartContext::configure_mesh()`] for more information and examples.
     */
     #[allow(clippy::type_complexity)]
-    pub fn build_cartesian_2d<X: AsRangedCoord, Y: AsRangedCoord>(
+    pub fn build_cartesian_2d<'c, X: AsRangedCoord, Y: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
     ) -> Result<
-        ChartContext<'a, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
+        ChartContext<'c, DB, Cartesian2d<X::CoordDescType, Y::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
         let mut label_areas = [None, None, None, None];
@@ -450,13 +450,13 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
     See [`ChartBuilder::on()`] and [`ChartContext::configure_axes()`] for more information and examples.
     */
     #[allow(clippy::type_complexity)]
-    pub fn build_cartesian_3d<X: AsRangedCoord, Y: AsRangedCoord, Z: AsRangedCoord>(
+    pub fn build_cartesian_3d<'c, X: AsRangedCoord, Y: AsRangedCoord, Z: AsRangedCoord>(
         &mut self,
         x_spec: X,
         y_spec: Y,
         z_spec: Z,
     ) -> Result<
-        ChartContext<'a, DB, Cartesian3d<X::CoordDescType, Y::CoordDescType, Z::CoordDescType>>,
+        ChartContext<'c, DB, Cartesian3d<X::CoordDescType, Y::CoordDescType, Z::CoordDescType>>,
         DrawingAreaErrorKind<DB::ErrorType>,
     > {
         let mut drawing_area = DrawingArea::clone(self.root_area);
