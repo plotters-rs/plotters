@@ -88,7 +88,7 @@ macro_rules! impl_format_escaped_tuple {
         {
             fn format_escaped(buf: &mut String, tup: Self) {
                 $(
-                    let _ = FormatEscaped::format_escaped(buf, tup.$idx);
+                    FormatEscaped::format_escaped(buf, tup.$idx);
                 )+
             }
         }
@@ -133,10 +133,10 @@ impl<T: FormatEscaped> FormatEscaped for Option<T> {
     fn format_escaped(buf: &mut String, opt: Option<T>) {
         match opt {
             None => {
-                let _ = FormatEscaped::format_escaped(buf, "none");
+                FormatEscaped::format_escaped(buf, "none");
             }
             Some(x) => {
-                let _ = FormatEscaped::format_escaped(buf, x);
+                FormatEscaped::format_escaped(buf, x);
             }
         }
     }
@@ -198,7 +198,7 @@ impl<'a> AttrWriter<'a, Init> {
         AttrWriter {
             buf: self.buf,
             tag: self.tag.clone(),
-            tag_stack: &mut self.tag_stack,
+            tag_stack: self.tag_stack,
             state: Default::default(),
         }
     }
@@ -223,14 +223,9 @@ impl<'a> AttrWriter<'a, Value> {
 
 impl<'a> SVGBackend<'a> {
     fn escape_and_push(buf: &mut String, value: &str) {
-        value.chars().for_each(|c| match c {
-            '<' => buf.push_str("&lt;"),
-            '>' => buf.push_str("&gt;"),
-            '&' => buf.push_str("&amp;"),
-            '"' => buf.push_str("&quot;"),
-            '\'' => buf.push_str("&apos;"),
-            other => buf.push(other),
-        });
+        value
+            .chars()
+            .for_each(|c| FormatEscaped::format_escaped(buf, c));
     }
 
     fn close_tag(&mut self) -> bool {
@@ -245,7 +240,7 @@ impl<'a> SVGBackend<'a> {
     }
 
     /// Opens a tag and provides facilities for writing attrs and closing the tag
-    fn open_tag<'s>(&'s mut self, tag: SVGTag) -> AttrWriter<'s, Init> {
+    fn open_tag(&mut self, tag: SVGTag) -> AttrWriter<'_, Init> {
         AttrWriter::open_tag(self.target.get_mut(), tag, &mut self.tag_stack)
     }
 
@@ -356,10 +351,10 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         attrwriter.write_key("width").write_value("1");
         attrwriter.write_key("height").write_value("1");
         attrwriter.write_key("stroke").write_value("none");
+        attrwriter.write_key("opacity").write_value(color.alpha);
         attrwriter
-            .write_key("opacity")
+            .write_key("fill")
             .write_value(make_svg_color(color));
-        attrwriter.write_key("fill").write_value(color.alpha);
         attrwriter.close();
         Ok(())
     }
