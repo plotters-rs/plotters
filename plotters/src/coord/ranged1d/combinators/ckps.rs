@@ -13,6 +13,7 @@ use crate::coord::ranged1d::{AsRangedCoord, DiscreteRanged, KeyPointHint, Ranged
 /// for details.
 /// Note: For any coordinate spec wrapped by this decorator, the maximum number of labels configured by
 /// MeshStyle will be ignored and the key point function will always returns the entire vector
+#[derive(Clone)]
 pub struct WithKeyPoints<Inner: Ranged> {
     inner: Inner,
     bold_points: Vec<Inner::ValueType>,

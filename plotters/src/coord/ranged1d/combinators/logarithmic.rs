@@ -151,6 +151,7 @@ impl<V: LogScalable> AsRangedCoord for LogRangeExt<V> {
 }
 
 /// A log scaled coordinate axis
+#[derive(Clone)]
 pub struct LogCoord<V: LogScalable> {
     linear: RangedCoordf64,
     logic: Range<V>,
