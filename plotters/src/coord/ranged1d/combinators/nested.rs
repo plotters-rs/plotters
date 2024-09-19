@@ -45,6 +45,7 @@ impl<C, V> From<C> for NestedValue<C, V> {
 /// for each value in discrete value, there is a secondary coordinate system.
 /// And the value is defined as a tuple of primary coordinate value and secondary
 /// coordinate value
+#[derive(Clone)]
 pub struct NestedRange<Primary: DiscreteRanged, Secondary: Ranged> {
     primary: Primary,
     secondary: Vec<Secondary>,
