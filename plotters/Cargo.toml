@@ -78,8 +78,8 @@ default = [
         "full_palette",
         "colormaps"
 ]
-all_series = ["area_series", "line_series", "point_series", "surface_series"]
-all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
+all_series = ["area_series", "line_series", "point_series", "surface_series", "histogram"]
+all_elements = ["errorbar", "candlestick", "boxplot"]
 
 # Tier 1 Backends
 bitmap_backend = ["plotters-bitmap"]
