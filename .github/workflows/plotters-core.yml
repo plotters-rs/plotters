@@ -7,7 +7,7 @@ jobs:
     name: cargo-doc
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -20,7 +20,7 @@ jobs:
   msrv:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
           submodules: recursive
     - uses: actions-rs/toolchain@v1
@@ -34,7 +34,7 @@ jobs:
         matrix:
             os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
           submodules: recursive
     - uses: actions-rs/toolchain@v1
@@ -52,7 +52,7 @@ jobs:
   test_all_features:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
           submodules: recursive
     - uses: actions-rs/toolchain@v1
@@ -66,7 +66,7 @@ jobs:
   run_all_examples:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
           submodules: recursive
     - uses: actions-rs/cargo@v1
@@ -81,7 +81,7 @@ jobs:
           ../target/release/examples/$(basename ${example} .rs)
         done 
         tar -czvf example-outputs.tar.gz plotters-doc-data
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
           name: example-outputs
           path: plotters/example-outputs.tar.gz

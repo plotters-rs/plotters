@@ -1,5 +1,5 @@
 /// The datetime coordinates
-use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
+use chrono::{Date, DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike};
 use std::ops::{Add, Range, Sub};
 
 use crate::coord::ranged1d::{
@@ -23,7 +23,7 @@ pub trait TimeValue: Eq + Sized {
     /// Add duration to time value
     fn add(&self, duration: &Duration) -> Self;
     /// Instantiate a date type for current time value;
-    fn ymd_opt(&self, year: i32, month: u32, date: u32) -> Option<Self::DateType>;
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType;
     /// Cast current date type into this type
     fn from_date(date: Self::DateType) -> Self;
 
@@ -93,8 +93,8 @@ impl TimeValue for NaiveDate {
         *self + *other
     }
 
-    fn ymd_opt(&self, year: i32, month: u32, date: u32) -> Option<Self::DateType> {
-        NaiveDate::from_ymd_opt(year, month, date)
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        NaiveDate::from_ymd(year, month, date)
     }
 
     fn from_date(date: Self::DateType) -> Self {
@@ -102,11 +102,72 @@ impl TimeValue for NaiveDate {
     }
 }
 
+impl<Z: TimeZone> TimeValue for Date<Z> {
+    type DateType = Date<Z>;
+    fn date_floor(&self) -> Date<Z> {
+        self.clone()
+    }
+    fn date_ceil(&self) -> Date<Z> {
+        self.clone()
+    }
+    fn earliest_after_date(date: Date<Z>) -> Self {
+        date
+    }
+    fn subtract(&self, other: &Date<Z>) -> Duration {
+        self.clone() - other.clone()
+    }
+    fn add(&self, other: &Duration) -> Date<Z> {
+        self.clone() + *other
+    }
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        self.timezone().ymd(year, month, date)
+    }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date
+    }
+}
+
+impl<Z: TimeZone> TimeValue for DateTime<Z> {
+    type DateType = Date<Z>;
+    fn date_floor(&self) -> Date<Z> {
+        self.date()
+    }
+    fn date_ceil(&self) -> Date<Z> {
+        if self.time().num_seconds_from_midnight() > 0 {
+            self.date() + Duration::days(1)
+        } else {
+            self.date()
+        }
+    }
+    fn earliest_after_date(date: Date<Z>) -> DateTime<Z> {
+        date.and_hms(0, 0, 0)
+    }
+
+    fn subtract(&self, other: &DateTime<Z>) -> Duration {
+        self.clone() - other.clone()
+    }
+    fn add(&self, other: &Duration) -> DateTime<Z> {
+        self.clone() + *other
+    }
+
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        self.timezone().ymd(year, month, date)
+    }
+
+    fn from_date(date: Self::DateType) -> Self {
+        date.and_hms(0, 0, 0)
+    }
+}
+
 impl TimeValue for NaiveDateTime {
     type DateType = NaiveDate;
+
     fn date_floor(&self) -> NaiveDate {
         self.date()
     }
+
     fn date_ceil(&self) -> NaiveDate {
         if self.time().num_seconds_from_midnight() > 0 {
             self.date() + Duration::days(1)
@@ -114,9 +175,9 @@ impl TimeValue for NaiveDateTime {
             self.date()
         }
     }
+
     fn earliest_after_date(date: NaiveDate) -> NaiveDateTime {
-        // directly unwrap to avoid nested Options because the op is constant
-        date.and_hms_opt(0, 0, 0).unwrap()
+        date.and_hms(0, 0, 0)
     }
 
     fn subtract(&self, other: &NaiveDateTime) -> Duration {
@@ -126,13 +187,12 @@ impl TimeValue for NaiveDateTime {
         *self + *other
     }
 
-    fn ymd_opt(&self, year: i32, month: u32, date: u32) -> Option<Self::DateType> {
-        NaiveDate::from_ymd_opt(year, month, date)
+    fn ymd(&self, year: i32, month: u32, date: u32) -> Self::DateType {
+        NaiveDate::from_ymd(year, month, date)
     }
 
     fn from_date(date: Self::DateType) -> Self {
-        // directly unwrap to avoid nested Options because the op is constant
-        date.and_hms_opt(0, 0, 0).unwrap()
+        date.and_hms(0, 0, 0)
     }
 }
 
@@ -219,6 +279,11 @@ where
     }
 }
 
+impl<Z: TimeZone> AsRangedCoord for Range<Date<Z>> {
+    type CoordDescType = RangedDate<Date<Z>>;
+    type Value = Date<Z>;
+}
+
 impl AsRangedCoord for Range<NaiveDate> {
     type CoordDescType = RangedDate<NaiveDate>;
     type Value = NaiveDate;
@@ -271,9 +336,11 @@ impl<T: TimeValue + Clone> Monthly<T> {
         ) -> Vec<T> {
             let mut ret = vec![];
             while end_year > start_year || (end_year == start_year && end_month >= start_month) {
-                if let Some(date) = builder.ymd_opt(start_year, start_month as u32, 1) {
-                    ret.push(T::earliest_after_date(date));
-                }
+                ret.push(T::earliest_after_date(builder.ymd(
+                    start_year,
+                    start_month as u32,
+                    1,
+                )));
                 start_month += step as i32;
 
                 if start_month >= 13 {
@@ -397,12 +464,11 @@ where
         let index_from_start_year = index + (self.0.start.date_ceil().month() - 1) as usize;
         let year = self.0.start.date_ceil().year() + index_from_start_year as i32 / 12;
         let month = index_from_start_year % 12;
-
-        if let Some(start_ymd) = self.0.start.ymd_opt(year, month as u32 + 1, 1) {
-            return Some(T::earliest_after_date(start_ymd));
-        }
-
-        None
+        Some(T::earliest_after_date(self.0.start.ymd(
+            year,
+            month as u32 + 1,
+            1,
+        )))
     }
 }
 
@@ -440,9 +506,11 @@ fn generate_yearly_keypoints<T: TimeValue>(
     let mut ret = vec![];
 
     while start_year <= end_year {
-        if let Some(date) = builder.ymd_opt(start_year, start_month, 1) {
-            ret.push(T::earliest_after_date(date));
-        }
+        ret.push(T::earliest_after_date(builder.ymd(
+            start_year,
+            start_month,
+            1,
+        )));
         start_year += freq as i32;
     }
 
@@ -526,14 +594,11 @@ where
 
     fn from_index(&self, index: usize) -> Option<T> {
         let year = self.0.start.date_ceil().year() + index as i32;
-        if let Some(date) = self.0.start.ymd_opt(year, 1, 1) {
-            let ret = T::earliest_after_date(date);
-            if ret.date_ceil() <= self.0.start.date_floor() {
-                return Some(self.0.start.clone());
-            }
-            return Some(ret);
+        let ret = T::earliest_after_date(self.0.start.ymd(year, 1, 1));
+        if ret.date_ceil() <= self.0.start.date_floor() {
+            return Some(self.0.start.clone());
         }
-        None
+        Some(ret)
     }
 }
 
@@ -564,6 +629,17 @@ impl<T: TimeValue> IntoYearly<T> for Range<T> {
 /// The ranged coordinate for the date and time
 #[derive(Clone)]
 pub struct RangedDateTime<DT: Datelike + Timelike + TimeValue>(DT, DT);
+
+impl<Z: TimeZone> AsRangedCoord for Range<DateTime<Z>> {
+    type CoordDescType = RangedDateTime<DateTime<Z>>;
+    type Value = DateTime<Z>;
+}
+
+impl<Z: TimeZone> From<Range<DateTime<Z>>> for RangedDateTime<DateTime<Z>> {
+    fn from(range: Range<DateTime<Z>>) -> Self {
+        Self(range.start, range.end)
+    }
+}
 
 impl From<Range<NaiveDateTime>> for RangedDateTime<NaiveDateTime> {
     fn from(range: Range<NaiveDateTime>) -> Self {
@@ -706,7 +782,7 @@ impl Ranged for RangedDuration {
 
                 while current < self.1 {
                     ret.push(current);
-                    current = current + Duration::nanoseconds(period as i64);
+                    current += Duration::nanoseconds(period as i64);
                 }
 
                 return ret;
@@ -745,7 +821,7 @@ impl Ranged for RangedDuration {
 
         while current < self.1 {
             ret.push(current);
-            current = current + Duration::days(i64::from(days_per_tick));
+            current += Duration::days(i64::from(days_per_tick));
         }
 
         ret
@@ -755,7 +831,7 @@ impl Ranged for RangedDuration {
 #[allow(clippy::inconsistent_digit_grouping)]
 fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -> Option<u64> {
     let min_ns_per_point = total_ns as f64 / max_points as f64;
-    let actual_ns_per_point: u64 = (10u64).pow((min_ns_per_point as f64).log10().floor() as u32);
+    let actual_ns_per_point: u64 = (10u64).pow(min_ns_per_point.log10().floor() as u32);
 
     fn determine_actual_ns_per_point(
         total_ns: u64,
@@ -777,7 +853,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
 
     if actual_ns_per_point < 1_000_000_000 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             actual_ns_per_point,
             &[1, 2, 5],
             10,
@@ -785,7 +861,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         ))
     } else if actual_ns_per_point < 3600_000_000_000 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             1_000_000_000,
             &[1, 2, 5, 10, 15, 20, 30],
             60,
@@ -793,7 +869,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
         ))
     } else if actual_ns_per_point < 3600_000_000_000 * 24 {
         Some(determine_actual_ns_per_point(
-            total_ns as u64,
+            total_ns,
             3600_000_000_000,
             &[1, 2, 4, 8, 12],
             24,
@@ -802,7 +878,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
     } else if !sub_daily {
         if actual_ns_per_point < 3600_000_000_000 * 24 * 10 {
             Some(determine_actual_ns_per_point(
-                total_ns as u64,
+                total_ns,
                 3600_000_000_000 * 24,
                 &[1, 2, 5, 7],
                 10,
@@ -810,7 +886,7 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
             ))
         } else {
             Some(determine_actual_ns_per_point(
-                total_ns as u64,
+                total_ns,
                 3600_000_000_000 * 24 * 10,
                 &[1, 2, 5],
                 10,
@@ -825,30 +901,16 @@ fn compute_period_per_point(total_ns: u64, max_points: usize, sub_daily: bool) -
 #[cfg(test)]
 mod test {
     use super::*;
-
-    // it's safe to use unwrap in these macros because testcases use good known values
-    macro_rules! create_date {
-        ($year:expr, $month:expr, $day:expr) => {
-            NaiveDate::from_ymd_opt($year, $month, $day).unwrap()
-        };
-    }
-    macro_rules! create_datetime {
-        ($year:expr, $month:expr, $day:expr, $hour:expr, $min:expr, $sec:expr) => {
-            NaiveDate::from_ymd_opt($year, $month, $day)
-                .unwrap()
-                .and_hms_opt($hour, $min, $sec)
-                .unwrap()
-        };
-    }
+    use chrono::{TimeZone, Utc};
 
     #[test]
     fn test_date_range_long() {
-        let range = create_date!(1000, 1, 1)..create_date!(2999, 1, 1);
+        let range = Utc.ymd(1000, 1, 1)..Utc.ymd(2999, 1, 1);
 
         let ranged_coord = Into::<RangedDate<_>>::into(range);
 
-        assert_eq!(ranged_coord.map(&create_date!(1000, 8, 10), (0, 100)), 0);
-        assert_eq!(ranged_coord.map(&create_date!(2999, 8, 10), (0, 100)), 100);
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
 
         let kps = ranged_coord.key_points(23);
 
@@ -871,7 +933,7 @@ mod test {
 
     #[test]
     fn test_date_range_short() {
-        let range = create_date!(2019, 1, 1)..create_date!(2019, 1, 21);
+        let range = Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 1, 21);
         let ranged_coord = Into::<RangedDate<_>>::into(range);
 
         let kps = ranged_coord.key_points(4);
@@ -914,11 +976,11 @@ mod test {
     #[test]
     fn test_yearly_date_range() {
         use crate::coord::ranged1d::BoldPoints;
-        let range = create_date!(1000, 8, 5)..create_date!(2999, 1, 1);
+        let range = Utc.ymd(1000, 8, 5)..Utc.ymd(2999, 1, 1);
         let ranged_coord = range.yearly();
 
-        assert_eq!(ranged_coord.map(&create_date!(1000, 8, 10), (0, 100)), 0);
-        assert_eq!(ranged_coord.map(&create_date!(2999, 8, 10), (0, 100)), 100);
+        assert_eq!(ranged_coord.map(&Utc.ymd(1000, 8, 10), (0, 100)), 0);
+        assert_eq!(ranged_coord.map(&Utc.ymd(2999, 8, 10), (0, 100)), 100);
 
         let kps = ranged_coord.key_points(23);
 
@@ -939,7 +1001,7 @@ mod test {
 
         assert!(kps.into_iter().all(|x| x.month() == 9 && x.day() == 1));
 
-        let range = create_date!(2019, 8, 5)..create_date!(2020, 1, 1);
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 1, 1);
         let ranged_coord = range.yearly();
         let kps = ranged_coord.key_points(BoldPoints(23));
         assert!(kps.len() == 1);
@@ -947,7 +1009,7 @@ mod test {
 
     #[test]
     fn test_monthly_date_range() {
-        let range = create_date!(2019, 8, 5)..create_date!(2020, 9, 1);
+        let range = Utc.ymd(2019, 8, 5)..Utc.ymd(2020, 9, 1);
         let ranged_coord = range.monthly();
 
         use crate::coord::ranged1d::BoldPoints;
@@ -975,14 +1037,14 @@ mod test {
     #[test]
     fn test_datetime_long_range() {
         let coord: RangedDateTime<_> =
-            (create_datetime!(1000, 1, 1, 0, 0, 0)..create_datetime!(3000, 1, 1, 0, 0, 0)).into();
+            (Utc.ymd(1000, 1, 1).and_hms(0, 0, 0)..Utc.ymd(3000, 1, 1).and_hms(0, 0, 0)).into();
 
         assert_eq!(
-            coord.map(&create_datetime!(1000, 1, 1, 0, 0, 0), (0, 100)),
+            coord.map(&Utc.ymd(1000, 1, 1).and_hms(0, 0, 0), (0, 100)),
             0
         );
         assert_eq!(
-            coord.map(&create_datetime!(3000, 1, 1, 0, 0, 0), (0, 100)),
+            coord.map(&Utc.ymd(3000, 1, 1).and_hms(0, 0, 0), (0, 100)),
             100
         );
 
@@ -1008,7 +1070,7 @@ mod test {
     #[test]
     fn test_datetime_medium_range() {
         let coord: RangedDateTime<_> =
-            (create_datetime!(2019, 1, 1, 0, 0, 0)..create_datetime!(2019, 1, 11, 0, 0, 0)).into();
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 11).and_hms(0, 0, 0)).into();
 
         let kps = coord.key_points(23);
 
@@ -1032,7 +1094,7 @@ mod test {
     #[test]
     fn test_datetime_short_range() {
         let coord: RangedDateTime<_> =
-            (create_datetime!(2019, 1, 1, 0, 0, 0)..create_datetime!(2019, 1, 2, 0, 0, 0)).into();
+            (Utc.ymd(2019, 1, 1).and_hms(0, 0, 0)..Utc.ymd(2019, 1, 2).and_hms(0, 0, 0)).into();
 
         let kps = coord.key_points(50);
 
@@ -1055,8 +1117,8 @@ mod test {
 
     #[test]
     fn test_datetime_nano_range() {
-        let start = create_datetime!(2019, 1, 1, 0, 0, 0);
-        let end = start.clone() + Duration::nanoseconds(100);
+        let start = Utc.ymd(2019, 1, 1).and_hms(0, 0, 0);
+        let end = start + Duration::nanoseconds(100);
         let coord: RangedDateTime<_> = (start..end).into();
 
         let kps = coord.key_points(50);
@@ -1129,20 +1191,16 @@ mod test {
 
     #[test]
     fn test_date_discrete() {
-        let coord: RangedDate<NaiveDate> =
-            (create_date!(2019, 1, 1)..create_date!(2019, 12, 31)).into();
+        let coord: RangedDate<Date<_>> = (Utc.ymd(2019, 1, 1)..Utc.ymd(2019, 12, 31)).into();
         assert_eq!(coord.size(), 365);
-        assert_eq!(
-            coord.index_of(&create_date!(2019, 2, 28)),
-            Some(31 + 28 - 1)
-        );
-        assert_eq!(coord.from_index(364), Some(create_date!(2019, 12, 31)));
+        assert_eq!(coord.index_of(&Utc.ymd(2019, 2, 28)), Some(31 + 28 - 1));
+        assert_eq!(coord.from_index(364), Some(Utc.ymd(2019, 12, 31)));
     }
 
     #[test]
     fn test_monthly_discrete() {
-        let coord1 = (create_date!(2019, 1, 10)..create_date!(2019, 12, 31)).monthly();
-        let coord2 = (create_date!(2019, 1, 10)..create_date!(2020, 1, 1)).monthly();
+        let coord1 = (Utc.ymd(2019, 1, 10)..Utc.ymd(2019, 12, 31)).monthly();
+        let coord2 = (Utc.ymd(2019, 1, 10)..Utc.ymd(2020, 1, 1)).monthly();
         assert_eq!(coord1.size(), 12);
         assert_eq!(coord2.size(), 13);
 
@@ -1157,7 +1215,7 @@ mod test {
 
     #[test]
     fn test_yearly_discrete() {
-        let coord1 = (create_date!(2000, 1, 10)..create_date!(2019, 12, 31)).yearly();
+        let coord1 = (Utc.ymd(2000, 1, 10)..Utc.ymd(2019, 12, 31)).yearly();
         assert_eq!(coord1.size(), 20);
 
         for i in 0..20 {
@@ -1168,9 +1226,9 @@ mod test {
 
     #[test]
     fn test_datetime_with_unmap() {
-        let start_time = create_datetime!(2021, 1, 1, 8, 0, 0);
-        let end_time = create_datetime!(2023, 1, 1, 8, 0, 0);
-        let mid = create_datetime!(2022, 1, 1, 8, 0, 0);
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
+        let end_time = Utc.ymd(2023, 1, 1).and_hms(8, 0, 0);
+        let mid = Utc.ymd(2022, 1, 1).and_hms(8, 0, 0);
         let coord: RangedDateTime<_> = (start_time..end_time).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
@@ -1180,9 +1238,9 @@ mod test {
 
     #[test]
     fn test_naivedatetime_with_unmap() {
-        let start_time = create_datetime!(2021, 1, 1, 8, 0, 0);
-        let end_time = create_datetime!(2023, 1, 1, 8, 0, 0);
-        let mid = create_datetime!(2022, 1, 1, 8, 0, 0);
+        let start_time = NaiveDate::from_ymd(2021, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let end_time = NaiveDate::from_ymd(2023, 1, 1).and_hms_milli(8, 0, 0, 0);
+        let mid = NaiveDate::from_ymd(2022, 1, 1).and_hms_milli(8, 0, 0, 0);
         let coord: RangedDateTime<_> = (start_time..end_time).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
@@ -1192,10 +1250,10 @@ mod test {
 
     #[test]
     fn test_date_with_unmap() {
-        let start_date = create_date!(2021, 1, 1);
-        let end_date = create_date!(2023, 1, 1);
-        let mid = create_date!(2022, 1, 1);
-        let coord: RangedDate<NaiveDate> = (start_date..end_date).into();
+        let start_date = Utc.ymd(2021, 1, 1);
+        let end_date = Utc.ymd(2023, 1, 1);
+        let mid = Utc.ymd(2022, 1, 1);
+        let coord: RangedDate<Date<_>> = (start_date..end_date).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
         let value = coord.unmap(pos, (1000, 2000));
@@ -1204,9 +1262,9 @@ mod test {
 
     #[test]
     fn test_naivedate_with_unmap() {
-        let start_date = create_date!(2021, 1, 1);
-        let end_date = create_date!(2023, 1, 1);
-        let mid = create_date!(2022, 1, 1);
+        let start_date = NaiveDate::from_ymd(2021, 1, 1);
+        let end_date = NaiveDate::from_ymd(2023, 1, 1);
+        let mid = NaiveDate::from_ymd(2022, 1, 1);
         let coord: RangedDate<NaiveDate> = (start_date..end_date).into();
         let pos = coord.map(&mid, (1000, 2000));
         assert_eq!(pos, 1500);
@@ -1216,7 +1274,7 @@ mod test {
 
     #[test]
     fn test_datetime_unmap_for_nanoseconds() {
-        let start_time = create_datetime!(2021, 1, 1, 8, 0, 0);
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
         let end_time = start_time + Duration::nanoseconds(1900);
         let mid = start_time + Duration::nanoseconds(950);
         let coord: RangedDateTime<_> = (start_time..end_time).into();
@@ -1228,7 +1286,7 @@ mod test {
 
     #[test]
     fn test_datetime_unmap_for_nanoseconds_small_period() {
-        let start_time = create_datetime!(2021, 1, 1, 8, 0, 0);
+        let start_time = Utc.ymd(2021, 1, 1).and_hms(8, 0, 0);
         let end_time = start_time + Duration::nanoseconds(400);
         let coord: RangedDateTime<_> = (start_time..end_time).into();
         let value = coord.unmap(2000, (1000, 2000));
