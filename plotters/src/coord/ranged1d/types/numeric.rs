@@ -1,10 +1,10 @@
 use std::convert::TryFrom;
 use std::ops::Range;
 
-use crate::coord::ranged1d::{
+use crate::coord::{combinators::WithKeyPoints, ranged1d::{
     AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
     ReversibleRanged, ValueFormatter,
-};
+}};
 
 macro_rules! impl_discrete_trait {
     ($name:ident) => {
@@ -268,6 +268,17 @@ impl ValueFormatter<f32> for RangedCoordf32 {
         .print(*value as f64)
     }
 }
+impl ValueFormatter<f32> for WithKeyPoints<RangedCoordf32> {
+    fn format(value: &f32) -> String {
+        crate::data::float::FloatPrettyPrinter {
+            allow_scientific: false,
+            min_decimal: 1,
+            max_decimal: 5,
+        }
+        .print(*value as f64)
+    }
+}
+
 make_numeric_coord!(
     f64,
     RangedCoordf64,
@@ -277,6 +288,16 @@ make_numeric_coord!(
 );
 impl_reverse_mapping_trait!(f64, RangedCoordf64);
 impl ValueFormatter<f64> for RangedCoordf64 {
+    fn format(value: &f64) -> String {
+        crate::data::float::FloatPrettyPrinter {
+            allow_scientific: false,
+            min_decimal: 1,
+            max_decimal: 5,
+        }
+        .print(*value)
+    }
+}
+impl ValueFormatter<f64> for WithKeyPoints<RangedCoordf64> {
     fn format(value: &f64) -> String {
         crate::data::float::FloatPrettyPrinter {
             allow_scientific: false,
