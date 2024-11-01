@@ -571,6 +571,22 @@ pub fn register_font(
 ) -> Result<(), InvalidFont>
 ```
 
+- (De)serialization features
+
+| Name          | Description                              | Additional Dependency | Default? |
+|---------------|------------------------------------------|-----------------------|----------|
+| serialization | Enables serde (de)serialization support  | serde                 | No       |
+
+`serialization` enables support for serializing and deserializing using the serde crate.
+Enable the feature via Cargo.toml then use it like the following:
+```rust,ignore
+#[cfg(feature = "serialization")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
+pub struct RGBAColor(pub u8, pub u8, pub u8, pub f64);
+```
+
 - Coordinate features
 
 | Name    |  Description | Additional Dependency |Default?|
