@@ -20,6 +20,7 @@ deprecated = { level = "allow" }
 [dependencies]
 num-traits = "0.2.14"
 chrono = { version = "0.4.32", optional = true }
+serde = { version = "1.0.139", features = ["derive"] }
 
 [dependencies.plotters-backend]
 version = "0.3.6"
@@ -122,7 +123,6 @@ itertools = "0.10.0"
 criterion = "0.5.1"
 rayon = "1.5.1"
 serde_json = "1.0.82"
-serde = "1.0.139"
 serde_derive = "1.0.140"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]

@@ -3,6 +3,8 @@ use super::ShapeStyle;
 
 use plotters_backend::{BackendColor, BackendStyle};
 
+use serde::{Deserialize, Serialize};
+
 use std::marker::PhantomData;
 
 /// Any color representation
@@ -63,7 +65,7 @@ impl<T: Color> Color for &'_ T {
 /// of color
 ///
 /// If you want to directly create a RGB color with transparency use [RGBColor::mix]
-#[derive(Copy, Clone, PartialEq, Debug, Default)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, Serialize, Deserialize)]
 pub struct RGBAColor(pub u8, pub u8, pub u8, pub f64);
 
 impl Color for RGBAColor {
@@ -83,7 +85,7 @@ impl From<RGBColor> for RGBAColor {
 }
 
 /// A color in the given palette
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default, Serialize, Deserialize)]
 pub struct PaletteColor<P: Palette>(usize, PhantomData<P>);
 
 impl<P: Palette> PaletteColor<P> {
@@ -104,7 +106,7 @@ impl<P: Palette> Color for PaletteColor<P> {
 }
 
 /// The color described by its RGB value
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default, Serialize, Deserialize)]
 pub struct RGBColor(pub u8, pub u8, pub u8);
 
 impl BackendStyle for RGBAColor {
@@ -129,7 +131,7 @@ impl BackendStyle for RGBColor {
 }
 
 /// The color described by HSL color space
-#[derive(Copy, Clone, PartialEq, Debug, Default)]
+#[derive(Copy, Clone, PartialEq, Debug, Default, Serialize, Deserialize)]
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl Color for HSLColor {
