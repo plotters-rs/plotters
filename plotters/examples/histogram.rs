@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart.draw_series(
         Histogram::vertical(&chart)
             .style(RED.mix(0.5).filled())
-            .data(data.iter().map(|x: &u32| (*x, 1))),
+            .data(data.iter().enumerate().map(|(x, &y)| (x, y))),
     )?;
 
     // To avoid the IO failure being ignored silently, we manually call the present function
