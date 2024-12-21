@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use std::ops::Range;
 
 use crate::coord::{combinators::WithKeyPoints, ranged1d::{
@@ -26,10 +25,8 @@ macro_rules! impl_discrete_trait {
             }
 
             fn from_index(&self, index: usize) -> Option<Self::ValueType> {
-                if let Ok(index) = Self::ValueType::try_from(index) {
-                    return Some(self.0 + index);
-                }
-                None
+                // Ensure index can be added to self.0 without overflowing
+                self.0.checked_add(index as Self::ValueType)
             }
         }
     };
