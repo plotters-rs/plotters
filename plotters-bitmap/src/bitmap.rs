@@ -40,7 +40,7 @@ pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     buffer: Buffer<'a>,
     /// Flag indicates if the bitmap has been saved
     saved: bool,
-    _pantomdata: PhantomData<P>,
+    _phantomdata: PhantomData<P>,
 }
 
 impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
@@ -57,7 +57,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
             size: (w, h),
             buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
-            _pantomdata: PhantomData,
+            _phantomdata: PhantomData,
         }
     }
 
@@ -85,7 +85,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
             size: (w, h),
             buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
-            _pantomdata: PhantomData,
+            _data: PhantomData,
         })
     }
 
@@ -128,7 +128,7 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
             size: (w, h),
             buffer: Buffer::Borrowed(buf),
             saved: false,
-            _pantomdata: PhantomData,
+            _phantomdata: PhantomData,
         })
     }
 
