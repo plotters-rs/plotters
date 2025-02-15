@@ -85,7 +85,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
             size: (w, h),
             buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
-            _data: PhantomData,
+            _phantomdata: PhantomData,
         })
     }
 
