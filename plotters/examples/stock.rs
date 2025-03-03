@@ -1,9 +1,7 @@
-use chrono::{DateTime, Duration, NaiveDate};
+use chrono::{Duration, NaiveDate};
 use plotters::prelude::*;
 fn parse_time(t: &str) -> NaiveDate {
-    DateTime::parse_from_str(&format!("{} 0:0", t), "%Y-%m-%d %H:%M")
-        .unwrap()
-        .date_naive()
+    NaiveDate::parse_from_str(&format!("{} 0:0", t), "%Y-%m-%d %H:%M").unwrap()
 }
 const OUT_FILE_NAME: &'static str = "plotters-doc-data/stock.png";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
