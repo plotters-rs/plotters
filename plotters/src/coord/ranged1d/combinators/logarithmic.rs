@@ -1,5 +1,7 @@
 use crate::coord::ranged1d::types::RangedCoordf64;
-use crate::coord::ranged1d::{AsRangedCoord, DefaultFormatting, KeyPointHint, Ranged};
+use crate::coord::ranged1d::{
+    AsRangedCoord, DefaultFormatting, KeyPointHint, Ranged, ReversibleRanged,
+};
 use std::marker::PhantomData;
 use std::ops::Range;
 
@@ -75,6 +77,15 @@ impl<T: LogScalable> IntoLogRange for Range<T> {
             zero: 0.0,
             base: 10.0,
         }
+    }
+}
+
+impl<V: LogScalable> ReversibleRanged for LogCoord<V> {
+    fn unmap(&self, input: i32, limit: (i32, i32)) -> Option<V> {
+        self.linear.unmap(input, limit).map(|value_ln| {
+            let fv = value_ln.exp();
+            self.f64_to_value(fv)
+        })
     }
 }
 
