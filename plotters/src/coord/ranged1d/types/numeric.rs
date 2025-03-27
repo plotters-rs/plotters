@@ -26,10 +26,9 @@ macro_rules! impl_discrete_trait {
             }
 
             fn from_index(&self, index: usize) -> Option<Self::ValueType> {
-                if let Ok(index) = Self::ValueType::try_from(index) {
-                    return Some(self.0 + index);
-                }
-                None
+                Self::ValueType::try_from(index)
+                    .ok()
+                    .and_then(|index| self.0.checked_add(index))
             }
         }
     };
