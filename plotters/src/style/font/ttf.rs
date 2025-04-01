@@ -76,14 +76,13 @@ impl Drop for FontExt {
 impl FontExt {
     fn new(font: Font) -> Self {
         let handle = font.handle();
-        let (data, idx) = match handle.as_ref() {
-            Some(Handle::Memory { bytes, font_index }) => (&bytes[..], *font_index),
-            _ => unreachable!(),
-        };
-        let face = unsafe {
-            std::mem::transmute::<Option<_>, Option<Face<'static>>>(
-                ttf_parser::Face::parse(data, idx).ok(),
-            )
+        let face = match handle.as_ref() {
+            Some(Handle::Memory { bytes, font_index }) => unsafe {
+                std::mem::transmute::<Option<_>, Option<Face<'static>>>(
+                    ttf_parser::Face::parse(bytes, *font_index).ok(),
+                )
+            },
+            _ => None,
         };
         Self { inner: font, face }
     }
