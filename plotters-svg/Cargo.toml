@@ -16,7 +16,7 @@ version = "0.3.6"
 path = "../plotters-backend"
 
 [dependencies.image]
-version = "0.24.2"
+version = "0.25.5"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]
