@@ -140,9 +140,11 @@ impl BackendStyle for RGBColor {
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
 impl HSLColor {
+    /// Creates an `HSLColor` from degrees, wrapping into `[0, 360)` before normalizing.
+    /// Prefer this helper when specifying hue in degrees.
     #[inline]
     pub fn from_degrees(h_deg: f64, s: f64, l: f64) -> Self {
-        Self(h_deg / 360.0, s, l)
+        Self(h_deg.rem_euclid(360.0) / 360.0, s, l)
     }
 }
 
@@ -150,14 +152,9 @@ impl Color for HSLColor {
     #[inline(always)]
     #[allow(clippy::many_single_char_names)]
     fn to_backend_color(&self) -> BackendColor {
-        // Hue: do not clamp; normalize
-        // - If >1.0, treat as degrees (divide by 360), then wrap to [0,1)
-        // - Else, wrap value to [0,1) to accept negatives
-        let h = if self.0 > 1.0 {
-            (self.0 / 360.0).rem_euclid(1.0)
-        } else {
-            self.0.rem_euclid(1.0)
-        };
+        // Hue is expected normalized in [0,1); wrap to keep negative or slightly
+        // out-of-range inputs usable, but do not reinterpret raw degrees.
+        let h = self.0.rem_euclid(1.0);
 
         // Saturation & lightness remain clamped to valid ranges
         let s = self.1.clamp(0.0, 1.0);
@@ -209,23 +206,31 @@ mod hue_robustness_tests {
     use super::*;
 
     #[test]
-    fn degrees_passed_directly_should_work_for_common_cases() {
-        let red = HSLColor(0.0, 1.0, 0.5).to_backend_color().rgb;
+    fn degrees_passed_via_helper_should_work_for_common_cases() {
+        let red = HSLColor::from_degrees(0.0, 1.0, 0.5).to_backend_color().rgb;
         assert_eq!(red, (255, 0, 0));
 
-        let green = HSLColor(120.0, 1.0, 0.5).to_backend_color().rgb;
+        let green = HSLColor::from_degrees(120.0, 1.0, 0.5).to_backend_color().rgb;
         assert_eq!(green, (0, 255, 0));
 
-        let blue = HSLColor(240.0, 1.0, 0.5).to_backend_color().rgb;
+        let blue = HSLColor::from_degrees(240.0, 1.0, 0.5).to_backend_color().rgb;
         assert_eq!(blue, (0, 0, 255));
     }
 
     #[test]
-    fn from_degrees_and_direct_degrees_are_equivalent() {
-        for &deg in &[0.0, 30.0, 60.0, 120.0, 180.0, 240.0, 300.0, 360.0] {
-            let a = HSLColor(deg, 1.0, 0.5).to_backend_color().rgb;
-            let b = HSLColor::from_degrees(deg, 1.0, 0.5).to_backend_color().rgb;
-            assert_eq!(a, b);
-        }
+    fn from_degrees_wraps_and_matches_normalized() {
+        let normalized = HSLColor(120.0 / 360.0, 1.0, 0.5).to_backend_color().rgb;
+        let via_helper = HSLColor::from_degrees(120.0, 1.0, 0.5).to_backend_color().rgb;
+        assert_eq!(normalized, via_helper);
+
+        let wrap_positive =
+            HSLColor::from_degrees(720.0, 1.0, 0.5).to_backend_color().rgb;
+        let wrap_negative =
+            HSLColor::from_degrees(-120.0, 1.0, 0.5).to_backend_color().rgb;
+        let canonical =
+            HSLColor::from_degrees(0.0, 1.0, 0.5).to_backend_color().rgb;
+
+        assert_eq!(wrap_positive, canonical);
+        assert_eq!(wrap_negative, HSLColor::from_degrees(240.0, 1.0, 0.5).to_backend_color().rgb);
     }
 }
