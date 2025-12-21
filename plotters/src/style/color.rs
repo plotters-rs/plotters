@@ -6,6 +6,7 @@ use plotters_backend::{BackendColor, BackendStyle};
 #[cfg(feature = "serialization")]
 use serde::{Deserialize, Serialize};
 
+use std::fmt;
 use std::marker::PhantomData;
 
 /// Any color representation
@@ -139,12 +140,53 @@ impl BackendStyle for RGBColor {
 #[cfg_attr(feature = "serialization", derive(Serialize, Deserialize))]
 pub struct HSLColor(pub f64, pub f64, pub f64);
 
+/// Errors that can occur when constructing an `HSLColor`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HSLColorError {
+    /// Hue (or degrees input) must be finite.
+    NonFiniteHue,
+    /// Saturation must be in the closed interval `[0, 1]`.
+    SaturationOutOfRange,
+    /// Lightness must be in the closed interval `[0, 1]`.
+    LightnessOutOfRange,
+}
+
+impl fmt::Display for HSLColorError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HSLColorError::NonFiniteHue => f.write_str("hue must be finite"),
+            HSLColorError::SaturationOutOfRange => f.write_str("saturation must be in [0, 1]"),
+            HSLColorError::LightnessOutOfRange => f.write_str("lightness must be in [0, 1]"),
+        }
+    }
+}
+
+impl std::error::Error for HSLColorError {}
+
 impl HSLColor {
+    /// Creates an `HSLColor` from normalized components, returning an error if any are out of range.
+    pub fn try_new(h: f64, s: f64, l: f64) -> Result<Self, HSLColorError> {
+        if !h.is_finite() {
+            return Err(HSLColorError::NonFiniteHue);
+        }
+        if !s.is_finite() || s < 0.0 || s > 1.0 {
+            return Err(HSLColorError::SaturationOutOfRange);
+        }
+        if !l.is_finite() || l < 0.0 || l > 1.0 {
+            return Err(HSLColorError::LightnessOutOfRange);
+        }
+        Ok(Self(h, s, l))
+    }
+
     /// Creates an `HSLColor` from degrees, wrapping into `[0, 360)` before normalizing.
-    /// Prefer this helper when specifying hue in degrees.
+    /// Prefer this helper when specifying hue in degrees. Returns an error if saturation
+    /// or lightness fall outside `[0, 1]` or if the input hue is non-finite.
     #[inline]
-    pub fn from_degrees(h_deg: f64, s: f64, l: f64) -> Self {
-        Self(h_deg.rem_euclid(360.0) / 360.0, s, l)
+    pub fn from_degrees(h_deg: f64, s: f64, l: f64) -> Result<Self, HSLColorError> {
+        if !h_deg.is_finite() {
+            return Err(HSLColorError::NonFiniteHue);
+        }
+        Self::try_new(h_deg.rem_euclid(360.0) / 360.0, s, l)
     }
 }
 
@@ -207,30 +249,64 @@ mod hue_robustness_tests {
 
     #[test]
     fn degrees_passed_via_helper_should_work_for_common_cases() {
-        let red = HSLColor::from_degrees(0.0, 1.0, 0.5).to_backend_color().rgb;
+        let red = HSLColor::from_degrees(0.0, 1.0, 0.5)
+            .unwrap()
+            .to_backend_color()
+            .rgb;
         assert_eq!(red, (255, 0, 0));
 
-        let green = HSLColor::from_degrees(120.0, 1.0, 0.5).to_backend_color().rgb;
+        let green = HSLColor::from_degrees(120.0, 1.0, 0.5)
+            .unwrap()
+            .to_backend_color()
+            .rgb;
         assert_eq!(green, (0, 255, 0));
 
-        let blue = HSLColor::from_degrees(240.0, 1.0, 0.5).to_backend_color().rgb;
+        let blue = HSLColor::from_degrees(240.0, 1.0, 0.5)
+            .unwrap()
+            .to_backend_color()
+            .rgb;
         assert_eq!(blue, (0, 0, 255));
     }
 
     #[test]
     fn from_degrees_wraps_and_matches_normalized() {
         let normalized = HSLColor(120.0 / 360.0, 1.0, 0.5).to_backend_color().rgb;
-        let via_helper = HSLColor::from_degrees(120.0, 1.0, 0.5).to_backend_color().rgb;
+        let via_helper = HSLColor::from_degrees(120.0, 1.0, 0.5)
+            .unwrap()
+            .to_backend_color()
+            .rgb;
         assert_eq!(normalized, via_helper);
 
         let wrap_positive =
-            HSLColor::from_degrees(720.0, 1.0, 0.5).to_backend_color().rgb;
+            HSLColor::from_degrees(720.0, 1.0, 0.5).unwrap().to_backend_color().rgb;
         let wrap_negative =
-            HSLColor::from_degrees(-120.0, 1.0, 0.5).to_backend_color().rgb;
+            HSLColor::from_degrees(-120.0, 1.0, 0.5).unwrap().to_backend_color().rgb;
         let canonical =
-            HSLColor::from_degrees(0.0, 1.0, 0.5).to_backend_color().rgb;
+            HSLColor::from_degrees(0.0, 1.0, 0.5).unwrap().to_backend_color().rgb;
 
         assert_eq!(wrap_positive, canonical);
-        assert_eq!(wrap_negative, HSLColor::from_degrees(240.0, 1.0, 0.5).to_backend_color().rgb);
+        assert_eq!(
+            wrap_negative,
+            HSLColor::from_degrees(240.0, 1.0, 0.5)
+                .unwrap()
+                .to_backend_color()
+                .rgb
+        );
+    }
+
+    #[test]
+    fn from_degrees_rejects_out_of_range_components() {
+        assert!(matches!(
+            HSLColor::from_degrees(0.0, -0.1, 0.5),
+            Err(HSLColorError::SaturationOutOfRange)
+        ));
+        assert!(matches!(
+            HSLColor::from_degrees(0.0, 0.5, 1.1),
+            Err(HSLColorError::LightnessOutOfRange)
+        ));
+        assert!(matches!(
+            HSLColor::from_degrees(f64::INFINITY, 0.5, 0.5),
+            Err(HSLColorError::NonFiniteHue)
+        ));
     }
 }
