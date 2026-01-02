@@ -753,8 +753,8 @@ pub fn register_font(
     Since Plotters 0.3, all drawing backends are independent crate from the main Plotters crate.
     Use the following link to find the backend code:
 
-    - [Bitmap Backend](https://github.com/plotters-rs/plotters-bitmap.git)
-    - [SVG Backend](https://github.com/plotters-rs/plotters-svg.git)
+    - [Bitmap Backend](https://github.com/plotters-rs/plotters/tree/master/plotters-bitmap)
+    - [SVG Backend](https://github.com/plotters-rs/plotters/tree/master/plotters-svg)
     - [HTML5 Canvas Backend](https://github.com/plotters-rs/plotters-canvas.git)
     - [GTK/Cairo Backend](https://github.com/plotters-rs/plotters-cairo.git)
 
