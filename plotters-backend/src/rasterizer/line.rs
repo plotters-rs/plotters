@@ -81,10 +81,15 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     let grad = f64::from(to.1 - from.1) / f64::from(to.0 - from.0);
 
     let mut put_pixel = |(x, y): BackendCoord, b: f64| {
-        if steep {
-            back.draw_pixel((y, x), style.color().mix(b))
+        // Do not use flat color but interpolate when using anti-aliasing
+        if back.use_anti_aliasing() {
+            if steep {
+                back.draw_pixel((y, x), style.color().mix(b))
+            } else {
+                back.draw_pixel((x, y), style.color().mix(b))
+            }
         } else {
-            back.draw_pixel((x, y), style.color().mix(b))
+            Ok(())
         }
     };
 
