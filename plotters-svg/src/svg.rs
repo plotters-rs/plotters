@@ -662,6 +662,10 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
         Ok(())
     }
+
+    fn use_anti_aliasing(&self) -> bool {
+        true
+    }
 }
 
 impl Drop for SVGBackend<'_> {
