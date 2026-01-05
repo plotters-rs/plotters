@@ -114,6 +114,8 @@ where
         }
         Ok(())
     }
+
+    #[allow(clippy::needless_range_loop)]
     #[allow(clippy::type_complexity)]
     pub(crate) fn draw_axis(
         &mut self,

@@ -1,10 +1,10 @@
-/// The implementation of an actual font implementation
-///
-/// This exists since for the image rendering task, we want to use
-/// the system font. But in wasm application, we want the browser
-/// to handle all the font issue.
-///
-/// Thus we need different mechanism for the font implementation
+//! The implementation of an actual font implementation
+//!
+//! This exists since for the image rendering task, we want to use
+//! the system font. But in wasm application, we want the browser
+//! to handle all the font issue.
+//!
+//! Thus we need different mechanism for the font implementation
 
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),

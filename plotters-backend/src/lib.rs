@@ -26,7 +26,7 @@
   features, you need to play with `ensure_prepared` and `present` method. The following figure illustrates how Plotters operates a drawing backend.
 
   - `ensure_prepared` - Called before each time when plotters want to draw. This function should initialize the backend for current frame, if the backend is already prepared
-     for a frame, this function should simply do nothing.
+    for a frame, this function should simply do nothing.
   - `present` - Called when plotters want to finish current frame drawing
 
 
