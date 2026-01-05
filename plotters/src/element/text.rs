@@ -148,7 +148,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
 
                 let end_idx = match indices.peek() {
                     Some(idx) => *idx,
-                    None => line.bytes().len(),
+                    None => line.len(),
                 };
 
                 Some(&line[start_idx..end_idx])

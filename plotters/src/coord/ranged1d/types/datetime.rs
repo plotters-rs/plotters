@@ -769,7 +769,7 @@ impl Ranged for RangedDuration {
             if let Some(period) = compute_period_per_point(total_ns as u64, max_points, false) {
                 let mut start_ns = self.0.num_nanoseconds().unwrap();
 
-                if start_ns as u64 % period > 0 {
+                if !(start_ns as u64).is_multiple_of(period) {
                     if start_ns > 0 {
                         start_ns += period as i64 - (start_ns % period as i64);
                     } else {

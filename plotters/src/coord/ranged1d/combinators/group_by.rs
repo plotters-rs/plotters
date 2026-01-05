@@ -45,7 +45,7 @@ impl<T: AsRangedCoord + Sized> ToGroupByRange for T where T::CoordDescType: Disc
 
 impl<T: DiscreteRanged> DiscreteRanged for GroupBy<T> {
     fn size(&self) -> usize {
-        (self.0.size() + self.1 - 1) / self.1
+        self.0.size().div_ceil(self.1)
     }
     fn index_of(&self, value: &Self::ValueType) -> Option<usize> {
         self.0.index_of(value).map(|idx| idx / self.1)
@@ -76,7 +76,7 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
         //let logic_range: RangedCoordusize = range.into();
 
         let interval =
-            ((range.end - range.start + hint.bold_points() - 1) / hint.bold_points()).max(1);
+            (range.end - range.start).div_ceil(hint.bold_points()).max(1);
         let count = (range.end - range.start) / interval;
 
         let idx_iter = (0..hint.bold_points()).map(|x| x * interval);
@@ -85,7 +85,7 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
             let outer_ticks = idx_iter;
             let outer_tick_size = interval * self.1;
             let inner_ticks_per_group = hint.max_num_points() / outer_ticks.len();
-            let inner_ticks = (outer_tick_size + inner_ticks_per_group - 1) / inner_ticks_per_group;
+            let inner_ticks = outer_tick_size.div_ceil(inner_ticks_per_group);
             let inner_ticks: Vec<_> = (0..(outer_tick_size / inner_ticks))
                 .map(move |x| x * inner_ticks)
                 .collect();
