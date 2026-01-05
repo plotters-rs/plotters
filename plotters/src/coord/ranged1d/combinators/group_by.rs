@@ -75,8 +75,9 @@ impl<T: DiscreteRanged> Ranged for GroupBy<T> {
         let range = 0..(self.0.size() + self.1) / self.1;
         //let logic_range: RangedCoordusize = range.into();
 
-        let interval =
-            (range.end - range.start).div_ceil(hint.bold_points()).max(1);
+        let interval = (range.end - range.start)
+            .div_ceil(hint.bold_points())
+            .max(1);
         let count = (range.end - range.start) / interval;
 
         let idx_iter = (0..hint.bold_points()).map(|x| x * interval);
