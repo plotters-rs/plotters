@@ -308,7 +308,7 @@ impl<'a> BackendTextStyle for TextStyle<'a> {
         self.pos
     }
 
-    fn family(&self) -> FontFamily {
+    fn family(&self) -> FontFamily<'_> {
         self.font.get_family()
     }
 

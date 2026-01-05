@@ -142,7 +142,7 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
     ///
     /// - `area_size`: The size of the area
     /// - **returns**: The split backends that can be rendered in parallel
-    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<P>> {
+    pub fn split(&mut self, area_size: &[u32]) -> Vec<BitMapBackend<'_, P>> {
         let (w, h) = self.get_size();
         let buf = self.get_raw_pixel_buffer();
 
