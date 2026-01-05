@@ -19,7 +19,7 @@ version = "0.3.6"
 path = "../plotters-backend"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.image]
-version = "0.24.3"
+version = "0.25.9"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]
