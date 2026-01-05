@@ -35,7 +35,7 @@ features = ["ttf", "line_series", "bitmap_backend"]
 path = "../plotters"
 
 [dev-dependencies]
-criterion = "0.5.1"
+criterion = "0.8.1"
 rayon = "1.5.1"
 
 [[bench]]
