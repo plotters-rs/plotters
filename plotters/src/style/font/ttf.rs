@@ -31,6 +31,8 @@ pub enum FontError {
     NoSuchFont(String, String),
     FontLoadError(Arc<FontLoadingError>),
     GlyphError(Arc<GlyphLoadingError>),
+    FontHandleUnavailable,
+    FaceParseError(String),
 }
 
 impl std::fmt::Display for FontError {
@@ -42,6 +44,8 @@ impl std::fmt::Display for FontError {
             }
             FontError::FontLoadError(e) => write!(fmt, "Font loading error {}", e),
             FontError::GlyphError(e) => write!(fmt, "Glyph error {}", e),
+            FontError::FontHandleUnavailable => write!(fmt, "Font handle is not available"),
+            FontError::FaceParseError(e) => write!(fmt, "Font face parse error {}", e),
         }
     }
 }
@@ -74,18 +78,19 @@ impl Drop for FontExt {
 }
 
 impl FontExt {
-    fn new(font: Font) -> Self {
-        let handle = font.handle();
-        let (data, idx) = match handle.as_ref() {
-            Some(Handle::Memory { bytes, font_index }) => (&bytes[..], *font_index),
-            _ => unreachable!(),
+    fn new(font: Font) -> FontResult<Self> {
+        let handle = font
+            .handle()
+            .ok_or(FontError::FontHandleUnavailable)?;
+        let face = match handle {
+            Handle::Memory { bytes, font_index } => {
+                let face = ttf_parser::Face::parse(bytes.as_slice(), font_index)
+                    .map_err(|err| FontError::FaceParseError(err.to_string()))?;
+                Some(unsafe { std::mem::transmute::<Face<'_>, Face<'static>>(face) })
+            }
+            _ => None,
         };
-        let face = unsafe {
-            std::mem::transmute::<Option<_>, Option<Face<'static>>>(
-                ttf_parser::Face::parse(data, idx).ok(),
-            )
-        };
-        Self { inner: font, face }
+        Ok(Self { inner: font, face })
     }
 
     fn query_kerning_table(&self, prev: u32, next: u32) -> f32 {
@@ -133,12 +138,7 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
     // Then we need to check if the data cache contains the font data
     let cache = DATA_CACHE.read().unwrap();
     if let Some(data) = cache.get(Borrow::<str>::borrow(&key)) {
-        data.clone().map(|handle| {
-            handle
-                .load()
-                .map(FontExt::new)
-                .map_err(|e| FontError::FontLoadError(Arc::new(e)))
-        })??;
+        data.clone().map(load_font_from_handle)??;
     }
     drop(cache);
 
@@ -164,10 +164,7 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
     if let Ok(handle) = FONT_SOURCE
         .with(|source| source.select_best_match(&[family, FamilyName::SansSerif], &properties))
     {
-        let font = handle
-            .load()
-            .map(FontExt::new)
-            .map_err(|e| FontError::FontLoadError(Arc::new(e)));
+        let font = load_font_from_handle(handle);
         let (should_cache, data) = match font.as_ref().map(|f| f.handle()) {
             Ok(None) => (false, Err(FontError::LockError)),
             Ok(Some(handle)) => (true, Ok(handle)),
@@ -192,6 +189,13 @@ fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
         return font;
     }
     Err(make_not_found_error())
+}
+
+fn load_font_from_handle(handle: Handle) -> FontResult<FontExt> {
+    let font = handle
+        .load()
+        .map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
+    FontExt::new(font)
 }
 
 #[derive(Clone)]
