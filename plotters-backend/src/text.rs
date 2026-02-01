@@ -217,7 +217,7 @@ pub trait BackendTextStyle {
         text_anchor::Pos::default()
     }
 
-    fn family(&self) -> FontFamily;
+    fn family(&self) -> FontFamily<'_>;
 
     #[allow(clippy::type_complexity)]
     fn layout_box(&self, text: &str) -> Result<((i32, i32), (i32, i32)), Self::FontError>;

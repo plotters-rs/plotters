@@ -1,10 +1,13 @@
 use std::convert::TryFrom;
 use std::ops::Range;
 
-use crate::coord::{combinators::WithKeyPoints, ranged1d::{
-    AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting, Ranged,
-    ReversibleRanged, ValueFormatter,
-}};
+use crate::coord::{
+    combinators::WithKeyPoints,
+    ranged1d::{
+        AsRangedCoord, DefaultFormatting, DiscreteRanged, KeyPointHint, NoDefaultFormatting,
+        Ranged, ReversibleRanged, ValueFormatter,
+    },
+};
 
 macro_rules! impl_discrete_trait {
     ($name:ident) => {

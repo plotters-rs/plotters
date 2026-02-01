@@ -147,7 +147,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
     /// Copy the existing bitmap element to another location
     ///
     /// - `pos`: The new location to copy
-    pub fn copy_to<Coord2>(&self, pos: Coord2) -> BitMapElement<Coord2, P> {
+    pub fn copy_to<Coord2>(&self, pos: Coord2) -> BitMapElement<'_, Coord2, P> {
         BitMapElement {
             image: Buffer::Borrowed(self.image.borrow()),
             size: self.size,
@@ -165,7 +165,7 @@ impl<'a, Coord, P: PixelFormat> BitMapElement<'a, Coord, P> {
 
     /// Make the bitmap element as a bitmap backend, so that we can use
     /// plotters drawing functionality on the bitmap element
-    pub fn as_bitmap_backend(&mut self) -> BitMapBackend<P> {
+    pub fn as_bitmap_backend(&mut self) -> BitMapBackend<'_, P> {
         BitMapBackend::with_buffer_and_format(self.image.to_mut(), self.size).unwrap()
     }
 }

@@ -1,5 +1,6 @@
 #![warn(missing_docs)]
 #![allow(clippy::type_complexity)]
+#![allow(clippy::doc_overindented_list_items)]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 /*!
 

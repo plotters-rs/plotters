@@ -193,7 +193,7 @@ impl PixelFormat for BGRXPixel {
                         // TODO: Consider using AVX instructions when possible
                         let ptr = p as *mut [u8; 8] as *mut u64;
                         unsafe {
-                            let d: u64 = std::mem::transmute([
+                            let d: u64 = u64::from_ne_bytes([
                                 b, g, r, 0, b, g, r, 0, // QW1
                             ]);
                             ptr.write_unaligned(d);
