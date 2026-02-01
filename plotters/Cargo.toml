@@ -38,7 +38,7 @@ optional = true
 path = "../plotters-svg"
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies]
-ttf-parser = { version = "0.20.0", optional = true }
+ttf-parser = { version = "0.25.1", optional = true }
 lazy_static = { version = "1.4.0", optional = true }
 pathfinder_geometry = { version = "0.5.1", optional = true }
 font-kit = { version = "0.14.2", optional = true }
@@ -47,7 +47,7 @@ once_cell = { version = "1.8.0", optional = true }
 
 
 [target.'cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))'.dependencies.image]
-version = "0.24.3"
+version = "0.25.9"
 optional = true
 default-features = false
 features = ["jpeg", "png", "bmp"]
@@ -120,17 +120,17 @@ evcxr_bitmap = ["evcxr", "bitmap_backend", "plotters-svg/bitmap_encoder"]
 deprecated_items = [] # Keep some of the deprecated items for backward compatibility
 
 [dev-dependencies]
-itertools = "0.10.0"
-criterion = "0.5.1"
+itertools = "0.14.0"
+criterion = "0.8.1"
 rayon = "1.5.1"
 serde_json = "1.0.82"
 serde_derive = "1.0.140"
 plotters = { path = ".", features = ["serialization"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-rand = "0.8.3"
-rand_distr = "0.4.0"
-rand_xorshift = "0.3.0"
+rand = "0.9.2"
+rand_distr = "0.5.1"
+rand_xorshift = "0.4.0"
 
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dev-dependencies]
 wasm-bindgen-test = "0.3.39"
