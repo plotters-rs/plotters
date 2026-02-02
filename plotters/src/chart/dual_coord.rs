@@ -131,10 +131,16 @@ impl<'a, DB: DrawingBackend, CT1: CoordTranslate, CT2: CoordTranslate>
         &self.secondary.drawing_area
     }
 
-    /// Borrow a mutable reference to the chart context that uses the secondary
+    /// Borrow a reference to the chart context that uses the secondary
     /// coordinate system
     pub fn borrow_secondary(&self) -> &ChartContext<'a, DB, CT2> {
         &self.secondary
+    }
+
+    /// Borrow a mutable reference to the chart context that uses the secondary
+    /// coordinate system
+    pub fn borrow_secondary_mut(&mut self) -> &mut ChartContext<'a, DB, CT2> {
+        &mut self.secondary
     }
 }
 
