@@ -153,7 +153,8 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
 
         /* Draw the axis and get the axis range so that we can do further label
          * and tick mark drawing */
-        let axis_range = self.draw_axis(area, axis_style, orientation, tick_size < 0)?;
+        // Always draw axis on the outer edge (pass false for inward_labels)
+        let axis_range = self.draw_axis(area, axis_style, orientation, false)?;
 
         /* To make the right label area looks nice, it's a little bit tricky, since for a that is
          * very long, we actually prefer left alignment instead of right alignment.
@@ -162,14 +163,14 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
         let label_width: Vec<_> = labels
             .iter()
             .map(|(_, text)| {
-                if orientation.0 > 0 && orientation.1 == 0 && tick_size >= 0 {
+                if orientation.0 > 0 && orientation.1 == 0 {
                     self.drawing_area
                         .estimate_text_size(text, label_style)
                         .map(|(w, _)| w)
                         .unwrap_or(0) as i32
                 } else {
-                    // Don't ever do the layout estimationfor the drawing area that is either not
-                    // the right one or the tick mark is inward.
+                    // Don't ever do the layout estimation for the drawing area that is either not
+                    // the right one.
                     0
                 }
             })
@@ -194,51 +195,32 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 continue;
             }
 
-            let (cx, cy, h_pos, v_pos) = if tick_size >= 0 {
-                match orientation {
-                    // Right
-                    (dx, dy) if dx > 0 && dy == 0 => {
-                        if w >= right_align_width {
-                            (label_dist, *p - y0, HPos::Left, VPos::Center)
-                        } else {
-                            (
-                                label_dist + right_align_width,
-                                *p - y0,
-                                HPos::Right,
-                                VPos::Center,
-                            )
-                        }
-                    }
-                    // Left
-                    (dx, dy) if dx < 0 && dy == 0 => {
-                        (tw as i32 - label_dist, *p - y0, HPos::Right, VPos::Center)
-                    }
-                    // Bottom
-                    (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist, HPos::Center, VPos::Top),
-                    // Top
-                    (dx, dy) if dx == 0 && dy < 0 => {
-                        (*p - x0, th as i32 - label_dist, HPos::Center, VPos::Bottom)
-                    }
-                    _ => panic!("Bug: Invalid orientation specification"),
-                }
-            } else {
-                match orientation {
-                    // Right
-                    (dx, dy) if dx > 0 && dy == 0 => {
-                        (tw as i32 - label_dist, *p - y0, HPos::Right, VPos::Center)
-                    }
-                    // Left
-                    (dx, dy) if dx < 0 && dy == 0 => {
+            // Always position labels on the outside
+            let (cx, cy, h_pos, v_pos) = match orientation {
+                // Right
+                (dx, dy) if dx > 0 && dy == 0 => {
+                    if w >= right_align_width {
                         (label_dist, *p - y0, HPos::Left, VPos::Center)
+                    } else {
+                        (
+                            label_dist + right_align_width,
+                            *p - y0,
+                            HPos::Right,
+                            VPos::Center,
+                        )
                     }
-                    // Bottom
-                    (dx, dy) if dx == 0 && dy > 0 => {
-                        (*p - x0, th as i32 - label_dist, HPos::Center, VPos::Bottom)
-                    }
-                    // Top
-                    (dx, dy) if dx == 0 && dy < 0 => (*p - x0, label_dist, HPos::Center, VPos::Top),
-                    _ => panic!("Bug: Invalid orientation specification"),
                 }
+                // Left
+                (dx, dy) if dx < 0 && dy == 0 => {
+                    (tw as i32 - label_dist, *p - y0, HPos::Right, VPos::Center)
+                }
+                // Bottom
+                (dx, dy) if dx == 0 && dy > 0 => (*p - x0, label_dist, HPos::Center, VPos::Top),
+                // Top
+                (dx, dy) if dx == 0 && dy < 0 => {
+                    (*p - x0, th as i32 - label_dist, HPos::Center, VPos::Bottom)
+                }
+                _ => panic!("Bug: Invalid orientation specification"),
             };
 
             let (text_x, text_y) = if orientation.0 == 0 {
@@ -250,34 +232,22 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             let label_style = &label_style.pos(Pos::new(h_pos, v_pos));
             area.draw_text(t, label_style, (text_x, text_y))?;
 
-            if tick_size != 0 {
+            // Only draw outward tick marks here (tick_size > 0)
+            // Inward tick marks are drawn separately in draw_mesh
+            if tick_size > 0 {
                 if let Some(style) = axis_style {
                     let xmax = tw as i32 - 1;
                     let ymax = th as i32 - 1;
-                    let (kx0, ky0, kx1, ky1) = if tick_size > 0 {
-                        match orientation {
-                            (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
-                            (dx, dy) if dx < 0 && dy == 0 => {
-                                (xmax - tick_size, *p - y0, xmax, *p - y0)
-                            }
-                            (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
-                            (dx, dy) if dx == 0 && dy < 0 => {
-                                (*p - x0, ymax - tick_size, *p - x0, ymax)
-                            }
-                            _ => panic!("Bug: Invalid orientation specification"),
+                    let (kx0, ky0, kx1, ky1) = match orientation {
+                        (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
+                        (dx, dy) if dx < 0 && dy == 0 => {
+                            (xmax - tick_size, *p - y0, xmax, *p - y0)
                         }
-                    } else {
-                        match orientation {
-                            (dx, dy) if dx > 0 && dy == 0 => {
-                                (xmax, *p - y0, xmax + tick_size, *p - y0)
-                            }
-                            (dx, dy) if dx < 0 && dy == 0 => (0, *p - y0, -tick_size, *p - y0),
-                            (dx, dy) if dx == 0 && dy > 0 => {
-                                (*p - x0, ymax, *p - x0, ymax + tick_size)
-                            }
-                            (dx, dy) if dx == 0 && dy < 0 => (*p - x0, 0, *p - x0, -tick_size),
-                            _ => panic!("Bug: Invalid orientation specification"),
+                        (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
+                        (dx, dy) if dx == 0 && dy < 0 => {
+                            (*p - x0, ymax - tick_size, *p - x0, ymax)
                         }
+                        _ => panic!("Bug: Invalid orientation specification"),
                     };
                     let line = PathElement::new(vec![(kx0, ky0), (kx1, ky1)], *style);
                     area.draw(&line)?;
@@ -362,6 +332,77 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 y_desc.as_ref().map(|desc| (&desc[..], axis_desc_style)),
                 y_tick_size[idx],
             )?;
+        }
+
+        // Draw inward tick marks on the plot area
+        let plot_area = self.drawing_area.strip_coord_spec();
+        let (x0, y0) = self.drawing_area.get_base_pixel();
+        let (dw, dh) = self.drawing_area.dim_in_pixel();
+        let dw = dw as i32;
+        let dh = dh as i32;
+
+        if x_axis {
+            // Top inward ticks (x_tick_size[0] is for top label area)
+            if x_tick_size[0] < 0 {
+                let abs_tick = x_tick_size[0].abs();
+                for (px, _) in &x_labels {
+                    let x = *px - x0;
+                    if x >= 0 && x < dw {
+                        let line = PathElement::new(
+                            vec![(x, 0), (x, abs_tick)],
+                            *axis_style,
+                        );
+                        plot_area.draw(&line)?;
+                    }
+                }
+            }
+
+            // Bottom inward ticks (x_tick_size[1] is for bottom label area)
+            if x_tick_size[1] < 0 {
+                let abs_tick = x_tick_size[1].abs();
+                for (px, _) in &x_labels {
+                    let x = *px - x0;
+                    if x >= 0 && x < dw {
+                        let line = PathElement::new(
+                            vec![(x, dh - 1 - abs_tick), (x, dh - 1)],
+                            *axis_style,
+                        );
+                        plot_area.draw(&line)?;
+                    }
+                }
+            }
+        }
+
+        if y_axis {
+            // Left inward ticks (y_tick_size[0] is for left label area)
+            if y_tick_size[0] < 0 {
+                let abs_tick = y_tick_size[0].abs();
+                for (py, _) in &y_labels {
+                    let y = *py - y0;
+                    if y >= 0 && y < dh {
+                        let line = PathElement::new(
+                            vec![(0, y), (abs_tick, y)],
+                            *axis_style,
+                        );
+                        plot_area.draw(&line)?;
+                    }
+                }
+            }
+
+            // Right inward ticks (y_tick_size[1] is for right label area)
+            if y_tick_size[1] < 0 {
+                let abs_tick = y_tick_size[1].abs();
+                for (py, _) in &y_labels {
+                    let y = *py - y0;
+                    if y >= 0 && y < dh {
+                        let line = PathElement::new(
+                            vec![(dw - 1 - abs_tick, y), (dw - 1, y)],
+                            *axis_style,
+                        );
+                        plot_area.draw(&line)?;
+                    }
+                }
+            }
         }
 
         Ok(())
