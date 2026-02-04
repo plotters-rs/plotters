@@ -106,16 +106,20 @@ fn draw_sweep_line<B: DrawingBackend, S: BackendStyle>(
             (p0 + x0, e.floor() as i32 + y0),
             &style.color()
         ));
-        check_result!(b.draw_pixel((p0 + x0, s.ceil() as i32 + y0 - 1), style.color().mix(vs)));
-        check_result!(b.draw_pixel((p0 + x0, e.floor() as i32 + y0 + 1), style.color().mix(ve)));
-    } else {
+        if b.use_anti_aliasing() {
+            check_result!(b.draw_pixel((p0 + x0, s.ceil() as i32 + y0 - 1), style.color().mix(vs)));
+            check_result!(b.draw_pixel((p0 + x0, e.floor() as i32 + y0 + 1), style.color().mix(ve)));
+        }
+    } else if b.use_anti_aliasing() {
         check_result!(b.draw_line(
             (s.ceil() as i32 + x0, p0 + y0),
             (e.floor() as i32 + x0, p0 + y0),
             &style.color()
         ));
-        check_result!(b.draw_pixel((s.ceil() as i32 + x0 - 1, p0 + y0), style.color().mix(vs)));
-        check_result!(b.draw_pixel((e.floor() as i32 + x0 + 1, p0 + y0), style.color().mix(ve)));
+        if b.use_anti_aliasing() {
+            check_result!(b.draw_pixel((s.ceil() as i32 + x0 - 1, p0 + y0), style.color().mix(vs)));
+            check_result!(b.draw_pixel((e.floor() as i32 + x0 + 1, p0 + y0), style.color().mix(ve)));
+        }
     }
 
     Ok(())
@@ -319,22 +323,24 @@ pub fn draw_circle<B: DrawingBackend, S: BackendStyle>(
         let top = center.1 - lx.floor() as i32;
         let bottom = center.1 + lx.floor() as i32;
 
+        // Do not use flat color but interpolate when using anti-aliasing
         if fill {
             check_result!(b.draw_line((left, y), (right, y), &style.color()));
             check_result!(b.draw_line((x, top), (x, up - 1), &style.color()));
             check_result!(b.draw_line((x, down + 1), (x, bottom), &style.color()));
-        } else {
+        } else if b.use_anti_aliasing() {
             check_result!(b.draw_pixel((left, y), style.color().mix(1.0 - v)));
             check_result!(b.draw_pixel((right, y), style.color().mix(1.0 - v)));
 
             check_result!(b.draw_pixel((x, top), style.color().mix(1.0 - v)));
             check_result!(b.draw_pixel((x, bottom), style.color().mix(1.0 - v)));
         }
-
-        check_result!(b.draw_pixel((left - 1, y), style.color().mix(v)));
-        check_result!(b.draw_pixel((right + 1, y), style.color().mix(v)));
-        check_result!(b.draw_pixel((x, top - 1), style.color().mix(v)));
-        check_result!(b.draw_pixel((x, bottom + 1), style.color().mix(v)));
+        if b.use_anti_aliasing() {
+            check_result!(b.draw_pixel((left - 1, y), style.color().mix(v)));
+            check_result!(b.draw_pixel((right + 1, y), style.color().mix(v)));
+            check_result!(b.draw_pixel((x, top - 1), style.color().mix(v)));
+            check_result!(b.draw_pixel((x, bottom + 1), style.color().mix(v)));
+        }
     }
 
     Ok(())
