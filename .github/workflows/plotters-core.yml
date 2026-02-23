@@ -81,7 +81,7 @@ jobs:
           ../target/release/examples/$(basename ${example} .rs)
         done 
         tar -czvf example-outputs.tar.gz plotters-doc-data
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
           name: example-outputs
           path: plotters/example-outputs.tar.gz
