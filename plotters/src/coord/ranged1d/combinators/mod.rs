@@ -8,7 +8,7 @@ mod linspace;
 pub use linspace::{IntoLinspace, Linspace};
 
 mod logarithmic;
-pub use logarithmic::{IntoLogRange, LogCoord, LogScalable};
+pub use logarithmic::{IntoLogRange, LogCoord, LogScalable, LogRangeExt};
 
 #[allow(deprecated)]
 pub use logarithmic::LogRange;
