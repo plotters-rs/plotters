@@ -58,26 +58,33 @@ version = "0.2.89"
 [target.'cfg(all(target_arch = "wasm32", not(target_os = "wasi")))'.dependencies.web-sys]
 version = "0.3.66"
 features = [
-         "Document",
-         "DomRect",
-         "Element",
-         "HtmlElement",
-         "Node",
-         "Window",
-         "HtmlCanvasElement",
-         "CanvasRenderingContext2d",
+        "Document",
+        "DomRect",
+        "Element",
+        "HtmlElement",
+        "Node",
+        "Window",
+        "HtmlCanvasElement",
+        "CanvasRenderingContext2d",
+        "OffscreenCanvas",
+        "OffscreenCanvasRenderingContext2d",
+        "TextMetrics",
 ]
 
 [features]
 default = [
-        "bitmap_backend", "bitmap_encoder", "bitmap_gif",
+        "bitmap_backend",
+        "bitmap_encoder",
+        "bitmap_gif",
         "svg_backend",
         "chrono",
         "ttf",
         "image",
-        "deprecated_items",  "all_series", "all_elements",
+        "deprecated_items",
+        "all_series",
+        "all_elements",
         "full_palette",
-        "colormaps"
+        "colormaps",
 ]
 all_series = ["area_series", "line_series", "point_series", "surface_series"]
 all_elements = ["errorbar", "candlestick", "boxplot", "histogram"]
@@ -117,7 +124,8 @@ datetime = ["chrono"]
 serialization = ["serde"]
 evcxr = ["svg_backend"]
 evcxr_bitmap = ["evcxr", "bitmap_backend", "plotters-svg/bitmap_encoder"]
-deprecated_items = [] # Keep some of the deprecated items for backward compatibility
+deprecated_items = [
+] # Keep some of the deprecated items for backward compatibility
 
 [dev-dependencies]
 itertools = "0.14.0"
@@ -143,4 +151,3 @@ path = "benches/main.rs"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "doc_cfg"]
-
