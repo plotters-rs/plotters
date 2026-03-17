@@ -40,6 +40,7 @@ pub struct BitMapBackend<'a, P: PixelFormat = RGBPixel> {
     buffer: Buffer<'a>,
     /// Flag indicates if the bitmap has been saved
     saved: bool,
+    use_anti_aliasing: bool,
     _phantomdata: PhantomData<P>,
 }
 
@@ -57,6 +58,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
             size: (w, h),
             buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
+            use_anti_aliasing: true,
             _phantomdata: PhantomData,
         }
     }
@@ -85,6 +87,7 @@ impl<'a> BitMapBackend<'a, RGBPixel> {
             size: (w, h),
             buffer: Buffer::Owned(vec![0; Self::PIXEL_SIZE * (w * h) as usize]),
             saved: false,
+            use_anti_aliasing: true,
             _phantomdata: PhantomData,
         })
     }
@@ -128,6 +131,7 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
             size: (w, h),
             buffer: Buffer::Borrowed(buf),
             saved: false,
+            use_anti_aliasing: true,
             _phantomdata: PhantomData,
         })
     }
@@ -135,6 +139,13 @@ impl<'a, P: PixelFormat> BitMapBackend<'a, P> {
     #[inline(always)]
     pub(crate) fn get_raw_pixel_buffer(&mut self) -> &mut [u8] {
         self.buffer.borrow_buffer()
+    }
+
+    #[inline(always)]
+    pub fn anti_aliasing(self, use_anti_aliasing: bool) -> Self {
+        let mut s = self;
+        s.use_anti_aliasing = use_anti_aliasing;
+        s
     }
 
     /// Split a bitmap backend vertically into several sub drawing area which allows
@@ -333,6 +344,10 @@ impl<'a, P: PixelFormat> DrawingBackend for BitMapBackend<'a, P> {
         }
 
         Ok(())
+    }
+
+    fn use_anti_aliasing(&self) -> bool {
+        self.use_anti_aliasing
     }
 }
 

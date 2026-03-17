@@ -326,4 +326,10 @@ pub trait DrawingBackend: Sized {
 
         Ok(())
     }
+
+    /// Utilize anti-aliasing if supported by the chosen backend.
+    /// By default this option is true.
+    fn use_anti_aliasing(&self) -> bool {
+        true
+    }
 }

@@ -201,33 +201,39 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                         }
 
                         if horizontal_sweep {
+                            // Do not use flat color but interpolate when using anti-aliasing
                             check_result!(back.draw_line(
                                 (sweep_line, from.ceil() as i32),
                                 (sweep_line, to.floor() as i32),
                                 &style.color(),
                             ));
-                            check_result!(back.draw_pixel(
-                                (sweep_line, from.floor() as i32),
-                                style.color().mix(from.ceil() - from),
-                            ));
-                            check_result!(back.draw_pixel(
-                                (sweep_line, to.ceil() as i32),
-                                style.color().mix(to - to.floor()),
-                            ));
+                            if back.use_anti_aliasing() {
+                                check_result!(back.draw_pixel(
+                                    (sweep_line, from.floor() as i32),
+                                    style.color().mix(from.ceil() - from)
+                                ));
+                                check_result!(back.draw_pixel(
+                                    (sweep_line, to.ceil() as i32),
+                                    style.color().mix(to - to.floor())
+                                ));
+                            }
                         } else {
+                            // Do not use flat color but interpolate when using anti-aliasing
                             check_result!(back.draw_line(
                                 (from.ceil() as i32, sweep_line),
                                 (to.floor() as i32, sweep_line),
                                 &style.color(),
                             ));
-                            check_result!(back.draw_pixel(
-                                (from.floor() as i32, sweep_line),
-                                style.color().mix(from.ceil() - from),
-                            ));
-                            check_result!(back.draw_pixel(
-                                (to.ceil() as i32, sweep_line),
-                                style.color().mix(to.floor() - to),
-                            ));
+                            if back.use_anti_aliasing() {
+                                check_result!(back.draw_pixel(
+                                    (from.floor() as i32, sweep_line),
+                                    style.color().mix(from.ceil() - from)
+                                ));
+                                check_result!(back.draw_pixel(
+                                    (to.ceil() as i32, sweep_line),
+                                    style.color().mix(to.floor() - to)
+                                ));
+                            }
                         }
 
                         first = None;
