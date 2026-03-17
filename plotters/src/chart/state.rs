@@ -106,6 +106,7 @@ impl<CT: CoordTranslate> ChartState<CT> {
             y_label_area: [None, None],
             drawing_area: area.apply_coord_spec(self.coord),
             series_anno: vec![],
+            next_series_id: 0,
             drawing_area_pos: self.drawing_area_pos,
         }
     }

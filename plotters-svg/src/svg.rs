@@ -5,15 +5,17 @@ The SVG image drawing backend
 use plotters_backend::{
     text_anchor::{HPos, VPos},
     BackendColor, BackendCoord, BackendStyle, BackendTextStyle, DrawingBackend, DrawingErrorKind,
-    FontStyle, FontTransform,
+    ElementContext, FontStyle, FontTransform,
 };
 
-use std::fmt::Write as _;
+use std::fmt::{format, Write as _};
 use std::fs::File;
 #[allow(unused_imports)]
 use std::io::Cursor;
 use std::io::{BufWriter, Error, Write};
 use std::path::Path;
+
+use crate::svg;
 
 struct Rgb(u8, u8, u8);
 fn make_svg_color(color: BackendColor) -> Rgb {
@@ -45,6 +47,9 @@ enum SVGTag {
     Text,
     #[allow(dead_code)]
     Image,
+    Group,
+    Style,
+    Script,
 }
 
 impl SVGTag {
@@ -58,7 +63,46 @@ impl SVGTag {
             SVGTag::Text => "text",
             SVGTag::Image => "image",
             SVGTag::Polygon => "polygon",
+            SVGTag::Group => "g",
+            SVGTag::Style => "style",
+            SVGTag::Script => "script",
         }
+    }
+}
+
+/// Tracks the bounding box of all drawing operations within a context
+#[derive(Clone, Debug, Default)]
+struct BBoxTracker {
+    min_x: i32,
+    min_y: i32,
+    max_x: i32,
+    max_y: i32,
+    any: bool,
+    /// Set to true when fill_polygon or a filled draw_rect is called
+    /// inside this context, indicating the shape has interior area
+    has_fill: bool,
+}
+impl BBoxTracker {
+    fn expand(&mut self, x: i32, y: i32) {
+        if !self.any {
+            self.min_x = x;
+            self.max_x = x;
+            self.min_y = y;
+            self.max_y = y;
+            self.any = true;
+        } else {
+            self.min_x = self.min_x.min(x);
+            self.max_x = self.max_x.max(x);
+            self.min_y = self.min_y.min(y);
+            self.max_y = self.max_y.max(y);
+        }
+    }
+    fn expand_coord(&mut self, coord: BackendCoord) {
+        self.expand(coord.0, coord.1);
+    }
+    fn expand_rect(&mut self, a: BackendCoord, b: BackendCoord) {
+        self.expand(a.0.min(b.0), a.1.min(b.1));
+        self.expand(a.0.max(b.0), a.1.max(b.1));
     }
 }
 
@@ -68,6 +112,14 @@ pub struct SVGBackend<'a> {
     size: (u32, u32),
     tag_stack: Vec<SVGTag>,
     saved: bool,
+    /// When true, `begin_context` / `end_context` emit `<g>` wrappers with
+    /// data attributes that the injected tooltip script can use.
+    interactive: bool,
+    /// Stack of active element contexts (mirrors `begin_context` / `end_context` nesting ).
+    context_stack: Vec<ElementContext>,
+    /// Stack of bounding-box trackers, one per active interactive context.
+    /// Pushed in `begin_context`, poopped in `end_context`
+    bbox_stack: Vec<BBoxTracker>,
 }
 
 trait FormatEscaped {
@@ -257,6 +309,9 @@ impl<'a> SVGBackend<'a> {
             size,
             tag_stack: vec![],
             saved: false,
+            interactive: false,
+            context_stack: vec![],
+            bbox_stack: vec![],
         };
 
         ret.init_svg_file(size);
@@ -270,11 +325,250 @@ impl<'a> SVGBackend<'a> {
             size,
             tag_stack: vec![],
             saved: false,
+            interactive: false,
+            context_stack: vec![],
+            bbox_stack: vec![],
         };
 
         ret.init_svg_file(size);
 
         ret
+    }
+
+    /// Enable interactive tooltips
+    ///
+    /// When enabled, `begin_context` / `end_context` calls emit `<g>` wrapper elements with
+    /// `data-*` attributes. A `<style>` and `<script>` block are injected at `present()` time to
+    /// drive mouse-hover tooltips.
+    pub fn with_tooltips(mut self) -> Self {
+        self.interactive = true;
+        self
+    }
+
+    /// Expand the current bounding-box tracker (if any) with a Coordinate.
+    fn track_coord(&mut self, coord: BackendCoord) {
+        if let Some(bb) = self.bbox_stack.last_mut() {
+            bb.expand_coord(coord);
+        }
+    }
+
+    /// Expand the current bounding-box tracker with a rectangle.
+    fn track_rect(&mut self, a: BackendCoord, b: BackendCoord) {
+        if let Some(bb) = self.bbox_stack.last_mut() {
+            bb.expand_rect(a, b);
+        }
+    }
+
+    /// Inject the CSS and JavaScript needed for interactive tooltips.
+    ///
+    /// Called once from `present()` when `interactive` is enabled.
+    fn inject_tooltip_assets(&mut self) {
+        // --- CSS ---
+        let aw = self.open_tag(SVGTag::Style);
+        aw.finish_without_closing();
+        let buf = self.target.get_mut();
+        buf.push_str("<![CDATA[");
+        buf.push_str(
+            r#"
+.plotters-tooltip {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.plotters-tooltip.plotters-tt-visible {
+    opacity: 1;
+}
+.plotters-tooltip rect {
+    fill: #222;
+    rx: 4;
+    ry: 4;
+}
+.plotters-tooltip text {
+    fill: #fff;
+    font-family: sans-serif;
+    font-size: 12px;
+}
+.plotters-tt-series {
+    font-weight: bold;
+}
+.plotters-dp-hover {
+    pointer-events: all;
+    cursor: crosshair;
+}
+rect.plotters-dp-hover,
+rect.plotters-dl-hover {
+    pointer-events: fill;
+}
+.plotters-dp:hover .plotters-dp-ring, .plotters-dp-hover:hover ~ .plotters-dp-ring, circle:hover ~ .plotters-dp-ring {
+    opacity: 1;
+}
+.plotters-dp > circle {
+    pointer-events: none;
+}
+.plotters-dp-ring {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+}
+.plotters-dl-hover {
+    pointer-events: stroke;
+    cursor: crosshair;
+}
+"#,
+        );
+        buf.push_str("]]>");
+        self.close_tag(); // </style>
+
+        // --- Tooltip container ( hidden by default ) ---
+        let buf = self.target.get_mut();
+        buf.push_str(
+            r#"<g class="plotters-tooltip">
+<rect x="0" y="0" width="1" height="1"/>
+<text x="0" y="0">
+<tspan class="plotters-tt-series" x="0" dy="0"></tspan>
+<tspan class="plotters-tt-value" x="0" dy="1.3em"></tspan>
+</text>
+</g>
+"#,
+        );
+
+        // --- JavaScript ---
+        let aw = self.open_tag(SVGTag::Script);
+        aw.finish_without_closing();
+        let buf = self.target.get_mut();
+        buf.push_str("<![CDATA[");
+        buf.push_str(
+            r#"
+(function() {
+  var svg = document.currentScript.closest("svg");
+  if (!svg) return;
+  let tt = svg.querySelector(".plotters-tooltip");
+  if (!tt) return;
+  let ttRect = tt.querySelector("rect");
+  let ttSeries = tt.querySelector(".plotters-tt-series");
+  let ttValue = tt.querySelector(".plotters-tt-value");
+  let pad = 8;
+
+  function show(evt) {
+    let el = evt.currentTarget;
+    let xl = el.getAttribute("data-xl") || "";
+    let yl = el.getAttribute("data-yl") || "";
+    let sl = el.getAttribute("data-sl") || "";
+
+    // Populate tspans
+    ttSeries.textContent = sl;
+    ttSeries.style.display = sl ? "" : "none";
+    ttValue.textContent = "x: " + xl + " y: " + yl;
+
+    // Position everything at origin to measure
+    tt.classList.add("plotters-tt-visible");
+    ttSeries.setAttribute("x", 0);
+    ttValue.setAttribute("x", 0);
+    let bbox = tt.querySelector("text").getBBox();
+
+    let px = parseFloat(el.getAttribute("cx") || el.getAttribute("data-cx") || 0);
+    let py = parseFloat(el.getAttribute("cy") || el.getAttribute("data-cy") || 0);
+
+    let tw = bbox.width + pad*2;
+    let th = bbox.height + pad*2;
+    let tx = px + 12;
+    let ty = py - th - 4;
+    let svgW = svg.viewBox.baseVal ? svg.viewBox.baseVal.width : svg.width.baseVal.value;
+    let svgH = svg.viewBox.baseVal ? svg.viewBox.baseVal.height : svg.height.baseVal.value;
+    if (tx + tw > svgW) tx = px - tw - 12;
+    if (ty < 0) ty = py + 16;
+    if (ty + th > svgH) ty = svgH - th -2;
+
+    ttRect.setAttribute("x", tx);
+    ttRect.setAttribute("y", ty);
+    ttRect.setAttribute("width", tw);
+    ttRect.setAttribute("height", th);
+
+    // Align tspans inside the box
+    let textY = ty + pad + (bbox.height * 0.35);
+    ttSeries.setAttribute("x", tx + pad);
+    ttValue.setAttribute("x", tx + pad);
+    tt.querySelector("text").setAttribute("x", tx + pad);
+    tt.querySelector("text").setAttribute("y", textY);
+  }
+
+  function hide() {
+    tt.classList.remove("plotters-tt-visible");
+  }
+
+  svg.querySelectorAll(".plotters-dp-hover").forEach(function(el) {
+    el.addEventListener("mouseenter", show);
+    el.addEventListener("mouseleave", hide);
+  });
+
+  /* --- Continous line tooltips via mousemove --- */
+  function lineMove(evt) {
+    let el = evt.target;
+    let ptsStr = el.getAttribute("data-pts");
+    if (!ptsStr) return;
+    let sl = el.getAttribute("data-sl") || "";
+
+    // Parse vertices: "x,y,xl,yl;..."
+    let verts = ptsStr.split(";").map(function(s) {
+      let p = s.split(",");
+      return { x: +p[0], y: +p[1], xl: p[2], yl: p[3] };
+    });
+
+    // Get cursor position in SVG coordinates
+    let pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    let svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+    // Find nearest vertex by x-distance
+    let best = verts[0], bestDist = Math.abs(svgPt.x - verts[0].x);
+    for (var i = 1; i < verts.length; i++) {
+      let d = Math.abs(svgPt.x - verts[i].x);
+      if (d < bestDist) { bestDist = d; best = verts[i]; }
+    }
+
+    // Show tooltip at that vertex
+    ttSeries.textContent = sl;
+    ttSeries.style.display = sl ? "" : "none";
+    ttValue.textContent = "x: " + best.xl + " y: " + best.yl;
+
+    tt.classList.add("plotters-tt-visible");
+    ttSeries.setAttribute("x", 0);
+    ttValue.setAttribute("x", 0);
+    let bbox = tt.querySelector("text").getBBox();
+
+    let tw = bbox.width + pad * 2;
+    let th = bbox.height + pad * 2;
+    let tx = best.x + 12;
+    let ty = best.y - th - 4;
+    let svgW = svg.viewBox.baseVal ? svg.viewBox.baseVal.width : svg.width.baseVal.value;
+    let svgH = svg.viewBox.baseVal ? svg.viewBox.baseVal.height : svg.height.baseVal.value;
+    if (tx + tw > svgW) tx = best.x - tw - 12;
+    if (ty < 0) ty = best.y + 16;
+    if (ty + th > svgH) ty = svgH - th - 2;
+
+    ttRect.setAttribute("x", tx);
+    ttRect.setAttribute("y", ty);
+    ttRect.setAttribute("width", tw);
+    ttRect.setAttribute("height", th);
+
+    let textY = ty + pad + (bbox.height * 0.35);
+    ttSeries.setAttribute("x", tx + pad);
+    ttValue.setAttribute("x", tx + pad);
+    tt.querySelector("text").setAttribute("x", tx + pad);
+    tt.querySelector("text").setAttribute("y", textY);
+  }
+
+  svg.querySelectorAll(".plotters-dl-hover").forEach(function(el) {
+    el.addEventListener("mousemove", lineMove);
+    el.addEventListener("mouseleave", hide);
+  });
+})();
+//# sourceURL=svg-tooltip.js
+"#,
+        );
+        buf.push_str("]]>");
+        self.close_tag(); // </script>
     }
 }
 
@@ -289,8 +583,254 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         Ok(())
     }
 
+    fn begin_context(&mut self, ctx: ElementContext) {
+        if !self.interactive {
+            self.context_stack.push(ctx);
+            return;
+        }
+        // Open a <g> with data attributes derived from the context
+        let mut aw = self.open_tag(SVGTag::Group);
+        match &ctx {
+            ElementContext::Background => {
+                aw.write_key("class").write_value("plotters-bg");
+            }
+            ElementContext::Axis { axis_id, .. } => {
+                aw.write_key("class").write_value("plotters-axis");
+                aw.write_key("data-axis").write_value(axis_id.as_str());
+            }
+            ElementContext::Tick {
+                axis_id,
+                position,
+                label,
+            } => {
+                aw.write_key("class").write_value("plotters-tick");
+                aw.write_key("data-axis").write_value(axis_id.as_str());
+                aw.write_key("data-pos").write_value(*position);
+                aw.write_key("data-label").write_value(label.as_str());
+            }
+            ElementContext::Label { text } => {
+                aw.write_key("class").write_value("plotters-label");
+                aw.write_key("data-text").write_value(text.as_str());
+            }
+            ElementContext::DataSeries { id, label, .. } => {
+                aw.write_key("class").write_value("plotters-series");
+                aw.write_key("data-series-id").write_value(*id as i32);
+                if !label.is_empty() {
+                    aw.write_key("data-series-label")
+                        .write_value(label.as_str());
+                }
+            }
+            ElementContext::DataPoint {
+                coord,
+                x_label,
+                y_label,
+                series_id,
+            } => {
+                aw.write_key("class").write_value("plotters-dp");
+                aw.write_key("data-x").write_value(coord.0);
+                aw.write_key("data-y").write_value(coord.1);
+                aw.write_key("data-xl").write_value(x_label.as_str());
+                aw.write_key("data-yl").write_value(y_label.as_str());
+                aw.write_key("data-series-id")
+                    .write_value(*series_id as i32);
+            }
+            ElementContext::DataLine { series_id, .. } => {
+                aw.write_key("class").write_value("plotters-dl");
+                aw.write_key("data-series-id")
+                    .write_value(*series_id as i32);
+            }
+        }
+        aw.finish_without_closing();
+        self.bbox_stack.push(BBoxTracker::default());
+        self.context_stack.push(ctx);
+    }
+
+    fn end_context(&mut self) {
+        let Some(ctx) = self.context_stack.pop() else {
+            return;
+        };
+        let bbox = self.bbox_stack.pop().unwrap_or_default();
+        if !self.interactive {
+            return;
+        }
+        // Resolve the series label (shared by DataPoint and DataLine)
+        let series_label = self
+            .context_stack
+            .iter()
+            .rev()
+            .find_map(|c| {
+                if let ElementContext::DataSeries { id, color, label } = c {
+                    Some(label.clone())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_default();
+
+        // For DataPoint contexts, emit a hover target covering the drawn bounding box ( so complex
+        // elements like boxplots are fully hoverable).
+        if let ElementContext::DataPoint {
+            coord,
+            x_label,
+            y_label,
+            ..
+        } = &ctx
+        {
+            // Highlight ring at the nominal coordinate
+            let mut ring = self.open_tag(SVGTag::Circle);
+            ring.write_key("class").write_value("plotters-dp-ring");
+            ring.write_key("cx").write_value(coord.0);
+            ring.write_key("cy").write_value(coord.1);
+            ring.write_key("r").write_value(6u32);
+            ring.write_key("fill").write_value("none");
+            ring.write_key("stroke").write_value("#333");
+            ring.write_key("stroke-width").write_value(2i32);
+            ring.close();
+            if bbox.any {
+                // Use a bounding-box rectangle as the hover target
+                let pad = 4;
+                let mut aw = self.open_tag(SVGTag::Rectangle);
+                aw.write_key("class").write_value("plotters-dp-hover");
+                aw.write_key("x").write_value(bbox.min_x - pad);
+                aw.write_key("y").write_value(bbox.min_y - pad);
+                aw.write_key("width")
+                    .write_value(bbox.max_x - bbox.min_x + pad * 2);
+                aw.write_key("height")
+                    .write_value(bbox.max_y - bbox.min_y + pad * 2);
+                aw.write_key("fill").write_value("transparent");
+                aw.write_key("data-cx").write_value(coord.0);
+                aw.write_key("data-cy").write_value(coord.1);
+                aw.write_key("data-xl").write_value(x_label.as_str());
+                aw.write_key("data-yl").write_value(y_label.as_str());
+                if !series_label.is_empty() {
+                    aw.write_key("data-sl").write_value(series_label.as_str());
+                }
+                aw.close();
+            } else {
+                // Fallback: small circle at the nominal coordinate
+                let mut aw = self.open_tag(SVGTag::Circle);
+                aw.write_key("class").write_value("plotters-dp-hover");
+                aw.write_key("cx").write_value(coord.0);
+                aw.write_key("cy").write_value(coord.1);
+                aw.write_key("r").write_value(8i32);
+                aw.write_key("fill").write_value("transparent");
+                aw.write_key("data-xl").write_value(x_label.as_str());
+                aw.write_key("data-yl").write_value(y_label.as_str());
+                if !series_label.is_empty() {
+                    aw.write_key("data-sl").write_value(series_label.as_str());
+                }
+                aw.close();
+            }
+        }
+
+        // For DataLine contexts, emit an invisible hover target. If the shape is a closed polygon
+        // (first point == last point in the bounding data), use a filled polygon so the interior is
+        // hoverable. Otherwise, use a wide-stroke polyline.
+        if let ElementContext::DataLine {
+            x_interpolation,
+            y_interpolation,
+            ..
+        } = &ctx
+        {
+            if let (
+                plotters_backend::Interpolation::Discrete { points: xpts },
+                plotters_backend::Interpolation::Discrete { points: ypts },
+            ) = (x_interpolation, y_interpolation)
+            {
+                if xpts.len() >= 2 && xpts.len() == ypts.len() {
+                    // Encode vertex data for the tooltip JS
+                    let pts_data = xpts
+                        .iter()
+                        .zip(ypts.iter())
+                        .map(|((xp, xl), (yp, yl))| format!("{},{},{},{}", xp, yp, xl, yl))
+                        .collect::<Vec<_>>()
+                        .join(";");
+                    let coords: Vec<(i32, i32)> = xpts
+                        .iter()
+                        .zip(ypts.iter())
+                        .map(|((xp, _), (yp, _))| (*xp, *yp))
+                        .collect();
+
+                    let pts_str: String = coords
+                        .iter()
+                        .map(|(x, y)| format!("{},{}", x, y))
+                        .collect::<Vec<_>>()
+                        .join(" ");
+
+                    let first = coords.first().unwrap();
+                    let last = coords.last().unwrap();
+                    let is_closed = (first.0 - last.0).abs() <= 2 && (first.1 - last.1).abs() <= 2;
+                    let use_fill = bbox.has_fill || is_closed;
+
+                    // Check if the bounding box of drawn content extends significantly beyond the
+                    // polyline path, indicating a complex element (e.g. boxplot) whose hover target
+                    // should cover the full rendered area.
+                    let path_min_x = coords.iter().map(|c| c.0).min().unwrap();
+                    let path_max_x = coords.iter().map(|c| c.0).max().unwrap();
+                    let path_min_y = coords.iter().map(|c| c.1).min().unwrap();
+                    let path_max_y = coords.iter().map(|c| c.1).max().unwrap();
+                    let extend_threshold = 6;
+                    let use_bbox_rect = bbox.any
+                        && ((bbox.min_x < path_min_x - extend_threshold)
+                            || (bbox.max_x > path_max_x + extend_threshold)
+                            || (bbox.min_y < path_min_y - extend_threshold)
+                            || (bbox.max_y > path_max_y + extend_threshold));
+
+                    if use_bbox_rect {
+                        // Bounding-box rectangle hover target (boxplots, etc.)
+                        let pad = 4;
+                        let mut aw = self.open_tag(SVGTag::Rectangle);
+                        aw.write_key("class").write_value("plotters-dl-hover");
+                        aw.write_key("x").write_value(bbox.min_x - pad);
+                        aw.write_key("y").write_value(bbox.min_y - pad);
+                        aw.write_key("width")
+                            .write_value(bbox.max_x - bbox.min_x + pad * 2);
+                        aw.write_key("height")
+                            .write_value(bbox.max_y - bbox.min_y + pad * 2);
+                        aw.write_key("fill").write_value("transparent");
+                        aw.write_key("data-pts").write_value(pts_data.as_str());
+                        if !series_label.is_empty() {
+                            aw.write_key("data-sl").write_value(series_label.as_str());
+                        }
+                        aw.close();
+                    } else if use_fill {
+                        // Filled polygon hover target (area charts)
+                        let mut aw = self.open_tag(SVGTag::Polygon);
+                        aw.write_key("class").write_value("plotters-dl-hover");
+                        aw.write_key("fill").write_value("transparent");
+                        aw.write_key("stroke").write_value("none");
+                        aw.write_key("points").write_value(pts_str.as_str());
+                        aw.write_key("data-pts").write_value(pts_data.as_str());
+                        if !series_label.is_empty() {
+                            aw.write_key("data-sl").write_value(series_label.as_str());
+                        }
+                        aw.close();
+                    } else {
+                        // Wide-stroke polyline hover target (line charts)
+                        let mut aw = self.open_tag(SVGTag::Polyline);
+                        aw.write_key("class").write_value("plotters-dl-hover");
+                        aw.write_key("fill").write_value("none");
+                        aw.write_key("stroke").write_value("transparent");
+                        aw.write_key("stroke-width").write_value(12i32);
+                        aw.write_key("points").write_value(pts_str.as_str());
+                        aw.write_key("data-pts").write_value(pts_data.as_str());
+                        if !series_label.is_empty() {
+                            aw.write_key("data-sl").write_value(series_label.as_str());
+                        }
+                        aw.close();
+                    }
+                }
+            }
+        }
+        // Clone the <g>
+        self.close_tag();
+    }
+
     fn present(&mut self) -> Result<(), DrawingErrorKind<Error>> {
         if !self.saved {
+            if self.interactive {
+                self.inject_tooltip_assets();
+            }
             while self.close_tag() {}
             match self.target {
                 Target::File(ref buf, path) => {
@@ -326,6 +866,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .write_key("fill")
             .write_value(make_svg_color(color));
         attrwriter.close();
+        self.track_coord(point);
         Ok(())
     }
 
@@ -353,6 +894,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         attrwriter.write_key("x2").write_value(to.0);
         attrwriter.write_key("y2").write_value(to.1);
         attrwriter.close();
+        self.track_rect(from, to);
         Ok(())
     }
 
@@ -366,6 +908,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
+        let is_filled = fill;
 
         let color = make_svg_color(style.color());
         let (fill, stroke) = if !fill {
@@ -389,6 +932,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         attrwriter.write_key("fill").write_value(fill);
         attrwriter.write_key("stroke").write_value(stroke);
         attrwriter.close();
+        if let Some(bb) = self.bbox_stack.last_mut() {
+            bb.expand_rect(upper_left, bottom_right);
+            if is_filled {
+                bb.has_fill = true;
+            }
+        }
         Ok(())
     }
 
@@ -400,6 +949,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
+        let path_points: Vec<_> = path.into_iter().collect();
         let mut attrwriter = self.open_tag(SVGTag::Polyline);
         attrwriter.write_key("fill").write_value("none");
         attrwriter
@@ -414,9 +964,12 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         attrwriter
             .write_key("points")
             .write_value(FormatEscapedIter(
-                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+                path_points.iter().map(|c| (c.0, ',', c.1, ' ')),
             ));
         attrwriter.close();
+        for &pt in &path_points {
+            self.track_coord(pt);
+        }
         Ok(())
     }
 
@@ -428,6 +981,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         if style.color().alpha == 0.0 {
             return Ok(());
         }
+        let poly_points: Vec<_> = path.into_iter().collect();
         let mut attrwriter = self.open_tag(SVGTag::Polygon);
         attrwriter
             .write_key("opacity")
@@ -438,9 +992,15 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
         attrwriter
             .write_key("points")
             .write_value(FormatEscapedIter(
-                path.into_iter().map(|c| (c.0, ',', c.1, ' ')),
+                poly_points.iter().map(|c| (c.0, ',', c.1, ' ')),
             ));
         attrwriter.close();
+        if let Some(bb) = self.bbox_stack.last_mut() {
+            for &pt in &poly_points {
+                bb.expand_coord(pt);
+            }
+            bb.has_fill = true;
+        }
 
         Ok(())
     }
@@ -474,6 +1034,10 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .write_key("stroke-width")
             .write_value(style.stroke_width());
         attrwriter.close();
+        self.track_rect(
+            (center.0 - radius as i32, center.1 - radius as i32),
+            (center.0 + radius as i32, center.1 + radius as i32),
+        );
         Ok(())
     }
 

@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use plotters_backend::DrawingBackend;
+use plotters_backend::{DrawingBackend, ElementContext, Interpolation};
 
 use crate::chart::ChartContext;
 use crate::coord::{
@@ -145,6 +145,24 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             return Ok(());
         };
 
+        // Emit an Axis context so interactive backends can attach tooltips.
+        let axis_id = if orientation.0 == 0 {
+            "x".to_string()
+        } else {
+            "y".to_string()
+        };
+        let interp = if !labels.is_empty() {
+            Some(Interpolation::Discrete {
+                points: labels.to_vec(),
+            })
+        } else {
+            None
+        };
+        area.begin_context(ElementContext::Axis {
+            axis_id: axis_id.to_string(),
+            interpolation: interp,
+        })?;
+
         let (x0, y0) = self.drawing_area.get_base_pixel();
         let (tw, th) = area.dim_in_pixel();
 
@@ -240,13 +258,9 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                     let ymax = th as i32 - 1;
                     let (kx0, ky0, kx1, ky1) = match orientation {
                         (dx, dy) if dx > 0 && dy == 0 => (0, *p - y0, tick_size, *p - y0),
-                        (dx, dy) if dx < 0 && dy == 0 => {
-                            (xmax - tick_size, *p - y0, xmax, *p - y0)
-                        }
+                        (dx, dy) if dx < 0 && dy == 0 => (xmax - tick_size, *p - y0, xmax, *p - y0),
                         (dx, dy) if dx == 0 && dy > 0 => (*p - x0, 0, *p - x0, tick_size),
-                        (dx, dy) if dx == 0 && dy < 0 => {
-                            (*p - x0, ymax - tick_size, *p - x0, ymax)
-                        }
+                        (dx, dy) if dx == 0 && dy < 0 => (*p - x0, ymax - tick_size, *p - x0, ymax),
                         _ => panic!("Bug: Invalid orientation specification"),
                     };
                     let line = PathElement::new(vec![(kx0, ky0), (kx1, ky1)], *style);
@@ -279,6 +293,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
             let actual_style = &actual_style.pos(Pos::new(h_pos, v_pos));
             area.draw_text(text, actual_style, (x0 as i32, y0 as i32))?;
         }
+        area.end_context()?;
 
         Ok(())
     }
@@ -348,10 +363,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 for (px, _) in &x_labels {
                     let x = *px - x0;
                     if x >= 0 && x < dw {
-                        let line = PathElement::new(
-                            vec![(x, 0), (x, abs_tick)],
-                            *axis_style,
-                        );
+                        let line = PathElement::new(vec![(x, 0), (x, abs_tick)], *axis_style);
                         plot_area.draw(&line)?;
                     }
                 }
@@ -380,10 +392,7 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
                 for (py, _) in &y_labels {
                     let y = *py - y0;
                     if y >= 0 && y < dh {
-                        let line = PathElement::new(
-                            vec![(0, y), (abs_tick, y)],
-                            *axis_style,
-                        );
+                        let line = PathElement::new(vec![(0, y), (abs_tick, y)], *axis_style);
                         plot_area.draw(&line)?;
                     }
                 }
@@ -408,3 +417,4 @@ impl<'a, DB: DrawingBackend, X: Ranged, Y: Ranged> ChartContext<'a, DB, Cartesia
         Ok(())
     }
 }
+

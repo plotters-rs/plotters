@@ -6,7 +6,7 @@ use crate::style::text_anchor::{HPos, Pos, VPos};
 use crate::style::{Color, SizeDesc, TextStyle};
 
 /// The abstraction of a drawing area
-use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
+use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind, ElementContext};
 
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -312,6 +312,25 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.backend_ops(|b| b.present())
     }
 
+    /// Forward a semantic context to the underlying backend.
+    ///
+    /// Backends that support interactivity (e.g. SVG tooltips) use this to know *what* is currently
+    /// being drawn. Must be paired with [`end_context`](Self::end_context).
+    pub fn begin_context(&self, ctx: ElementContext) -> Result<(), DrawingAreaError<DB>> {
+        self.backend_ops(|b| {
+            b.begin_context(ctx);
+            Ok(())
+        })
+    }
+
+    /// Close the most recently opened semantic context.
+    pub fn end_context(&self) -> Result<(), DrawingAreaError<DB>> {
+        self.backend_ops(|b| {
+            b.end_context();
+            Ok(())
+        })
+    }
+
     /// Draw an high-level element
     pub fn draw<'a, E, B>(&self, element: &'a E) -> Result<(), DrawingAreaError<DB>>
     where
@@ -492,6 +511,10 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
 
         let style = &style.pos(Pos::new(HPos::Center, VPos::Top));
 
+        self.begin_context(ElementContext::Label {
+            text: text.to_string(),
+        })?;
+
         self.backend_ops(|b| {
             b.draw_text(
                 text,
@@ -499,6 +522,7 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 (self.rect.x0 + x_padding, self.rect.y0 + y_padding),
             )
         })?;
+        self.end_context()?;
 
         Ok(Self {
             rect: Rect {

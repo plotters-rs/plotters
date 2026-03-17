@@ -76,6 +76,92 @@ use text_anchor::{HPos, VPos};
 /// which defines the top-left point as (0, 0).
 pub type BackendCoord = (i32, i32);
 
+/// Describes how pixel positions along an axis map to logical valeus.
+///
+/// Backends can use this to compute tooltip labels for arbitrary cursor positions (continuous) or
+/// to snap to the nearest labeled tick (discrete).
+#[derive(Clone, Debug, PartialEq)]
+pub enum Interpolation {
+    /// A linear mapping from a pixel range to a floating-point value range.
+    Continuous {
+        /// The pixel range that this axis occupies on the backend.
+        backend_range: (i32, i32),
+        /// The logical value range corresponding to `backend_range`.
+        value_range: (f64, f64),
+        /// Human-readable units string (may be empty).
+        units: String,
+    },
+    /// A set of individually labeled positions (tick marks).
+    Discrete {
+        /// Each tuple is (pixel_position, label_text).
+        points: Vec<(i32, String)>,
+    },
+}
+
+/// Semantic context passed to [`DrawingBackend::begin_context`] so that backends know *what* is
+/// being drawn and can attach metadata such as tooltip information, accessibility labels, or
+/// interactive behaviour.
+///
+/// Contexts are nestable: a `DataSeries` context may contain multiple `DataPoint` contexts, and an
+/// `Axis` context may contain `Tick` and `Label` children.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ElementContext {
+    /// The full-chart background fill.
+    Background,
+    /// An axis line (x or y).
+    Axis {
+        /// Identifier for this axis, e.g. `"x"` or `"y"`.
+        axis_id: String,
+        /// Interpolation info lets backends compute tooltips anywhere along the axis, not only at
+        /// tick positions.
+        interpolation: Option<Interpolation>,
+    },
+    /// A single tick mark on an axis.
+    Tick {
+        /// Which axis this tick belongs to (matches `Axis::axis_id`).
+        axis_id: String,
+        /// Pixel position of the tick along the axis direction.
+        position: i32,
+        /// Formatted label for this tick valeu.
+        label: String,
+    },
+    /// A text label drawn on the chart (axis description, chart title, etc.).
+    Label {
+        /// The text content of the label.
+        text: String,
+    },
+    /// A single rendered data point inside a series.
+    DataPoint {
+        /// The backend pixel coordinate of this point.
+        coord: BackendCoord,
+        /// Formatted x-axis value at this point.
+        x_label: String,
+        /// Formatted y-axis value at this point.
+        y_label: String,
+        /// Index of the series this point belongs to (matches `DataSeries::id`).
+        series_id: usize,
+    },
+    /// A path / polyline connecting data points.
+    DataLine {
+        /// How to map pixel positions to x-axis values along the line.
+        x_interpolation: Interpolation,
+        /// How to map pixel positions to y-axis values along the line.
+        y_interpolation: Interpolation,
+        /// Index of the series this line belongs to (matches `DataSeries::id`).
+        series_id: usize,
+    },
+    /// Groups all elements that belong to one logical data series.
+    DataSeries {
+        /// A unique identifier for this series within the chart.
+        id: usize,
+        /// The colour used for this series.
+        color: BackendColor,
+        /// Human-readable name / legend label for this series (may be empty if the caller has not
+        /// assigned one yet).
+        label: String,
+    },
+}
+
 /// The error produced by a drawing backend.
 #[derive(Debug)]
 pub enum DrawingErrorKind<E: Error + Send + Sync> {
@@ -106,6 +192,19 @@ impl<E: Error + Send + Sync> Error for DrawingErrorKind<E> {}
 pub trait DrawingBackend: Sized {
     /// The error type reported by the backend
     type ErrorType: Error + Send + Sync;
+
+    /// Begin a semantic drawing context.
+    ///
+    /// Backends that support interactivity ( e.g. SVG tooltips) can override this to record
+    /// metadata about the elements that follow. The deault implementation is a no-op, so existing
+    /// backends remain unchanged.
+    fn begin_context(&mut self, _ctx: ElementContext) {}
+
+    /// End the most recently opened context.
+    ///
+    /// Must be paired with a preceding [`begin_context`](Self::begin_context) call. The default
+    /// implementation is a no-op.
+    fn end_context(&mut self) {}
 
     /// Get the dimension of the drawing backend in pixels
     fn get_size(&self) -> (u32, u32);

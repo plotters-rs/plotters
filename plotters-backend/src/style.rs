@@ -1,5 +1,5 @@
 /// The color type that is used by all the backend
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BackendColor {
     pub alpha: f64,
     pub rgb: (u8, u8, u8),

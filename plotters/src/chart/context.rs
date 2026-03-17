@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use plotters_backend::{BackendCoord, DrawingBackend};
+use plotters_backend::{BackendColor, BackendCoord, DrawingBackend, ElementContext};
 
 use crate::chart::{SeriesAnno, SeriesLabelStyle};
 use crate::coord::{CoordTranslate, ReverseCoordTranslate, Shift};
@@ -28,6 +28,8 @@ pub struct ChartContext<'a, DB: DrawingBackend, CT: CoordTranslate> {
     pub(crate) drawing_area: DrawingArea<DB, CT>,
     pub(crate) series_anno: Vec<SeriesAnno<'a, DB>>,
     pub(crate) drawing_area_pos: (i32, i32),
+    /// Monotonically increasing series id used by `begin_context`.
+    pub(crate) next_series_id: usize,
 }
 
 impl<'a, DB: DrawingBackend, CT: ReverseCoordTranslate> ChartContext<'a, DB, CT> {
@@ -128,7 +130,21 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
         R: Borrow<E>,
         S: IntoIterator<Item = R>,
     {
+        let series_id = self.next_series_id;
+        self.next_series_id += 1;
+        // Wrap the series in a DatSeries context so interactive backends can group the elements
+        // visually.
+        self.drawing_area
+            .begin_context(ElementContext::DataSeries {
+                id: series_id,
+                color: BackendColor {
+                    alpha: 1.,
+                    rgb: (0, 0, 0),
+                },
+                label: String::new(),
+            })?;
         self.draw_series_impl(series)?;
+        self.drawing_area.end_context()?;
         Ok(self.alloc_series_anno())
     }
 }

@@ -833,6 +833,7 @@ pub mod prelude {
 
     // Re-export the backend for backward compatibility
     pub use plotters_backend::DrawingBackend;
+    pub use plotters_backend::{ElementContext, Interpolation};
 
     pub use crate::drawing::*;
 

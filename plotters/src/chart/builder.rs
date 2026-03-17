@@ -432,6 +432,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
                 pixel_range,
             )),
             series_anno: vec![],
+            next_series_id: 0,
             drawing_area_pos: (
                 actual_drawing_area_pos[2] + title_dx + self.margin[2] as i32,
                 actual_drawing_area_pos[0] + title_dy + self.margin[0] as i32,
@@ -491,6 +492,7 @@ impl<'a, 'b, DB: DrawingBackend> ChartBuilder<'a, 'b, DB> {
                 pixel_range,
             )),
             series_anno: vec![],
+            next_series_id: 0,
             drawing_area_pos: (
                 title_dx + self.margin[2] as i32,
                 title_dy + self.margin[0] as i32,
