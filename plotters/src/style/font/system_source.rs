@@ -1,5 +1,4 @@
 // pattern: Imperative Shell
-#![allow(dead_code)]
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
@@ -95,7 +94,10 @@ fn query_families(family: FontFamily<'_>) -> Vec<QueryFamily<'_>> {
             QueryFamily::Generic(GenericFamily::Monospace),
             QueryFamily::Generic(GenericFamily::SansSerif),
         ],
-        FontFamily::Name(name) => vec![QueryFamily::Named(name)],
+        FontFamily::Name(name) => vec![
+            QueryFamily::Named(name),
+            QueryFamily::Generic(GenericFamily::SansSerif),
+        ],
     }
 }
 
@@ -141,9 +143,10 @@ mod tests {
     }
 
     #[test]
-    fn missing_named_font_returns_error() {
+    fn missing_named_font_falls_back_to_sans_serif() -> FontResult<()> {
         let family = FontFamily::Name("plotters-font-that-should-not-exist");
-        let err = load(family, FontStyle::Normal).unwrap_err();
-        assert!(matches!(err, FontError::NoSuchFont(_, _)));
+        let font = load(family, FontStyle::Normal)?;
+        assert!(!font.bytes.is_empty());
+        Ok(())
     }
 }
