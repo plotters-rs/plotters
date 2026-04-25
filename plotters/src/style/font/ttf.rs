@@ -1,12 +1,9 @@
 #[path = "system_source.rs"]
 mod system_source;
 
-use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
-
-use lazy_static::lazy_static;
+use std::sync::Arc;
 
 use swash::{
     scale::{Render, ScaleContext, Source},
@@ -44,99 +41,74 @@ impl std::fmt::Display for FontError {
 
 impl std::error::Error for FontError {}
 
-lazy_static! {
-    static ref DATA_CACHE: RwLock<HashMap<String, FontResult<SystemFontData>>> =
-        RwLock::new(HashMap::new());
-}
-
 thread_local! {
     static FONT_OBJECT_CACHE: RefCell<HashMap<String, FontExt>> = RefCell::new(HashMap::new());
     static SCALE_CONTEXT: RefCell<ScaleContext> = RefCell::new(ScaleContext::new());
 }
 
-const PLACEHOLDER_CHAR: char = '�';
+/// Substituted when the requested glyph is missing from the font.
+const PLACEHOLDER_CHAR: char = '\u{FFFD}';
+
+const RENDER_SOURCES: [Source; 1] = [Source::Outline];
 
 #[derive(Clone)]
 struct FontExt {
     bytes: Arc<Vec<u8>>,
     index: usize,
+    id: u64,
 }
 
 impl FontExt {
-    fn new(data: SystemFontData) -> FontResult<Self> {
-        FontRef::from_index(data.bytes.as_slice(), data.index).ok_or_else(|| {
-            FontError::FontLoadError(format!("invalid font data at index {}", data.index))
-        })?;
-        Face::parse(data.bytes.as_slice(), data.index as u32)
-            .map_err(|err| FontError::FaceParseError(err.to_string()))?;
-        Ok(Self {
+    fn from_data(data: SystemFontData) -> Self {
+        Self {
             bytes: data.bytes,
             index: data.index,
-        })
+            id: data.id,
+        }
     }
 
-    fn font_ref(&self) -> FontResult<FontRef<'_>> {
-        FontRef::from_index(self.bytes.as_slice(), self.index).ok_or_else(|| {
-            FontError::FontLoadError(format!("invalid font data at index {}", self.index))
-        })
+    fn font_ref(&self) -> FontRef<'_> {
+        FontRef::from_index(self.bytes.as_slice(), self.index)
+            .expect("font validated at system_source::load")
+    }
+
+    fn face(&self) -> Face<'_> {
+        Face::parse(self.bytes.as_slice(), self.index as u32)
+            .expect("face validated at system_source::load")
     }
 
     fn cache_id(&self) -> [u64; 2] {
-        [Arc::as_ptr(&self.bytes) as usize as u64, self.index as u64]
-    }
-
-    fn query_kerning_table(&self, prev: GlyphId, next: GlyphId) -> f32 {
-        let Ok(face) = Face::parse(self.bytes.as_slice(), self.index as u32) else {
-            return 0.0;
-        };
-        if let Some(kern) = face.tables().kern {
-            let kern = kern
-                .subtables
-                .into_iter()
-                .filter(|st| st.horizontal && !st.variable)
-                .find_map(|st| st.glyphs_kerning(TtfGlyphId(prev), TtfGlyphId(next)))
-                .unwrap_or(0);
-            return kern as f32;
-        }
-        0.0
+        [self.id, self.index as u64]
     }
 }
 
-/// Lazily load font data. Font type doesn't own actual data, which
-/// lives in the cache.
+fn kerning_units(face: &Face<'_>, prev: GlyphId, next: GlyphId) -> i16 {
+    let Some(kern) = face.tables().kern else {
+        return 0;
+    };
+    kern.subtables
+        .into_iter()
+        .filter(|st| st.horizontal && !st.variable)
+        .find_map(|st| st.glyphs_kerning(TtfGlyphId(prev), TtfGlyphId(next)))
+        .unwrap_or(0)
+}
+
+/// Fetch the font for `(face, style)`, hitting the thread-local cache when
+/// possible and falling back to the global byte cache in `system_source`.
 fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
     let key = cache_key(face, style);
 
-    // First, we try to find the font object for current thread
-    if let Some(font_object) = FONT_OBJECT_CACHE.with(|font_object_cache| {
-        font_object_cache
-            .borrow()
-            .get(Borrow::<str>::borrow(&key))
-            .cloned()
-    }) {
+    if let Some(font_object) =
+        FONT_OBJECT_CACHE.with(|cache| cache.borrow().get(key.as_str()).cloned())
+    {
         return Ok(font_object);
     }
 
-    // Then we need to check if the data cache contains the font data
-    if let Some(data) = DATA_CACHE
-        .read()
-        .map_err(|_| FontError::LockError)?
-        .get(Borrow::<str>::borrow(&key))
-        .cloned()
-    {
-        let font = FontExt::new(data?)?;
-        cache_font_object(key, &font);
-        return Ok(font);
-    }
-
-    let data = system_source::load(face, style);
-    DATA_CACHE
-        .write()
-        .map_err(|_| FontError::LockError)?
-        .insert(key.clone(), data.clone());
-
-    let font = FontExt::new(data?)?;
-    cache_font_object(key, &font);
+    let data = system_source::load(face, style)?;
+    let font = FontExt::from_data(data);
+    FONT_OBJECT_CACHE.with(|cache| {
+        cache.borrow_mut().insert(key, font.clone());
+    });
     Ok(font)
 }
 
@@ -145,12 +117,6 @@ fn cache_key(face: FontFamily<'_>, style: FontStyle) -> String {
         FontStyle::Normal => face.as_str().to_owned(),
         _ => format!("{}, {}", face.as_str(), style.as_str()),
     }
-}
-
-fn cache_font_object(key: String, font: &FontExt) {
-    FONT_OBJECT_CACHE.with(|font_object_cache| {
-        font_object_cache.borrow_mut().insert(key, font.clone());
-    });
 }
 
 fn glyph_for_char(charmap: &Charmap<'_>, c: char) -> Option<GlyphId> {
@@ -177,28 +143,28 @@ impl FontData for FontDataInternal {
     }
 
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
-        let pixel_per_em = size / 1.24;
+        let pixel_per_em = (size / 1.24) as f32;
         let font = &self.0;
-        let font_ref = font.font_ref()?;
+        let font_ref = font.font_ref();
+        let face = font.face();
         let metrics = font_ref.metrics(&[]);
-        let glyph_metrics = font_ref.glyph_metrics(&[]).scale(pixel_per_em as f32);
+        let glyph_metrics = font_ref.glyph_metrics(&[]).scale(pixel_per_em);
         let charmap = font_ref.charmap();
 
         let mut x_pixels = 0f32;
-
         let mut prev = None;
         let place_holder = glyph_for_char(&charmap, PLACEHOLDER_CHAR);
 
         for c in text.chars() {
             if let Some(glyph_id) = glyph_for_char(&charmap, c).or(place_holder) {
-                x_pixels += glyph_metrics.advance_width(glyph_id);
                 if let Some(pc) = prev {
                     x_pixels += scale_design_units(
-                        font.query_kerning_table(pc, glyph_id),
-                        pixel_per_em as f32,
+                        kerning_units(&face, pc, glyph_id) as f32,
+                        pixel_per_em,
                         metrics.units_per_em,
                     );
                 }
+                x_pixels += glyph_metrics.advance_width(glyph_id);
                 prev = Some(glyph_id);
             }
         }
@@ -217,7 +183,8 @@ impl FontData for FontDataInternal {
 
         let mut x = base_x as f32;
         let font = &self.0;
-        let font_ref = font.font_ref()?;
+        let font_ref = font.font_ref();
+        let face = font.face();
         let metrics = font_ref.metrics(&[]);
         let glyph_metrics = font_ref.glyph_metrics(&[]).scale(em);
         let charmap = font_ref.charmap();
@@ -227,8 +194,6 @@ impl FontData for FontDataInternal {
         let mut prev = None;
         let place_holder = glyph_for_char(&charmap, PLACEHOLDER_CHAR);
 
-        let render_sources = [Source::Outline];
-
         let draw_result = SCALE_CONTEXT.with(|scale_context| {
             let mut scale_context = scale_context.borrow_mut();
             let mut scaler = scale_context
@@ -236,14 +201,14 @@ impl FontData for FontDataInternal {
                 .size(em)
                 .hint(true)
                 .build();
-            let mut renderer = Render::new(&render_sources);
+            let mut renderer = Render::new(&RENDER_SOURCES);
             renderer.format(Format::Alpha);
 
             for c in text.chars() {
                 if let Some(glyph_id) = glyph_for_char(&charmap, c).or(place_holder) {
                     if let Some(pc) = prev {
                         x += scale_design_units(
-                            font.query_kerning_table(pc, glyph_id),
+                            kerning_units(&face, pc, glyph_id) as f32,
                             em,
                             metrics.units_per_em,
                         );
@@ -287,17 +252,13 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        // We cannot only check the size of font cache, because
-        // the test case may be run in parallel. Thus the font cache
-        // may contains other fonts.
-        let _a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
-
-        let _b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
-
-        // TODO: Check they are the same
-
+        let a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
+        let b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
+        assert!(
+            Arc::ptr_eq(&a.bytes, &b.bytes),
+            "cached loads should share the underlying byte buffer"
+        );
+        assert_eq!(a.id, b.id, "cached loads should share font id");
         Ok(())
     }
 
@@ -318,6 +279,7 @@ mod test {
     fn assert_draw_sanity(family: FontFamily<'_>, style: FontStyle) -> FontResult<()> {
         let size = 32.0;
         let em = size / 1.24;
+        let baseline = (size as i32) - (0.24 * em as f32) as i32;
         let font = FontDataInternal::new(family, style)?;
         let mut samples = Vec::new();
 
@@ -360,6 +322,34 @@ mod test {
             max_y <= (1.5 * em) as i32,
             "glyphs drifted below canvas: max_y={}",
             max_y
+        );
+
+        // 'g' descender must land below the baseline; if placement.top were
+        // added rather than subtracted, every glyph would render above
+        // baseline and this would fail.
+        assert!(
+            max_y > baseline,
+            "expected 'g' descender below baseline {}: max_y={}",
+            baseline,
+            max_y
+        );
+
+        // The touched bbox should span roughly one em vertically; this
+        // guards against placement.top being applied with the wrong scale.
+        let bbox_height = (max_y - min_y) as f32;
+        assert!(
+            (0.5 * em as f32..=1.5 * em as f32).contains(&bbox_height),
+            "bbox height {} not within [0.5*em, 1.5*em] (em={})",
+            bbox_height,
+            em
+        );
+
+        // 'g' is the second glyph; it must be drawn well to the right of
+        // 'H'. Catches a missing advance_width or placement.left bug.
+        assert!(
+            max_x > (0.6 * em) as i32,
+            "expected second glyph drawn after 'H'; max_x={}",
+            max_x
         );
 
         Ok(())
