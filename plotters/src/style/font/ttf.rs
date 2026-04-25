@@ -189,7 +189,14 @@ impl FontData for FontDataInternal {
         let glyph_metrics = font_ref.glyph_metrics(&[]).scale(em);
         let charmap = font_ref.charmap();
 
-        base_y -= (0.24 * em) as i32;
+        // Place the swash pen at the baseline. font-kit rasterized into a
+        // `size`-square canvas whose top sat at `pos.y - 0.24*em`, then
+        // applied a `(0, em)` rasterization translation, putting the
+        // effective baseline at `pos.y + 0.76*em`. Swash places glyphs
+        // relative to the pen directly, so we shift the pen to that same
+        // baseline; otherwise glyphs render ~one em above where callers
+        // expect them.
+        base_y += (0.76 * em) as i32;
 
         let mut prev = None;
         let place_holder = glyph_for_char(&charmap, PLACEHOLDER_CHAR);
@@ -277,13 +284,15 @@ mod test {
     }
 
     fn assert_draw_sanity(family: FontFamily<'_>, style: FontStyle) -> FontResult<()> {
-        let size = 32.0;
-        let em = size / 1.24;
-        let baseline = (size as i32) - (0.24 * em as f32) as i32;
+        let size = 32.0_f64;
+        let em = (size / 1.24) as f32;
+        let pos_y = size as i32;
+        // Baseline must match the pen position chosen in `draw`.
+        let baseline = pos_y + (0.76 * em) as i32;
         let font = FontDataInternal::new(family, style)?;
         let mut samples = Vec::new();
 
-        let draw_result = font.draw((0, size as i32), size, "Hg", |x, y, alpha| {
+        let draw_result = font.draw((0, pos_y), size, "Hg", |x, y, alpha| {
             samples.push((x, y, alpha));
             Ok::<(), ()>(())
         })?;
@@ -311,16 +320,24 @@ mod test {
         let min_y = touched.iter().map(|(_, y, _)| *y).min().unwrap();
         let max_y = touched.iter().map(|(_, y, _)| *y).max().unwrap();
 
+        // Baseline-anchored bounds. The pen is at output y = `baseline`,
+        // ascenders extend up by ~em and descenders down by ~0.3*em.
         assert!(min_x >= 0, "glyphs drifted left: min_x={}", min_x);
-        assert!(min_y >= 0, "glyphs drifted above canvas: min_y={}", min_y);
+        assert!(
+            min_y >= baseline - (1.2 * em) as i32,
+            "glyphs drifted too high above baseline {}: min_y={}",
+            baseline,
+            min_y
+        );
         assert!(
             max_x <= (3.0 * em) as i32,
             "glyphs drifted right: max_x={}",
             max_x
         );
         assert!(
-            max_y <= (1.5 * em) as i32,
-            "glyphs drifted below canvas: max_y={}",
+            max_y <= baseline + (0.6 * em) as i32,
+            "glyphs drifted too far below baseline {}: max_y={}",
+            baseline,
             max_y
         );
 
@@ -334,11 +351,19 @@ mod test {
             max_y
         );
 
+        // Cap height should sit above the baseline by a meaningful amount.
+        assert!(
+            min_y < baseline,
+            "expected glyph tops above baseline {}: min_y={}",
+            baseline,
+            min_y
+        );
+
         // The touched bbox should span roughly one em vertically; this
         // guards against placement.top being applied with the wrong scale.
         let bbox_height = (max_y - min_y) as f32;
         assert!(
-            (0.5 * em as f32..=1.5 * em as f32).contains(&bbox_height),
+            (0.5 * em..=1.5 * em).contains(&bbox_height),
             "bbox height {} not within [0.5*em, 1.5*em] (em={})",
             bbox_height,
             em
