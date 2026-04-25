@@ -1,3 +1,5 @@
+// pattern: Mixed (needs refactoring)
+
 /*!
 The SVG image drawing backend
 */
@@ -602,7 +604,7 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
 
             let color = image::ColorType::Rgb8;
 
-            encoder.write_image(src, w, h, color).map_err(|e| {
+            encoder.write_image(src, w, h, color.into()).map_err(|e| {
                 DrawingErrorKind::DrawingError(Error::new(
                     std::io::ErrorKind::Other,
                     format!("Image error: {}", e),
