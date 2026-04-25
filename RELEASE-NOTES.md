@@ -2,6 +2,18 @@
 
 This documents contains the release notes for every major release since v0.3.
 
+## Development Notes
+
+### TTF Font Backend
+
+The default `ttf` feature no longer depends on `font-kit` or
+`pathfinder_geometry`. It uses `fontique` for native system font discovery and
+`swash` for glyph rasterization, while retaining `ttf-parser` for legacy
+kerning table support.
+
+Enabling `ttf` now requires Rust 1.88 or newer. Builds that disable `ttf`
+retain the crate's declared MSRV.
+
 ## Plotters v0.3
 
 Plotters v0.3 is shipped with multiple major improvements.

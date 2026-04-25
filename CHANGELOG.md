@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Replace the `ttf` feature's `font-kit`-backed font backend with `fontique`
+  for native system font discovery and `swash` for glyph rasterization.
+- Enabling the `ttf` feature now requires Rust 1.88 or newer; non-`ttf` builds
+  retain the crate's declared MSRV.
+
+### Removed
+
+- Remove `font-kit` and `pathfinder_geometry` from the `ttf` dependency tree.
+
 ## Plotters 0.3.6 (2024-05-20)
 
 ### Added

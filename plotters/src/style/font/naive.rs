@@ -1,3 +1,5 @@
+// pattern: Functional Core
+
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
 
 #[derive(Debug, Clone)]
@@ -25,8 +27,8 @@ impl FontData for FontDataInternal {
     }
 
     /// Note: This is only a crude estimatation, since for some backend such as SVG, we have no way to
-    /// know the real size of the text anyway. Thus using font-kit is an overkill and doesn't helps
-    /// the layout.
+    /// know the real size of the text anyway. Thus using the system font backend is overkill and
+    /// doesn't help the layout.
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
         let em = size / 1.24 / 1.24;
         Ok((

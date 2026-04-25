@@ -532,7 +532,7 @@ The following list is a complete list of features that can be opted in or out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap\_encoder  | Allow `BitMapBackend` to save the result to bitmap files | image, rusttype, font-kit | Yes |
+| bitmap\_encoder  | Allow `BitMapBackend` to save the result to bitmap files | image | Yes |
 | svg\_backend     | Enable `SVGBackend` Support | None | Yes |
 | bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
@@ -540,8 +540,13 @@ The following list is a complete list of features that can be opted in or out.
 
 | Name     | Description                              | Additional Dependency | Default? |
 |----------|------------------------------------------|-----------------------|----------|
-| ttf      | Allows TrueType font support             | font-kit              | Yes      |
+| ttf      | Allows TrueType font support             | fontique, swash, ttf-parser, lazy_static | Yes      |
 | ab_glyph | Skips loading system fonts, unlike `ttf` | ab_glyph              | No       |
+
+The `ttf` feature uses native system font discovery through `fontique` and
+glyph rasterization through `swash`, while retaining `ttf-parser` for legacy
+kerning table support. Enabling `ttf` requires Rust 1.88 or newer; builds that
+disable `ttf` keep the crate's declared MSRV.
 
 `ab_glyph` supports TrueType and OpenType fonts, but does not attempt to
 load fonts provided by the system on which it is running.
@@ -645,5 +650,4 @@ pub struct RGBAColor(pub u8, pub u8, pub u8, pub f64);
 
     In the case that error handling is important, you need manually call the `present()` method before the backend gets dropped.
 	For more information, please see the examples.
-
 
