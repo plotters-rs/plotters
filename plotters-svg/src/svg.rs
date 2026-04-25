@@ -1,5 +1,3 @@
-// pattern: Mixed (needs refactoring)
-
 /*!
 The SVG image drawing backend
 */

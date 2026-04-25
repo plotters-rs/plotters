@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 

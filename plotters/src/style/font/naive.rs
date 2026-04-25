@@ -1,5 +1,3 @@
-// pattern: Functional Core
-
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
 
 #[derive(Debug, Clone)]

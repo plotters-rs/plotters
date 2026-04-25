@@ -1,5 +1,3 @@
-// pattern: Mixed (needs refactoring)
-
 #[path = "system_source.rs"]
 mod system_source;
 
