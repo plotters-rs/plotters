@@ -230,13 +230,11 @@ impl FontData for FontDataInternal {
                         for dy in 0..height {
                             for dx in 0..width {
                                 let alpha = image.data[dy * width + dx] as f32 / 255.0;
-                                if let Err(e) = draw(
+                                draw(
                                     base_x + image.placement.left + dx as i32,
                                     base_y - image.placement.top + dy as i32,
                                     alpha,
-                                ) {
-                                    return Err(e);
-                                }
+                                )?
                             }
                         }
                     }
