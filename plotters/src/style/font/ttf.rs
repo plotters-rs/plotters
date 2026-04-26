@@ -1,25 +1,18 @@
-use std::borrow::{Borrow, Cow};
+#[path = "system_source.rs"]
+mod system_source;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
-use lazy_static::lazy_static;
-
-use font_kit::{
-    canvas::{Canvas, Format, RasterizationOptions},
-    error::{FontLoadingError, GlyphLoadingError},
-    family_name::FamilyName,
-    font::Font,
-    handle::Handle,
-    hinting::HintingOptions,
-    properties::{Properties, Style, Weight},
-    source::SystemSource,
+use swash::{
+    scale::{Render, ScaleContext, Source},
+    zeno::Format,
+    Charmap, FontRef, GlyphId,
 };
 
-use ttf_parser::{Face, GlyphId};
-
-use pathfinder_geometry::transform2d::Transform2F;
-use pathfinder_geometry::vector::{Vector2F, Vector2I};
+use system_source::SystemFontData;
+use ttf_parser::{Face, GlyphId as TtfGlyphId};
 
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
 
@@ -29,173 +22,114 @@ type FontResult<T> = Result<T, FontError>;
 pub enum FontError {
     LockError,
     NoSuchFont(String, String),
-    FontLoadError(Arc<FontLoadingError>),
-    GlyphError(Arc<GlyphLoadingError>),
-    FontHandleUnavailable,
+    FontLoadError(String),
     FaceParseError(String),
 }
 
 impl std::fmt::Display for FontError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
-            FontError::LockError => write!(fmt, "Could not lock mutex"),
+            FontError::LockError => write!(fmt, "could not lock mutex"),
             FontError::NoSuchFont(family, style) => {
-                write!(fmt, "No such font: {} {}", family, style)
+                write!(fmt, "no such font: {} {}", family, style)
             }
-            FontError::FontLoadError(e) => write!(fmt, "Font loading error {}", e),
-            FontError::GlyphError(e) => write!(fmt, "Glyph error {}", e),
-            FontError::FontHandleUnavailable => write!(fmt, "Font handle is not available"),
-            FontError::FaceParseError(e) => write!(fmt, "Font face parse error {}", e),
+            FontError::FontLoadError(e) => write!(fmt, "font loading error: {}", e),
+            FontError::FaceParseError(e) => write!(fmt, "font face parse error: {}", e),
         }
     }
 }
 
 impl std::error::Error for FontError {}
 
-lazy_static! {
-    static ref DATA_CACHE: RwLock<HashMap<String, FontResult<Handle>>> =
-        RwLock::new(HashMap::new());
-}
-
 thread_local! {
-    static FONT_SOURCE: SystemSource = SystemSource::new();
     static FONT_OBJECT_CACHE: RefCell<HashMap<String, FontExt>> = RefCell::new(HashMap::new());
+    static SCALE_CONTEXT: RefCell<ScaleContext> = RefCell::new(ScaleContext::new());
 }
 
-const PLACEHOLDER_CHAR: char = '�';
+/// Substituted when the requested glyph is missing from the font.
+const PLACEHOLDER_CHAR: char = '\u{FFFD}';
+
+const RENDER_SOURCES: [Source; 1] = [Source::Outline];
 
 #[derive(Clone)]
 struct FontExt {
-    inner: Font,
-    face: Option<Face<'static>>,
-}
-
-impl Drop for FontExt {
-    fn drop(&mut self) {
-        // We should make sure the face object dead first
-        self.face.take();
-    }
+    bytes: Arc<Vec<u8>>,
+    index: usize,
+    id: u64,
 }
 
 impl FontExt {
-    fn new(font: Font) -> FontResult<Self> {
-        let handle = font
-            .handle()
-            .ok_or(FontError::FontHandleUnavailable)?;
-        let face = match handle {
-            Handle::Memory { bytes, font_index } => {
-                let face = ttf_parser::Face::parse(bytes.as_slice(), font_index)
-                    .map_err(|err| FontError::FaceParseError(err.to_string()))?;
-                Some(unsafe { std::mem::transmute::<Face<'_>, Face<'static>>(face) })
-            }
-            _ => None,
-        };
-        Ok(Self { inner: font, face })
-    }
-
-    fn query_kerning_table(&self, prev: u32, next: u32) -> f32 {
-        if let Some(face) = self.face.as_ref() {
-            if let Some(kern) = face.tables().kern {
-                let kern = kern
-                    .subtables
-                    .into_iter()
-                    .filter(|st| st.horizontal && !st.variable)
-                    .filter_map(|st| st.glyphs_kerning(GlyphId(prev as u16), GlyphId(next as u16)))
-                    .next()
-                    .unwrap_or(0);
-                return kern as f32;
-            }
+    fn from_data(data: SystemFontData) -> Self {
+        Self {
+            bytes: data.bytes,
+            index: data.index,
+            id: data.id,
         }
-        0.0
+    }
+
+    fn font_ref(&self) -> FontRef<'_> {
+        FontRef::from_index(self.bytes.as_slice(), self.index)
+            .expect("font validated at system_source::load")
+    }
+
+    fn face(&self) -> Face<'_> {
+        Face::parse(self.bytes.as_slice(), self.index as u32)
+            .expect("face validated at system_source::load")
+    }
+
+    fn cache_id(&self) -> [u64; 2] {
+        [self.id, self.index as u64]
     }
 }
 
-impl std::ops::Deref for FontExt {
-    type Target = Font;
-    fn deref(&self) -> &Font {
-        &self.inner
-    }
-}
-
-/// Lazily load font data. Font type doesn't own actual data, which
-/// lives in the cache.
-fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
-    let key = match style {
-        FontStyle::Normal => Cow::Borrowed(face.as_str()),
-        _ => Cow::Owned(format!("{}, {}", face.as_str(), style.as_str())),
+fn kerning_units(face: &Face<'_>, prev: GlyphId, next: GlyphId) -> i16 {
+    let Some(kern) = face.tables().kern else {
+        return 0;
     };
+    kern.subtables
+        .into_iter()
+        .filter(|st| st.horizontal && !st.variable)
+        .find_map(|st| st.glyphs_kerning(TtfGlyphId(prev), TtfGlyphId(next)))
+        .unwrap_or(0)
+}
 
-    // First, we try to find the font object for current thread
-    if let Some(font_object) = FONT_OBJECT_CACHE.with(|font_object_cache| {
-        font_object_cache
-            .borrow()
-            .get(Borrow::<str>::borrow(&key))
-            .cloned()
-    }) {
+/// Fetch the font for `(face, style)`, hitting the thread-local cache when
+/// possible and falling back to the global byte cache in `system_source`.
+fn load_font_data(face: FontFamily, style: FontStyle) -> FontResult<FontExt> {
+    let key = cache_key(face, style);
+
+    if let Some(font_object) =
+        FONT_OBJECT_CACHE.with(|cache| cache.borrow().get(key.as_str()).cloned())
+    {
         return Ok(font_object);
     }
 
-    // Then we need to check if the data cache contains the font data
-    let cache = DATA_CACHE.read().unwrap();
-    if let Some(data) = cache.get(Borrow::<str>::borrow(&key)) {
-        data.clone().map(load_font_from_handle)??;
-    }
-    drop(cache);
-
-    // Otherwise we should load from system
-    let mut properties = Properties::new();
-    match style {
-        FontStyle::Normal => properties.style(Style::Normal),
-        FontStyle::Italic => properties.style(Style::Italic),
-        FontStyle::Oblique => properties.style(Style::Oblique),
-        FontStyle::Bold => properties.weight(Weight::BOLD),
-    };
-
-    let family = match face {
-        FontFamily::Serif => FamilyName::Serif,
-        FontFamily::SansSerif => FamilyName::SansSerif,
-        FontFamily::Monospace => FamilyName::Monospace,
-        FontFamily::Name(name) => FamilyName::Title(name.to_owned()),
-    };
-
-    let make_not_found_error =
-        || FontError::NoSuchFont(face.as_str().to_owned(), style.as_str().to_owned());
-
-    if let Ok(handle) = FONT_SOURCE
-        .with(|source| source.select_best_match(&[family, FamilyName::SansSerif], &properties))
-    {
-        let font = load_font_from_handle(handle);
-        let (should_cache, data) = match font.as_ref().map(|f| f.handle()) {
-            Ok(None) => (false, Err(FontError::LockError)),
-            Ok(Some(handle)) => (true, Ok(handle)),
-            Err(e) => (true, Err(e.clone())),
-        };
-
-        if should_cache {
-            DATA_CACHE
-                .write()
-                .map_err(|_| FontError::LockError)?
-                .insert(key.clone().into_owned(), data);
-        }
-
-        if let Ok(font) = font.as_ref() {
-            FONT_OBJECT_CACHE.with(|font_object_cache| {
-                font_object_cache
-                    .borrow_mut()
-                    .insert(key.into_owned(), font.clone());
-            });
-        }
-
-        return font;
-    }
-    Err(make_not_found_error())
+    let data = system_source::load(face, style)?;
+    let font = FontExt::from_data(data);
+    FONT_OBJECT_CACHE.with(|cache| {
+        cache.borrow_mut().insert(key, font.clone());
+    });
+    Ok(font)
 }
 
-fn load_font_from_handle(handle: Handle) -> FontResult<FontExt> {
-    let font = handle
-        .load()
-        .map_err(|e| FontError::FontLoadError(Arc::new(e)))?;
-    FontExt::new(font)
+fn cache_key(face: FontFamily<'_>, style: FontStyle) -> String {
+    match style {
+        FontStyle::Normal => face.as_str().to_owned(),
+        _ => format!("{}, {}", face.as_str(), style.as_str()),
+    }
+}
+
+fn glyph_for_char(charmap: &Charmap<'_>, c: char) -> Option<GlyphId> {
+    let glyph_id = charmap.map(c);
+    (glyph_id != 0).then_some(glyph_id)
+}
+
+fn scale_design_units(value: f32, em: f32, units_per_em: u16) -> f32 {
+    if units_per_em == 0 {
+        0.0
+    } else {
+        value * em / units_per_em as f32
+    }
 }
 
 #[derive(Clone)]
@@ -209,30 +143,31 @@ impl FontData for FontDataInternal {
     }
 
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
+        let pixel_per_em = (size / 1.24) as f32;
         let font = &self.0;
-        let pixel_per_em = size / 1.24;
-        let metrics = font.metrics();
+        let font_ref = font.font_ref();
+        let face = font.face();
+        let metrics = font_ref.metrics(&[]);
+        let glyph_metrics = font_ref.glyph_metrics(&[]).scale(pixel_per_em);
+        let charmap = font_ref.charmap();
 
-        let font = &self.0;
-
-        let mut x_in_unit = 0f32;
-
+        let mut x_pixels = 0f32;
         let mut prev = None;
-        let place_holder = font.glyph_for_char(PLACEHOLDER_CHAR);
+        let place_holder = glyph_for_char(&charmap, PLACEHOLDER_CHAR);
 
         for c in text.chars() {
-            if let Some(glyph_id) = font.glyph_for_char(c).or(place_holder) {
-                if let Ok(size) = font.advance(glyph_id) {
-                    x_in_unit += size.x();
-                }
+            if let Some(glyph_id) = glyph_for_char(&charmap, c).or(place_holder) {
                 if let Some(pc) = prev {
-                    x_in_unit += font.query_kerning_table(pc, glyph_id);
+                    x_pixels += scale_design_units(
+                        kerning_units(&face, pc, glyph_id) as f32,
+                        pixel_per_em,
+                        metrics.units_per_em,
+                    );
                 }
+                x_pixels += glyph_metrics.advance_width(glyph_id);
                 prev = Some(glyph_id);
             }
         }
-
-        let x_pixels = x_in_unit * pixel_per_em as f32 / metrics.units_per_em as f32;
 
         Ok(((0, 0), (x_pixels as i32, pixel_per_em as i32)))
     }
@@ -248,56 +183,70 @@ impl FontData for FontDataInternal {
 
         let mut x = base_x as f32;
         let font = &self.0;
-        let metrics = font.metrics();
+        let font_ref = font.font_ref();
+        let face = font.face();
+        let metrics = font_ref.metrics(&[]);
+        let glyph_metrics = font_ref.glyph_metrics(&[]).scale(em);
+        let charmap = font_ref.charmap();
 
-        let canvas_size = size as usize;
-
-        base_y -= (0.24 * em) as i32;
+        // Place the swash pen at the baseline. font-kit rasterized into a
+        // `size`-square canvas whose top sat at `pos.y - 0.24*em`, then
+        // applied a `(0, em)` rasterization translation, putting the
+        // effective baseline at `pos.y + 0.76*em`. Swash places glyphs
+        // relative to the pen directly, so we shift the pen to that same
+        // baseline; otherwise glyphs render ~one em above where callers
+        // expect them.
+        base_y += (0.76 * em) as i32;
 
         let mut prev = None;
-        let place_holder = font.glyph_for_char(PLACEHOLDER_CHAR);
+        let place_holder = glyph_for_char(&charmap, PLACEHOLDER_CHAR);
 
-        let mut result = Ok(());
+        let draw_result = SCALE_CONTEXT.with(|scale_context| {
+            let mut scale_context = scale_context.borrow_mut();
+            let mut scaler = scale_context
+                .builder_with_id(font_ref, font.cache_id())
+                .size(em)
+                .hint(true)
+                .build();
+            let mut renderer = Render::new(&RENDER_SOURCES);
+            renderer.format(Format::Alpha);
 
-        for c in text.chars() {
-            if let Some(glyph_id) = font.glyph_for_char(c).or(place_holder) {
-                if let Some(pc) = prev {
-                    x += font.query_kerning_table(pc, glyph_id) * em / metrics.units_per_em as f32;
-                }
+            for c in text.chars() {
+                if let Some(glyph_id) = glyph_for_char(&charmap, c).or(place_holder) {
+                    if let Some(pc) = prev {
+                        x += scale_design_units(
+                            kerning_units(&face, pc, glyph_id) as f32,
+                            em,
+                            metrics.units_per_em,
+                        );
+                    }
 
-                let mut canvas = Canvas::new(Vector2I::splat(canvas_size as i32), Format::A8);
+                    let base_x = x as i32;
 
-                result = font
-                    .rasterize_glyph(
-                        &mut canvas,
-                        glyph_id,
-                        em,
-                        Transform2F::from_translation(Vector2F::new(0.0, em)),
-                        HintingOptions::None,
-                        RasterizationOptions::GrayscaleAa,
-                    )
-                    .map_err(|e| FontError::GlyphError(Arc::new(e)))
-                    .and(result);
+                    if let Some(image) = renderer.render(&mut scaler, glyph_id) {
+                        let width = image.placement.width as usize;
+                        let height = image.placement.height as usize;
 
-                let base_x = x as i32;
-
-                for dy in 0..canvas_size {
-                    for dx in 0..canvas_size {
-                        let alpha = canvas.pixels[dy * canvas_size + dx] as f32 / 255.0;
-                        if let Err(e) = draw(base_x + dx as i32, base_y + dy as i32, alpha) {
-                            return Ok(Err(e));
+                        for dy in 0..height {
+                            for dx in 0..width {
+                                let alpha = image.data[dy * width + dx] as f32 / 255.0;
+                                draw(
+                                    base_x + image.placement.left + dx as i32,
+                                    base_y - image.placement.top + dy as i32,
+                                    alpha,
+                                )?
+                            }
                         }
                     }
+
+                    x += glyph_metrics.advance_width(glyph_id);
+
+                    prev = Some(glyph_id);
                 }
-
-                x += font.advance(glyph_id).map(|size| size.x()).unwrap_or(0.0) * em
-                    / metrics.units_per_em as f32;
-
-                prev = Some(glyph_id);
             }
-        }
-        result?;
-        Ok(Ok(()))
+            Ok(())
+        });
+        Ok(draw_result)
     }
 }
 
@@ -308,16 +257,123 @@ mod test {
 
     #[test]
     fn test_font_cache() -> FontResult<()> {
-        // We cannot only check the size of font cache, because
-        // the test case may be run in parallel. Thus the font cache
-        // may contains other fonts.
-        let _a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
+        let a = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
+        let b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
+        assert!(
+            Arc::ptr_eq(&a.bytes, &b.bytes),
+            "cached loads should share the underlying byte buffer"
+        );
+        assert_eq!(a.id, b.id, "cached loads should share font id");
+        Ok(())
+    }
 
-        let _b = load_font_data(FontFamily::Serif, FontStyle::Normal)?;
-        assert!(DATA_CACHE.read().unwrap().contains_key("serif"));
+    #[test]
+    fn draw_glyphs_stay_in_expected_bounds() -> FontResult<()> {
+        let cases = [
+            (FontFamily::SansSerif, FontStyle::Normal),
+            (FontFamily::Serif, FontStyle::Bold),
+        ];
 
-        // TODO: Check they are the same
+        for (family, style) in cases {
+            assert_draw_sanity(family, style)?;
+        }
+
+        Ok(())
+    }
+
+    fn assert_draw_sanity(family: FontFamily<'_>, style: FontStyle) -> FontResult<()> {
+        let size = 32.0_f64;
+        let em = (size / 1.24) as f32;
+        let pos_y = size as i32;
+        // Baseline must match the pen position chosen in `draw`.
+        let baseline = pos_y + (0.76 * em) as i32;
+        let font = FontDataInternal::new(family, style)?;
+        let mut samples = Vec::new();
+
+        let draw_result = font.draw((0, pos_y), size, "Hg", |x, y, alpha| {
+            samples.push((x, y, alpha));
+            Ok::<(), ()>(())
+        })?;
+        assert!(draw_result.is_ok());
+
+        assert!(
+            samples.iter().any(|(_, _, alpha)| *alpha > 0.8),
+            "expected at least one high-alpha glyph sample"
+        );
+        assert!(
+            samples
+                .iter()
+                .all(|(_, _, alpha)| alpha.is_finite() && (0.0..=1.0).contains(alpha)),
+            "all alpha samples should be finite and normalized"
+        );
+
+        let touched: Vec<_> = samples
+            .iter()
+            .filter(|(_, _, alpha)| *alpha > 0.0)
+            .collect();
+        assert!(!touched.is_empty(), "expected non-empty touched bounds");
+
+        let min_x = touched.iter().map(|(x, _, _)| *x).min().unwrap();
+        let max_x = touched.iter().map(|(x, _, _)| *x).max().unwrap();
+        let min_y = touched.iter().map(|(_, y, _)| *y).min().unwrap();
+        let max_y = touched.iter().map(|(_, y, _)| *y).max().unwrap();
+
+        // Baseline-anchored bounds. The pen is at output y = `baseline`,
+        // ascenders extend up by ~em and descenders down by ~0.3*em.
+        assert!(min_x >= 0, "glyphs drifted left: min_x={}", min_x);
+        assert!(
+            min_y >= baseline - (1.2 * em) as i32,
+            "glyphs drifted too high above baseline {}: min_y={}",
+            baseline,
+            min_y
+        );
+        assert!(
+            max_x <= (3.0 * em) as i32,
+            "glyphs drifted right: max_x={}",
+            max_x
+        );
+        assert!(
+            max_y <= baseline + (0.6 * em) as i32,
+            "glyphs drifted too far below baseline {}: max_y={}",
+            baseline,
+            max_y
+        );
+
+        // 'g' descender must land below the baseline; if placement.top were
+        // added rather than subtracted, every glyph would render above
+        // baseline and this would fail.
+        assert!(
+            max_y > baseline,
+            "expected 'g' descender below baseline {}: max_y={}",
+            baseline,
+            max_y
+        );
+
+        // Cap height should sit above the baseline by a meaningful amount.
+        assert!(
+            min_y < baseline,
+            "expected glyph tops above baseline {}: min_y={}",
+            baseline,
+            min_y
+        );
+
+        // The touched bbox should span roughly one em vertically; this
+        // guards against placement.top being applied with the wrong scale.
+        let bbox_height = (max_y - min_y) as f32;
+        assert!(
+            (0.5 * em..=1.5 * em).contains(&bbox_height),
+            "bbox height {} not within [0.5*em, 1.5*em] (em={})",
+            bbox_height,
+            em
+        );
+
+        // 'g' is the second glyph; it must be drawn well to the right of
+        // 'H'. Catches a missing advance_width or placement.left bug.
+        assert!(
+            max_x > (0.6 * em) as i32,
+            "expected second glyph drawn after 'H'; max_x={}",
+            max_x
+        );
 
         Ok(())
     }

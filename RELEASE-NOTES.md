@@ -2,6 +2,38 @@
 
 This documents contains the release notes for every major release since v0.3.
 
+## Development Notes
+
+### TTF Font Backend
+
+The default `ttf` feature no longer depends on `font-kit` or
+`pathfinder_geometry`. It uses `fontique` for native system font discovery and
+`swash` for glyph rasterization, while retaining `ttf-parser` for legacy
+kerning table support.
+
+Enabling `ttf` now requires Rust 1.88 or newer. Builds that disable `ttf`
+retain the crate's declared MSRV.
+
+The `fontconfig-dlopen` cargo feature continues to enable runtime loading of
+the fontconfig C library on Linux, now routed through `fontique`'s feature of
+the same name.
+
+#### Breaking changes in `FontError`
+
+The `ttf` backend's public `FontError` enum has been reshaped to drop
+`font-kit`-typed payloads:
+
+- Removed: `GlyphError(Arc<font_kit::error::GlyphLoadingError>)` and
+  `FontHandleUnavailable`.
+- Changed: `FontLoadError(Arc<font_kit::error::FontLoadingError>)` is now
+  `FontLoadError(String)`.
+
+Downstream code that pattern-matches on these variants must be updated.
+Glyph-loading failures previously surfaced through `GlyphError` at draw time;
+they are now reported via `FontLoadError` / `FaceParseError` at font-load
+time, so error handling around `FontDataInternal::new` and the surrounding
+`text_anchor` / `IntoTextStyle` machinery should be reviewed.
+
 ## Plotters v0.3
 
 Plotters v0.3 is shipped with multiple major improvements.

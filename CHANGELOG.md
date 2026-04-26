@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Replace the `ttf` feature's `font-kit`-backed font backend with `fontique`
+  for native system font discovery and `swash` for glyph rasterization.
+- Enabling the `ttf` feature now requires Rust 1.88 or newer; non-`ttf` builds
+  retain the crate's declared MSRV.
+- The `fontconfig-dlopen` cargo feature now routes through
+  `fontique/fontconfig-dlopen`; behavior on Linux is unchanged.
+
+### Breaking
+
+- The `ttf` backend's `FontError` enum has been reshaped to drop
+  `font-kit`-typed payloads. Removed variants:
+  `GlyphError(Arc<font_kit::error::GlyphLoadingError>)` and
+  `FontHandleUnavailable`. Changed:
+  `FontLoadError(Arc<font_kit::error::FontLoadingError>)` is now
+  `FontLoadError(String)`. Downstream code that pattern-matches on these
+  variants must be updated. Glyph-loading failures are now reported via
+  `FontLoadError` / `FaceParseError` at font-load time rather than at draw
+  time.
+
+### Removed
+
+- Remove `font-kit` and `pathfinder_geometry` from the `ttf` dependency tree.
+
 ## Plotters 0.3.6 (2024-05-20)
 
 ### Added
