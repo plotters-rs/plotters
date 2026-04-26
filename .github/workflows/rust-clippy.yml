@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install fontconfig
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af #@v1

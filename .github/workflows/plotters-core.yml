@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install fontconfig
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -26,7 +26,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install fontconfig
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: 1.88.0
@@ -43,7 +43,7 @@ jobs:
           submodules: recursive
       - name: Install fontconfig
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -63,7 +63,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install fontconfig
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -79,7 +79,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install fontconfig
-        run: sudo apt-get update && sudo apt-get install -y fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
       - uses: actions-rs/cargo@v1
         with:
           command: build
