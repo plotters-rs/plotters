@@ -26,7 +26,7 @@ pub(crate) use font::push_font_context;
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
     feature = "ab_glyph"
 ))]
-pub use font::register_font;
+pub use font::{register_font, InvalidFont};
 #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
 pub use font::{FontContext, FontContextBuilder};
 pub use font::{

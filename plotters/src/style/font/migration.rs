@@ -11,6 +11,7 @@ use std::sync::{Arc, Mutex};
 
 static REGISTERED_FONTS: Lazy<Mutex<Vec<RegisteredFont>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
+/// Error returned when legacy font registration receives invalid font bytes.
 #[derive(Debug, Clone)]
 pub struct InvalidFont {
     _priv: (),

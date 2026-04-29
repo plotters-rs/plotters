@@ -32,7 +32,7 @@ pub use engine::FontError;
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
     feature = "ab_glyph"
 ))]
-pub use migration::register_font;
+pub use migration::{register_font, InvalidFont};
 
 #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
 mod web;
