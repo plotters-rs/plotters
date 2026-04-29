@@ -137,8 +137,19 @@ impl<'a, DB: DrawingBackend, CT: CoordTranslate> ChartContext<'a, DB, CT> {
 mod test {
     use crate::prelude::*;
 
+    #[cfg(feature = "ab_glyph")]
+    fn register_test_serif() {
+        const FONT_BYTES: &[u8] = include_bytes!("../../tests/fixtures/SourceSansPro-Regular-Tiny.ttf");
+        let _ = crate::style::register_font("serif", crate::style::FontStyle::Normal, FONT_BYTES);
+        let _ =
+            crate::style::register_font("sans-serif", crate::style::FontStyle::Normal, FONT_BYTES);
+    }
+
     #[test]
     fn test_chart_context() {
+        #[cfg(feature = "ab_glyph")]
+        register_test_serif();
+
         let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
 
         drawing_area.fill(&WHITE).expect("Fill");
@@ -188,6 +199,9 @@ mod test {
 
     #[test]
     fn test_chart_context_3d() {
+        #[cfg(feature = "ab_glyph")]
+        register_test_serif();
+
         let drawing_area = create_mocked_drawing_area(200, 200, |_| {});
 
         drawing_area.fill(&WHITE).expect("Fill");

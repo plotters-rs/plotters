@@ -1,6 +1,6 @@
 // pattern: Imperative Shell
 
-use super::engine::{FontEngine, FontError, ParsedFont};
+use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont};
 use super::harfrust_engine::HarfrustEngine;
 use super::system::SystemFontSource;
 use super::LayoutBox;
@@ -10,7 +10,7 @@ use std::cell::RefCell;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::{Arc, Mutex, OnceLock, Weak};
+use std::sync::{Arc, Mutex, OnceLock};
 
 type FontResult<T> = Result<T, FontError>;
 
@@ -19,11 +19,14 @@ const DEFAULT_ENABLE_SYSTEM: bool = false;
 #[cfg(not(feature = "ab_glyph"))]
 const DEFAULT_ENABLE_SYSTEM: bool = true;
 
-static GLOBAL_PARSED: Lazy<Mutex<HashMap<FontFingerprint, Weak<dyn ParsedFont>>>> =
+// Strong refs: parsed fonts intern for the process lifetime, so that repeated
+// resolves return the same `Arc<dyn ParsedFont>` and the glyph cache keyed by
+// `Arc::as_ptr` cannot suffer from heap address reuse.
+static GLOBAL_PARSED: Lazy<Mutex<HashMap<FontFingerprint, Arc<dyn ParsedFont>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 thread_local! {
-    static FONT_CTX_STACK: RefCell<Vec<Arc<FontContext>>> = RefCell::new(Vec::new());
+    static FONT_CTX_STACK: RefCell<Vec<Arc<FontContext>>> = const { RefCell::new(Vec::new()) };
 }
 
 /// Font state used while estimating and drawing text.
@@ -34,7 +37,7 @@ pub struct FontContext {
 struct FontContextInner {
     engine: Arc<dyn FontEngine>,
     system: Mutex<SystemFontSource>,
-    parsed: Mutex<HashMap<FontKey, Arc<dyn ParsedFont>>>,
+    glyphs: Mutex<HashMap<GlyphCacheKey, Arc<CoverageMask>>>,
     explicit: Vec<RegisteredFont>,
     enable_system: bool,
     include_registered: bool,
@@ -55,17 +58,18 @@ pub(crate) struct RegisteredFont {
     index: u32,
 }
 
-#[derive(Hash, PartialEq, Eq)]
-struct FontKey {
-    family: String,
-    style: String,
-}
-
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 struct FontFingerprint {
     hash: u64,
     len: usize,
     index: u32,
+}
+
+#[derive(Hash, PartialEq, Eq)]
+struct GlyphCacheKey {
+    font_ptr: usize,
+    glyph_id: u32,
+    size_bits: u32,
 }
 
 impl FontContext {
@@ -119,7 +123,7 @@ impl FontContext {
         let run = font.shape(text, size as f32)?;
 
         for glyph in run.glyphs {
-            let mask = font.rasterize(glyph.id, size as f32)?;
+            let mask = self.rasterize_cached(&font, glyph.id, size as f32)?;
             for row in 0..mask.height {
                 for col in 0..mask.width {
                     let index = (row * mask.width + col) as usize;
@@ -139,31 +143,41 @@ impl FontContext {
         Ok(Ok(()))
     }
 
-    fn resolve(&self, family: FontFamily<'_>, style: FontStyle) -> FontResult<Arc<dyn ParsedFont>> {
-        let key = FontKey {
-            family: family.as_str().to_owned(),
-            style: style.as_str().to_owned(),
+    fn rasterize_cached(
+        &self,
+        font: &Arc<dyn ParsedFont>,
+        glyph_id: u32,
+        size_px: f32,
+    ) -> FontResult<Arc<CoverageMask>> {
+        let key = GlyphCacheKey {
+            font_ptr: Arc::as_ptr(font) as *const () as usize,
+            glyph_id,
+            size_bits: size_px.to_bits(),
         };
 
-        if let Some(font) = self
+        if let Some(mask) = self
             .inner
-            .parsed
+            .glyphs
             .lock()
             .map_err(|_| FontError::LockError)?
             .get(&key)
             .cloned()
         {
-            return Ok(font);
+            return Ok(mask);
         }
 
-        let source = self.resolve_source(family, style)?;
-        let parsed = self.parse_cached(source.data, source.index)?;
-        self.inner
-            .parsed
+        let mask = Arc::new(font.rasterize(glyph_id, size_px)?);
+        let mut cache = self
+            .inner
+            .glyphs
             .lock()
-            .map_err(|_| FontError::LockError)?
-            .insert(key, parsed.clone());
-        Ok(parsed)
+            .map_err(|_| FontError::LockError)?;
+        Ok(cache.entry(key).or_insert(mask).clone())
+    }
+
+    fn resolve(&self, family: FontFamily<'_>, style: FontStyle) -> FontResult<Arc<dyn ParsedFont>> {
+        let source = self.resolve_source(family, style)?;
+        self.parse_cached(source.data, source.index)
     }
 
     fn resolve_source(
@@ -221,18 +235,14 @@ impl FontContext {
             .lock()
             .map_err(|_| FontError::LockError)?
             .get(&fingerprint)
-            .and_then(Weak::upgrade)
+            .cloned()
         {
             return Ok(font);
         }
 
         let parsed = self.inner.engine.parse(data, index)?;
         let mut global = GLOBAL_PARSED.lock().map_err(|_| FontError::LockError)?;
-        if let Some(font) = global.get(&fingerprint).and_then(Weak::upgrade) {
-            return Ok(font);
-        }
-        global.insert(fingerprint, Arc::downgrade(&parsed));
-        Ok(parsed)
+        Ok(global.entry(fingerprint).or_insert(parsed).clone())
     }
 }
 
@@ -262,12 +272,6 @@ impl FontContextBuilder {
         self
     }
 
-    /// Allows this context to resolve fonts from the operating system.
-    pub fn enable_system_fonts(mut self) -> Self {
-        self.enable_system = true;
-        self
-    }
-
     /// Includes fonts registered through the legacy `register_font` API.
     #[cfg(feature = "ab_glyph")]
     pub fn include_registered(mut self) -> Self {
@@ -281,7 +285,7 @@ impl FontContextBuilder {
             inner: Arc::new(FontContextInner {
                 engine: Arc::new(HarfrustEngine),
                 system: Mutex::new(SystemFontSource::new(self.enable_system)),
-                parsed: Mutex::new(HashMap::new()),
+                glyphs: Mutex::new(HashMap::new()),
                 explicit: self.explicit,
                 enable_system: self.enable_system,
                 include_registered: self.include_registered,
@@ -423,6 +427,25 @@ mod tests {
             assert!(Arc::ptr_eq(&FontContext::current().unwrap(), &ctx));
         }
         assert!(FontContext::current().is_none());
+    }
+
+    #[test]
+    fn glyph_cache_returns_same_arc_for_repeat_calls() {
+        let ctx = FontContext::builder()
+            .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
+            .disable_system_fonts()
+            .build();
+        let font = ctx
+            .resolve(FontFamily::Name("Fixture"), FontStyle::Normal)
+            .unwrap();
+        let glyph_id = font.shape("A", 24.0).unwrap().glyphs[0].id;
+
+        let mask_a = ctx.rasterize_cached(&font, glyph_id, 24.0).unwrap();
+        let mask_b = ctx.rasterize_cached(&font, glyph_id, 24.0).unwrap();
+        assert!(Arc::ptr_eq(&mask_a, &mask_b));
+
+        let mask_c = ctx.rasterize_cached(&font, glyph_id, 36.0).unwrap();
+        assert!(!Arc::ptr_eq(&mask_a, &mask_c));
     }
 
     #[test]

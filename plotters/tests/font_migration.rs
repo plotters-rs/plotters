@@ -7,7 +7,6 @@
 
 use plotters::coord::Shift;
 use plotters::prelude::*;
-use plotters::style::FontContext;
 use std::sync::Arc;
 use std::thread;
 
@@ -27,11 +26,8 @@ fn root<'a>(buffer: &'a mut [u8]) -> DrawingArea<BitMapBackend<'a>, Shift> {
     BitMapBackend::with_buffer(buffer, CANVAS).into_drawing_area()
 }
 
-fn one_font_context(name: &'static str) -> Arc<FontContext> {
-    FontContext::builder()
-        .with_font(name, FontStyle::Normal, font_bytes())
-        .disable_system_fonts()
-        .build()
+fn font_table(name: &'static str) -> Vec<(&'static str, FontStyle, Arc<[u8]>)> {
+    vec![(name, FontStyle::Normal, font_bytes())]
 }
 
 fn style(name: &'static str) -> TextStyle<'static> {
@@ -64,7 +60,7 @@ fn with_fonts_draws_text_to_bitmap() {
 
     let mut pixels = buffer();
     {
-        let area = root(&mut pixels).with_fonts([(FAMILY, FontStyle::Normal, font_bytes())]);
+        let area = root(&mut pixels).with_fonts(font_table(FAMILY));
         area.draw_text("Hello", &style(FAMILY), (8, 8)).unwrap();
     }
 
@@ -77,15 +73,14 @@ fn explicit_context_isolated_from_default_area() {
 
     let mut explicit_pixels = buffer();
     {
-        let area = root(&mut explicit_pixels).with_font_context(one_font_context(FAMILY));
+        let area = root(&mut explicit_pixels).with_fonts(font_table(FAMILY));
         area.draw_text("Hello", &style(FAMILY), (8, 8)).unwrap();
     }
     assert_has_ink(&explicit_pixels);
 
     let mut default_pixels = buffer();
     {
-        let area = root(&mut default_pixels)
-            .with_font_context(FontContext::builder().disable_system_fonts().build());
+        let area = root(&mut default_pixels);
         assert_text_missing(&area, FAMILY);
     }
 }
@@ -96,7 +91,7 @@ fn sub_areas_inherit_parent_context() {
 
     let mut pixels = buffer();
     {
-        let area = root(&mut pixels).with_font_context(one_font_context(FAMILY));
+        let area = root(&mut pixels).with_fonts(font_table(FAMILY));
         let children = area.split_evenly((1, 2));
         children[1]
             .draw_text("Hello", &style(FAMILY), (8, 8))
@@ -113,10 +108,10 @@ fn sub_area_context_override_stays_local() {
 
     let mut pixels = buffer();
     {
-        let area = root(&mut pixels).with_font_context(one_font_context(PARENT));
+        let area = root(&mut pixels).with_fonts(font_table(PARENT));
         let child = area.split_evenly((1, 2))[0]
             .clone()
-            .with_font_context(one_font_context(CHILD));
+            .with_fonts(font_table(CHILD));
 
         assert_text_missing(&child, PARENT);
         child.draw_text("Child", &style(CHILD), (8, 8)).unwrap();
@@ -135,7 +130,7 @@ fn concurrent_drawing_areas_keep_font_contexts_separate() {
         thread::spawn(move || {
             let mut pixels = buffer();
             {
-                let area = root(&mut pixels).with_font_context(one_font_context(own));
+                let area = root(&mut pixels).with_fonts(font_table(own));
                 assert_text_missing(&area, other);
                 area.draw_text("Hello", &style(own), (8, 8)).unwrap();
             }
@@ -165,27 +160,6 @@ fn legacy_register_after_area_construction_reaches_default_context() {
 
 #[cfg(feature = "ab_glyph")]
 #[test]
-fn explicit_context_can_include_legacy_registry() {
-    const FAMILY: &str = "PlottersFixtureLegacyIncluded";
-
-    plotters::style::register_font(FAMILY, FontStyle::Normal, FONT_BYTES).unwrap();
-
-    let mut pixels = buffer();
-    {
-        let area = root(&mut pixels).with_font_context(
-            FontContext::builder()
-                .disable_system_fonts()
-                .include_registered()
-                .build(),
-        );
-        area.draw_text("Hello", &style(FAMILY), (8, 8)).unwrap();
-    }
-
-    assert_has_ink(&pixels);
-}
-
-#[cfg(feature = "ab_glyph")]
-#[test]
 fn with_fonts_does_not_see_legacy_registry() {
     const REGISTERED: &str = "PlottersFixtureLegacyHidden";
     const LOCAL: &str = "PlottersFixtureLocalOnly";
@@ -194,7 +168,7 @@ fn with_fonts_does_not_see_legacy_registry() {
 
     let mut pixels = buffer();
     {
-        let area = root(&mut pixels).with_fonts([(LOCAL, FontStyle::Normal, font_bytes())]);
+        let area = root(&mut pixels).with_fonts(font_table(LOCAL));
         assert_text_missing(&area, REGISTERED);
         area.draw_text("Hello", &style(LOCAL), (8, 8)).unwrap();
     }

@@ -364,16 +364,9 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.backend_ops(move |b| b.estimate_text_size(text, style))
     }
 
-    /// Returns a drawing area that resolves text against the provided font context.
-    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-    pub fn with_font_context(mut self, font_ctx: Arc<FontContext>) -> Self {
-        self.font_ctx = font_ctx;
-        self
-    }
-
     /// Returns a drawing area that can resolve the provided in-memory fonts by name.
     #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-    pub fn with_fonts<I, S>(self, fonts: I) -> Self
+    pub fn with_fonts<I, S>(mut self, fonts: I) -> Self
     where
         I: IntoIterator<Item = (S, FontStyle, Arc<[u8]>)>,
         S: Into<String>,
@@ -383,7 +376,8 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             let name = name.into();
             builder = builder.with_font(&name, style, bytes);
         }
-        self.with_font_context(builder.build())
+        self.font_ctx = builder.build();
+        self
     }
 }
 
@@ -766,6 +760,15 @@ mod drawing_area_tests {
     }
     #[test]
     fn test_titled() {
+        #[cfg(feature = "ab_glyph")]
+        {
+            let _ = crate::style::register_font(
+                "serif",
+                FontStyle::Normal,
+                include_bytes!("../../tests/fixtures/SourceSansPro-Regular-Tiny.ttf"),
+            );
+        }
+
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_text(|c, font, size, _pos, text| {
                 assert_eq!(c, BLACK.to_rgba());
