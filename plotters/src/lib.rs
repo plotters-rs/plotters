@@ -670,25 +670,28 @@ The following list is a complete list of features that can be opted in or out.
 
 | Name    |  Description | Additional Dependency |Default?|
 |---------|--------------|--------|------------|
-| bitmap\_encoder  | Allow `BitMapBackend` to save the result to bitmap files | image, rusttype, font-kit | Yes |
+| bitmap\_encoder  | Allow `BitMapBackend` to save the result to bitmap files | image | Yes |
 | svg\_backend     | Enable `SVGBackend` Support | None | Yes |
 | bitmap\_gif| Opt-in GIF animation Rendering support for `BitMapBackend`, implies `bitmap` enabled | gif | Yes |
 
 - Font manipulation features
 
-| Name     | Description                              | Additional Dependency | Default? |
-|----------|------------------------------------------|-----------------------|----------|
-| ttf      | Allows TrueType font support             | font-kit              | Yes      |
-| ab_glyph | Skips loading system fonts, unlike `ttf` | ab_glyph              | No       |
+Native text rendering is always available. Plotters resolves system fonts
+through `fontique`, shapes text with `harfrust`, reads outlines with `skrifa`,
+and rasterizes glyphs with `zeno`. Use `DrawingArea::with_fonts` or
+`FontContext::builder()` when a chart should use in-memory fonts instead of, or
+in addition to, system fonts.
 
-`ab_glyph` supports TrueType and OpenType fonts, but does not attempt to
-load fonts provided by the system on which it is running.
-It is pure Rust, and easier to cross compile.
-To use this, you *must* call `plotters::style::register_font` before
-using any `plotters` functions which require the ability to render text.
-This function only exists when the `ab_glyph` feature is enabled.
+| Name     | Description                                                                       | Additional Dependency | Default? |
+|----------|-----------------------------------------------------------------------------------|-----------------------|----------|
+| ab_glyph | Compatibility shim: exposes `register_font` and disables default system font use   | None                  | No       |
+
+The `ab_glyph` feature is retained for source compatibility with code that
+uses `plotters::style::register_font`. New code should prefer
+`DrawingArea::with_fonts` for per-area font registration.
+`register_font` only exists when the `ab_glyph` feature is enabled.
 ```rust,ignore
-/// Register a font in the fonts table.
+/// Register a font in the legacy process-global font table.
 ///
 /// The `name` parameter gives the name this font shall be referred to
 /// in the other APIs, like `"sans-serif"`.
@@ -869,6 +872,8 @@ pub mod prelude {
         IntoTextStyle, Palette, Palette100, Palette99, Palette9999, PaletteColor, RGBAColor,
         RGBColor, ShapeStyle, TextStyle,
     };
+    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+    pub use crate::style::{FontContext, FontContextBuilder};
 
     // Elements
     pub use crate::element::{

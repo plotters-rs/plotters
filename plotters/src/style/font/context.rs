@@ -227,10 +227,11 @@ impl FontContext {
         }
 
         let parsed = self.inner.engine.parse(data, index)?;
-        GLOBAL_PARSED
-            .lock()
-            .map_err(|_| FontError::LockError)?
-            .insert(fingerprint, Arc::downgrade(&parsed));
+        let mut global = GLOBAL_PARSED.lock().map_err(|_| FontError::LockError)?;
+        if let Some(font) = global.get(&fingerprint).and_then(Weak::upgrade) {
+            return Ok(font);
+        }
+        global.insert(fingerprint, Arc::downgrade(&parsed));
         Ok(parsed)
     }
 }

@@ -101,7 +101,7 @@ line_series = []
 point_series = []
 surface_series = []
 
-# Font implementation
+# Font compatibility
 ab_glyph = []
 
 # Misc
