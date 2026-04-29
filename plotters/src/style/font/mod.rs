@@ -23,9 +23,7 @@ mod migration;
 mod system;
 
 #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-pub(crate) use context::push_font_context;
-#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-pub use context::{FontContext, FontContextBuilder};
+pub(crate) use context::{push_font_context, FontContext};
 #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
 pub use engine::FontError;
 #[cfg(all(

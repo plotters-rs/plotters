@@ -30,7 +30,7 @@ thread_local! {
 }
 
 /// Font state used while estimating and drawing text.
-pub struct FontContext {
+pub(crate) struct FontContext {
     inner: Arc<FontContextInner>,
 }
 
@@ -44,7 +44,7 @@ struct FontContextInner {
 }
 
 /// Builder for a [`FontContext`].
-pub struct FontContextBuilder {
+pub(crate) struct FontContextBuilder {
     explicit: Vec<RegisteredFont>,
     enable_system: bool,
     include_registered: bool,
@@ -74,7 +74,7 @@ struct GlyphCacheKey {
 
 impl FontContext {
     /// Returns the process default font context.
-    pub fn system_default() -> Arc<FontContext> {
+    pub(crate) fn system_default() -> Arc<FontContext> {
         static DEFAULT: OnceLock<Arc<FontContext>> = OnceLock::new();
         DEFAULT
             .get_or_init(|| {
@@ -87,7 +87,7 @@ impl FontContext {
     }
 
     /// Creates a font context builder.
-    pub fn builder() -> FontContextBuilder {
+    pub(crate) fn builder() -> FontContextBuilder {
         FontContextBuilder::new()
     }
 
@@ -256,7 +256,12 @@ impl FontContextBuilder {
     }
 
     /// Adds a named font to this context.
-    pub fn with_font(mut self, name: &str, style: FontStyle, bytes: impl Into<Arc<[u8]>>) -> Self {
+    pub(crate) fn with_font(
+        mut self,
+        name: &str,
+        style: FontStyle,
+        bytes: impl Into<Arc<[u8]>>,
+    ) -> Self {
         self.explicit.push(RegisteredFont {
             family: name.to_owned(),
             style,
@@ -267,20 +272,23 @@ impl FontContextBuilder {
     }
 
     /// Prevents this context from resolving fonts from the operating system.
-    pub fn disable_system_fonts(mut self) -> Self {
+    /// Used by unit tests to make resolution deterministic on hosts whose
+    /// fontique enumeration would otherwise pollute the test font set.
+    #[cfg(test)]
+    pub(crate) fn disable_system_fonts(mut self) -> Self {
         self.enable_system = false;
         self
     }
 
     /// Includes fonts registered through the legacy `register_font` API.
     #[cfg(feature = "ab_glyph")]
-    pub fn include_registered(mut self) -> Self {
+    pub(crate) fn include_registered(mut self) -> Self {
         self.include_registered = true;
         self
     }
 
     /// Builds the font context.
-    pub fn build(self) -> Arc<FontContext> {
+    pub(crate) fn build(self) -> Arc<FontContext> {
         Arc::new(FontContext {
             inner: Arc::new(FontContextInner {
                 engine: Arc::new(HarfrustEngine),

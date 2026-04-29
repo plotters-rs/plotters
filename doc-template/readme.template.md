@@ -278,9 +278,11 @@ The following list is a complete list of features that can be opted in or out.
 
 Native text rendering is always available. Plotters resolves system fonts
 through `fontique`, shapes text with `harfrust`, reads outlines with `skrifa`,
-and rasterizes glyphs with `zeno`. Use `DrawingArea::with_fonts` or
-`FontContext::builder()` when a chart should use in-memory fonts instead of, or
-in addition to, system fonts.
+and rasterizes glyphs with `zeno`. Use `DrawingArea::with_fonts` when a chart
+should use in-memory fonts instead of, or in addition to, system fonts. See
+[`plotters/examples/dynamic_font.rs`](plotters/examples/dynamic_font.rs) for an
+end-to-end example that downloads Roboto from Google Fonts at runtime and
+attaches it to a chart through the new pipeline.
 
 | Name     | Description                                                                       | Additional Dependency | Default? |
 |----------|-----------------------------------------------------------------------------------|-----------------------|----------|

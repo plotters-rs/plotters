@@ -21,14 +21,12 @@ pub use colors::{BLACK, BLUE, CYAN, GREEN, MAGENTA, RED, TRANSPARENT, WHITE, YEL
 pub use colors::full_palette;
 
 #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-pub(crate) use font::push_font_context;
+pub(crate) use font::{push_font_context, FontContext};
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
     feature = "ab_glyph"
 ))]
 pub use font::{register_font, InvalidFont};
-#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-pub use font::{FontContext, FontContextBuilder};
 pub use font::{
     FontDesc, FontError, FontFamily, FontResult, FontStyle, FontTransform, IntoFont, LayoutBox,
 };
