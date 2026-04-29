@@ -27,5 +27,4 @@ bitmap_encoder = ["image"]
 
 [dev-dependencies.plotters]
 default-features = false
-features = ["ttf"]
 path = "../plotters"

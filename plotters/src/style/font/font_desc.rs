@@ -1,3 +1,9 @@
+// pattern: Imperative Shell
+
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+use super::FontContext;
+use super::FontResult;
+#[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
 use super::{FontData, FontDataInternal};
 use crate::style::text_anchor::Pos;
 use crate::style::{Color, TextStyle};
@@ -6,17 +12,12 @@ use std::convert::From;
 
 pub use plotters_backend::{FontFamily, FontStyle, FontTransform};
 
-/// The error type for the font implementation
-pub type FontError = <FontDataInternal as FontData>::ErrorType;
-
-/// The type we used to represent a result of any font operations
-pub type FontResult<T> = Result<T, FontError>;
-
 /// Describes a font
 #[derive(Clone)]
 pub struct FontDesc<'a> {
     size: f64,
     family: FontFamily<'a>,
+    #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
     data: FontResult<FontDataInternal>,
     transform: FontTransform,
     style: FontStyle,
@@ -33,6 +34,7 @@ impl<'a> FontDesc<'a> {
         Self {
             size,
             family,
+            #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
             data: FontDataInternal::new(family, style),
             transform: FontTransform::None,
             style,
@@ -47,6 +49,7 @@ impl<'a> FontDesc<'a> {
         Self {
             size,
             family: self.family,
+            #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
             data: self.data.clone(),
             transform: self.transform.clone(),
             style: self.style,
@@ -61,6 +64,7 @@ impl<'a> FontDesc<'a> {
         Self {
             size: self.size,
             family: self.family,
+            #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
             data: self.data.clone(),
             transform: self.transform.clone(),
             style,
@@ -75,6 +79,7 @@ impl<'a> FontDesc<'a> {
         Self {
             size: self.size,
             family: self.family,
+            #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
             data: self.data.clone(),
             transform: trans,
             style: self.style,
@@ -142,6 +147,17 @@ impl<'a> FontDesc<'a> {
     /// For a TTF type, zero point of the layout box is the left most baseline char of the string
     /// Thus the upper bound of the box is most likely be negative
     pub fn layout_box(&self, text: &str) -> FontResult<((i32, i32), (i32, i32))> {
+        #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+        {
+            return FontContext::current_or_default().layout_box(
+                self.family,
+                self.style,
+                self.size,
+                text,
+            );
+        }
+
+        #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
         match &self.data {
             Ok(ref font) => font.estimate_layout(self.size, text),
             Err(e) => Err(e.clone()),
@@ -164,6 +180,19 @@ impl<'a> FontDesc<'a> {
         (x, y): (i32, i32),
         draw: DrawFunc,
     ) -> FontResult<Result<(), E>> {
+        #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+        {
+            return FontContext::current_or_default().draw(
+                self.family,
+                self.style,
+                self.size,
+                text,
+                (x, y),
+                draw,
+            );
+        }
+
+        #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
         match &self.data {
             Ok(ref font) => font.draw((x, y), self.size, text, draw),
             Err(e) => Err(e.clone()),

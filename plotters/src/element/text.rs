@@ -1,3 +1,5 @@
+// pattern: Functional Core
+
 use std::borrow::Borrow;
 
 use super::{Drawable, PointCollection};
@@ -163,7 +165,7 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
 
 // Only run the test on Linux because the default font is different
 // on other platforms, causing different multiline splits.
-#[cfg(all(feature = "ttf", target_os = "linux"))]
+#[cfg(all(not(feature = "ab_glyph"), target_os = "linux"))]
 #[test]
 fn test_multi_layout() {
     use plotters_backend::{FontFamily, FontStyle};
