@@ -369,12 +369,12 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         I: IntoIterator<Item = (S, FontStyle, Arc<[u8]>)>,
         S: Into<String>,
     {
-        let mut builder = FontContext::builder();
+        let mut ctx = FontContext::new();
         for (name, style, bytes) in fonts {
             let name = name.into();
-            builder = builder.with_font(&name, style, bytes);
+            ctx = ctx.with_font(&name, style, bytes);
         }
-        self.font_ctx = builder.build();
+        self.font_ctx = Arc::new(ctx);
         self
     }
 }

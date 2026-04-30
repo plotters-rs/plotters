@@ -27,22 +27,13 @@ thread_local! {
     static FONT_CTX_STACK: RefCell<Vec<Arc<FontContext>>> = const { RefCell::new(Vec::new()) };
 }
 
-/// Font state used while estimating and drawing text.
+/// Font state used while estimating and drawing text. Always handed around as
+/// `Arc<FontContext>`, so the struct holds the shared state directly rather
+/// than via an inner Arc.
 pub(crate) struct FontContext {
-    inner: Arc<FontContextInner>,
-}
-
-struct FontContextInner {
     engine: Arc<dyn FontEngine>,
     system: Mutex<SystemFontSource>,
     glyphs: Mutex<HashMap<GlyphCacheKey, Arc<CoverageMask>>>,
-    explicit: Vec<RegisteredFont>,
-    enable_system: bool,
-    include_registered: bool,
-}
-
-/// Builder for a [`FontContext`].
-pub(crate) struct FontContextBuilder {
     explicit: Vec<RegisteredFont>,
     enable_system: bool,
     include_registered: bool,
@@ -83,17 +74,57 @@ impl FontContext {
         static DEFAULT: OnceLock<Arc<FontContext>> = OnceLock::new();
         DEFAULT
             .get_or_init(|| {
-                let builder = FontContextBuilder::new();
+                let ctx = FontContext::new();
                 #[cfg(feature = "ab_glyph")]
-                let builder = builder.include_registered();
-                builder.build()
+                let ctx = ctx.include_registered();
+                Arc::new(ctx)
             })
             .clone()
     }
 
-    /// Creates a font context builder.
-    pub(crate) fn builder() -> FontContextBuilder {
-        FontContextBuilder::new()
+    /// Creates a font context with default settings.
+    pub(crate) fn new() -> Self {
+        Self {
+            engine: Arc::new(HarfrustEngine),
+            system: Mutex::new(SystemFontSource::new(DEFAULT_ENABLE_SYSTEM)),
+            glyphs: Mutex::new(HashMap::new()),
+            explicit: Vec::new(),
+            enable_system: DEFAULT_ENABLE_SYSTEM,
+            include_registered: false,
+        }
+    }
+
+    /// Adds a named font to this context.
+    pub(crate) fn with_font(
+        mut self,
+        name: &str,
+        style: FontStyle,
+        bytes: impl Into<Arc<[u8]>>,
+    ) -> Self {
+        self.explicit.push(RegisteredFont {
+            family: name.to_owned(),
+            style,
+            data: bytes.into(),
+            index: 0,
+        });
+        self
+    }
+
+    /// Prevents this context from resolving fonts from the operating system.
+    /// Used by unit tests to make resolution deterministic on hosts whose
+    /// fontique enumeration would otherwise pollute the test font set.
+    #[cfg(test)]
+    pub(crate) fn disable_system_fonts(mut self) -> Self {
+        self.enable_system = false;
+        self.system = Mutex::new(SystemFontSource::new(false));
+        self
+    }
+
+    /// Includes fonts registered through the legacy `register_font` API.
+    #[cfg(feature = "ab_glyph")]
+    pub(crate) fn include_registered(mut self) -> Self {
+        self.include_registered = true;
+        self
     }
 
     pub(crate) fn current() -> Option<Arc<FontContext>> {
@@ -167,7 +198,6 @@ impl FontContext {
         };
 
         if let Some(mask) = self
-            .inner
             .glyphs
             .lock()
             .map_err(|_| FontError::LockError)?
@@ -180,11 +210,7 @@ impl FontContext {
         let sx = sx_quantum as f32 / SUBPIXEL_LEVELS as f32;
         let sy = sy_quantum as f32 / SUBPIXEL_LEVELS as f32;
         let mask = Arc::new(font.rasterize(glyph_id, size_px, (sx, sy))?);
-        let mut cache = self
-            .inner
-            .glyphs
-            .lock()
-            .map_err(|_| FontError::LockError)?;
+        let mut cache = self.glyphs.lock().map_err(|_| FontError::LockError)?;
         Ok(cache.entry(key).or_insert(mask).clone())
     }
 
@@ -198,12 +224,12 @@ impl FontContext {
         family: FontFamily<'_>,
         style: FontStyle,
     ) -> FontResult<RegisteredFont> {
-        if let Some(font) = find_registered_font(&self.inner.explicit, family, style) {
+        if let Some(font) = find_registered_font(&self.explicit, family, style) {
             return Ok(font.clone());
         }
 
         #[cfg(feature = "ab_glyph")]
-        if self.inner.include_registered {
+        if self.include_registered {
             if let Some(font) = super::migration::registered_fonts()
                 .and_then(|fonts| find_registered_font(&fonts, family, style).cloned())
             {
@@ -211,8 +237,8 @@ impl FontContext {
             }
         }
 
-        if !self.inner.enable_system {
-            if !self.inner.explicit.is_empty() || self.inner.include_registered {
+        if !self.enable_system {
+            if !self.explicit.is_empty() || self.include_registered {
                 return Err(FontError::NotInContext {
                     family: family.as_str().to_owned(),
                     style: style.as_str().to_owned(),
@@ -224,7 +250,6 @@ impl FontContext {
         }
 
         let candidate = self
-            .inner
             .system
             .lock()
             .map_err(|_| FontError::LockError)?
@@ -253,65 +278,9 @@ impl FontContext {
             return Ok(font);
         }
 
-        let parsed = self.inner.engine.parse(data, index)?;
+        let parsed = self.engine.parse(data, index)?;
         let mut global = GLOBAL_PARSED.lock().map_err(|_| FontError::LockError)?;
         Ok(global.entry(fingerprint).or_insert(parsed).clone())
-    }
-}
-
-impl FontContextBuilder {
-    fn new() -> Self {
-        Self {
-            explicit: Vec::new(),
-            enable_system: DEFAULT_ENABLE_SYSTEM,
-            include_registered: false,
-        }
-    }
-
-    /// Adds a named font to this context.
-    pub(crate) fn with_font(
-        mut self,
-        name: &str,
-        style: FontStyle,
-        bytes: impl Into<Arc<[u8]>>,
-    ) -> Self {
-        self.explicit.push(RegisteredFont {
-            family: name.to_owned(),
-            style,
-            data: bytes.into(),
-            index: 0,
-        });
-        self
-    }
-
-    /// Prevents this context from resolving fonts from the operating system.
-    /// Used by unit tests to make resolution deterministic on hosts whose
-    /// fontique enumeration would otherwise pollute the test font set.
-    #[cfg(test)]
-    pub(crate) fn disable_system_fonts(mut self) -> Self {
-        self.enable_system = false;
-        self
-    }
-
-    /// Includes fonts registered through the legacy `register_font` API.
-    #[cfg(feature = "ab_glyph")]
-    pub(crate) fn include_registered(mut self) -> Self {
-        self.include_registered = true;
-        self
-    }
-
-    /// Builds the font context.
-    pub(crate) fn build(self) -> Arc<FontContext> {
-        Arc::new(FontContext {
-            inner: Arc::new(FontContextInner {
-                engine: Arc::new(HarfrustEngine),
-                system: Mutex::new(SystemFontSource::new(self.enable_system)),
-                glyphs: Mutex::new(HashMap::new()),
-                explicit: self.explicit,
-                enable_system: self.enable_system,
-                include_registered: self.include_registered,
-            }),
-        })
     }
 }
 
@@ -396,10 +365,11 @@ mod tests {
 
     #[test]
     fn explicit_font_resolves_without_system_fonts() {
-        let ctx = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
-            .disable_system_fonts()
-            .build();
+        let ctx = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
+                .disable_system_fonts(),
+        );
 
         let bounds = ctx
             .layout_box(
@@ -428,14 +398,16 @@ mod tests {
     #[test]
     fn global_parse_cache_shares_fonts_between_contexts() {
         let bytes = Arc::<[u8]>::from(FONT_BYTES);
-        let a = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, bytes.clone())
-            .disable_system_fonts()
-            .build();
-        let b = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, bytes)
-            .disable_system_fonts()
-            .build();
+        let a = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, bytes.clone())
+                .disable_system_fonts(),
+        );
+        let b = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, bytes)
+                .disable_system_fonts(),
+        );
 
         let font_a = a
             .resolve(FontFamily::Name("Fixture"), FontStyle::Normal)
@@ -449,10 +421,11 @@ mod tests {
 
     #[test]
     fn context_stack_pops_when_guard_drops() {
-        let ctx = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
-            .disable_system_fonts()
-            .build();
+        let ctx = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
+                .disable_system_fonts(),
+        );
 
         assert!(FontContext::current().is_none());
         {
@@ -464,10 +437,11 @@ mod tests {
 
     #[test]
     fn glyph_cache_returns_same_arc_for_repeat_calls() {
-        let ctx = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
-            .disable_system_fonts()
-            .build();
+        let ctx = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
+                .disable_system_fonts(),
+        );
         let font = ctx
             .resolve(FontFamily::Name("Fixture"), FontStyle::Normal)
             .unwrap();
@@ -504,10 +478,11 @@ mod tests {
 
     #[test]
     fn context_stack_pops_during_unwind() {
-        let ctx = FontContext::builder()
-            .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
-            .disable_system_fonts()
-            .build();
+        let ctx = Arc::new(
+            FontContext::new()
+                .with_font("Fixture", FontStyle::Normal, Arc::<[u8]>::from(FONT_BYTES))
+                .disable_system_fonts(),
+        );
 
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let _guard = push_font_context(ctx);
