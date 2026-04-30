@@ -1,4 +1,3 @@
-// pattern: Imperative Shell
 use plotters::prelude::*;
 const OUT_FILE_NAME: &str = "plotters-doc-data/3d-plot.svg";
 fn main() -> Result<(), Box<dyn std::error::Error>> {
