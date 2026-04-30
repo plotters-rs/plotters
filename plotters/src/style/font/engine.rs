@@ -1,5 +1,3 @@
-// pattern: Functional Core
-
 use super::LayoutBox;
 use std::error::Error;
 use std::fmt;
@@ -13,7 +11,18 @@ pub trait FontEngine: Send + Sync {
 /// A parsed font that can shape text and rasterize glyph masks.
 pub trait ParsedFont: Send + Sync {
     fn shape(&self, text: &str, size_px: f32) -> Result<ShapedRun, FontError>;
-    fn rasterize(&self, glyph_id: u32, size_px: f32) -> Result<CoverageMask, FontError>;
+    /// Rasterize a single glyph at the requested pixel size.
+    ///
+    /// `subpixel` carries the fractional `(x, y)` offset of the glyph origin
+    /// within its target pixel cell, in `[0, 1)`. Implementations should fold
+    /// it into the rasterization so strokes that fall between integer pixel
+    /// columns are anti-aliased correctly instead of being rounded away.
+    fn rasterize(
+        &self,
+        glyph_id: u32,
+        size_px: f32,
+        subpixel: (f32, f32),
+    ) -> Result<CoverageMask, FontError>;
 }
 
 /// A shaped single-line run.
