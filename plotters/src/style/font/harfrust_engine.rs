@@ -1,6 +1,6 @@
 use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun};
 use harfrust::{Direction, FontRef as HarfrustFontRef, ShaperData, UnicodeBuffer};
-use skrifa::outline::{DrawSettings, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen};
+use skrifa::outline::{DrawSettings, Engine, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen};
 use skrifa::prelude::{LocationRef, Size};
 use skrifa::{FontRef as SkrifaFontRef, MetadataProvider};
 use std::collections::HashMap;
@@ -59,15 +59,25 @@ impl HarfrustFont {
 
         let font = self.skrifa_font()?;
         let outlines = font.outline_glyphs();
+        // Use the autohinter unconditionally rather than the default
+        // AutoFallback. Many TrueType hint programs (Roboto's included)
+        // intentionally relax overshoot snapping above ~24px, leaving curved
+        // glyphs like c/o/e a fractional pixel below the baseline of flat
+        // ones like l/m/i. That is correct typographic behaviour but reads
+        // as a baseline bug in chart labels. The autohinter snaps overshoots
+        // at every size so labels keep a single shared baseline.
         let hinter = HintingInstance::new(
             &outlines,
             Size::new(size_px),
             LocationRef::default(),
-            HintingOptions::default(),
+            HintingOptions {
+                engine: Engine::Auto(None),
+                ..HintingOptions::default()
+            },
         )
-        // Treat font bytecode hinting as an optimization. Some system fonts
-        // fail their hint program at specific sizes but still have valid
-        // outlines, so cache that miss and draw unhinted.
+        // Treat hinting as an optimisation: if it fails for some reason
+        // (corrupt instructions, exotic font features) the unhinted outlines
+        // are still valid, so cache the miss and fall back at draw time.
         .ok()
         .map(Arc::new);
         self.hinters
