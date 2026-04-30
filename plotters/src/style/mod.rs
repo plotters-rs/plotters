@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 /*!
   The style for shapes and text, font, color, etc.
 */

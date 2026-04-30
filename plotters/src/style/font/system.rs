@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 use fontique::{
     Attributes, Collection, CollectionOptions, FontStyle as FontiqueStyle, FontWeight, FontWidth,
     GenericFamily, QueryFamily, QueryStatus, SourceCache,

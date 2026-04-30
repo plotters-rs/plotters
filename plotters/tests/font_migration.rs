@@ -3,8 +3,6 @@
     not(all(target_arch = "wasm32", not(target_os = "wasi")))
 ))]
 
-// pattern: Imperative Shell
-
 use plotters::coord::Shift;
 use plotters::prelude::*;
 use std::sync::Arc;

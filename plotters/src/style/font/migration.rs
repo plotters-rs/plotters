@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 use super::context::{registered_font, RegisteredFont};
 use super::engine::FontEngine;
 use super::harfrust_engine::HarfrustEngine;

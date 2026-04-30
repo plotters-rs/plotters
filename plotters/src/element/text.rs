@@ -1,5 +1,3 @@
-// pattern: Functional Core
-
 use std::borrow::Borrow;
 
 use super::{Drawable, PointCollection};

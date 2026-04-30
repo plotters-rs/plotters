@@ -3,8 +3,6 @@ use crate::coord::ranged1d::{KeyPointHint, Ranged};
 use crate::coord::{CoordTranslate, Shift};
 use crate::element::{CoordMapper, Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
-// pattern: Imperative Shell
-
 #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
 use crate::style::{push_font_context, FontContext};
 use crate::style::{Color, FontStyle, SizeDesc, TextStyle};

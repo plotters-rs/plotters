@@ -1,5 +1,3 @@
-// pattern: Imperative Shell
-
 //! The implementation of an actual font implementation
 //!
 //! This exists since for the image rendering task, we want to use
