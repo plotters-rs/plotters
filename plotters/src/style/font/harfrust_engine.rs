@@ -1,6 +1,7 @@
+// pattern: Functional Core
 use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun};
 use harfrust::{Direction, FontRef as HarfrustFontRef, ShaperData, UnicodeBuffer};
-use skrifa::outline::{DrawSettings, HintingInstance, HintingOptions, OutlinePen};
+use skrifa::outline::{DrawSettings, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen};
 use skrifa::prelude::{LocationRef, Size};
 use skrifa::{FontRef as SkrifaFontRef, MetadataProvider};
 use std::collections::HashMap;
@@ -31,7 +32,7 @@ struct HarfrustFont {
     // Building a HintingInstance traces the font's TrueType bytecode
     // interpreter; doing it on every rasterize call dwarfs the actual
     // outline drawing. Cache by quantized pixel size.
-    hinters: Mutex<HashMap<u32, Arc<HintingInstance>>>,
+    hinters: Mutex<HashMap<u32, Option<Arc<HintingInstance>>>>,
 }
 
 impl HarfrustFont {
@@ -45,7 +46,7 @@ impl HarfrustFont {
             .map_err(|_| FontError::InvalidFontIndex(self.index))
     }
 
-    fn hinter_for(&self, size_px: f32) -> Result<Arc<HintingInstance>, FontError> {
+    fn hinter_for(&self, size_px: f32) -> Result<Option<Arc<HintingInstance>>, FontError> {
         let key = size_px.to_bits();
         if let Some(h) = self
             .hinters
@@ -65,13 +66,16 @@ impl HarfrustFont {
             LocationRef::default(),
             HintingOptions::default(),
         )
-        .map_err(|err| FontError::RasterizeError(err.to_string()))?;
-        let h = Arc::new(hinter);
+        // Treat font bytecode hinting as an optimization. Some system fonts
+        // fail their hint program at specific sizes but still have valid
+        // outlines, so cache that miss and draw unhinted.
+        .ok()
+        .map(Arc::new);
         self.hinters
             .lock()
             .map_err(|_| FontError::LockError)?
-            .insert(key, h.clone());
-        Ok(h)
+            .insert(key, hinter.clone());
+        Ok(hinter)
     }
 }
 
@@ -139,18 +143,25 @@ impl ParsedFont for HarfrustFont {
             return Ok(empty_mask());
         };
 
-        let hinter = self.hinter_for(size_px)?;
         let mut path = Vec::new();
-        glyph
-            .draw(
-                DrawSettings::hinted(&hinter, false),
-                &mut ZenoPen {
-                    path: &mut path,
-                    sx: subpixel.0,
-                    sy: subpixel.1,
-                },
-            )
-            .map_err(|err| FontError::RasterizeError(err.to_string()))?;
+        if let Some(hinter) = self.hinter_for(size_px)? {
+            if glyph
+                .draw(
+                    DrawSettings::hinted(&hinter, false),
+                    &mut ZenoPen {
+                        path: &mut path,
+                        sx: subpixel.0,
+                        sy: subpixel.1,
+                    },
+                )
+                .is_err()
+            {
+                path.clear();
+                draw_unhinted_glyph(&glyph, size_px, subpixel, &mut path)?;
+            }
+        } else {
+            draw_unhinted_glyph(&glyph, size_px, subpixel, &mut path)?;
+        }
 
         if path.is_empty() {
             return Ok(empty_mask());
@@ -165,6 +176,25 @@ impl ParsedFont for HarfrustFont {
             data,
         })
     }
+}
+
+fn draw_unhinted_glyph(
+    glyph: &OutlineGlyph<'_>,
+    size_px: f32,
+    subpixel: (f32, f32),
+    path: &mut Vec<Command>,
+) -> Result<(), FontError> {
+    glyph
+        .draw(
+            DrawSettings::unhinted(Size::new(size_px), LocationRef::default()),
+            &mut ZenoPen {
+                path,
+                sx: subpixel.0,
+                sy: subpixel.1,
+            },
+        )
+        .map(|_| ())
+        .map_err(|err| FontError::RasterizeError(err.to_string()))
 }
 
 fn empty_mask() -> CoverageMask {
