@@ -47,15 +47,14 @@ impl HarfrustFont {
 
     fn hinter_for(&self, size_px: f32) -> Result<Option<Arc<HintingInstance>>, FontError> {
         let key = size_px.to_bits();
-        if let Some(h) = self
-            .hinters
-            .lock()
-            .map_err(|_| FontError::LockError)?
-            .get(&key)
-            .cloned()
-        {
-            return Ok(h);
-        }
+let hinter = self.hinters.lock()
+    .map_err(|_| FontError::LockError)?
+    .get(&key)
+    .cloned();
+
+if let Some(h) = hinter {
+    return Ok(h);
+}
 
         let font = self.skrifa_font()?;
         let outlines = font.outline_glyphs();
