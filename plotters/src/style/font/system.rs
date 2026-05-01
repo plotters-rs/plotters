@@ -1,6 +1,6 @@
 use fontique::{
-    Attributes, Collection, CollectionOptions, FontStyle as FontiqueStyle, FontWeight, FontWidth,
-    GenericFamily, QueryFamily, QueryStatus, SourceCache,
+    Attributes, Collection, CollectionOptions, FallbackKey, FontStyle as FontiqueStyle,
+    FontWeight, FontWidth, GenericFamily, QueryFamily, QueryStatus, Script, SourceCache,
 };
 use plotters_backend::{FontFamily, FontStyle};
 use std::sync::Arc;
@@ -26,7 +26,21 @@ impl SystemFontSource {
         }
     }
 
-    pub fn resolve(&mut self, family: FontFamily<'_>, style: FontStyle) -> Option<FontCandidate> {
+    /// Resolve `family` against the configured collection. When
+    /// `with_fallback` is true, fontique chains through Latin-script fallback
+    /// families if the named family isn't installed -- mirroring the implicit
+    /// fontconfig fallback that callers used to get from the legacy
+    /// font-kit/`ttf` backend, so a chart asking for a font that isn't on the
+    /// host (e.g. "Calibri" on Linux) renders via the closest match instead
+    /// of erroring. Strict resolution (`with_fallback = false`) is kept for
+    /// explicit `with_fonts(...)` contexts where every name must match
+    /// exactly.
+    pub fn resolve(
+        &mut self,
+        family: FontFamily<'_>,
+        style: FontStyle,
+        with_fallback: bool,
+    ) -> Option<FontCandidate> {
         let mut query = self.collection.query(&mut self.source_cache);
         match family {
             FontFamily::Serif => query.set_families([QueryFamily::Generic(GenericFamily::Serif)]),
@@ -39,6 +53,13 @@ impl SystemFontSource {
             FontFamily::Name(name) => query.set_families([QueryFamily::Named(name)]),
         }
         query.set_attributes(attributes(style));
+        if with_fallback {
+            // Latin script covers the ASCII/Latin-1 ranges that chart labels
+            // are overwhelmingly drawn from; fontique iterates `families`
+            // first and only consults the fallback list when nothing in
+            // `families` matched.
+            query.set_fallbacks(FallbackKey::new(Script::from_bytes(*b"Latn"), None));
+        }
 
         let mut candidate = None;
         query.matches_with(|font| {

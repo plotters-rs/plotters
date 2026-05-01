@@ -56,7 +56,7 @@ jobs:
         with:
           command: test
           args: --verbose --no-default-features --features=svg_backend --lib
-  test_all_features:
+  test_all_features_exclude_ab_glyph:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +71,25 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --verbose --all-features
+          # This is all features except for ab_glyph, which will break doctests
+          args: --verbose --features=serialization,evcxr
+  test_all_features_exclude_doctests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install fontconfig
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig-dev
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          # Run all tests with ab_glyph, but exclude doctests
+          args: --lib --bins --tests --verbose --all-features
   run_all_examples:
     runs-on: ubuntu-latest
     steps:

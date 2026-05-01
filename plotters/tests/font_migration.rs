@@ -76,11 +76,21 @@ fn explicit_context_isolated_from_default_area() {
     }
     assert_has_ink(&explicit_pixels);
 
+    // The default context applies fontconfig-style fallback for unknown
+    // family names, so the lookup may either error (no Latin font on host)
+    // or succeed via a substituted system face. Either way the explicit
+    // fixture's bytes must not be reachable from the default context, which
+    // we verify by rendering the same string in both and asserting the
+    // pixels differ.
     let mut default_pixels = buffer();
     {
         let area = root(&mut default_pixels);
-        assert_text_missing(&area, FAMILY);
+        let _ = area.draw_text("Hello", &style(FAMILY), (8, 8));
     }
+    assert_ne!(
+        explicit_pixels, default_pixels,
+        "explicit-context fixture leaked into the global default context"
+    );
 }
 
 #[test]

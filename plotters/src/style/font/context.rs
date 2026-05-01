@@ -37,6 +37,12 @@ pub(crate) struct FontContext {
     explicit: Vec<RegisteredFont>,
     enable_system: bool,
     include_registered: bool,
+    // When true, named family lookups that miss every registered/system font
+    // fall through to fontique's Latin-script fallback chain instead of
+    // erroring. Only the process-wide system_default() turns this on, so
+    // explicit `with_fonts(...)` contexts stay strict (asking for an
+    // unregistered name is still a hard miss).
+    fallback_unresolved_names: bool,
 }
 
 #[derive(Clone)]
@@ -74,7 +80,14 @@ impl FontContext {
         static DEFAULT: OnceLock<Arc<FontContext>> = OnceLock::new();
         DEFAULT
             .get_or_init(|| {
-                let ctx = FontContext::new();
+                let mut ctx = FontContext::new();
+                // Restore fontconfig-style implicit fallback for the global
+                // default context. This lets `("Calibri", ..)` on a host
+                // without Calibri render via the closest Latin-script match
+                // -- the same behaviour the old font-kit/`ttf` backend had
+                // through fontconfig. Explicit `with_fonts(...)` contexts
+                // intentionally stay strict.
+                ctx.fallback_unresolved_names = true;
                 #[cfg(feature = "ab_glyph")]
                 let ctx = ctx.include_registered();
                 Arc::new(ctx)
@@ -91,6 +104,7 @@ impl FontContext {
             explicit: Vec::new(),
             enable_system: DEFAULT_ENABLE_SYSTEM,
             include_registered: false,
+            fallback_unresolved_names: false,
         }
     }
 
@@ -253,7 +267,7 @@ impl FontContext {
             .system
             .lock()
             .map_err(|_| FontError::LockError)?
-            .resolve(family, style)
+            .resolve(family, style, self.fallback_unresolved_names)
             .ok_or_else(|| FontError::NotInContext {
                 family: family.as_str().to_owned(),
                 style: style.as_str().to_owned(),

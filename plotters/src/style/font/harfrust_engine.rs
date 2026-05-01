@@ -1,6 +1,8 @@
 use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun};
 use harfrust::{Direction, FontRef as HarfrustFontRef, ShaperData, UnicodeBuffer};
-use skrifa::outline::{DrawSettings, Engine, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen};
+use skrifa::outline::{
+    DrawSettings, Engine, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen,
+};
 use skrifa::prelude::{LocationRef, Size};
 use skrifa::{FontRef as SkrifaFontRef, MetadataProvider};
 use std::collections::HashMap;

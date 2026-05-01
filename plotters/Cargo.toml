@@ -70,7 +70,7 @@ features = [
 default = [
         "bitmap_backend", "bitmap_encoder", "bitmap_gif",
         "svg_backend",
-        "chrono",
+        "datetime",
         "image",
         "deprecated_items",  "all_series", "all_elements",
         "full_palette",
