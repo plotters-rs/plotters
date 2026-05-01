@@ -7,6 +7,8 @@ use skrifa::prelude::{LocationRef, Size};
 use skrifa::{FontRef as SkrifaFontRef, MetadataProvider};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+// TODO: use glifo (https://github.com/linebender/vello/tree/main/glifo) when it
+// stabilizes
 use zeno::{Command, Mask, PathBuilder};
 
 #[derive(Default)]
@@ -47,18 +49,13 @@ impl HarfrustFont {
             .map_err(|_| FontError::InvalidFontIndex(self.index))
     }
 
-    fn hinter_for(&self, size_px: f32) -> Result<Option<Arc<HintingInstance>>, FontError> {
+    fn hinter_for(&self, size_px: f32) -> Option<Arc<HintingInstance>> {
         let key = size_px.to_bits();
-let hinter = self.hinters.lock()
-    .map_err(|_| FontError::LockError)?
-    .get(&key)
-    .cloned();
+        if let Some(cached) = self.hinters.lock().ok()?.get(&key).cloned() {
+            return cached;
+        }
 
-if let Some(h) = hinter {
-    return Ok(h);
-}
-
-        let font = self.skrifa_font()?;
+        let font = self.skrifa_font().ok()?;
         let outlines = font.outline_glyphs();
         // Use the autohinter unconditionally rather than the default
         // AutoFallback. Many TrueType hint programs (Roboto's included)
@@ -81,11 +78,8 @@ if let Some(h) = hinter {
         // are still valid, so cache the miss and fall back at draw time.
         .ok()
         .map(Arc::new);
-        self.hinters
-            .lock()
-            .map_err(|_| FontError::LockError)?
-            .insert(key, hinter.clone());
-        Ok(hinter)
+        self.hinters.lock().ok()?.insert(key, hinter.clone());
+        hinter
     }
 }
 
@@ -124,12 +118,16 @@ impl ParsedFont for HarfrustFont {
             cursor_y += position.y_advance as f32;
         }
 
-let font = self.skrifa_font()?;
-let metrics = font.metrics(Size::new(size_px), LocationRef::default());
-let min_y = (-metrics.ascent).floor() as i32;
-let descent_y = (-metrics.descent).ceil() as i32;
-let max_y = if descent_y > min_y { descent_y } else { size_px.ceil() as i32 };
-let width = (cursor_x * scale).ceil().max(0.0) as i32;
+        let font = self.skrifa_font()?;
+        let metrics = font.metrics(Size::new(size_px), LocationRef::default());
+        let min_y = (-metrics.ascent).floor() as i32;
+        let descent_y = (-metrics.descent).ceil() as i32;
+        let max_y = if descent_y > min_y {
+            descent_y
+        } else {
+            size_px.ceil() as i32
+        };
+        let width = (cursor_x * scale).ceil().max(0.0) as i32;
 
         Ok(ShapedRun {
             glyphs,
@@ -150,7 +148,7 @@ let width = (cursor_x * scale).ceil().max(0.0) as i32;
         };
 
         let mut path = Vec::new();
-        if let Some(hinter) = self.hinter_for(size_px)? {
+        if let Some(hinter) = self.hinter_for(size_px) {
             if glyph
                 .draw(
                     DrawSettings::hinted(&hinter, false),
