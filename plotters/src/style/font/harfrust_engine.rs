@@ -123,16 +123,12 @@ impl ParsedFont for HarfrustFont {
             cursor_y += position.y_advance as f32;
         }
 
-        let font = self.skrifa_font()?;
-        let metrics = font.metrics(Size::new(size_px), LocationRef::default());
-        let min_y = (-metrics.ascent).floor() as i32;
-        let max_y = (-metrics.descent).ceil() as i32;
-        let max_y = if max_y > min_y {
-            max_y
-        } else {
-            size_px.ceil() as i32
-        };
-        let width = (cursor_x * scale).ceil().max(0.0) as i32;
+let font = self.skrifa_font()?;
+let metrics = font.metrics(Size::new(size_px), LocationRef::default());
+let min_y = (-metrics.ascent).floor() as i32;
+let descent_y = (-metrics.descent).ceil() as i32;
+let max_y = if descent_y > min_y { descent_y } else { size_px.ceil() as i32 };
+let width = (cursor_x * scale).ceil().max(0.0) as i32;
 
         Ok(ShapedRun {
             glyphs,
