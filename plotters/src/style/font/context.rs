@@ -332,20 +332,24 @@ fn find_registered_font<'a>(
     family: FontFamily<'_>,
     style: FontStyle,
 ) -> Option<&'a RegisteredFont> {
-    fonts
-        .iter()
-        .rev()
-        .find(|font| font.family == family.as_str() && font.style.as_str() == style.as_str())
-        .or_else(|| {
-            if matches!(style, FontStyle::Normal) {
-                None
-            } else {
-                fonts.iter().rev().find(|font| {
-                    font.family == family.as_str()
-                        && font.style.as_str() == FontStyle::Normal.as_str()
-                })
-            }
-        })
+    let family_str = family.as_str();
+    let style_str = style.as_str();
+
+    let mut fallback = None;
+
+    for font in fonts.iter().rev() {
+        if font.family != family_str {
+            continue;
+        }
+        if font.style.as_str() == style_str {
+            return Some(font);
+        }
+        if fallback.is_none() && !matches!(style, FontStyle::Normal) && font.style.as_str() == FontStyle::Normal.as_str() {
+            fallback = Some(font);
+        }
+    }
+
+    fallback
 }
 
 fn fingerprint(data: &[u8], index: u32) -> FontFingerprint {
