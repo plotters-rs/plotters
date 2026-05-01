@@ -54,10 +54,6 @@ impl SystemFontSource {
         }
         query.set_attributes(attributes(style));
         if with_fallback {
-            // Latin script covers the ASCII/Latin-1 ranges that chart labels
-            // are overwhelmingly drawn from; fontique iterates `families`
-            // first and only consults the fallback list when nothing in
-            // `families` matched.
             query.set_fallbacks(FallbackKey::new(Script::from_bytes(*b"Latn"), None));
         }
 
