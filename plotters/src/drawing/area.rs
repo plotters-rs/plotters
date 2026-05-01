@@ -377,6 +377,14 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         self.font_ctx = Arc::new(ctx);
         self
     }
+
+    /// Clone of the area's font context, for callers that need to lay out
+    /// text outside `backend_ops` (which would otherwise hide explicit
+    /// `with_fonts` registrations from `FontDesc::layout_box`).
+    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+    pub(crate) fn font_context_arc(&self) -> Arc<FontContext> {
+        self.font_ctx.clone()
+    }
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
