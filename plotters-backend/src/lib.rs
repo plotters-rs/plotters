@@ -80,6 +80,12 @@ pub use text::{text_anchor, BackendTextStyle, FontFamily, FontStyle, FontTransfo
 
 use text_anchor::{HPos, VPos};
 
+use crate::math_guard::{
+    checked_add_i32, checked_add_u32, checked_add_usize, checked_div_i32, checked_mul_u32,
+    checked_mul_usize, checked_neg_i32, checked_sub_i32, i32_to_u32_checked, u32_to_i32_checked,
+    u32_to_usize_checked,
+};
+
 /// A coordinate in the pixel-based backend. The coordinate follows the framebuffer's convention,
 /// which defines the top-left point as (0, 0).
 pub type BackendCoord = (i32, i32);
@@ -221,23 +227,26 @@ pub trait DrawingBackend: Sized {
             .layout_box(text)
             .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
         let ((min_x, min_y), (max_x, max_y)) = layout;
-        let width = max_x - min_x;
-        let height = max_y - min_y;
+        let width = checked_sub_i32(max_x, min_x)?;
+        let height = checked_sub_i32(max_y, min_y)?;
         let dx = match style.anchor().h_pos {
-            HPos::Left => 0,
-            HPos::Right => -width,
-            HPos::Center => -width / 2,
-        };
+            HPos::Left => Ok(0),
+            HPos::Right => checked_neg_i32(width),
+            HPos::Center => checked_div_i32(checked_neg_i32(width)?, 2),
+        }?;
         let dy = match style.anchor().v_pos {
-            VPos::Top => 0,
-            VPos::Center => -height / 2,
-            VPos::Bottom => -height,
-        };
+            VPos::Top => Ok(0),
+            VPos::Center => checked_div_i32(checked_neg_i32(height)?, 2),
+            VPos::Bottom => checked_neg_i32(height),
+        }?;
         let trans = style.transform();
         let (w, h) = self.get_size();
         let drawing_result = style.draw(text, (0, 0), |x, y, color| {
-            let (x, y) = trans.transform(x + dx - min_x, y + dy - min_y)?;
-            let (x, y) = (pos.0 + x, pos.1 + y);
+            let (x, y) = trans.transform(
+                checked_sub_i32(checked_add_i32(x, dx)?, min_x)?,
+                checked_sub_i32(checked_add_i32(y, dy)?, min_y)?,
+            )?;
+            let (x, y) = (checked_add_i32(pos.0, x)?, checked_add_i32(pos.1, y)?);
             if x >= 0 && x < w as i32 && y >= 0 && y < h as i32 {
                 self.draw_pixel((x, y), color)
             } else {
@@ -266,10 +275,10 @@ pub trait DrawingBackend: Sized {
         let layout = style
             .layout_box(text)
             .map_err(|e| DrawingErrorKind::FontError(Box::new(e)))?;
-        Ok((
-            ((layout.1).0 - (layout.0).0) as u32,
-            ((layout.1).1 - (layout.0).1) as u32,
-        ))
+        let width = checked_sub_i32((layout.1).0, (layout.0).0)?;
+        let height = checked_sub_i32((layout.1).1, (layout.0).1)?;
+
+        Ok((i32_to_u32_checked(width)?, i32_to_u32_checked(height)?))
     }
 
     /// Blit a bitmap on to the backend.
@@ -289,22 +298,33 @@ pub trait DrawingBackend: Sized {
         let (w, h) = self.get_size();
 
         for dx in 0..iw {
-            if pos.0 + dx as i32 >= w as i32 {
+            if checked_add_i32(pos.0, u32_to_i32_checked(dx)?)? >= u32_to_i32_checked(w)? {
                 break;
             }
             for dy in 0..ih {
-                if pos.1 + dy as i32 >= h as i32 {
+                if checked_add_i32(pos.1, u32_to_i32_checked(dy)?)? >= u32_to_i32_checked(h)? {
                     break;
                 }
                 // FIXME: This assume we have RGB image buffer
-                let r = src[(dx + dy * iw) as usize * 3];
-                let g = src[(dx + dy * iw) as usize * 3 + 1];
-                let b = src[(dx + dy * iw) as usize * 3 + 2];
+                let src_calc =
+                    u32_to_usize_checked(checked_add_u32(dx, checked_mul_u32(dy, iw)?)?)?;
+                let r = checked_mul_usize(src_calc, 3)?;
+                let g = checked_add_usize(r, 1)?;
+                let b = checked_add_usize(r, 2)?;
+                let r = src[r];
+                let g = src[g];
+                let b = src[b];
                 let color = BackendColor {
                     alpha: 1.0,
                     rgb: (r, g, b),
                 };
-                let result = self.draw_pixel((pos.0 + dx as i32, pos.1 + dy as i32), color);
+                let result = self.draw_pixel(
+                    (
+                        checked_add_i32(pos.0, u32_to_i32_checked(dx)?)?,
+                        checked_add_i32(pos.1, u32_to_i32_checked(dy)?)?,
+                    ),
+                    color,
+                );
                 #[allow(clippy::question_mark)]
                 if result.is_err() {
                     return result;

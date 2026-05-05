@@ -41,7 +41,7 @@ mod tests {
     fn math_error_is_copy_clone_debug_partial_eq_and_eq() {
         let err = MathError::ValueOutOfRange;
         let copied = err;
-        let cloned = err.clone();
+        let cloned = err;
 
         assert_eq!(err, copied);
         assert_eq!(err, cloned);

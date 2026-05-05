@@ -126,6 +126,14 @@ pub(crate) fn u32_to_i32_checked(v: u32) -> Result<i32, MathError> {
     i32::try_from(v).map_err(|_| MathError::ValueOutOfRange)
 }
 
+pub(crate) fn u32_to_usize_checked(v: u32) -> Result<usize, MathError> {
+    if u64::from(v) > usize::MAX as u64 {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    Ok(v as usize)
+}
+
 pub(crate) fn i32_to_u32_checked(v: i32) -> Result<u32, MathError> {
     u32::try_from(v).map_err(|_| MathError::ValueOutOfRange)
 }
@@ -768,6 +776,22 @@ mod tests {
                 usize_to_u32_checked(u32::MAX as usize + 1),
                 Err(MathError::ValueOutOfRange)
             );
+        }
+    }
+    #[test]
+    fn u32_to_usize_checked_accepts_zero() {
+        assert_eq!(u32_to_usize_checked(0), Ok(0));
+    }
+
+    #[test]
+    fn u32_to_usize_checked_accepts_in_range_value() {
+        assert_eq!(u32_to_usize_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn u32_to_usize_checked_accepts_u32_max_on_supported_platforms() {
+        if usize::BITS >= 32 {
+            assert_eq!(u32_to_usize_checked(u32::MAX), Ok(u32::MAX as usize));
         }
     }
 }
