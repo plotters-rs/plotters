@@ -1,5 +1,5 @@
 use crate::{
-    math_guard::{checked_add, checked_mul, checked_sub, non_zero_checked},
+    math_guard::{checked_add_i64, checked_mul_i64, checked_sub_i32, non_zero_f64},
     BackendCoord, MathError,
 };
 use std::convert::From;
@@ -10,14 +10,14 @@ fn get_dir_vector(
     to: BackendCoord,
     flag: bool,
 ) -> Result<((f64, f64), (f64, f64)), MathError> {
-    let dx = i64::from(checked_sub(to.0, from.0, MathError::ValueOverflow)?);
-    let dy = i64::from(checked_sub(to.1, from.1, MathError::ValueOverflow)?);
+    let dx = i64::from(checked_sub_i32(to.0, from.0)?);
+    let dy = i64::from(checked_sub_i32(to.1, from.1)?);
 
-    let x2 = checked_mul(dx, dx, MathError::ValueOverflow)?;
-    let y2 = checked_mul(dy, dy, MathError::ValueOverflow)?;
-    let sum = checked_add(x2, y2, MathError::ValueOverflow)? as f64;
+    let x2 = checked_mul_i64(dx, dx)?;
+    let y2 = checked_mul_i64(dy, dy)?;
+    let sum = checked_add_i64(x2, y2)? as f64;
 
-    let len = non_zero_checked(sum.sqrt(), MathError::ZeroDivision)?;
+    let len = non_zero_f64(sum.sqrt())?;
 
     let v = (dx as f64 / len, dy as f64 / len);
 
@@ -201,10 +201,10 @@ mod test {
     }
 
     #[test]
-    fn get_dir_vector_rejects_extreme_delta_overflow() {
+    fn get_dir_vector_rejects_extreme_delta_out_of_range() {
         assert_eq!(
             get_dir_vector((i32::MIN, 0), (i32::MAX, 0), false),
-            Err(MathError::ValueOverflow)
+            Err(MathError::ValueOutOfRange)
         );
     }
 
@@ -273,7 +273,7 @@ mod test {
     fn polygonize_rejects_extreme_coordinate_span() {
         assert_eq!(
             polygonize(&[(i32::MIN, 0), (i32::MAX, 0)], 2),
-            Err(MathError::ValueOverflow)
+            Err(MathError::ValueOutOfRange)
         );
     }
 }

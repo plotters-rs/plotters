@@ -1,10 +1,10 @@
 use crate::{
     math_guard::{
-        checked_add, checked_mul, checked_sub, float_to_integer_checked, non_zero_checked,
+        checked_add_i32, checked_add_i64, checked_div_f64, checked_mul_i64, checked_sub_i32,
+        checked_sub_i64, f64_to_i32_checked, non_zero_f64, non_zero_i32, u32_to_i32_checked,
     },
-    BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind, MathError,
+    BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
 };
-use std::convert::TryFrom;
 
 pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     back: &mut DB,
@@ -18,12 +18,12 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
 
     if style.stroke_width() != 1 {
         // If the line is wider than 1px, then we need to make it a polygon
-        let dx = i64::from(checked_sub(to.0, from.0, MathError::ValueOverflow)?);
-        let dy = i64::from(checked_sub(to.1, from.1, MathError::ValueOverflow)?);
+        let dx = i64::from(checked_sub_i32(to.0, from.0)?);
+        let dy = i64::from(checked_sub_i32(to.1, from.1)?);
 
-        let x2 = checked_mul(dx, dx, MathError::ValueOverflow)?;
-        let y2 = checked_mul(dy, dy, MathError::ValueOverflow)?;
-        let sum = checked_add(x2, y2, MathError::ValueOverflow)? as f64;
+        let x2 = checked_mul_i64(dx, dx)?;
+        let y2 = checked_mul_i64(dy, dy)?;
+        let sum = checked_add_i64(x2, y2)? as f64;
 
         let len = sum.sqrt();
 
@@ -31,8 +31,11 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             return Ok(());
         }
 
-        let len = non_zero_checked(len, MathError::ZeroDivision)?;
-        let v = (dx as f64 / len, dy as f64 / len);
+        let len = non_zero_f64(len)?;
+        let v = (
+            checked_div_f64(dx as f64, len)?,
+            checked_div_f64(dy as f64, len)?,
+        );
 
         let r = f64::from(style.stroke_width()) / 2.0;
         let mut trans = [(v.1 * r, -v.0 * r), (-v.1 * r, v.0 * r)];
@@ -71,16 +74,8 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         }
         return Ok(());
     }
-    let dx = checked_sub::<i64, MathError>(
-        i64::from(to.0),
-        i64::from(from.0),
-        MathError::ValueUnderflow,
-    )?;
-    let dy = checked_sub::<i64, MathError>(
-        i64::from(to.1),
-        i64::from(from.1),
-        MathError::ValueUnderflow,
-    )?;
+    let dx = checked_sub_i64(i64::from(to.0), i64::from(from.0))?;
+    let dy = checked_sub_i64(i64::from(to.1), i64::from(from.1))?;
     let steep = dx.abs() < dy.abs();
 
     if steep {
@@ -99,11 +94,8 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     if steep {
         size_limit = (size_limit.1, size_limit.0);
     }
-    let grad = f64::from(checked_sub(to.1, from.1, MathError::ValueOverflow)?)
-        / f64::from(non_zero_checked(
-            checked_sub(to.0, from.0, MathError::ValueOverflow)?,
-            MathError::ZeroDivision,
-        )?);
+    let grad = f64::from(checked_sub_i32(to.1, from.1)?)
+        / f64::from(non_zero_i32(checked_sub_i32(to.0, from.0)?)?);
 
     let mut put_pixel = |(x, y): BackendCoord, b: f64| {
         if steep {
@@ -112,54 +104,38 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
             back.draw_pixel((x, y), style.color().mix(b))
         }
     };
-    let y_max = checked_sub(
-        i32::try_from(size_limit.1).map_err(|_| MathError::ValueOutOfRange)?,
-        1,
-        MathError::ValueUnderflow,
-    )?;
+    let y_max = checked_sub_i32(u32_to_i32_checked(size_limit.1)?, 1)?;
 
     let y_clamped = to.1.min(y_max).max(0);
 
-    let y_delta = checked_sub(y_clamped, from.1, MathError::ValueOverflow)?;
+    let y_delta = checked_sub_i32(y_clamped, from.1)?;
 
-    let y_step_limit = (f64::from(y_delta) / grad).floor() as i32;
+    let y_step_limit = f64_to_i32_checked((f64::from(y_delta) / non_zero_f64(grad)?).floor())?;
 
-    let y_max = checked_sub(
-        i32::try_from(size_limit.1).map_err(|_| MathError::ValueOutOfRange)?,
-        2,
-        MathError::ValueUnderflow,
-    )?;
+    let y_max = checked_sub_i32(u32_to_i32_checked(size_limit.1)?, 2)?;
 
     let y_clamped = from.1.min(y_max).max(0);
 
-    let y_delta = checked_sub(y_clamped, from.1, MathError::ValueOverflow)?;
+    let y_delta = checked_sub_i32(y_clamped, from.1)?;
 
     let x_offset = (f64::from(y_delta) / grad).abs().ceil() as i32;
 
-    let batch_start = checked_add(x_offset, from.0, MathError::ValueOverflow)?;
+    let batch_start = checked_add_i32(x_offset, from.0)?;
 
-    let x_max = checked_sub(
-        i32::try_from(size_limit.0).map_err(|_| MathError::ValueOutOfRange)?,
-        2,
-        MathError::ValueUnderflow,
-    )?;
+    let x_max = checked_sub_i32(u32_to_i32_checked(size_limit.0)?, 2)?;
 
-    let stepped_x = checked_sub(
-        checked_add(from.0, y_step_limit, MathError::ValueOverflow)?,
-        1,
-        MathError::ValueUnderflow,
-    )?;
+    let stepped_x = checked_sub_i32(checked_add_i32(from.0, y_step_limit)?, 1)?;
 
     let batch_limit = to.0.min(x_max).min(stepped_x);
 
-    let batch_delta = checked_sub(batch_start, from.0, MathError::ValueOverflow)?;
+    let batch_delta = checked_sub_i32(batch_start, from.0)?;
 
     let mut y = f64::from(from.1) + f64::from(batch_delta) * grad;
 
     for x in batch_start..=batch_limit {
-        let y_i = float_to_integer_checked::<f64, i32, MathError>(y, MathError::ValueOutOfRange)?;
+        let y_i = f64_to_i32_checked(y)?;
 
-        let y_next = checked_add(y_i, 1, MathError::ValueOverflow)?;
+        let y_next = checked_add_i32(y_i, 1)?;
 
         let y_floor = y.floor();
 
@@ -170,10 +146,10 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
     }
 
     if to.0 > batch_limit && y < f64::from(to.1) {
-        let x = checked_add(batch_limit, 1, MathError::ValueOverflow)?;
+        let x = checked_add_i32(batch_limit, 1)?;
         let y_floor = y.floor();
 
-        let y_i = float_to_integer_checked::<f64, i32, MathError>(y, MathError::ValueOutOfRange)?;
+        let y_i = f64_to_i32_checked(y)?;
 
         let lower_alpha = 1.0 + y_floor - y;
         if lower_alpha > 1e-5 {
@@ -181,7 +157,7 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
         }
 
         let upper_alpha = y - y_floor;
-        let y_next = checked_add(y_i, 1, MathError::ValueOverflow)?;
+        let y_next = checked_add_i32(y_i, 1)?;
 
         if upper_alpha > 1e-5 && y + 1.0 < f64::from(to.1) {
             check_result!(put_pixel((x, y_next), upper_alpha));
@@ -193,9 +169,9 @@ pub fn draw_line<DB: DrawingBackend, S: BackendStyle>(
 
 #[cfg(test)]
 mod tests {
-    // tried keep this unit test inside this file as much as possible. 
+    // tried keep this unit test inside this file as much as possible.
     use super::*;
-    use crate::{BackendColor, BackendStyle};
+    use crate::{BackendColor, BackendStyle, MathError};
 
     // a simple backend error for testing in this module
     #[derive(Debug)]
@@ -377,29 +353,31 @@ mod tests {
     }
 
     #[test]
-    fn wide_line_reports_math_error_for_extreme_delta() {
+    fn wide_line_reports_math_error_for_out_of_range_delta() {
         let mut backend = backend();
 
         let err =
             draw_line(&mut backend, (i32::MIN, 0), (i32::MAX, 0), &style(4, 1.0)).unwrap_err();
 
-        assert!(matches!(
-            err,
-            DrawingErrorKind::MathError(MathError::ValueOverflow)
-        ));
+        assert!(
+            matches!(err, DrawingErrorKind::MathError(MathError::ValueOutOfRange)),
+            "unexpected error: {:?}",
+            err
+        );
     }
 
     #[test]
-    fn diagonal_line_reports_math_error_for_extreme_x_span() {
+    fn diagonal_line_reports_math_error_for_out_of_range_x_span() {
         let mut backend = backend();
 
         let err =
             draw_line(&mut backend, (i32::MIN, 0), (i32::MAX, 1), &style(1, 1.0)).unwrap_err();
 
-        assert!(matches!(
-            err,
-            DrawingErrorKind::MathError(MathError::ValueOverflow)
-        ));
+        assert!(
+            matches!(err, DrawingErrorKind::MathError(MathError::ValueOutOfRange)),
+            "unexpected error: {:?}",
+            err
+        );
     }
 
     #[test]

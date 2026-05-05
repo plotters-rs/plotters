@@ -1,6 +1,6 @@
 use crate::math_errors::MathError;
-
-pub(crate) fn float_to_i32_checked(v: f64) -> Result<i32, MathError> {
+use std::convert::TryFrom;
+pub(crate) fn f64_to_i32_checked(v: f64) -> Result<i32, MathError> {
     if !v.is_finite() {
         return Err(MathError::NonFiniteCalculation);
     }
@@ -13,11 +13,11 @@ pub(crate) fn float_to_i32_checked(v: f64) -> Result<i32, MathError> {
 }
 
 pub(crate) fn ceil_f64_to_i32(v: f64) -> Result<i32, MathError> {
-    float_to_i32_checked(v.ceil())
+    f64_to_i32_checked(v.ceil())
 }
 
 pub(crate) fn floor_f64_to_i32(v: f64) -> Result<i32, MathError> {
-    float_to_i32_checked(v.floor())
+    f64_to_i32_checked(v.floor())
 }
 
 pub(crate) fn f64_to_f32_checked(v: f64) -> Result<f32, MathError> {
@@ -86,6 +86,26 @@ pub(crate) fn checked_neg_i32(v: i32) -> Result<i32, MathError> {
     v.checked_neg().ok_or(MathError::ValueOutOfRange)
 }
 
+pub(crate) fn checked_add_i64(lhs: i64, rhs: i64) -> Result<i64, MathError> {
+    lhs.checked_add(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_sub_i64(lhs: i64, rhs: i64) -> Result<i64, MathError> {
+    lhs.checked_sub(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_mul_i64(lhs: i64, rhs: i64) -> Result<i64, MathError> {
+    lhs.checked_mul(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_div_i64(lhs: i64, rhs: i64) -> Result<i64, MathError> {
+    lhs.checked_div(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_neg_i64(v: i64) -> Result<i64, MathError> {
+    v.checked_neg().ok_or(MathError::ValueOutOfRange)
+}
+
 pub(crate) fn checked_add_u32(lhs: u32, rhs: u32) -> Result<u32, MathError> {
     lhs.checked_add(rhs).ok_or(MathError::ValueOutOfRange)
 }
@@ -106,6 +126,9 @@ pub(crate) fn u32_to_i32_checked(v: u32) -> Result<i32, MathError> {
     i32::try_from(v).map_err(|_| MathError::ValueOutOfRange)
 }
 
+pub(crate) fn i32_to_u32_checked(v: i32) -> Result<u32, MathError> {
+    u32::try_from(v).map_err(|_| MathError::ValueOutOfRange)
+}
 pub(crate) fn sqrt_f64_checked(v: f64) -> Result<f64, MathError> {
     if !v.is_finite() || v < 0.0 {
         return Err(MathError::NonFiniteCalculation);
@@ -114,27 +137,97 @@ pub(crate) fn sqrt_f64_checked(v: f64) -> Result<f64, MathError> {
     Ok(v.sqrt())
 }
 
+pub(crate) fn checked_div_f64(lhs: f64, rhs: f64) -> Result<f64, MathError> {
+    if !lhs.is_finite() || !rhs.is_finite() {
+        return Err(MathError::NonFiniteCalculation);
+    }
+
+    if rhs == 0.0 {
+        return Err(MathError::ZeroDivision);
+    }
+
+    let out = lhs / rhs;
+
+    if !out.is_finite() {
+        return Err(MathError::NonFiniteCalculation);
+    }
+
+    Ok(out)
+}
+
+pub(crate) fn checked_add_usize(lhs: usize, rhs: usize) -> Result<usize, MathError> {
+    lhs.checked_add(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_sub_usize(lhs: usize, rhs: usize) -> Result<usize, MathError> {
+    lhs.checked_sub(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_mul_usize(lhs: usize, rhs: usize) -> Result<usize, MathError> {
+    lhs.checked_mul(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn checked_div_usize(lhs: usize, rhs: usize) -> Result<usize, MathError> {
+    lhs.checked_div(rhs).ok_or(MathError::ValueOutOfRange)
+}
+
+pub(crate) fn i32_to_usize_checked(v: i32) -> Result<usize, MathError> {
+    if v < 0 {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    Ok(v as usize)
+}
+
+pub(crate) fn i64_to_usize_checked(v: i64) -> Result<usize, MathError> {
+    if v < 0 {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    if v as u64 > usize::MAX as u64 {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    Ok(v as usize)
+}
+
+pub(crate) fn usize_to_i32_checked(v: usize) -> Result<i32, MathError> {
+    if v > i32::MAX as usize {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    Ok(v as i32)
+}
+
+pub(crate) fn usize_to_u32_checked(v: usize) -> Result<u32, MathError> {
+    if v > u32::MAX as usize {
+        return Err(MathError::ValueOutOfRange);
+    }
+
+    Ok(v as u32)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn float_to_i32_checked_accepts_valid_value() {
-        assert_eq!(float_to_i32_checked(42.0), Ok(42));
+        assert_eq!(f64_to_i32_checked(42.0), Ok(42));
     }
 
     #[test]
     fn float_to_i32_checked_rejects_non_finite_values() {
         assert_eq!(
-            float_to_i32_checked(f64::NAN),
+            f64_to_i32_checked(f64::NAN),
             Err(MathError::NonFiniteCalculation)
         );
         assert_eq!(
-            float_to_i32_checked(f64::INFINITY),
+            f64_to_i32_checked(f64::INFINITY),
             Err(MathError::NonFiniteCalculation)
         );
         assert_eq!(
-            float_to_i32_checked(f64::NEG_INFINITY),
+            f64_to_i32_checked(f64::NEG_INFINITY),
             Err(MathError::NonFiniteCalculation)
         );
     }
@@ -142,12 +235,12 @@ mod tests {
     #[test]
     fn float_to_i32_checked_rejects_out_of_range_values() {
         assert_eq!(
-            float_to_i32_checked(f64::from(i32::MAX) + 1.0),
+            f64_to_i32_checked(f64::from(i32::MAX) + 1.0),
             Err(MathError::ValueOutOfRange)
         );
 
         assert_eq!(
-            float_to_i32_checked(f64::from(i32::MIN) - 1.0),
+            f64_to_i32_checked(f64::from(i32::MIN) - 1.0),
             Err(MathError::ValueOutOfRange)
         );
     }
@@ -223,10 +316,7 @@ mod tests {
 
     #[test]
     fn non_zero_f64_rejects_non_finite_value() {
-        assert_eq!(
-            non_zero_f64(f64::NAN),
-            Err(MathError::NonFiniteCalculation)
-        );
+        assert_eq!(non_zero_f64(f64::NAN), Err(MathError::NonFiniteCalculation));
     }
 
     #[test]
@@ -275,10 +365,7 @@ mod tests {
 
     #[test]
     fn checked_div_i32_rejects_division_by_zero() {
-        assert_eq!(
-            checked_div_i32(8, 0),
-            Err(MathError::ValueOutOfRange)
-        );
+        assert_eq!(checked_div_i32(8, 0), Err(MathError::ValueOutOfRange));
     }
 
     #[test]
@@ -296,10 +383,7 @@ mod tests {
 
     #[test]
     fn checked_neg_i32_rejects_min_value() {
-        assert_eq!(
-            checked_neg_i32(i32::MIN),
-            Err(MathError::ValueOutOfRange)
-        );
+        assert_eq!(checked_neg_i32(i32::MIN), Err(MathError::ValueOutOfRange));
     }
 
     #[test]
@@ -322,10 +406,7 @@ mod tests {
 
     #[test]
     fn checked_sub_u32_rejects_underflow() {
-        assert_eq!(
-            checked_sub_u32(0, 1),
-            Err(MathError::ValueOutOfRange)
-        );
+        assert_eq!(checked_sub_u32(0, 1), Err(MathError::ValueOutOfRange));
     }
 
     #[test]
@@ -348,10 +429,7 @@ mod tests {
 
     #[test]
     fn checked_div_u32_rejects_division_by_zero() {
-        assert_eq!(
-            checked_div_u32(8, 0),
-            Err(MathError::ValueOutOfRange)
-        );
+        assert_eq!(checked_div_u32(8, 0), Err(MathError::ValueOutOfRange));
     }
 
     #[test]
@@ -368,16 +446,36 @@ mod tests {
     }
 
     #[test]
+    fn i32_to_u32_checked_accepts_in_range_value() {
+        assert_eq!(i32_to_u32_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn i32_to_u32_checked_rejects_out_of_range_value() {
+        assert_eq!(
+            i32_to_u32_checked(i32::MIN),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn i32_to_u32_checked_rejects_negative_one() {
+        assert_eq!(i32_to_u32_checked(-1), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn i32_to_u32_checked_accepts_i32_max() {
+        assert_eq!(i32_to_u32_checked(i32::MAX), Ok(i32::MAX as u32));
+    }
+
+    #[test]
     fn sqrt_f64_checked_accepts_valid_value() {
         assert_eq!(sqrt_f64_checked(9.0), Ok(3.0));
     }
 
     #[test]
     fn sqrt_f64_checked_rejects_negative_value() {
-        assert_eq!(
-            sqrt_f64_checked(-1.0),
-            Err(MathError::NonFiniteCalculation)
-        );
+        assert_eq!(sqrt_f64_checked(-1.0), Err(MathError::NonFiniteCalculation));
     }
 
     #[test]
@@ -386,5 +484,290 @@ mod tests {
             sqrt_f64_checked(f64::NAN),
             Err(MathError::NonFiniteCalculation)
         );
+    }
+
+    #[test]
+    fn checked_add_i64_accepts_valid_sum() {
+        assert_eq!(checked_add_i64(2, 3), Ok(5));
+    }
+
+    #[test]
+    fn checked_add_i64_rejects_overflow() {
+        assert_eq!(
+            checked_add_i64(i64::MAX, 1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_add_i64_rejects_underflow() {
+        assert_eq!(
+            checked_add_i64(i64::MIN, -1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_sub_i64_accepts_valid_difference() {
+        assert_eq!(checked_sub_i64(5, 3), Ok(2));
+    }
+
+    #[test]
+    fn checked_sub_i64_rejects_overflow() {
+        assert_eq!(
+            checked_sub_i64(i64::MAX, -1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_sub_i64_rejects_underflow() {
+        assert_eq!(
+            checked_sub_i64(i64::MIN, 1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_mul_i64_accepts_valid_product() {
+        assert_eq!(checked_mul_i64(6, 7), Ok(42));
+    }
+
+    #[test]
+    fn checked_mul_i64_rejects_overflow() {
+        assert_eq!(
+            checked_mul_i64(i64::MAX, 2),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_mul_i64_rejects_underflow() {
+        assert_eq!(
+            checked_mul_i64(i64::MIN, 2),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_div_i64_accepts_valid_quotient() {
+        assert_eq!(checked_div_i64(8, 2), Ok(4));
+    }
+
+    #[test]
+    fn checked_div_i64_rejects_division_by_zero() {
+        assert_eq!(checked_div_i64(8, 0), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn checked_div_i64_rejects_min_divided_by_negative_one() {
+        assert_eq!(
+            checked_div_i64(i64::MIN, -1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_neg_i64_accepts_valid_negation() {
+        assert_eq!(checked_neg_i64(7), Ok(-7));
+    }
+
+    #[test]
+    fn checked_neg_i64_accepts_zero() {
+        assert_eq!(checked_neg_i64(0), Ok(0));
+    }
+
+    #[test]
+    fn checked_neg_i64_rejects_min_value() {
+        assert_eq!(checked_neg_i64(i64::MIN), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn checked_neg_i64_accepts_max_value() {
+        assert_eq!(checked_neg_i64(i64::MAX), Ok(-i64::MAX));
+    }
+
+    #[test]
+    fn checked_div_f64_accepts_valid_quotient() {
+        assert_eq!(checked_div_f64(8.0, 2.0), Ok(4.0));
+    }
+
+    #[test]
+    fn checked_div_f64_accepts_fractional_quotient() {
+        assert_eq!(checked_div_f64(1.0, 4.0), Ok(0.25));
+    }
+
+    #[test]
+    fn checked_div_f64_accepts_negative_quotient() {
+        assert_eq!(checked_div_f64(-8.0, 2.0), Ok(-4.0));
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_division_by_positive_zero() {
+        assert_eq!(checked_div_f64(8.0, 0.0), Err(MathError::ZeroDivision));
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_division_by_negative_zero() {
+        assert_eq!(checked_div_f64(8.0, -0.0), Err(MathError::ZeroDivision));
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_nan_lhs() {
+        assert_eq!(
+            checked_div_f64(f64::NAN, 2.0),
+            Err(MathError::NonFiniteCalculation)
+        );
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_nan_rhs() {
+        assert_eq!(
+            checked_div_f64(8.0, f64::NAN),
+            Err(MathError::NonFiniteCalculation)
+        );
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_infinite_lhs() {
+        assert_eq!(
+            checked_div_f64(f64::INFINITY, 2.0),
+            Err(MathError::NonFiniteCalculation)
+        );
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_infinite_rhs() {
+        assert_eq!(
+            checked_div_f64(8.0, f64::INFINITY),
+            Err(MathError::NonFiniteCalculation)
+        );
+    }
+
+    #[test]
+    fn checked_div_f64_rejects_non_finite_output() {
+        assert_eq!(
+            checked_div_f64(f64::MAX, f64::MIN_POSITIVE),
+            Err(MathError::NonFiniteCalculation)
+        );
+    }
+
+    #[test]
+    fn checked_add_usize_accepts_valid_sum() {
+        assert_eq!(checked_add_usize(2, 3), Ok(5));
+    }
+
+    #[test]
+    fn checked_add_usize_rejects_overflow() {
+        assert_eq!(
+            checked_add_usize(usize::MAX, 1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_sub_usize_accepts_valid_difference() {
+        assert_eq!(checked_sub_usize(5, 3), Ok(2));
+    }
+
+    #[test]
+    fn checked_sub_usize_rejects_underflow() {
+        assert_eq!(checked_sub_usize(0, 1), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn checked_mul_usize_accepts_valid_product() {
+        assert_eq!(checked_mul_usize(6, 7), Ok(42));
+    }
+
+    #[test]
+    fn checked_mul_usize_rejects_overflow() {
+        assert_eq!(
+            checked_mul_usize(usize::MAX, 2),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn checked_div_usize_accepts_valid_quotient() {
+        assert_eq!(checked_div_usize(8, 2), Ok(4));
+    }
+
+    #[test]
+    fn checked_div_usize_rejects_division_by_zero() {
+        assert_eq!(checked_div_usize(8, 0), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn i32_to_usize_checked_accepts_non_negative_value() {
+        assert_eq!(i32_to_usize_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn i32_to_usize_checked_accepts_zero() {
+        assert_eq!(i32_to_usize_checked(0), Ok(0));
+    }
+
+    #[test]
+    fn i32_to_usize_checked_rejects_negative_value() {
+        assert_eq!(i32_to_usize_checked(-1), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn i64_to_usize_checked_accepts_non_negative_value() {
+        assert_eq!(i64_to_usize_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn i64_to_usize_checked_rejects_negative_value() {
+        assert_eq!(i64_to_usize_checked(-1), Err(MathError::ValueOutOfRange));
+    }
+
+    #[test]
+    fn i64_to_usize_checked_rejects_out_of_range_value() {
+        if usize::BITS < 64 {
+            assert_eq!(
+                i64_to_usize_checked(i64::MAX),
+                Err(MathError::ValueOutOfRange)
+            );
+        }
+    }
+
+    #[test]
+    fn usize_to_i32_checked_accepts_in_range_value() {
+        assert_eq!(usize_to_i32_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn usize_to_i32_checked_accepts_i32_max() {
+        assert_eq!(usize_to_i32_checked(i32::MAX as usize), Ok(i32::MAX));
+    }
+
+    #[test]
+    fn usize_to_i32_checked_rejects_out_of_range_value() {
+        assert_eq!(
+            usize_to_i32_checked(i32::MAX as usize + 1),
+            Err(MathError::ValueOutOfRange)
+        );
+    }
+
+    #[test]
+    fn usize_to_u32_checked_accepts_in_range_value() {
+        assert_eq!(usize_to_u32_checked(42), Ok(42));
+    }
+
+    #[test]
+    fn usize_to_u32_checked_accepts_u32_max() {
+        assert_eq!(usize_to_u32_checked(u32::MAX as usize), Ok(u32::MAX));
+    }
+
+    #[test]
+    fn usize_to_u32_checked_rejects_out_of_range_value() {
+        if usize::BITS > 32 {
+            assert_eq!(
+                usize_to_u32_checked(u32::MAX as usize + 1),
+                Err(MathError::ValueOutOfRange)
+            );
+        }
     }
 }

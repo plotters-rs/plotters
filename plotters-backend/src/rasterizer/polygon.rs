@@ -1,5 +1,8 @@
 use crate::{
-    math_guard::{checked_add, checked_mul, checked_sub, non_zero_checked},
+    math_guard::{
+        checked_add_u32, checked_add_usize, checked_mul_i64, checked_sub_i32, checked_sub_i64,
+        checked_sub_u32, checked_sub_usize, i32_to_u32_checked, non_zero_f64,
+    },
     BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind, MathError,
 };
 
@@ -29,8 +32,7 @@ impl Edge {
             std::mem::swap(&mut from, &mut to);
         }
 
-        let total_epoch =
-            checked_sub::<i32, MathError>(to.0, from.0, MathError::ValueOverflow)? as u32;
+        let total_epoch = i32_to_u32_checked(checked_sub_i32(to.0, from.0)?)?;
         Ok(Some(Edge {
             epoch: 0,
             total_epoch,
@@ -44,24 +46,19 @@ impl Edge {
     }
 
     fn get_master_pos(&self) -> Result<i32, MathError> {
-        let epoch_diff = checked_sub(self.total_epoch, self.epoch, MathError::ValueUnderflow)?;
+        let epoch_diff = checked_sub_u32(self.total_epoch, self.epoch)?;
         i32::try_from(epoch_diff).map_err(|_| MathError::ValueOutOfRange)
     }
 
     fn inc_epoch(&mut self) -> Result<(), MathError> {
-        self.epoch = checked_add::<u32, MathError>(self.epoch, 1, MathError::ValueOverflow)?;
+        self.epoch = checked_add_u32(self.epoch, 1)?;
         Ok(())
     }
 
     fn get_slave_pos(&self) -> Result<f64, MathError> {
-        let slave_diff = checked_sub(
-            i64::from(self.slave_end),
-            i64::from(self.slave_begin),
-            MathError::ValueOverflow,
-        )?;
-        let product =
-            checked_mul(slave_diff, i64::from(self.epoch), MathError::ValueOverflow)? as f64;
-        let total_epoch = non_zero_checked(f64::from(self.total_epoch), MathError::ZeroDivision)?;
+        let slave_diff = checked_sub_i64(i64::from(self.slave_end), i64::from(self.slave_begin))?;
+        let product = checked_mul_i64(slave_diff, i64::from(self.epoch))? as f64;
+        let total_epoch = non_zero_f64(f64::from(self.total_epoch))?;
 
         Ok(f64::from(self.slave_begin) + product / total_epoch)
     }
@@ -118,10 +115,10 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
         if x_span.0 == x_span.1 || y_span.0 == y_span.1 {
             return back.draw_line((x_span.0, y_span.0), (x_span.1, y_span.1), style);
         }
-        let x_diff = checked_sub::<i32, MathError>(x_span.1, x_span.0, MathError::ValueOverflow)?;
-        let y_diff = checked_sub::<i32, MathError>(y_span.1, y_span.0, MathError::ValueOverflow)?;
+        let x_diff = checked_sub_i32(x_span.1, x_span.0)?;
+        let y_diff = checked_sub_i32(y_span.1, y_span.0)?;
         let horizontal_sweep = x_diff > y_diff;
-        let last_idx = checked_sub(vertices.len(), 1, MathError::ValueUnderflow)?;
+        let last_idx = checked_sub_usize(vertices.len(), 1)?;
         let mut edges: Vec<_> = vertices
             .iter()
             .zip(vertices.iter().skip(1))
@@ -187,7 +184,7 @@ pub fn fill_polygon<DB: DrawingBackend, S: BackendStyle>(
                     active_edge.push(edge_obj);
                 }
 
-                idx = checked_add::<usize, MathError>(idx, 1, MathError::ValueOverflow)?;
+                idx = checked_add_usize(idx, 1)?;
             }
 
             active_edge.sort();
@@ -366,7 +363,7 @@ mod tests {
     fn horizontal_sweep_reports_overflow_for_extreme_span() {
         let err = Edge::horizontal_sweep((i32::MIN, 0), (i32::MAX, 0)).unwrap_err();
 
-        assert_eq!(err, MathError::ValueOverflow);
+        assert_eq!(err, MathError::ValueOutOfRange);
     }
 
     #[test]
@@ -400,7 +397,7 @@ mod tests {
             slave_end: 10,
         };
 
-        assert_eq!(edge.get_master_pos(), Err(MathError::ValueUnderflow));
+        assert_eq!(edge.get_master_pos(), Err(MathError::ValueOutOfRange));
     }
 
     #[test]
@@ -437,7 +434,7 @@ mod tests {
             slave_end: 10,
         };
 
-        assert_eq!(edge.inc_epoch(), Err(MathError::ValueOverflow));
+        assert_eq!(edge.inc_epoch(), Err(MathError::ValueOutOfRange));
         assert_eq!(edge.epoch, u32::MAX);
     }
 
@@ -606,7 +603,7 @@ mod tests {
         dbg!(&err);
         assert!(matches!(
             err,
-            DrawingErrorKind::MathError(MathError::ValueOverflow)
+            DrawingErrorKind::MathError(MathError::ValueOutOfRange)
         ));
     }
 }

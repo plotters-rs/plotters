@@ -61,6 +61,7 @@
   All the plotters main crate and second-party backends with version "x.y.*" should be compatible, and they should depens on the latest version of `plotters-backend x.y.*`
 
 */
+#![warn(clippy::arithmetic_side_effects)]
 use std::error::Error;
 
 pub mod error;
@@ -312,5 +313,359 @@ pub trait DrawingBackend: Sized {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::arithmetic_side_effects)]
+mod tests {
+    use super::*;
+    use std::fmt;
+
+    #[derive(Debug)]
+    struct TestBackendError;
+
+    impl fmt::Display for TestBackendError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(f, "test backend error")
+        }
+    }
+
+    impl Error for TestBackendError {}
+
+    #[derive(Debug, Clone)]
+    enum TestOp {
+        Pixel {
+            point: BackendCoord,
+            rgb: (u8, u8, u8),
+            alpha: f64,
+        },
+        Line {
+            from: BackendCoord,
+            to: BackendCoord,
+        },
+        FillPolygon {
+            len: usize,
+        },
+    }
+
+    struct TestBackend {
+        size: (u32, u32),
+        ops: Vec<TestOp>,
+        ensure_prepared_count: usize,
+        present_count: usize,
+    }
+
+    impl TestBackend {
+        fn new(size: (u32, u32)) -> Self {
+            Self {
+                size,
+                ops: Vec::new(),
+                ensure_prepared_count: 0,
+                present_count: 0,
+            }
+        }
+    }
+
+    impl DrawingBackend for TestBackend {
+        type ErrorType = TestBackendError;
+
+        fn get_size(&self) -> (u32, u32) {
+            self.size
+        }
+
+        fn ensure_prepared(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+            self.ensure_prepared_count += 1;
+            Ok(())
+        }
+
+        fn present(&mut self) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+            self.present_count += 1;
+            Ok(())
+        }
+
+        fn draw_pixel(
+            &mut self,
+            point: BackendCoord,
+            color: BackendColor,
+        ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+            self.ops.push(TestOp::Pixel {
+                point,
+                rgb: color.rgb,
+                alpha: color.alpha,
+            });
+            Ok(())
+        }
+
+        fn draw_line<S: BackendStyle>(
+            &mut self,
+            from: BackendCoord,
+            to: BackendCoord,
+            _style: &S,
+        ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+            self.ops.push(TestOp::Line { from, to });
+            Ok(())
+        }
+
+        fn fill_polygon<S: BackendStyle, I: IntoIterator<Item = BackendCoord>>(
+            &mut self,
+            vert: I,
+            _style: &S,
+        ) -> Result<(), DrawingErrorKind<Self::ErrorType>> {
+            let len = vert.into_iter().count();
+            self.ops.push(TestOp::FillPolygon { len });
+            Ok(())
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct TestStyle {
+        color: BackendColor,
+        stroke_width: u32,
+    }
+
+    impl TestStyle {
+        fn new(stroke_width: u32, alpha: f64) -> Self {
+            Self {
+                color: BackendColor {
+                    rgb: (1, 2, 3),
+                    alpha,
+                },
+                stroke_width,
+            }
+        }
+    }
+
+    impl BackendStyle for TestStyle {
+        fn color(&self) -> BackendColor {
+            self.color
+        }
+
+        fn stroke_width(&self) -> u32 {
+            self.stroke_width
+        }
+    }
+
+    #[test]
+    fn backend_coord_is_i32_pair() {
+        let coord: BackendCoord = (-1, 2);
+
+        assert_eq!(coord, (-1_i32, 2_i32));
+    }
+
+    #[test]
+    fn ensure_prepared_and_present_can_be_called() {
+        let mut backend = TestBackend::new((10, 10));
+
+        backend.ensure_prepared().unwrap();
+        backend.present().unwrap();
+
+        assert_eq!(backend.ensure_prepared_count, 1);
+        assert_eq!(backend.present_count, 1);
+    }
+
+    #[test]
+    fn draw_path_with_transparent_style_draws_nothing() {
+        let mut backend = TestBackend::new((100, 100));
+        let style = TestStyle::new(1, 0.0);
+
+        backend
+            .draw_path(vec![(0, 0), (10, 10), (20, 0)], &style)
+            .unwrap();
+
+        assert!(backend.ops.is_empty());
+    }
+
+    #[test]
+    fn draw_path_with_single_point_draws_nothing() {
+        let mut backend = TestBackend::new((100, 100));
+        let style = TestStyle::new(1, 1.0);
+
+        backend.draw_path(vec![(0, 0)], &style).unwrap();
+
+        assert!(backend.ops.is_empty());
+    }
+
+    #[test]
+    fn draw_path_with_stroke_width_one_draws_consecutive_lines() {
+        let mut backend = TestBackend::new((100, 100));
+        let style = TestStyle::new(1, 1.0);
+
+        backend
+            .draw_path(vec![(0, 0), (10, 10), (20, 0)], &style)
+            .unwrap();
+
+        assert_eq!(backend.ops.len(), 2);
+
+        match &backend.ops[0] {
+            TestOp::Line { from, to } => {
+                assert_eq!((*from, *to), ((0, 0), (10, 10)));
+            }
+            other => panic!("expected first op to be line, got {:?}", other),
+        }
+
+        match &backend.ops[1] {
+            TestOp::Line { from, to } => {
+                assert_eq!((*from, *to), ((10, 10), (20, 0)));
+            }
+            other => panic!("expected second op to be line, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn draw_path_with_wide_stroke_uses_fill_polygon() {
+        let mut backend = TestBackend::new((100, 100));
+        let style = TestStyle::new(3, 1.0);
+
+        backend
+            .draw_path(vec![(0, 0), (10, 10), (20, 0)], &style)
+            .unwrap();
+
+        assert_eq!(backend.ops.len(), 1);
+
+        match &backend.ops[0] {
+            TestOp::FillPolygon { len } => {
+                assert!(*len > 0);
+            }
+            other => panic!("expected fill polygon op, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn blit_bitmap_draws_rgb_pixels() {
+        let mut backend = TestBackend::new((2, 2));
+
+        let src = [
+            255, 0, 0, // pixel (0, 0)
+            0, 255, 0, // pixel (1, 0)
+            0, 0, 255, // pixel (0, 1)
+            255, 255, 0, // pixel (1, 1)
+        ];
+
+        backend.blit_bitmap((0, 0), (2, 2), &src).unwrap();
+
+        assert_eq!(backend.ops.len(), 4);
+
+        match &backend.ops[0] {
+            TestOp::Pixel { point, rgb, alpha } => {
+                assert_eq!(*point, (0, 0));
+                assert_eq!(*rgb, (255, 0, 0));
+                assert_eq!(*alpha, 1.0);
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+
+        match &backend.ops[1] {
+            TestOp::Pixel { point, rgb, alpha } => {
+                assert_eq!(*point, (0, 1));
+                assert_eq!(*rgb, (0, 0, 255));
+                assert_eq!(*alpha, 1.0);
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+
+        match &backend.ops[2] {
+            TestOp::Pixel { point, rgb, alpha } => {
+                assert_eq!(*point, (1, 0));
+                assert_eq!(*rgb, (0, 255, 0));
+                assert_eq!(*alpha, 1.0);
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+
+        match &backend.ops[3] {
+            TestOp::Pixel { point, rgb, alpha } => {
+                assert_eq!(*point, (1, 1));
+                assert_eq!(*rgb, (255, 255, 0));
+                assert_eq!(*alpha, 1.0);
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn blit_bitmap_clips_at_right_edge() {
+        let mut backend = TestBackend::new((2, 2));
+
+        let src = [
+            255, 0, 0, // pixel (0, 0)
+            0, 255, 0, // pixel (1, 0)
+            0, 0, 255, // pixel (0, 1)
+            255, 255, 0, // pixel (1, 1)
+        ];
+
+        backend.blit_bitmap((1, 0), (2, 2), &src).unwrap();
+
+        assert_eq!(backend.ops.len(), 2);
+
+        match &backend.ops[0] {
+            TestOp::Pixel { point, rgb, .. } => {
+                assert_eq!(*point, (1, 0));
+                assert_eq!(*rgb, (255, 0, 0));
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+
+        match &backend.ops[1] {
+            TestOp::Pixel { point, rgb, .. } => {
+                assert_eq!(*point, (1, 1));
+                assert_eq!(*rgb, (0, 0, 255));
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn blit_bitmap_clips_at_bottom_edge() {
+        let mut backend = TestBackend::new((2, 1));
+
+        let src = [
+            255, 0, 0, // pixel (0, 0)
+            0, 255, 0, // pixel (1, 0)
+            0, 0, 255, // pixel (0, 1)
+            255, 255, 0, // pixel (1, 1)
+        ];
+
+        backend.blit_bitmap((0, 0), (2, 2), &src).unwrap();
+
+        assert_eq!(backend.ops.len(), 2);
+
+        match &backend.ops[0] {
+            TestOp::Pixel { point, rgb, .. } => {
+                assert_eq!(*point, (0, 0));
+                assert_eq!(*rgb, (255, 0, 0));
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+
+        match &backend.ops[1] {
+            TestOp::Pixel { point, rgb, .. } => {
+                assert_eq!(*point, (1, 0));
+                assert_eq!(*rgb, (0, 255, 0));
+            }
+            other => panic!("expected pixel op, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn blit_bitmap_outside_right_edge_draws_nothing() {
+        let mut backend = TestBackend::new((2, 2));
+
+        let src = [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0];
+
+        backend.blit_bitmap((2, 0), (2, 2), &src).unwrap();
+
+        assert!(backend.ops.is_empty());
+    }
+
+    #[test]
+    fn blit_bitmap_outside_bottom_edge_draws_nothing() {
+        let mut backend = TestBackend::new((2, 2));
+
+        let src = [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0];
+
+        backend.blit_bitmap((0, 2), (2, 2), &src).unwrap();
+
+        assert!(backend.ops.is_empty());
     }
 }

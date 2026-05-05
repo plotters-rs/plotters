@@ -1,6 +1,5 @@
 use crate::{
-    math_guard::checked_sub, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
-    MathError,
+    math_guard::checked_sub_i32, BackendCoord, BackendStyle, DrawingBackend, DrawingErrorKind,
 };
 
 pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
@@ -19,8 +18,8 @@ pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
     let x1 = upper_left.0.max(bottom_right.0);
     let y1 = upper_left.1.max(bottom_right.1);
 
-    let width = checked_sub(x1, x0, MathError::ValueOverflow)?;
-    let height = checked_sub(y1, y0, MathError::ValueOverflow)?;
+    let width = checked_sub_i32(x1, x0)?;
+    let height = checked_sub_i32(y1, y0)?;
 
     if fill {
         if width < height {
@@ -45,7 +44,7 @@ pub fn draw_rect<B: DrawingBackend, S: BackendStyle>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{BackendColor, BackendStyle};
+    use crate::{BackendColor, BackendStyle, MathError};
 
     #[derive(Debug)]
     struct TestBackendError;
@@ -192,7 +191,7 @@ mod tests {
     }
 
     #[test]
-    fn rect_with_extreme_coordinates_returns_math_error() {
+    fn rect_with_extreme_coordinates_returns_out_of_range_math_error() {
         let mut backend = TestBackend::default();
 
         let err = draw_rect(
@@ -206,7 +205,9 @@ mod tests {
 
         assert!(matches!(
             err,
-            DrawingErrorKind::MathError(MathError::ValueOverflow)
+            DrawingErrorKind::MathError(MathError::ValueOutOfRange)
         ));
+
+        assert!(backend.lines.is_empty());
     }
 }
