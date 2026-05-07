@@ -25,17 +25,17 @@ const ORANGE: RGBColor = RGBColor(255, 200, 90);
 const PURPLE: RGBColor = RGBColor(170, 140, 240);
 
 const DATA: &[(i32, f64)] = &[
-    (96, 7.3214),
-    (224, 7.1289),
-    (352, 6.8956),
-    (480, 6.6943),
-    (608, 6.4877),
-    (736, 6.2731),
-    (864, 6.0840),
+    (96, 7.5512),
+    (224, 7.2034),
+    (352, 6.9281),
+    (480, 6.7102),
+    (608, 6.5298),
+    (736, 6.3871),
+    (864, 6.2705),
 ];
 
-const SLOPE: f64 = -0.001627;
-const INTERCEPT: f64 = 7.4790;
+const SLOPE: f64 = -0.001635;
+const INTERCEPT: f64 = 7.5820;
 const CURRENT_STEP: i32 = 960;
 const TARGET_STEP: i32 = 1216;
 const BASELINE_VALUE: f64 = 7.6;
@@ -109,7 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let fit_points: Vec<(i32, f64)> = (40..=1260).step_by(4).map(|x| (x, fit(x))).collect();
     chart
         .draw_series(DashedLineSeries::new(fit_points, 8, 6, fit_style))?
-        .label("Linear fit (-0.208 nats / 128 steps)")
+        .label("Linear fit (-0.209 nats / 128 steps)")
         .legend(move |(x, y)| {
             PathElement::new(
                 vec![(x, y), (x + 8, y), (x + 14, y), (x + 24, y)],
@@ -181,7 +181,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         EmptyElement::at((CURRENT_STEP, fit(CURRENT_STEP)))
             + Text::new(
                 format!("fit ~{:.3}", fit(CURRENT_STEP)),
-                (8, 6),
+                (8, -8),
                 fit_label_left,
             ),
     ))?;
@@ -199,8 +199,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (90, 5.83),
         (560, 5.40),
         &[
-            "Confirmed drop: 1.2374 nats (96 -> 864)",
-            "Latest confirmed: 6.0840 at step 864",
+            "Confirmed drop: 1.2807 nats (96 -> 864)",
+            "Latest confirmed: 6.2705 at step 864",
             "Step 960 eval not yet logged",
         ],
         14,
