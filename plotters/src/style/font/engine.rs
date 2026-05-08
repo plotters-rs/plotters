@@ -1,5 +1,3 @@
-// pattern: Functional Core
-
 use super::LayoutBox;
 use std::error::Error;
 use std::fmt;

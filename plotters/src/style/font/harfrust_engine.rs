@@ -1,5 +1,3 @@
-// pattern: Mixed (needs refactoring)
-
 use super::engine::{
     CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun, Vector2F,
 };

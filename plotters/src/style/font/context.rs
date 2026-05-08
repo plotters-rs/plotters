@@ -1,5 +1,3 @@
-// pattern: Mixed (needs refactoring)
-
 use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, Vector2F};
 use super::harfrust_engine::HarfrustEngine;
 use super::system::SystemFontSource;
