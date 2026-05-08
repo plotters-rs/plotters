@@ -1,3 +1,5 @@
+// pattern: Functional Core
+
 use super::LayoutBox;
 use std::error::Error;
 use std::fmt;
@@ -10,19 +12,32 @@ pub trait FontEngine: Send + Sync {
 
 /// A parsed font that can shape text and rasterize glyph masks.
 pub trait ParsedFont: Send + Sync {
-    fn shape(&self, text: &str, size_px: f32) -> Result<ShapedRun, FontError>;
+    fn shape(&self, text: &str, font_size_px: f32) -> Result<ShapedRun, FontError>;
     /// Rasterize a single glyph at the requested pixel size.
     ///
-    /// `subpixel` carries the fractional `(x, y)` offset of the glyph origin
-    /// within its target pixel cell, in `[0, 1)`. Implementations should fold
-    /// it into the rasterization so strokes that fall between integer pixel
-    /// columns are anti-aliased correctly instead of being rounded away.
+    /// `subpixel_offset` carries the fractional offset of the glyph origin within
+    /// its target pixel cell, in `[0, 1)`. Implementations should fold it into
+    /// the rasterization so strokes that fall between integer pixel columns are
+    /// anti-aliased correctly instead of being rounded away.
     fn rasterize(
         &self,
         glyph_id: u32,
-        size_px: f32,
-        subpixel: (f32, f32),
+        font_size_px: f32,
+        subpixel_offset: Vector2F,
     ) -> Result<CoverageMask, FontError>;
+}
+
+/// A two-dimensional vector in floating-point pixel coordinates.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub(crate) struct Vector2F {
+    pub(crate) x: f32,
+    pub(crate) y: f32,
+}
+
+impl Vector2F {
+    pub(crate) fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
 }
 
 /// A shaped single-line run.

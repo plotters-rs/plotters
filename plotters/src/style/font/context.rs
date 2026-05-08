@@ -1,4 +1,6 @@
-use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont};
+// pattern: Mixed (needs refactoring)
+
+use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, Vector2F};
 use super::harfrust_engine::HarfrustEngine;
 use super::system::SystemFontSource;
 use super::LayoutBox;
@@ -43,6 +45,17 @@ pub(crate) struct FontContext {
     // explicit `with_fonts(...)` contexts stay strict (asking for an
     // unregistered name is still a hard miss).
     fallback_unresolved_names: bool,
+}
+
+pub(crate) enum FontDrawError<E> {
+    Font(FontError),
+    Draw(E),
+}
+
+impl<E> From<FontError> for FontDrawError<E> {
+    fn from(err: FontError) -> Self {
+        Self::Font(err)
+    }
 }
 
 #[derive(Clone)]
@@ -168,14 +181,15 @@ impl FontContext {
         text: &str,
         (base_x, base_y): (i32, i32),
         mut draw: DrawFunc,
-    ) -> FontResult<Result<(), E>> {
+    ) -> Result<(), FontDrawError<E>> {
         let font = self.resolve(family, style)?;
         let run = font.shape(text, size as f32)?;
 
         for glyph in run.glyphs {
             let (int_x, sx_quantum) = split_subpixel(glyph.x);
             let (int_y, sy_quantum) = split_subpixel(glyph.y);
-            let mask = self.rasterize_cached(&font, glyph.id, size as f32, sx_quantum, sy_quantum)?;
+            let mask =
+                self.rasterize_cached(&font, glyph.id, size as f32, sx_quantum, sy_quantum)?;
             for row in 0..mask.height {
                 for col in 0..mask.width {
                     let index = (row * mask.width + col) as usize;
@@ -185,14 +199,12 @@ impl FontContext {
                     }
                     let x = base_x + int_x + mask.left + col as i32;
                     let y = base_y + int_y + mask.top + row as i32;
-                    if let Err(err) = draw(x, y, alpha) {
-                        return Ok(Err(err));
-                    }
+                    draw(x, y, alpha).map_err(FontDrawError::Draw)?;
                 }
             }
         }
 
-        Ok(Ok(()))
+        Ok(())
     }
 
     fn rasterize_cached(
@@ -221,9 +233,11 @@ impl FontContext {
             return Ok(mask);
         }
 
-        let sx = sx_quantum as f32 / SUBPIXEL_LEVELS as f32;
-        let sy = sy_quantum as f32 / SUBPIXEL_LEVELS as f32;
-        let mask = Arc::new(font.rasterize(glyph_id, size_px, (sx, sy))?);
+        let subpixel_offset = Vector2F::new(
+            sx_quantum as f32 / SUBPIXEL_LEVELS as f32,
+            sy_quantum as f32 / SUBPIXEL_LEVELS as f32,
+        );
+        let mask = Arc::new(font.rasterize(glyph_id, size_px, subpixel_offset)?);
         let mut cache = self.glyphs.lock().map_err(|_| FontError::LockError)?;
         Ok(cache.entry(key).or_insert(mask).clone())
     }

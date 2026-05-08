@@ -1,6 +1,8 @@
-#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
-use super::FontContext;
+// pattern: Mixed (needs refactoring)
+
 use super::FontResult;
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+use super::{context::FontDrawError, FontContext};
 #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
 use super::{FontData, FontDataInternal};
 use crate::style::text_anchor::Pos;
@@ -180,14 +182,18 @@ impl<'a> FontDesc<'a> {
     ) -> FontResult<Result<(), E>> {
         #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
         {
-            FontContext::current_or_default().draw(
+            match FontContext::current_or_default().draw(
                 self.family,
                 self.style,
                 self.size,
                 text,
                 (x, y),
                 draw,
-            )
+            ) {
+                Ok(()) => Ok(Ok(())),
+                Err(FontDrawError::Font(err)) => Err(err),
+                Err(FontDrawError::Draw(err)) => Ok(Err(err)),
+            }
         }
 
         #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]

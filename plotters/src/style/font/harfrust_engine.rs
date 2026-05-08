@@ -1,4 +1,8 @@
-use super::engine::{CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun};
+// pattern: Mixed (needs refactoring)
+
+use super::engine::{
+    CoverageMask, FontEngine, FontError, ParsedFont, PositionedGlyph, ShapedRun, Vector2F,
+};
 use harfrust::{Direction, FontRef as HarfrustFontRef, ShaperData, UnicodeBuffer};
 use skrifa::outline::{
     DrawSettings, Engine, HintingInstance, HintingOptions, OutlineGlyph, OutlinePen,
@@ -49,8 +53,8 @@ impl HarfrustFont {
             .map_err(|_| FontError::InvalidFontIndex(self.index))
     }
 
-    fn hinter_for(&self, size_px: f32) -> Option<Arc<HintingInstance>> {
-        let key = size_px.to_bits();
+    fn hinter_for(&self, font_size_px: f32) -> Option<Arc<HintingInstance>> {
+        let key = font_size_px.to_bits();
         if let Some(cached) = self.hinters.lock().ok()?.get(&key).cloned() {
             return cached;
         }
@@ -66,7 +70,7 @@ impl HarfrustFont {
         // at every size so labels keep a single shared baseline.
         let hinter = HintingInstance::new(
             &outlines,
-            Size::new(size_px),
+            Size::new(font_size_px),
             LocationRef::default(),
             HintingOptions {
                 engine: Engine::Auto(None),
@@ -84,7 +88,7 @@ impl HarfrustFont {
 }
 
 impl ParsedFont for HarfrustFont {
-    fn shape(&self, text: &str, size_px: f32) -> Result<ShapedRun, FontError> {
+    fn shape(&self, text: &str, font_size_px: f32) -> Result<ShapedRun, FontError> {
         if text.is_empty() {
             return Ok(ShapedRun {
                 glyphs: Vec::new(),
@@ -94,8 +98,11 @@ impl ParsedFont for HarfrustFont {
 
         let font = self.harfrust_font()?;
         let shaper_data = ShaperData::new(&font);
-        let shaper = shaper_data.shaper(&font).point_size(Some(size_px)).build();
-        let scale = size_px / (shaper.units_per_em().max(1) as f32);
+        let shaper = shaper_data
+            .shaper(&font)
+            .point_size(Some(font_size_px))
+            .build();
+        let scale = font_size_px / (shaper.units_per_em().max(1) as f32);
 
         let mut buffer = UnicodeBuffer::new();
         buffer.push_str(text);
@@ -119,13 +126,13 @@ impl ParsedFont for HarfrustFont {
         }
 
         let font = self.skrifa_font()?;
-        let metrics = font.metrics(Size::new(size_px), LocationRef::default());
+        let metrics = font.metrics(Size::new(font_size_px), LocationRef::default());
         let min_y = (-metrics.ascent).floor() as i32;
         let descent_y = (-metrics.descent).ceil() as i32;
         let max_y = if descent_y > min_y {
             descent_y
         } else {
-            size_px.ceil() as i32
+            font_size_px.ceil() as i32
         };
         let width = (cursor_x * scale).ceil().max(0.0) as i32;
 
@@ -138,8 +145,8 @@ impl ParsedFont for HarfrustFont {
     fn rasterize(
         &self,
         glyph_id: u32,
-        size_px: f32,
-        subpixel: (f32, f32),
+        font_size_px: f32,
+        subpixel_offset: Vector2F,
     ) -> Result<CoverageMask, FontError> {
         let font = self.skrifa_font()?;
         let outlines = font.outline_glyphs();
@@ -148,23 +155,22 @@ impl ParsedFont for HarfrustFont {
         };
 
         let mut path = Vec::new();
-        if let Some(hinter) = self.hinter_for(size_px) {
+        if let Some(hinter) = self.hinter_for(font_size_px) {
             if glyph
                 .draw(
                     DrawSettings::hinted(&hinter, false),
                     &mut ZenoPen {
                         path: &mut path,
-                        sx: subpixel.0,
-                        sy: subpixel.1,
+                        subpixel_offset,
                     },
                 )
                 .is_err()
             {
                 path.clear();
-                draw_unhinted_glyph(&glyph, size_px, subpixel, &mut path)?;
+                draw_unhinted_glyph(&glyph, font_size_px, subpixel_offset, &mut path)?;
             }
         } else {
-            draw_unhinted_glyph(&glyph, size_px, subpixel, &mut path)?;
+            draw_unhinted_glyph(&glyph, font_size_px, subpixel_offset, &mut path)?;
         }
 
         if path.is_empty() {
@@ -184,17 +190,16 @@ impl ParsedFont for HarfrustFont {
 
 fn draw_unhinted_glyph(
     glyph: &OutlineGlyph<'_>,
-    size_px: f32,
-    subpixel: (f32, f32),
+    font_size_px: f32,
+    subpixel_offset: Vector2F,
     path: &mut Vec<Command>,
 ) -> Result<(), FontError> {
     glyph
         .draw(
-            DrawSettings::unhinted(Size::new(size_px), LocationRef::default()),
+            DrawSettings::unhinted(Size::new(font_size_px), LocationRef::default()),
             &mut ZenoPen {
                 path,
-                sx: subpixel.0,
-                sy: subpixel.1,
+                subpixel_offset,
             },
         )
         .map(|_| ())
@@ -217,29 +222,32 @@ struct ZenoPen<'a> {
     // already accounts for the glyph's fractional pixel position. Without
     // this, the caller has to round to integer pixel positions and the
     // sub-pixel kerning information from harfrust is lost.
-    sx: f32,
-    sy: f32,
+    subpixel_offset: Vector2F,
 }
 
 impl OutlinePen for ZenoPen<'_> {
     fn move_to(&mut self, x: f32, y: f32) {
-        self.path.move_to((x + self.sx, -y + self.sy));
+        self.path
+            .move_to((x + self.subpixel_offset.x, -y + self.subpixel_offset.y));
     }
 
     fn line_to(&mut self, x: f32, y: f32) {
-        self.path.line_to((x + self.sx, -y + self.sy));
+        self.path
+            .line_to((x + self.subpixel_offset.x, -y + self.subpixel_offset.y));
     }
 
     fn quad_to(&mut self, cx0: f32, cy0: f32, x: f32, y: f32) {
-        self.path
-            .quad_to((cx0 + self.sx, -cy0 + self.sy), (x + self.sx, -y + self.sy));
+        self.path.quad_to(
+            (cx0 + self.subpixel_offset.x, -cy0 + self.subpixel_offset.y),
+            (x + self.subpixel_offset.x, -y + self.subpixel_offset.y),
+        );
     }
 
     fn curve_to(&mut self, cx0: f32, cy0: f32, cx1: f32, cy1: f32, x: f32, y: f32) {
         self.path.curve_to(
-            (cx0 + self.sx, -cy0 + self.sy),
-            (cx1 + self.sx, -cy1 + self.sy),
-            (x + self.sx, -y + self.sy),
+            (cx0 + self.subpixel_offset.x, -cy0 + self.subpixel_offset.y),
+            (cx1 + self.subpixel_offset.x, -cy1 + self.subpixel_offset.y),
+            (x + self.subpixel_offset.x, -y + self.subpixel_offset.y),
         );
     }
 
@@ -269,7 +277,10 @@ mod tests {
         let mask = run
             .glyphs
             .iter()
-            .map(|glyph| font.rasterize(glyph.id, 24.0, (0.0, 0.0)).unwrap())
+            .map(|glyph| {
+                font.rasterize(glyph.id, 24.0, Vector2F::new(0.0, 0.0))
+                    .unwrap()
+            })
             .find(|mask| mask.width > 0 && mask.height > 0)
             .expect("at least one glyph has an outline");
 
@@ -283,8 +294,12 @@ mod tests {
         let font = engine.parse(Arc::<[u8]>::from(FONT_BYTES), 0).unwrap();
         let glyph_id = font.shape("H", 18.0).unwrap().glyphs[0].id;
 
-        let aligned = font.rasterize(glyph_id, 18.0, (0.0, 0.0)).unwrap();
-        let shifted = font.rasterize(glyph_id, 18.0, (0.5, 0.0)).unwrap();
+        let aligned = font
+            .rasterize(glyph_id, 18.0, Vector2F::new(0.0, 0.0))
+            .unwrap();
+        let shifted = font
+            .rasterize(glyph_id, 18.0, Vector2F::new(0.5, 0.0))
+            .unwrap();
 
         // A half-pixel horizontal shift either changes the placement or the
         // coverage values; otherwise subpixel positioning is being dropped.
