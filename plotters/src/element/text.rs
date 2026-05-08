@@ -161,19 +161,31 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
     }
 }
 
-// Only run the test on Linux because the default font is different
-// on other platforms, causing different multiline splits.
-#[cfg(all(feature = "ttf", target_os = "linux"))]
+// Only run the test on Linux: the default sans-serif resolves to a
+// deterministic family (DejaVu) on most distros, but the exact glyph
+// advances differ between font-kit + ttf-parser and harfrust + skrifa, so
+// pinning the split index to a specific char makes this flaky across
+// versions of the same font. Validate the structural contract instead --
+// the chunks must reconstruct the input, oversized input must produce more
+// than one chunk, and no chunk may be empty.
+#[cfg(all(not(feature = "ab_glyph"), target_os = "linux"))]
 #[test]
 fn test_multi_layout() {
     use plotters_backend::{FontFamily, FontStyle};
 
     let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
 
+    let mut chunks = Vec::new();
     layout_multiline_text("öäabcde", 40, font, |txt| {
         println!("Got: {}", txt);
-        assert!(txt == "öäabc" || txt == "de");
+        chunks.push(txt.to_string());
     });
+    assert_eq!(chunks.concat(), "öäabcde");
+    assert!(
+        chunks.len() >= 2,
+        "expected multi-chunk split for input wider than 40 px, got {chunks:?}"
+    );
+    assert!(chunks.iter().all(|c| !c.is_empty()));
 
     let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
     layout_multiline_text("öä", 100, font, |txt| {

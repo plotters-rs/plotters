@@ -3,7 +3,9 @@ use crate::coord::ranged1d::{KeyPointHint, Ranged};
 use crate::coord::{CoordTranslate, Shift};
 use crate::element::{CoordMapper, Drawable, PointCollection};
 use crate::style::text_anchor::{HPos, Pos, VPos};
-use crate::style::{Color, SizeDesc, TextStyle};
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+use crate::style::{push_font_context, FontContext};
+use crate::style::{Color, FontStyle, SizeDesc, TextStyle};
 
 /// The abstraction of a drawing area
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
@@ -14,6 +16,8 @@ use std::error::Error;
 use std::iter::{once, repeat};
 use std::ops::Range;
 use std::rc::Rc;
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+use std::sync::Arc;
 
 /// The representation of the rectangle in backend canvas
 #[derive(Clone, Debug)]
@@ -120,6 +124,8 @@ pub struct DrawingArea<DB: DrawingBackend, CT: CoordTranslate> {
     backend: Rc<RefCell<DB>>,
     rect: Rect,
     coord: CT,
+    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+    font_ctx: Arc<FontContext>,
 }
 
 impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, CT> {
@@ -128,6 +134,8 @@ impl<DB: DrawingBackend, CT: CoordTranslate + Clone> Clone for DrawingArea<DB, C
             backend: self.backend.clone(),
             rect: self.rect.clone(),
             coord: self.coord.clone(),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         }
     }
 }
@@ -236,6 +244,8 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             rect: self.rect.clone(),
             backend: self.backend.clone(),
             coord: Shift((self.rect.x0, self.rect.y0)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         }
     }
 
@@ -245,6 +255,8 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
             rect: self.rect.clone(),
             backend: self.backend.clone(),
             coord: Shift((0, 0)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         }
     }
 
@@ -276,6 +288,9 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
         &self,
         ops: O,
     ) -> Result<R, DrawingAreaError<DB>> {
+        #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+        let _font_ctx_guard = push_font_context(self.font_ctx.clone());
+
         if let Ok(mut db) = self.backend.try_borrow_mut() {
             db.ensure_prepared()
                 .map_err(DrawingAreaErrorKind::BackendError)?;
@@ -346,6 +361,30 @@ impl<DB: DrawingBackend, CT: CoordTranslate> DrawingArea<DB, CT> {
     ) -> Result<(u32, u32), DrawingAreaError<DB>> {
         self.backend_ops(move |b| b.estimate_text_size(text, style))
     }
+
+    /// Returns a drawing area that can resolve the provided in-memory fonts by name.
+    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+    pub fn with_fonts<I, S>(mut self, fonts: I) -> Self
+    where
+        I: IntoIterator<Item = (S, FontStyle, Arc<[u8]>)>,
+        S: Into<String>,
+    {
+        let mut ctx = FontContext::new();
+        for (name, style, bytes) in fonts {
+            let name = name.into();
+            ctx = ctx.with_font(&name, style, bytes);
+        }
+        self.font_ctx = Arc::new(ctx);
+        self
+    }
+
+    /// Clone of the area's font context, for callers that need to lay out
+    /// text outside `backend_ops` (which would otherwise hide explicit
+    /// `with_fonts` registrations from `FontDesc::layout_box`).
+    #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+    pub(crate) fn font_context_arc(&self) -> Arc<FontContext> {
+        self.font_ctx.clone()
+    }
 }
 
 impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
@@ -360,6 +399,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend,
             coord: Shift((0, 0)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: FontContext::system_default(),
         }
     }
 
@@ -388,6 +429,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: self.rect.clone(),
             backend: self.backend.clone(),
             coord: coord_spec,
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         }
     }
 
@@ -412,6 +455,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.backend.clone(),
             coord: Shift((self.rect.x0 + left, self.rect.y0 + top)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         }
     }
 
@@ -423,6 +468,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: rect.clone(),
             backend: self.backend.clone(),
             coord: Shift((rect.x0, rect.y0)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
@@ -436,6 +483,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             rect: rect.clone(),
             backend: self.backend.clone(),
             coord: Shift((rect.x0, rect.y0)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         });
 
         (ret.next().unwrap(), ret.next().unwrap())
@@ -449,6 +498,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 rect: rect.clone(),
                 backend: self.backend.clone(),
                 coord: Shift((rect.x0, rect.y0)),
+                #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+                font_ctx: self.font_ctx.clone(),
             })
             .collect()
     }
@@ -473,6 +524,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
                 rect: rect.clone(),
                 backend: self.backend.clone(),
                 coord: Shift((rect.x0, rect.y0)),
+                #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+                font_ctx: self.font_ctx.clone(),
             })
             .collect()
     }
@@ -509,6 +562,8 @@ impl<DB: DrawingBackend> DrawingArea<DB, Shift> {
             },
             backend: self.backend.clone(),
             coord: Shift((self.rect.x0, self.rect.y0 + y_padding * 2 + text_h as i32)),
+            #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+            font_ctx: self.font_ctx.clone(),
         })
     }
 
@@ -711,6 +766,15 @@ mod drawing_area_tests {
     }
     #[test]
     fn test_titled() {
+        #[cfg(feature = "ab_glyph")]
+        {
+            let _ = crate::style::register_font(
+                "serif",
+                FontStyle::Normal,
+                include_bytes!("../../tests/fixtures/SourceSansPro-Regular-Tiny.ttf"),
+            );
+        }
+
         let drawing_area = create_mocked_drawing_area(1024, 768, |m| {
             m.check_draw_text(|c, font, size, _pos, text| {
                 assert_eq!(c, BLACK.to_rgba());

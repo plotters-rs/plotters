@@ -2,6 +2,8 @@ use super::ChartContext;
 use crate::coord::CoordTranslate;
 use crate::drawing::DrawingAreaErrorKind;
 use crate::element::{DynElement, EmptyElement, IntoDynElement, MultiLineText, Rectangle};
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+use crate::style::push_font_context;
 use crate::style::{IntoFont, IntoTextStyle, ShapeStyle, SizeDesc, TextStyle, TRANSPARENT};
 
 use plotters_backend::{BackendCoord, DrawingBackend, DrawingErrorKind};
@@ -224,6 +226,15 @@ impl<'a, 'b, DB: DrawingBackend + 'a, CT: CoordTranslate> SeriesLabelStyle<'a, '
     */
     pub fn draw(&mut self) -> Result<(), DrawingAreaErrorKind<DB::ErrorType>> {
         let drawing_area = self.target.plotting_area().strip_coord_spec();
+
+        // The legend's text-layout passes (`estimate_dimension`,
+        // `compute_line_layout`) call `FontDesc::layout_box` directly rather
+        // than going through `backend_ops`, so the per-area font context
+        // wouldn't otherwise be visible to them. Push it here for the
+        // remainder of `draw()` so explicit `with_fonts` registrations
+        // resolve as expected.
+        #[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+        let _font_ctx_guard = push_font_context(drawing_area.font_context_arc());
 
         // TODO: Issue #68 Currently generic font family doesn't load on OSX, change this after the issue
         // resolved

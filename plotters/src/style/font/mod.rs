@@ -6,49 +6,29 @@
 //!
 //! Thus we need different mechanism for the font implementation
 
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+mod context;
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+mod engine;
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+mod harfrust_engine;
 #[cfg(all(
     not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    feature = "ttf"
-))]
-mod ttf;
-#[cfg(all(
-    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    feature = "ttf"
-))]
-use ttf::FontDataInternal;
-
-#[cfg(all(
-    not(target_arch = "wasm32"),
-    not(target_os = "wasi"),
     feature = "ab_glyph"
 ))]
-mod ab_glyph;
+mod migration;
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+mod system;
+
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+pub(crate) use context::{push_font_context, FontContext};
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+pub use engine::FontError;
 #[cfg(all(
-    not(target_arch = "wasm32"),
-    not(target_os = "wasi"),
+    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
     feature = "ab_glyph"
 ))]
-pub use self::ab_glyph::register_font;
-#[cfg(all(
-    not(target_arch = "wasm32"),
-    not(target_os = "wasi"),
-    feature = "ab_glyph",
-    not(feature = "ttf")
-))]
-use self::ab_glyph::FontDataInternal;
-
-#[cfg(all(
-    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    not(feature = "ttf"),
-    not(feature = "ab_glyph")
-))]
-mod naive;
-#[cfg(all(
-    not(all(target_arch = "wasm32", not(target_os = "wasi"))),
-    not(feature = "ttf"),
-    not(feature = "ab_glyph")
-))]
-use naive::FontDataInternal;
+pub use migration::{register_font, InvalidFont};
 
 #[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
 mod web;
@@ -61,6 +41,19 @@ pub use font_desc::*;
 /// Represents a box where a text label can be fit
 pub type LayoutBox = ((i32, i32), (i32, i32));
 
+#[cfg(not(all(target_arch = "wasm32", not(target_os = "wasi"))))]
+/// The type we used to represent a result of any font operations
+pub type FontResult<T> = Result<T, FontError>;
+
+#[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
+/// The error type for the font implementation
+pub type FontError = <FontDataInternal as FontData>::ErrorType;
+
+#[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
+/// The type we used to represent a result of any font operations
+pub type FontResult<T> = Result<T, FontError>;
+
+#[cfg(all(target_arch = "wasm32", not(target_os = "wasi")))]
 pub trait FontData: Clone {
     type ErrorType: Sized + std::error::Error + Clone;
     fn new(family: FontFamily, style: FontStyle) -> Result<Self, Self::ErrorType>;
