@@ -140,7 +140,7 @@ impl FontTransform {
 }
 
 /// Describes the font style. Such as Italic, Oblique, etc.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FontStyle {
     /// The normal style
     Normal,
