@@ -46,13 +46,33 @@ impl Quartiles {
     pub fn new<T: Into<f64> + Copy + PartialOrd>(s: &[T]) -> Self {
         let mut s = s.to_owned();
         s.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-
         let lower = Quartiles::percentile_of_sorted(&s, 25_f64);
         let median = Quartiles::percentile_of_sorted(&s, 50_f64);
         let upper = Quartiles::percentile_of_sorted(&s, 75_f64);
         let iqr = upper - lower;
-        let lower_fence = lower - 1.5 * iqr;
-        let upper_fence = upper + 1.5 * iqr;
+        let mut lower_fence = lower - 1.5 * iqr;
+        let mut upper_fence = upper + 1.5 * iqr;
+        // smallest and largest within 1.5 IQR range:
+        let mut min_defined = false;
+        let mut max_defined_val = None;
+
+        for item in s {
+            let value = item.into();
+            if value > upper_fence {
+                break;
+            }
+            if value > lower_fence && !min_defined {
+                lower_fence = value;
+                min_defined = true;
+            }
+
+            if max_defined_val.is_none() || item > max_defined_val.unwrap() {
+                max_defined_val = Some(item)
+            }
+
+        }
+        upper_fence = max_defined_val.unwrap().into();
+
         Self {
             lower_fence,
             lower,
@@ -71,7 +91,7 @@ impl Quartiles {
     ///
     /// let quartiles = Quartiles::new(&[7, 15, 36, 39, 40, 41]);
     /// let values = quartiles.values();
-    /// assert_eq!(values, [-9.0, 20.25, 37.5, 39.75, 69.0]);
+    /// assert_eq!(values, [7.0, 20.25, 37.5, 39.75, 41.0]);
     /// ```
     pub fn values(&self) -> [f32; 5] {
         [
@@ -117,11 +137,20 @@ mod test {
         );
         assert_eq!(
             Quartiles::new(&[10, 20]).values(),
-            [5.0, 12.5, 15.0, 17.5, 25.0]
+            [10.0, 12.5, 15.0, 17.5, 20.0]
         );
         assert_eq!(
             Quartiles::new(&[10, 20, 30]).values(),
-            [0.0, 15.0, 20.0, 25.0, 40.0]
+            [10.0, 15.0, 20.0, 25.0, 30.0]
+        );
+    }
+
+    #[test]
+    fn test_close_value_inputs() {
+        assert_eq!(
+            Quartiles::new(&[0.0, 1.0, 12.9, 13.0, 13.5,43.0, 44.5, 46.0,48.2, 49.0, 51.5, 60.0]).values(),
+            // calculated fences are -40.525 and 102.075
+            [0.0, 12.975, 43.75, 48.4, 60.0]
         );
     }
 }
