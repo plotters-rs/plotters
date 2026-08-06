@@ -47,7 +47,7 @@ fn draw_line(c: &mut Criterion) {
             for y in 0..10 {
                 root.draw_line(
                     (0, 0),
-                    ((W / 2) as i32, (y * 100) as i32),
+                    ((W / 2) as i32, y * 100),
                     &RGBColor(255, 0, 234).to_rgba(),
                 )
                 .unwrap();
@@ -63,7 +63,7 @@ fn draw_line(c: &mut Criterion) {
             for y in 0..10 {
                 root.draw_line(
                     (0, 0),
-                    ((W / 2) as i32, (y * 100) as i32),
+                    ((W / 2) as i32, y * 100),
                     &RGBColor(255, 0, 234).to_rgba(),
                 )
                 .unwrap();
