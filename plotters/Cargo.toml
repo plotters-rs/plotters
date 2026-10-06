@@ -66,6 +66,9 @@ features = [
          "Window",
          "HtmlCanvasElement",
          "CanvasRenderingContext2d",
+         "OffscreenCanvas",
+         "OffscreenCanvasRenderingContext2d",
+         "TextMetrics",
 ]
 
 [features]
