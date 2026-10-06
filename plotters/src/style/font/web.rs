@@ -1,6 +1,9 @@
 use super::{FontData, FontFamily, FontStyle, LayoutBox};
 use wasm_bindgen::JsCast;
-use web_sys::{window, HtmlElement};
+use web_sys::{
+    window, CanvasRenderingContext2d, HtmlCanvasElement, OffscreenCanvas,
+    OffscreenCanvasRenderingContext2d, TextMetrics,
+};
 
 #[derive(Debug, Clone)]
 pub enum FontError {
@@ -29,18 +32,39 @@ impl FontData for FontDataInternal {
         ))
     }
     fn estimate_layout(&self, size: f64, text: &str) -> Result<LayoutBox, Self::ErrorType> {
-        let window = window().unwrap();
-        let document = window.document().unwrap();
-        let body = document.body().unwrap();
-        let span = document.create_element("span").unwrap();
-        span.set_text_content(Some(text));
-        span.set_attribute("style", &format!("display: inline-block; font-family:{}; font-style:{}; font-size: {}px; position: fixed; top: 100%", self.0, self.1, size)).unwrap();
-        let span = span.into();
-        body.append_with_node_1(&span).unwrap();
-        let elem = JsCast::dyn_into::<HtmlElement>(span).unwrap();
-        let height = elem.offset_height() as i32;
-        let width = elem.offset_width() as i32;
-        elem.remove();
-        Ok(((0, 0), (width, height)))
+        let metrics = measure(&format!("{} {}px {}", self.1, size, self.0), text)
+            .ok_or(FontError::UnknownError)?;
+        let height = metrics.font_bounding_box_ascent() + metrics.font_bounding_box_descent();
+        Ok((
+            (0, 0),
+            (metrics.width().round() as i32, height.round() as i32),
+        ))
     }
+}
+
+/// Measure `text` in the CSS `font` with an `OffscreenCanvas`, or with a canvas element where
+/// `OffscreenCanvas` doesn't exist.
+fn measure(font: &str, text: &str) -> Option<TextMetrics> {
+    let offscreen = || -> Option<TextMetrics> {
+        let context: OffscreenCanvasRenderingContext2d = OffscreenCanvas::new(0, 0)
+            .ok()?
+            .get_context("2d")
+            .ok()??
+            .dyn_into()
+            .ok()?;
+        context.set_font(font);
+        context.measure_text(text).ok()
+    };
+    let element = || -> Option<TextMetrics> {
+        let canvas: HtmlCanvasElement = window()?
+            .document()?
+            .create_element("canvas")
+            .ok()?
+            .dyn_into()
+            .ok()?;
+        let context: CanvasRenderingContext2d = canvas.get_context("2d").ok()??.dyn_into().ok()?;
+        context.set_font(font);
+        context.measure_text(text).ok()
+    };
+    offscreen().or_else(element)
 }
