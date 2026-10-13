@@ -388,6 +388,9 @@ impl<'a> DrawingBackend for SVGBackend<'a> {
             .write_value(style.color().alpha);
         attrwriter.write_key("fill").write_value(fill);
         attrwriter.write_key("stroke").write_value(stroke);
+        attrwriter
+            .write_key("stroke-width")
+            .write_value(style.stroke_width());
         attrwriter.close();
         Ok(())
     }
