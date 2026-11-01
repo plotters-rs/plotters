@@ -1,4 +1,4 @@
-use std::borrow::Borrow;
+use std::{borrow::Borrow, ops::Range};
 
 use super::{Drawable, PointCollection};
 use crate::style::{FontDesc, FontResult, LayoutBox, TextStyle};
@@ -129,33 +129,45 @@ fn layout_multiline_text<'a, F: FnMut(&'a str)>(
         if max_width == 0 || line.is_empty() {
             func(line);
         } else {
-            let mut indices = line.char_indices().map(|(idx, _)| idx).peekable();
+            let indices: Vec<_> = line.char_indices().map(|(idx, _)| idx).collect();
+            // The index span for each character:
+            let mut spans = indices
+                .iter()
+                .cloned()
+                .zip(indices[1..].iter().cloned().chain([line.len()]))
+                .map(|(start, end)| start..end)
+                .peekable();
 
-            let it = std::iter::from_fn(|| {
-                let start_idx = match indices.next() {
-                    Some(idx) => idx,
-                    None => return None,
+            // println!(
+            //     "Accumulated width of \"{line}\": {:?}",
+            //     spans
+            //         .clone()
+            //         .map(|span| font.box_size(&line[0..span.end]).unwrap().0)
+            //         .collect::<Vec<_>>()
+            // );
+
+            let it = std::iter::from_fn(|| loop {
+                // Include the first character regardless of width:
+                let Some(Range { start, mut end }) = spans.next() else {
+                    return None;
                 };
-
-                // iterate over indices
-                for idx in indices.by_ref() {
-                    let substring = &line[start_idx..idx];
-                    let width = font.box_size(substring).unwrap_or((0, 0)).0 as i32;
-                    if width > max_width as i32 {
-                        break;
-                    }
+                loop {
+                    // Add subsequent characters unless they cause width to be exceeded:
+                    if let Some(check) = spans.next_if(|check| {
+                        let Ok((width, _)) = font.box_size(&line[start..check.end]) else {
+                            return true;
+                        };
+                        width <= max_width
+                    }) {
+                        end = check.end;
+                    } else {
+                        return Some(start..end);
+                    };
                 }
-
-                let end_idx = match indices.peek() {
-                    Some(idx) => *idx,
-                    None => line.len(),
-                };
-
-                Some(&line[start_idx..end_idx])
             });
 
             for chunk in it {
-                func(chunk);
+                func(&line[chunk]);
             }
         }
     }
@@ -170,10 +182,12 @@ fn test_multi_layout() {
 
     let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
 
+    // Accumulated width of "öäabcde": [10, 19, 29, 39, 47, 58, 67]
+    let mut lines = Vec::new();
     layout_multiline_text("öäabcde", 40, font, |txt| {
-        println!("Got: {}", txt);
-        assert!(txt == "öäabc" || txt == "de");
+        lines.push(txt);
     });
+    assert_eq!(lines, ["öäab", "cde"]);
 
     let font = FontDesc::new(FontFamily::SansSerif, 20 as f64, FontStyle::Bold);
     layout_multiline_text("öä", 100, font, |txt| {
